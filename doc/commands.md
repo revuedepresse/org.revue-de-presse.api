@@ -29,8 +29,8 @@ make start-process-manager
 ## How to dispatch AMQP messages so that member publications are fetched?
 
 ```shell
-username="w3c" \
-list_name='W3C-Groups' \
+LIST_NAME='W3C-Groups' \
+USERNAME="w3c" \
 make dispatch-fetch-publications-messages
 ```
 
@@ -41,9 +41,9 @@ make dispatch-fetch-publications-messages
 docker exec -ti $(docker ps -a| \grep --fixed-strings "${PROJECT_NAME}_worker" | awk '{print $1}') bash
 
 # In worker container
-USER_NAME='w3c' \
 LIST_NAME='w3cstaff' \
-php ./bin/console devobs:import-publishers-lists --list-restriction="${LIST_NAME}" "${USER_NAME}"
+USERNAME='w3c' \
+php ./bin/console devobs:import-publishers-lists --list-restriction="${LIST_NAME}" "${USERNAME}"
 ```
 
 List created by [Renee Marie Parilak Teate](https://twitter.com/BecomingDataSci)  

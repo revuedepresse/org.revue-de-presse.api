@@ -138,10 +138,10 @@ function dispatch_fetch_publications_messages {
 
     fi
 
-    if [ -z "${username}" ];
+    if [ -z "${USERNAME}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty' 'username' 'username' $'\n'
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty' 'username' 'USERNAME' $'\n'
 
         return 1
 
@@ -197,7 +197,7 @@ function dispatch_fetch_publications_messages {
     fi
 
     local arguments
-    arguments="${priority_option}${list_option}${query_restriction} ${username}"
+    arguments="${priority_option}${list_option}${query_restriction} ${USERNAME}"
     arguments="${arguments}${cursor_argument}"
 
     local cmd
