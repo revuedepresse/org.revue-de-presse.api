@@ -53,25 +53,6 @@
 # make setup-amqp-fabric
 # ```
 
-function get_project_name() {
-    local project_name
-    project_name='wildcard'
-
-    if [ -n "${PROJECT_NAME}" ]; then
-        project_name="${PROJECT_NAME}"
-    fi
-
-    if [ -z "${project_name}" ]; then
-
-        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n'
-
-        exit 1
-
-    fi
-
-    echo "${project_name}"
-}
-
 function consume_fetch_publication_messages {
     local command_suffix
     command_suffix="${1}"
@@ -149,210 +130,6 @@ function consume_fetch_publication_messages {
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
 }
 
-function get_project_dir {
-    local project_dir="/var/www/${WORKER}"
-
-    if [ -n "${PROJECT_DIR}" ];
-    then
-        project_dir="${PROJECT_DIR}"
-    fi
-
-    echo "${project_dir}"
-}
-
-function remove_exited_containers() {
-    /bin/bash -c "docker ps -a | grep Exited | awk ""'"'{print $1}'"'"" | xargs docker rm -f >> /dev/null 2>&1"
-}
-
-function run_php_script() {
-    local script
-    script="${1}"
-
-    local interactive_mode
-    interactive_mode="${2}"
-
-    if [ -z "${interactive_mode}" ];
-    then
-      interactive_mode="${INTERACTIVE_MODE}";
-    fi
-
-    if [ -z "${script}" ];
-    then
-      if [ -z "${SCRIPT}" ];
-      then
-        echo 'Please pass a valid path to a script by export an environment variable'
-        echo 'e.g.'
-        echo 'export SCRIPT="bin/console cache:clear"'
-        return
-      fi
-
-      script="${SCRIPT}"
-    fi
-
-    local namespace=
-    namespace=''
-    if [ -n "${NAMESPACE}" ];
-    then
-        namespace="${NAMESPACE}-"
-
-        echo 'About to run container in namespace '"${NAMESPACE}"
-    fi
-
-    local suffix
-    suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
-
-    export SUFFIX="${suffix}"
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
-    local option_detached
-    option_detached=''
-    if [ -z "${interactive_mode}" ];
-    then
-        option_detached='-d '
-    fi
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    if [ $? -gt 0 ];
-    then
-        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
-        printf '%s%s' 'example:' $'\n' 1>&2
-        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
-
-        return 1
-    fi
-
-    local container_name
-    container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
-
-    local override_option
-    override_option=' -f ./docker-compose.yaml'
-    if [ -e './provisioning/containers/docker-compose.override.yaml' ];
-    then
-        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
-    fi
-
-    local command
-    if [ -z "${interactive_mode}" ];
-    then
-        command="$(echo -n 'cd provisioning/containers && \
-        docker compose '"${override_option}"' \
-        run -e '"${symfony_environment}"' -T --rm \
-        --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
-    else
-        command="$(echo -n 'cd provisioning/containers && \
-        docker compose '"${override_option}"' \
-        exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
-    fi
-
-    echo 'About to execute "'"${command}"'"'
-    /bin/bash -c "${command}"
-}
-
-function run_php() {
-    local arguments
-    arguments="$(cat -)"
-
-    if [ -z "${arguments}" ];
-    then
-        arguments="${ARGUMENT}"
-    fi
-
-    cd ./provisioning/containers || exit
-
-    local override_option
-    override_option=' -f ./docker-compose.yaml'
-
-    if [ -e './docker-compose.override.yaml' ];
-    then
-        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
-    fi
-
-    local command
-    command=$(echo -n 'docker compose'"${override_option}"' exec -T worker '"${arguments}")
-
-    echo 'About to execute '"${command}"
-    /bin/bash -c "${command}"
-}
-
-function run_worker() {
-    cd provisioning/containers || exit
-
-    local project_files
-    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
-
-    /bin/bash -c "docker compose ${project_files} up worker"
-
-    cd ../..
-}
-
-function ensure_log_files_exist() {
-    local standard_output_file="${1}"
-    local standard_error_file="${2}"
-
-    if [ ! -e ./composer.lock ];
-    then
-
-      echo 'Inconsistent file system location prevents executing the next commands'
-
-      return 1
-
-    fi
-
-    if [ ! -e "${standard_output_file}" ];
-    then
-        sudo touch "${standard_output_file}";
-    fi
-
-    if [ ! -e "${standard_error_file}" ];
-    then
-        sudo touch "${standard_error_file}";
-    fi
-}
-
-function get_symfony_environment() {
-    local symfony_env='dev'
-    if [ -n "${SYMFONY_ENV}" ];
-    then
-        symfony_env="${SYMFONY_ENV}"
-    fi
-
-    echo 'APP_ENV='"${symfony_env}"
-}
-
-function run_command {
-    local php_command
-    php_command=${1}
-
-    local rabbitmq_output_log
-    rabbitmq_output_log="var/log/rabbitmq.out.log"
-
-    local rabbitmq_error_log
-    rabbitmq_error_log="var/log/rabbitmq.error.log"
-
-    local PROJECT_DIR
-    PROJECT_DIR='.'
-
-    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-
-    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
-    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
-
-    export SCRIPT="${php_command}"
-
-    if [ -n "${memory_limit}" ];
-    then
-        export PHP_MEMORY_LIMIT=' -d memory_limit='"${memory_limit}"
-    fi
-
-    echo 'Logging standard output of worker in '"${rabbitmq_output_log}"
-    echo 'Logging standard error of worker in '"${rabbitmq_error_log}"
-
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-}
-
 function dispatch_fetch_publications_messages {
     if [ -z "${NAMESPACE}" ];
     then
@@ -390,24 +167,24 @@ function dispatch_fetch_publications_messages {
 
     fi
 
-    if [ -z "${list_name}" ] && [ -z "${multiple_lists}" ];
+    if [ -z "${LIST_NAME}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'list_name' $'\n' 1>&2
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'LIST_NAME' $'\n' 1>&2
         printf 'or%s' $'\n'  1>&2
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'comma-separated lists' 'multiple_lists' $'\n' 1>&2
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'comma-separated lists' 'MULTIPLE_LISTS' $'\n' 1>&2
 
         return 1;
 
     fi
 
     local list_option
-    list_option=' --list='"'${list_name}'"
+    list_option=' --list='"'${LIST_NAME}'"
 
-    if [ -n "${multiple_lists}" ];
+    if [ -n "${MULTIPLE_LISTS}" ];
     then
 
-        list_option=' --lists='"'${multiple_lists}'"
+        list_option=' --lists='"'${MULTIPLE_LISTS}'"
 
     fi
 
@@ -436,33 +213,75 @@ function dispatch_fetch_publications_messages {
     fi
 }
 
-function run_php_unit_tests() {
-    if [ -z "${DEBUG}" ];
+function ensure_log_files_exist() {
+    local standard_output_file="${1}"
+    local standard_error_file="${2}"
+
+    if [ ! -e ./composer.lock ];
     then
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation
-        return
+
+      echo 'Inconsistent file system location prevents executing the next commands'
+
+      return 1
+
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug
+    if [ ! -e "${standard_output_file}" ];
+    then
+        sudo touch "${standard_output_file}";
+    fi
+
+    if [ ! -e "${standard_error_file}" ];
+    then
+        sudo touch "${standard_error_file}";
+    fi
 }
 
-function load_production_fixtures() {
-  local script
-  script="php bin/console devobs:load-production-fixtures \
-    ${API_TWITTER_USER_TOKEN} \
-    ${API_TWITTER_USER_SECRET} \
-    ${API_TWITTER_CONSUMER_KEY} \
-    ${API_TWITTER_CONSUMER_SECRET} \
-    -vvvv"
+function get_project_dir {
+    local project_dir="/var/www/${WORKER}"
 
-  run_php_script "${script}" 'interactive_mode'
+    if [ -n "${PROJECT_DIR}" ];
+    then
+        project_dir="${PROJECT_DIR}"
+    fi
+
+    echo "${project_dir}"
 }
 
-function set_up_amqp_queues() {
-  local script
-  script='php bin/console messenger:setup-transports -vvvv'
+function get_project_name() {
+    local project_name
+    project_name='wildcard'
 
-  run_php_script "${script}" 'interactive_mode'
+    if [ -n "${PROJECT_NAME}" ]; then
+        project_name="${PROJECT_NAME}"
+    fi
+
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n'
+
+        exit 1
+
+    fi
+
+    echo "${project_name}"
+}
+
+function get_rabbitmq_virtual_host() {
+    local virtual_host
+    virtual_host="$(cat <(cat '.env.local' | grep "PUBLICATIONS='amqp" | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+
+    echo "${virtual_host}"
+}
+
+function get_symfony_environment() {
+    local symfony_env='dev'
+    if [ -n "${SYMFONY_ENV}" ];
+    then
+        symfony_env="${SYMFONY_ENV}"
+    fi
+
+    echo 'APP_ENV='"${symfony_env}"
 }
 
 function list_amqp_queues() {
@@ -477,11 +296,16 @@ function list_amqp_queues() {
     /bin/bash -c "docker compose ${project_files} exec amqp watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
-function get_rabbitmq_virtual_host() {
-    local virtual_host
-    virtual_host="$(cat <(cat '.env.local' | grep "PUBLICATIONS='amqp" | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+function load_production_fixtures() {
+  local script
+  script="php bin/console devobs:load-production-fixtures \
+    ${API_TWITTER_USER_TOKEN} \
+    ${API_TWITTER_USER_SECRET} \
+    ${API_TWITTER_CONSUMER_KEY} \
+    ${API_TWITTER_CONSUMER_SECRET} \
+    -vvvv"
 
-    echo "${virtual_host}"
+  run_php_script "${script}" 'interactive_mode'
 }
 
 function purge_queues() {
@@ -495,6 +319,190 @@ function purge_queues() {
 
     /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
     /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+}
+
+function remove_exited_containers() {
+    /bin/bash -c "docker ps -a | grep Exited | awk ""'"'{print $1}'"'"" | xargs docker rm -f >> /dev/null 2>&1"
+}
+
+function run_command {
+    local php_command
+    php_command=${1}
+
+    local rabbitmq_output_log
+    rabbitmq_output_log="var/log/rabbitmq.out.log"
+
+    local rabbitmq_error_log
+    rabbitmq_error_log="var/log/rabbitmq.error.log"
+
+    local PROJECT_DIR
+    PROJECT_DIR='.'
+
+    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+
+    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
+    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
+
+    export SCRIPT="${php_command}"
+
+    if [ -n "${memory_limit}" ];
+    then
+        export PHP_MEMORY_LIMIT=' -d memory_limit='"${memory_limit}"
+    fi
+
+    echo 'Logging standard output of worker in '"${rabbitmq_output_log}"
+    echo 'Logging standard error of worker in '"${rabbitmq_error_log}"
+
+    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+}
+
+function run_php() {
+    local arguments
+    arguments="$(cat -)"
+
+    if [ -z "${arguments}" ];
+    then
+        arguments="${ARGUMENT}"
+    fi
+
+    cd ./provisioning/containers || exit
+
+    local override_option
+    override_option=' -f ./docker-compose.yaml'
+
+    if [ -e './docker-compose.override.yaml' ];
+    then
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
+    fi
+
+    local command
+    command=$(echo -n 'docker compose'"${override_option}"' exec -T worker '"${arguments}")
+
+    echo 'About to execute '"${command}"
+    /bin/bash -c "${command}"
+}
+
+function run_php_script() {
+    local script
+    script="${1}"
+
+    local interactive_mode
+    interactive_mode="${2}"
+
+    if [ -z "${interactive_mode}" ];
+    then
+      interactive_mode="${INTERACTIVE_MODE}";
+    fi
+
+    if [ -z "${script}" ];
+    then
+      if [ -z "${SCRIPT}" ];
+      then
+        echo 'Please pass a valid path to a script by export an environment variable'
+        echo 'e.g.'
+        echo 'export SCRIPT="bin/console cache:clear"'
+        return
+      fi
+
+      script="${SCRIPT}"
+    fi
+
+    local namespace=
+    namespace=''
+
+    if [ -n "${NAMESPACE}" ];
+    then
+
+        namespace="${NAMESPACE}-"
+
+        printf '%s.%s' 'About to run container in namespace "'"${NAMESPACE}"'"' $'\n';
+
+    fi
+
+    local suffix
+    suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
+
+    export SUFFIX="${suffix}"
+
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
+
+    local option_detached
+    option_detached=''
+    if [ -z "${interactive_mode}" ];
+    then
+        option_detached='-d '
+    fi
+
+    local project_name
+    project_name="$(get_project_name)"
+
+    if [ $? -gt 0 ];
+    then
+        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
+        printf '%s%s' 'example:' $'\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+
+        return 1
+    fi
+
+    local container_name
+    container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
+
+    local override_option
+    override_option=' -f ./docker-compose.yaml'
+    if [ -e './provisioning/containers/docker-compose.override.yaml' ];
+    then
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
+    fi
+
+    local command
+    if [ -z "${interactive_mode}" ];
+    then
+
+        command="$(echo -n 'cd provisioning/containers && \
+        docker compose '"${override_option}"' \
+        run -e '"${symfony_environment}"' -T --rm \
+        --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+
+    else
+
+        command="$(echo -n 'cd provisioning/containers && \
+        docker compose '"${override_option}"' \
+        exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
+
+    fi
+
+    echo 'About to execute "'"${command}"'"'
+    /bin/bash -c "${command}"
+}
+
+function run_php_unit_tests() {
+    if [ -z "${DEBUG}" ];
+    then
+        bin/phpunit -c ./phpunit.xml.dist --process-isolation
+        return
+    fi
+
+    bin/phpunit -c ./phpunit.xml.dist --verbose --debug
+}
+
+function run_worker() {
+    cd provisioning/containers || exit
+
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
+
+    /bin/bash -c "docker compose ${project_files} up worker"
+
+    cd ../..
+}
+
+function set_up_amqp_queues() {
+  local script
+  script='php bin/console messenger:setup-transports -vvvv'
+
+  run_php_script "${script}" 'interactive_mode'
 }
 
 function stop_workers() {
