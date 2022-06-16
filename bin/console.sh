@@ -331,12 +331,6 @@ function ensure_log_files_exist() {
     then
         sudo touch "${standard_error_file}";
     fi
-
-    if [ ! `whoami` == 'www-data' ];
-    then
-        sudo chown www-data "${standard_output_file}" "${standard_error_file}"
-        sudo chmod a+rwx "${standard_output_file}" "${standard_error_file}"
-    fi
 }
 
 function get_symfony_environment() {
