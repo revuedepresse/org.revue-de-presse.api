@@ -1,4 +1,4 @@
-# wildcard.snapshots.fr worker
+# snapshots.fr worker
 
 ![wildcard.snapshots.fr continuous integration](https://github.com/thierrymarianne/wildcard.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
 
