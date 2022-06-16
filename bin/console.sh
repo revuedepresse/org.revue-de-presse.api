@@ -343,17 +343,6 @@ function get_symfony_environment() {
     echo 'APP_ENV='"${symfony_env}"
 }
 
-function before_running_command() {
-    remove_exited_containers
-
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
-    if [ -z "${PROJECT_DIR}" ];
-    then
-        export PROJECT_DIR="/var/www/${WORKER}"
-    fi
-}
-
 function run_command {
     local php_command
     php_command=${1}
@@ -391,7 +380,6 @@ function dispatch_fetch_publications_messages {
         export NAMESPACE="produce_news_messages"
     fi
 
-    before_running_command
 
     if [ -z "${username}" ];
     then
