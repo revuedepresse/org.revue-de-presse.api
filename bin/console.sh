@@ -149,19 +149,6 @@ function consume_fetch_publication_messages {
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
 }
 
-function execute_command () {
-    local output_log="${1}"
-    local error_log="${2}"
-
-    make run-php-script >> "${output_log}" 2>> "${error_log}"
-
-    if [ -n "${VERBOSE}" ];
-    then
-        cat "${output_log}" | tail -n1000
-        cat "${error_log}" | tail -n1000
-    fi
-}
-
 function get_project_dir {
     local project_dir="/var/www/${WORKER}"
 
@@ -448,18 +435,6 @@ function run_php_unit_tests() {
     fi
 
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug
-}
-
-function create_test_database() {
-  rm ./src/Twitter/Infrastructure/Database/Migrations/Version* -f
-
-  export INTERACTIVE_MODE=true
-  export SCRIPT='php bin/console cache:clear --no-warmup -e test -vvvv' && make run-php-script && \
-  export SCRIPT='php bin/console cache:warmup -e test -vvvv' && make run-php-script && \
-  export SCRIPT='php bin/console doc:database:drop --force --if-exists -e test -vvvv' && make run-php-script && \
-  export SCRIPT='php bin/console doc:database:create -e test --if-not-exists -vvvv' && make run-php-script && \
-  export SCRIPT='php bin/console doc:mig:diff -n -e test -vvvv' && make run-php-script && \
-  export SCRIPT='php bin/console doc:mig:mig -n -e test -vvvv' && make run-php-script
 }
 
 function load_production_fixtures() {
