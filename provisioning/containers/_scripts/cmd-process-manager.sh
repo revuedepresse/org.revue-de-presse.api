@@ -2,13 +2,13 @@
 set -Eeo pipefail
 
 start() {
-    cd "/var/www/${WORKER}/public" || exit
+    cd "/var/www/${WORKER}" || exit
 
     export \
       APP_ENV=prod \
       MEMORY_LIMIT=256M \
       MESSAGES=100 \
-      PROJECT_DIR="/var/www/${WORKER}/public" \
+      PROJECT_DIR="/var/www/${WORKER}" \
       PROJECT_NAME='wildcard' \
       SYMFONY_ENV=prod \
       TIME_LIMIT=600
