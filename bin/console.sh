@@ -123,8 +123,6 @@ function consume_fetch_publication_messages {
         minimum_execution_time="${MINIMUM_EXECUTION_TIME}"
     fi
 
-    remove_exited_containers
-
     local rabbitmq_output_log
     rabbitmq_output_log="./var/log/rabbitmq.out.log"
 
