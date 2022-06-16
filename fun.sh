@@ -94,6 +94,46 @@ function build() {
         worker
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
+function dispatch_amqp_messages() {
+    local USERNAME
+    local LIST_NAME
+
+    _set_up_configuration_files
+
+    if [ -z "${USERNAME}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'member screen name' 'USERNAME' $'\n'
+
+        return 1
+
+    fi
+
+    if [ -z "${LIST_NAME}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'publisher list' 'LIST_NAME' $'\n'
+
+        return 1
+
+    fi
+
+    clean ''
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        up -d app
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        --env _WORKER="${WORKER}" \
+        -T app \
+        /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
+}
+
 function guard_against_missing_variables() {
     if [ -z "${WORKER}" ];
     then
