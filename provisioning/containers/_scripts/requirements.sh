@@ -67,7 +67,6 @@ function create_log_files_when_non_existing() {
         /start.sh
 
     chmod -R ug+x \
-        "/var/www/${WORKER}" \
         /entrypoint.sh \
         /start.sh
 }
