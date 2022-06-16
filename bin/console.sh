@@ -76,13 +76,6 @@ function consume_fetch_publication_messages {
 }
 
 function dispatch_fetch_publications_messages {
-    if [ -z "${NAMESPACE}" ];
-    then
-
-        export NAMESPACE="produce_news_messages"
-
-    fi
-
     if [ -z "${USERNAME}" ];
     then
 
