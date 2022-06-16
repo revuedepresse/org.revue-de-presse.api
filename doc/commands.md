@@ -31,7 +31,7 @@ make start-process-manager
 ```shell
 LIST_NAME='W3C-Groups' \
 USERNAME="w3c" \
-make dispatch-fetch-publications-messages
+make dispatch-amqp-messages
 ```
 
 ## How to import a Twitter list in command-line?

@@ -123,10 +123,13 @@ function dispatch_fetch_publications_messages {
 
     if [ -n "${DRY_MODE}" ];
     then
+
         printf '%s%s' 'About to run command:' $'\n' 1>&2
         printf '%s%s' '"'"${cmd}"'"' $'\n' 1>&2
+
     else
-        printf '%s%s' "${cmd}" $'\n'
+
+        /bin/bash -c "$(printf "${cmd}")"
 
     fi
 }
