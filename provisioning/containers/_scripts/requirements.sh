@@ -5,19 +5,17 @@ function add_system_user_group() {
     if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
         groupadd \
             --gid "${WORKER_GID}" \
-            service
+            worker
     fi
 
-    if [ $(cat /etc/passwd | grep "${WORKER_UID}" -c) -eq 0 ]; then
-        useradd \
-            --shell /usr/sbin/nologin \
-            --uid ${WORKER_UID} \
-            --gid ${WORKER_GID} \
-            --no-user-group \
-            --no-create-home \
-            service
-    fi
-
+    useradd \
+        --shell /usr/sbin/nologin \
+        --uid ${WORKER_UID} \
+        --gid ${WORKER_GID} \
+        --non-unique \
+        --no-user-group \
+        --no-create-home \
+        worker
 }
 
 function clear_package_management_system_cache() {
