@@ -1,6 +1,14 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache consume-fetch-publication-messages dispatch-fetch-publications-messages install purge-amqp-queue restart set-up-amqp-queues start start-database stop stop-database test
+.PHONY: help build clean install restart start stop test
+
+.PHONY: clear-app-cache
+
+.PHONY: consume-fetch-publication-messages dispatch-fetch-publications-messages
+
+.PHONY: purge-amqp-queue set-up-amqp-queues
+
+.PHONY: start-database stop-database test
 
 WORKER ?= 'worker.example.org'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
