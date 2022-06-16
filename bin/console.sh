@@ -85,16 +85,6 @@ function dispatch_fetch_publications_messages {
 
     fi
 
-    local query_restriction
-    query_restriction=''
-
-    if [ -n "${QUERY_RESTRICTION}" ];
-    then
-
-        query_restriction=' --query_restriction='"${QUERY_RESTRICTION}"
-
-    fi
-
     if [ -z "${LIST_NAME}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
@@ -125,7 +115,7 @@ function dispatch_fetch_publications_messages {
     fi
 
     local arguments
-    arguments="${list_option}${query_restriction} ${USERNAME}"
+    arguments="${list_option} ${USERNAME}"
     arguments="${arguments}${cursor_argument}"
 
     local cmd
