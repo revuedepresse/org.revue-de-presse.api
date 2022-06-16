@@ -35,6 +35,7 @@ function install_dependencies() {
     install_system_packages
     add_system_user_group
     create_log_files_when_non_existing "${WORKER}"
+    install_dockerize
     install_process_manager
     clear_package_management_system_cache
 }
