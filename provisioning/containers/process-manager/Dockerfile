@@ -17,11 +17,11 @@ RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.s
 
 EXPOSE      3000
 
-USER        service
-
 VOLUME      ["/scripts", "/var/www/${WORKER}", "/var/www/shared"]
 
 WORKDIR     "/var/www/${WORKER}"
+
+USER        ${WORKER_UID}:${WORKER_GID}
 
 ENTRYPOINT  ["/usr/bin/tini", "--"]
 
