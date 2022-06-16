@@ -282,6 +282,27 @@ SCRIPT
     /bin/bash -c "${command}"
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
+function start_process_manager() {
+    guard_against_missing_variables
+
+    remove_container_image 'process-manager'
+
+    local command
+    command=$(cat <<-SCRIPT
+docker compose \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
+			up \
+			--detach \
+			--force-recreate \
+			process-manager
+SCRIPT
+)
+
+    echo 'About to execute "'"${command}"'"'
+    /bin/bash -c "${command}"
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
+
 function stop() {
     guard_against_missing_variables
 

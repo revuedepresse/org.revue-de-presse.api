@@ -43,6 +43,9 @@ set-up-amqp-queues: ## Set up AMQP queues
 start-database: ## Start database
 	@/bin/bash -c 'source fun.sh && start_database'
 
+start-process-manager: ## Start process manager
+	@/bin/bash -c 'source fun.sh && start_process_manager'
+
 stop: ## Stop worker
 	@/bin/bash -c 'source fun.sh && stop'
 
