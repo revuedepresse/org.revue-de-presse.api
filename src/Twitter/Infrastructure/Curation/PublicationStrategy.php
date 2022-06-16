@@ -19,25 +19,25 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
 {
     use CorrelationIdAwareTrait;
 
-    private string $screenName;
+    private int $cursor = -1;
 
     private ?string $dateBeforeWhichPublicationsAreCollected = null;
-
-    private ?string $listRestriction = null;
-
-    private array $listCollectionRestriction = [];
-
-    private bool $weightedAggregates = false;
-
-    private ?string $queryRestriction = null;
-
-    private ?string $memberRestriction = null;
 
     private bool $ignoreWhispers = false;
 
     private bool $includeOwner = false;
 
-    private int $cursor = -1;
+    private array $listCollectionRestriction = [];
+
+    private ?string $listRestriction = null;
+
+    private ?string $memberRestriction = null;
+
+    private ?string $queryRestriction = null;
+
+    private string $screenName;
+
+    private bool $weightedAggregates = false;
 
     public function __construct(CorrelationIdInterface $correlationId)
     {
