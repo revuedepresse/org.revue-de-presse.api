@@ -19,8 +19,6 @@ function consume_fetch_publication_messages {
 
     export NAMESPACE="handle_amqp_messages_${command_suffix}_${namespace}"
 
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
     if [ -z "${MESSAGES}" ]
     then
         MESSAGES=10;
