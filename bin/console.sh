@@ -375,44 +375,63 @@ function run_command {
 }
 
 function dispatch_fetch_publications_messages {
-    if [ -z ${NAMESPACE} ];
+    if [ -z "${NAMESPACE}" ];
     then
-        export NAMESPACE="produce_news_messages"
-    fi
 
+        export NAMESPACE="produce_news_messages"
+
+    fi
 
     if [ -z "${username}" ];
     then
-        echo 'Please export a valid username: export username="bob"'
 
-        return
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty' 'username' 'username' $'\n'
+
+        return 1
+
     fi
 
-    local priority_option=''
+    local priority_option
+    priority_option=''
+
     if [ -n "${in_priority}" ];
     then
+
         priority_option='--priority_to_aggregates '
+
     fi
 
-    local query_restriction=''
+    local query_restriction
+    query_restriction=''
+
     if [ -n "${QUERY_RESTRICTION}" ];
     then
+
         query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
+
     fi
 
     local list_option
     list_option=''
+
     if [ -n "${list_name}" ];
     then
-        local list_option='--list='"'${list_name}'"
+
+        local list_option
+        list_option='--list='"'${list_name}'"
+
         if [ -n "${multiple_lists}" ];
         then
+
             list_option='--lists='"'${multiple_lists}'"
+
         fi
+
     fi
 
     local cursor_argument
     cursor_argument=''
+
     if [ -n "${CURSOR}" ];
     then
         cursor_argument=' --cursor='"${CURSOR}"
@@ -421,7 +440,12 @@ function dispatch_fetch_publications_messages {
     local arguments
     arguments="${priority_option}"' '"${list_option}"' '"${query_restriction}"' '"${username}"
     arguments="${arguments}${cursor_argument}"
-    run_command 'bin/console devobs:dispatch-messages-to-fetch-member-statuses '"${arguments}"
+
+    local cmd
+    cmd="bin/console devobs:dispatch-messages-to-fetch-member-statuses ${arguments}"
+
+    echo 'About to run command:'
+    echo '"'"${cmd}"'"'
 }
 
 function run_php_unit_tests() {
