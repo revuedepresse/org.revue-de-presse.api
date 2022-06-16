@@ -61,8 +61,8 @@ function create_log_files_when_non_existing() {
 
     fi
 
-    chown -R ${WORKER_UID}.${WORKER_GID} \
-        "/var/www/${WORKER}/var/log" \
+    chown -R worker. \
+        /var/www/${WORKER}/var/log/* \
         /entrypoint.sh \
         /start.sh
 
