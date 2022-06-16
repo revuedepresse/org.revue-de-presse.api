@@ -126,7 +126,7 @@ function consume_fetch_publication_messages {
 
     if [ -z "${PROJECT_DIR}" ];
     then
-        export PROJECT_DIR='/var/www/api'
+        export PROJECT_DIR="/var/www/${WORKER}"
     fi
 
     local minimum_execution_time=10
@@ -194,7 +194,7 @@ function execute_command () {
 }
 
 function get_project_dir {
-    local project_dir='/var/www/api'
+    local project_dir="/var/www/${WORKER}"
 
     if [ -n "${PROJECT_DIR}" ];
     then
@@ -376,7 +376,7 @@ function before_running_command() {
 
     if [ -z "${PROJECT_DIR}" ];
     then
-        export PROJECT_DIR='/var/www/api'
+        export PROJECT_DIR="/var/www/${WORKER}"
     fi
 }
 
