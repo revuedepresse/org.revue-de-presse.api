@@ -135,6 +135,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         }
 
         $returnStatus = self::FAILURE;
+
         try {
             $this->publicationMessageDispatcher->dispatchPublicationMessages(
                 $this->collectionStrategy,
@@ -143,6 +144,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                     $this->output->writeln($message);
                 }
             );
+
             $returnStatus = self::SUCCESS;
         } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
             $this->logger->error(
@@ -155,6 +157,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 ['stacktrace' => $exception->getTraceAsString()]
             );
         }
+
         return $returnStatus;
     }
 
