@@ -1,58 +1,5 @@
 #!/usr/bin/env bash
 
-#
-# 2022-06-11 - Clean up
-#
-# 2019-11-10 - Notes about dependencies addition or removal
-#
-# ```
-# export VENDOR_NAME='symfony/symfony:^3.4.x' && make add-php-dependency
-# export VENDOR_NAME='symfony/symfony' && make remove-php-dependency
-# ```
-#
-# 2019-10-19 - Notes about clearing application cache
-#
-# ```
-# make clear-backend-application-cache
-# ```
-#
-# 2019-10-06 - Notes about running Apache container
-#
-# ```
-# make build-php-container
-# make build-apache-container
-#
-# # RabbitMQ startup has to be complete
-# # when generating cached application configuration
-# make run-rabbitmq
-#
-# # Install PHP vendors
-# make install-php-dependencies
-#
-# make run-apache-container
-#
-# # Set ACL
-# make set-acl
-# ```
-#
-# 2019-06-27 - Notes
-#
-# - Ensure environment variable PROJECT_DIR has been declared
-# - Ensure the appropriate docker network has been created before considering to initialize a MySQL volume
-# - Building a PHP docker image is a requirement of the initialization of the MySQL volume
-# ```
-# # First shortcut command to be executed before running a MySQL container
-# make initialize-mysql-volume
-# ```
-# - Building RabbitMQ docker image would prevent having warning provided the project configuration
-# when initializing MySQL volume
-# - Before running a RabbitMQ container, the following commands should have been executed
-# ```
-# make run-rabbitmq-container
-# make configure-rabbitmq-user-privileges
-# make setup-amqp-fabric
-# ```
-
 function consume_fetch_publication_messages {
     local command_suffix
     command_suffix="${1}"
