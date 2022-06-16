@@ -135,6 +135,7 @@ function consume_fetch_publication_messages {
 
     local php_directives
     php_directives=''
+
     if [ "${MEMORY_LIMIT}" != '128M' ];
     then
         php_directives='php -dmemory_limit='"${MEMORY_LIMIT}"' '
@@ -142,26 +143,16 @@ function consume_fetch_publication_messages {
 
     trap stop_workers SIGINT SIGTERM
 
-    export SCRIPT="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
+    local script
+    script="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
 
-    cd "${PROJECT_DIR}/provisioning/containers" || exit
+    echo 'About to run command: '
+    echo "${script}"
 
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
+    echo 'Redirecting standard output to "'"${rabbitmq_output_log}"'"'
+    echo 'Redirecting standard error in "'"${rabbitmq_error_log}"'"'
 
-    local override_option
-    override_option=' -f ./docker-compose.yaml'
-    if [ -e './docker-compose.override.yaml' ];
-    then
-        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
-    fi
-
-    command="docker compose${override_option} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
-    echo 'Executing command: "'$command'"'
-    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-    cd "../../"
 
     /bin/bash -c "sleep ${minimum_execution_time}"
 }
@@ -324,8 +315,11 @@ function ensure_log_files_exist() {
 
     if [ ! -e ./composer.lock ];
     then
+
       echo 'Inconsistent file system location prevents executing the next commands'
+
       return 1
+
     fi
 
     if [ ! -e "${standard_output_file}" ];
