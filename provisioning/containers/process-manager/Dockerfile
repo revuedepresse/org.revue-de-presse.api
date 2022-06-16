@@ -15,11 +15,11 @@ HEALTHCHECK CMD /bin/bash -c "pgrep node || ( test $(ps ax | \grep -E '\/dev\/nu
 
 RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.sh'
 
+USER        ${WORKER_UID}:${WORKER_GID}
+
 VOLUME      ["/scripts", "/var/www/${WORKER}", "/var/www/shared"]
 
 WORKDIR     "/var/www/${WORKER}"
-
-USER        ${WORKER_UID}:${WORKER_GID}
 
 ENTRYPOINT  ["/usr/bin/tini", "--"]
 
