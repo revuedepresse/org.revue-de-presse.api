@@ -117,12 +117,6 @@ function consume_fetch_publication_messages {
         export PROJECT_DIR="/var/www/${WORKER}"
     fi
 
-    local minimum_execution_time=10
-    if [ -n "${MINIMUM_EXECUTION_TIME}" ];
-    then
-        minimum_execution_time="${MINIMUM_EXECUTION_TIME}"
-    fi
-
     local rabbitmq_output_log
     rabbitmq_output_log="./var/log/rabbitmq.out.log"
 
@@ -153,8 +147,6 @@ function consume_fetch_publication_messages {
     echo 'Redirecting standard error in "'"${rabbitmq_error_log}"'"'
 
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
-    /bin/bash -c "sleep ${minimum_execution_time}"
 }
 
 function execute_command () {
