@@ -1,8 +1,8 @@
-# revue-de-presse.org worker
+# wildcard.snapshots.fr worker
 
-![worker.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/devobs-api/actions/workflows/continuous-integration.yml/badge.svg)
+![wildcard.snapshots.fr continuous integration](https://github.com/thierrymarianne/wildcard.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
 
-Worker collecting publications from social media (Twitter) from [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
+Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 
 ## Installation
 
