@@ -110,6 +110,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
+     * \App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor->dispatchPublications
+     * method is responsible for dispatching AMQP messages
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
