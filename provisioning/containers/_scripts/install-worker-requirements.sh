@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 source '/scripts/requirements.sh'
 
-function install_service_requirements() {
+function install_worker_requirements() {
     install_system_packages
     add_system_user_group
     install_php_extensions
@@ -14,7 +14,7 @@ function install_service_requirements() {
         --parents \
         "/var/www/${WORKER}"
 }
-install_service_requirements
+install_worker_requirements
 
 set -Eeuo pipefail
 
