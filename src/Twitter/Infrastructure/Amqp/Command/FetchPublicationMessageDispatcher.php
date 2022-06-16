@@ -172,18 +172,5 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         );
 
         $this->setupAggregateRepository();
-
-        if (
-            $this->collectionStrategy->shouldPrioritizeLists()
-            && ($this->collectionStrategy->listRestriction()
-                || $this->collectionStrategy->shouldApplyListCollectionRestriction())
-        ) {
-            // TODO customize message to be dispatched
-            // Before introducting messenger component
-            // it produced messages with
-            // old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer
-            // old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer
-            // services
-        }
     }
 }
