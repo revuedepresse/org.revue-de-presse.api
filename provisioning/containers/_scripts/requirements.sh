@@ -171,6 +171,7 @@ function install_system_packages() {
         libpq-dev \
         librabbitmq-dev \
         libsodium-dev \
+        make \
         procps \
         tini \
         unzip \
