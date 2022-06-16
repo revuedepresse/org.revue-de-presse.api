@@ -49,12 +49,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     public function configure()
     {
         $this->setName('devobs:dispatch-messages-to-fetch-member-statuses')
-            ->setDescription('Dispatch messages to fetch member statuses')
-            ->addArgument(
-                self::ARGUMENT_SCREEN_NAME,
-                InputArgument::REQUIRED,
-                'The screen name of a user'
-            )
+            ->setDescription('Dispatch AMQP messages to fetch member publications.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,
                 null,
@@ -108,7 +103,13 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 'iw',
                 InputOption::VALUE_NONE,
                 'Should ignore whispers (publication from members having not published anything for a month)'
-            )->setAliases(['pr:d-m-t-f-m-s']);
+            )
+            ->addArgument(
+                self::ARGUMENT_SCREEN_NAME,
+                InputArgument::REQUIRED,
+                'A member screen name'
+            )
+            ->setAliases(['pr:d-m-t-f-m-s']);
     }
 
     /**
