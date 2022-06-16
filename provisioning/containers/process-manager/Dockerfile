@@ -15,8 +15,6 @@ HEALTHCHECK CMD /bin/bash -c "pgrep node || ( test $(ps ax | \grep -E '\/dev\/nu
 
 RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.sh'
 
-EXPOSE      3000
-
 VOLUME      ["/scripts", "/var/www/${WORKER}", "/var/www/shared"]
 
 WORKDIR     "/var/www/${WORKER}"
