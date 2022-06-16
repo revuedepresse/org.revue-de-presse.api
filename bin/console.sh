@@ -486,7 +486,7 @@ function list_amqp_queues() {
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose exec ${project_files} messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose ${project_files} exec amqp watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function get_rabbitmq_virtual_host() {
