@@ -215,6 +215,8 @@ function clean() {
     fi
 
     remove_container_image 'app'
+    remove_container_image 'process-manager'
+    remove_container_image 'worker'
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function clear_cache_warmup() {
