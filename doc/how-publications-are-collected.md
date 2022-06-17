@@ -1,4 +1,4 @@
-# Publication collection strategy
+# How publications are collected?
 
  - Decide whether collect should be skipped when
     - the member is protected,
