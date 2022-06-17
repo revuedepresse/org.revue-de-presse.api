@@ -1,10 +1,6 @@
-name: ci.worker.snapshots.fr
+name: worker.snapshots.fr
 
-on:
-  push:
-    branches: [ wildcard ]
-  pull_request:
-    branches: [ wildcard ]
+on: [push, pull_request]
 
 jobs:
   release:
