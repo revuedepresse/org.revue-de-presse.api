@@ -62,6 +62,11 @@ function set_file_permissions() {
 
     fi
 
+    if [ ! -d "${project_dir}/.git" ];
+    then
+        rm --recursive --force --verbose "${project_dir}/.git"
+    fi
+
     chown --verbose -R "${WORKER_UID}:${WORKER_GID}" /scripts
 
     chmod --verbose     o-rwx /scripts
