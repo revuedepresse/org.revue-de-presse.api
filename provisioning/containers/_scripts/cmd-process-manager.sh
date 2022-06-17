@@ -9,6 +9,11 @@ start() {
 
     cd "${project_dir}" || exit
 
+    if [ ! -d "${project_dir}/.git" ];
+    then
+        rm --recursive --force --verbose "${project_dir}/.git"
+    fi
+
     export \
         APP_ENV=prod \
         MEMORY_LIMIT=256M \
