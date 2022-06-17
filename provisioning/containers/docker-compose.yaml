@@ -3,18 +3,22 @@ version: '3.8'
 name: 'wildcard'
 
 x-shared: &shared
-  build:
-    context: .
-    dockerfile: './worker/Dockerfile'
   env_file:
     - '../../.env.local'
+  restart: 'always'
   volumes:
     - './_scripts/:/scripts'
     - './worker/templates:/templates'
     - './worker/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
     - '../../../shared:/var/www/shared'
+
+x-worker: &worker
+  build:
+    context: .
+    dockerfile: './worker/Dockerfile'
   depends_on:
-    - 'amqp'
+      - 'amqp'
+  <<: *shared
 
 services:
 
@@ -27,7 +31,7 @@ services:
       - '../../.env.local'
 
   app:
-    <<: *shared
+    <<: *worker
 
   database:
     image: 'postgres:14-bullseye'
@@ -39,13 +43,9 @@ services:
     build:
       context: .
       dockerfile: './process-manager/Dockerfile'
-    env_file:
-      - '../../.env.local'
-    restart: 'always'
-    volumes:
-      - './_scripts/:/scripts'
-      - './worker/templates:/templates'
-      - '../../../shared:/var/www/shared'
+    depends_on:
+      - 'worker'
+    <<: *shared
 
   worker:
-    <<: *shared
+    <<: *worker

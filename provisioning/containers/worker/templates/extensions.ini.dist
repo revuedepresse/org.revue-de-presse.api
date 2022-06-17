@@ -1,6 +1,6 @@
 datadog.appsec.enabled      = true
 date.timezone               = 'UTC';
-display_errors              = off
+display_errors              = on
 display_startup_errors      = off
 error_reporting             = 'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'
 expose_php                  = off

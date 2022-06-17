@@ -25,8 +25,6 @@ services:
     test.App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
-    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
-        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
 
     App\Twitter\Infrastructure\Api\Security\Authorization\AuthorizeAccess:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Security\Authorization\Builder\AuthorizeAccessBuilder', 'build']

@@ -9,12 +9,13 @@ function add_system_user_group() {
     fi
 
     useradd \
+        --gid ${WORKER_GID} \
+        --home-dir=/var/www \
+        --no-create-home \
+        --no-user-group \
+        --non-unique \
         --shell /usr/sbin/nologin \
         --uid ${WORKER_UID} \
-        --gid ${WORKER_GID} \
-        --non-unique \
-        --no-user-group \
-        --no-create-home \
         worker
 }
 
@@ -60,15 +61,6 @@ function create_log_files_when_non_existing() {
         printf '%s "%s".%s' 'Created file located at' "/var/www/${WORKER}/var/log/${prefix}.error.log" $'\n'
 
     fi
-
-    chown -R worker. \
-        /var/www/${WORKER}/var/log/* \
-        /entrypoint.sh \
-        /start.sh
-
-    chmod -R ug+x \
-        /entrypoint.sh \
-        /start.sh
 }
 
 function install_dockerize() {
@@ -139,29 +131,109 @@ function install_php_extensions() {
     make install
 }
 
-function install_system_packages() {
+function install_process_manager() {
+    local asdf_dir
+    asdf_dir="${1}"
+
+    if [ -z "${asdf_dir}" ];
+    then
+
+        printf 'A %s is expected as %s (%s).%s' 'non-empty string' '1st argument' 'extendable version manager (asdf dir)' $'\n'
+
+        return 1
+
+    else
+
+        rm -rf "${asdf_dir}"
+
+    fi
+
+    git config --global advice.detachedHead false
+    git clone https://github.com/asdf-vm/asdf.git --branch v0.10.0 "${asdf_dir}"
+
+    export ASDF_DIR="${asdf_dir}"
+
+    echo 'export ASDF_DIR='"${asdf_dir}"        >> "${HOME}/.bashrc"
+    echo '. ${ASDF_DIR}/asdf.sh'                >> "${HOME}/.bashrc"
+    echo '. ${ASDF_DIR}/completions/asdf.bash'  >> "${HOME}/.bashrc"
+    echo 'nodejs 16.15.1'                       >> "${HOME}/.tool-versions"
+
+    source "${HOME}/.bashrc"
+
+    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+    asdf install nodejs 16.15.1
+    asdf global nodejs 16.15.1
+
+    # [npm Config Setting](https://docs.npmjs.com/cli/v8/using-npm/config#cache)
+    npm config set cache "${asdf_dir}/../npm" --global
+    npm install pm2
+    ./node_modules/.bin/pm2 install pm2-logrotate
+}
+
+function install_process_manager_packages() {
+    # Install packages with package management system frontend (apt)
+    apt-get install --assume-yes \
+        curl \
+        gawk \
+        git \
+        gpg \
+        dirmngr
+}
+
+function install_process_manager_requirements() {
+    create_log_files_when_non_existing "${WORKER}"
+    install_dockerize
+    install_process_manager_packages
+    set_permissions
+    clear_package_management_system_cache
+}
+
+function install_shared_requirements() {
+    add_system_user_group
+    install_shared_system_packages
+    install_worker_system_packages
+    install_php_extensions
+}
+
+function install_shared_system_packages() {
     # Update package source repositories
     apt-get update
 
     # Install packages with package management system frontend (apt)
     apt-get install --assume-yes \
-        --assume-yes \
         apt-utils \
         ca-certificates \
         git \
+        make \
+        procps \
+        tini \
+        unzip \
+        wget
+}
+
+function install_worker_system_packages() {
+    # Install packages with package management system frontend (apt)
+    apt-get install --assume-yes \
         libcurl4-gnutls-dev \
         libicu-dev \
         libjpeg-dev \
         libpng-dev \
         libpq-dev \
         librabbitmq-dev \
-        libsodium-dev \
-        make \
-        procps \
-        tini \
-        unzip \
-        wget \
-        zlib1g-dev
+        libsodium-dev
+}
+
+function set_permissions() {
+    chown worker. \
+        /var/www \
+        /entrypoint.sh \
+        /start.sh
+
+    chown -R worker. "/var/www/${WORKER}"/var/log/*
+
+    chmod -R ug+x \
+        /entrypoint.sh \
+        /start.sh
 }
 
 set -Eeuo pipefail

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -Eeo pipefail
 
 if [ -n "${PROJECT_DIR}" ];
 then
@@ -10,3 +11,5 @@ fi
 source "${current_directory}/console.sh"
 
 consume_fetch_publication_messages
+
+set +Eeo pipefail

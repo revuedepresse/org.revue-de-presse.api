@@ -250,14 +250,3 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.whisperer.class%'
-
-    App\NewsReview\Infrastructure\Repository\PopularPublicationRepository:
-        class: 'App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
-        arguments:
-            - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
-            - "%env(resolve:FIREBASE_DATABASE_URI)%"
-            - '%publishers_list_default%'
-            - '@repository.highlight'
-            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
-            - '@App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface'
-            - '@logger'

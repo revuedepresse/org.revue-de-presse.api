@@ -8,6 +8,8 @@ SHELL:=/bin/bash
 
 .PHONY: purge-amqp-queue set-up-amqp-queues
 
+.PHONY: shell-process-manager shell-worker
+
 .PHONY: start-database stop-database test
 
 WORKER ?= 'worker.example.org'
@@ -38,24 +40,27 @@ install: build ## Install requirements
 	@/bin/bash -c 'source fun.sh && install'
 
 list-amqp-messages: ## List AMQP messags
-		@/bin/bash -c 'source ./bin/console.sh && list_amqp_queues'
+	@/bin/bash -c 'source ./bin/console.sh && list_amqp_queues'
 
 purge-amqp-queue: ## Purge queue
-		@/bin/bash -c 'source ./bin/console.sh && purge_queues'
+	@/bin/bash -c 'source ./bin/console.sh && purge_queues'
 
 restart: clear-app-cache stop start ## Restart worker
+
+shell-process-manager: ## Get shell in process manager container
+	@/bin/bash -c 'source fun.sh && get_process_manager_shell'
+
+shell-worker: ## Get shell in worker container
+	@/bin/bash -c 'source fun.sh && get_worker_shell'
 
 start: ## Run worker
 	@/bin/bash -c 'source fun.sh && start'
 
 set-up-amqp-queues: ## Set up AMQP queues
-		@/bin/bash -c 'source ./.env.local && source ./bin/console.sh && set_up_amqp_queues'
+	@/bin/bash -c 'source ./bin/console.sh && set_up_amqp_queues'
 
 start-database: ## Start database
 	@/bin/bash -c 'source fun.sh && start_database'
-
-start-process-manager: ## Start process manager
-	@/bin/bash -c 'source fun.sh && start_process_manager'
 
 stop: ## Stop worker
 	@/bin/bash -c 'source fun.sh && stop'

@@ -1,5 +1,15 @@
 # Commands
 
+## How to authorize an existing application to collect publications on behalf of a Twitter member?
+
+```shell
+make shell-worker
+
+# Follow instructions to authorize an Twitter app
+# to collect publications from lists on behalf of a Twitter member  
+bin/console devobs:authorize-application
+```
+
 ## How to start worker and amqp containers?
 
 ```shell

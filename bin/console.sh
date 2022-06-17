@@ -72,7 +72,7 @@ function consume_fetch_publication_messages {
     echo 'Redirecting standard output to "'"${rabbitmq_output_log}"'"'
     echo 'Redirecting standard error in "'"${rabbitmq_error_log}"'"'
 
-    /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+    /bin/bash -c "$script >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
 }
 
 function dispatch_fetch_publications_messages {
@@ -420,10 +420,14 @@ function run_worker() {
 }
 
 function set_up_amqp_queues() {
-  local script
-  script='php bin/console messenger:setup-transports -vvvv'
+    (
+        cd provisioning/containers || exit
 
-  run_php_script "${script}" 'interactive_mode'
+        local project_files
+        project_files=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
+
+        /bin/bash -c "docker compose${project_files} exec -T worker php bin/console messenger:setup-transports -vvvv"
+    )
 }
 
 function stop_workers() {

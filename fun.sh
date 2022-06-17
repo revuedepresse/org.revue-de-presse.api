@@ -281,10 +281,64 @@ function run_unit_tests() {
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
 }
 
+function get_project_name() {
+    local project_name
+    project_name="$(
+        docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        config --format json \
+        | jq '.name' \
+        | tr -d '"'
+    )"
+
+    echo "${project_name}"
+}
+
+function get_process_manager_shell() {
+    if ! command -v jq >> /dev/null 2>&1;
+    then
+        printf 'Is %s (%s) installed?%s' 'command-line JSON processor' 'jq' $'\n'
+
+        return 1
+    fi
+
+    local project_name
+    project_name="$(get_project_name)"
+
+    docker exec -ti "$(
+        docker ps -a \
+        | \grep "${project_name}" \
+        | \grep 'process\-manager' \
+        | awk '{print $1}'
+    )" bash
+}
+
+function get_worker_shell() {
+    if ! command -v jq >> /dev/null 2>&1;
+    then
+        printf 'Is %s (%s) installed?%s' 'command-line JSON processor' 'jq' $'\n'
+
+        return 1
+    fi
+
+    local project_name
+    project_name="$(get_project_name)"
+
+    docker exec -ti "$(
+        docker ps -a \
+        | \grep "${project_name}" \
+        | \grep 'worker' \
+        | awk '{print $1}'
+    )" bash
+}
+
 function start() {
     guard_against_missing_variables
 
     clean ''
+
+    remove_container_image 'process-manager'
 
     local command
     command=$(cat <<-SCRIPT
@@ -293,7 +347,8 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			worker
+			--force-recreate \
+			process-manager
 SCRIPT
 )
 
@@ -315,27 +370,6 @@ docker compose \
 			--detach \
 			--force-recreate \
 			database
-SCRIPT
-)
-
-    echo 'About to execute "'"${command}"'"'
-    /bin/bash -c "${command}"
-} >> ./var/log/build.log 2>> ./var/log/build.error.log
-
-function start_process_manager() {
-    guard_against_missing_variables
-
-    remove_container_image 'process-manager'
-
-    local command
-    command=$(cat <<-SCRIPT
-docker compose \
-      --file=./provisioning/containers/docker-compose.yaml \
-      --file=./provisioning/containers/docker-compose.override.yaml \
-			up \
-			--detach \
-			--force-recreate \
-			process-manager
 SCRIPT
 )
 

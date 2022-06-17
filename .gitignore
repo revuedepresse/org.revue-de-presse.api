@@ -19,6 +19,7 @@ bin/yaml-lint
 bin/var-dump-server
 composer.phar
 /config/secrets/prod/prod.decrypt.private.php
+/node_modules*
 /phpunit.xml
 .phpunit.result.cache
 provisioning/containers/mysql/templates/mysql/my.cnf
