@@ -174,8 +174,17 @@ function remove_container_image() {
 
     _set_up_configuration_files
 
+    local project_name
+
+    if [ -n "${COMPOSE_PROJECT_NAME}" ];
+    then
+        project_name="${COMPOSE_PROJECT_NAME}"
+    else
+        project_name="$(get_project_name)"
+    fi
+
     docker ps -a |
-        \grep "${COMPOSE_PROJECT_NAME}" |
+        \grep "${project_name}" |
         \grep "${container_name}" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
@@ -183,7 +192,7 @@ function remove_container_image() {
     if [ -n "${DEBUG}" ];
     then
         docker images -a |
-            \grep "${COMPOSE_PROJECT_NAME}" |
+            \grep "${project_name}" |
             \grep "${container_name}" |
             awk '{print $3}' |
             xargs -I{} docker rmi -f {}
