@@ -2,6 +2,8 @@
 set -Eeuo pipefail
 
 function install_php_libraries() {
+    mkdir --parents "${COMPOSER_HOME}"
+
     # [Command line github-oauth](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#command-line-github-oauth)
     composer config -g github-oauth.github.com "${GITHUB_API_TOKEN}"
 

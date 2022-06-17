@@ -181,10 +181,8 @@ function install_process_manager_packages() {
 }
 
 function install_process_manager_requirements() {
-    create_log_files_when_non_existing "${WORKER}"
     install_dockerize
     install_process_manager_packages
-    set_permissions
     clear_package_management_system_cache
 }
 
@@ -193,6 +191,8 @@ function install_shared_requirements() {
     install_shared_system_packages
     install_worker_system_packages
     install_php_extensions
+    create_log_files_when_non_existing "${WORKER}"
+    set_permissions
 }
 
 function install_shared_system_packages() {
@@ -226,14 +226,19 @@ function install_worker_system_packages() {
 function set_permissions() {
     chown worker. \
         /var/www \
-        /entrypoint.sh \
         /start.sh
 
     chown -R worker. "/var/www/${WORKER}"/var/log/*
 
     chmod -R ug+x \
-        /entrypoint.sh \
         /start.sh
+
+    if [ -e /entrypoint.sh ]; then
+
+        chown worker. /entrypoint.sh
+        chmod -R ug+x /entrypoint.sh
+
+    fi
 }
 
 set -Eeuo pipefail
