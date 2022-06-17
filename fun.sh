@@ -391,10 +391,9 @@ SCRIPT
 function stop() {
     guard_against_missing_variables
 
-    docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        down
+    remove_container_image 'app'
+    remove_container_image 'process-manager'
+    remove_container_image 'worker'
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function stop_database() {
