@@ -4,6 +4,8 @@
 
 Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 
+This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
+
 ## Installation
 
 The shell scripts written for bash   
