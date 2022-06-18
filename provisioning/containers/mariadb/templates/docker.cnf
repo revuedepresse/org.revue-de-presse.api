@@ -10,6 +10,8 @@ init-connect='SET NAMES utf8mb4'
 max_allowed_packet = 1G
 log_error = /var/log/mysql/mysql_error.log
 long_query_time = 2
+query_cache_size = 0
+query_cache_type = 0
 slow_query_log = on
 slow_query_log_file = /var/log/mysql/mysql_slow.log
 skip-host-cache
