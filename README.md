@@ -3,8 +3,11 @@
 
 ![revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
-API serving daily short lists (10 items) of top news in France sorted by popularity.
+API serving daily short lists (10 items) of top news in France sorted by popularity.  
 Their popularity is based on retweets only retrieved by using Twitter API.
+
+A variant of this project generalizing the principle of providing briefs from [Twitter Lists](https://help.twitter.com/en/using-twitter/twitter-lists)  
+is also available from [snapshots.fr's git repository](https://github.com/thierrymarianne/snapshots.fr/tree/api)
 
 ## Installation
 
