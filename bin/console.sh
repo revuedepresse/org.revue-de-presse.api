@@ -149,12 +149,12 @@ function ensure_log_files_exist() {
 
     if [ ! -e "${standard_output_file}" ];
     then
-        sudo touch "${standard_output_file}";
+        touch "${standard_output_file}";
     fi
 
     if [ ! -e "${standard_error_file}" ];
     then
-        sudo touch "${standard_error_file}";
+        touch "${standard_error_file}";
     fi
 }
 
