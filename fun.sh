@@ -365,6 +365,18 @@ docker compose \
 			up \
 			--detach \
 			--no-recreate \
+			amqp
+SCRIPT
+)
+
+    local command
+    command=$(cat <<-SCRIPT
+docker compose \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
+			up \
+			--detach \
+			--force-recreate \
 			process-manager
 SCRIPT
 )

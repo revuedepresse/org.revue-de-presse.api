@@ -19,8 +19,6 @@ x-worker: &worker
   build:
     context: .
     dockerfile: './worker/Dockerfile'
-  depends_on:
-    - 'amqp'
   <<: *shared
 
 services:
