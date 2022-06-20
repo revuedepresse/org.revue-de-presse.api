@@ -2,22 +2,26 @@ version: '3.8'
 
 name: 'wildcard'
 
+x-vol: &shared-volumes
+  volumes:
+    - './_scripts/:/scripts'
+    - './_scripts/cmd-process-manager.sh:/start.sh'
+    - './worker/templates:/templates'
+    - './worker/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
+    - '../../../shared:/var/www/shared'
+
 x-shared: &shared
   env_file:
     - '../../.env.local'
   restart: 'always'
-  volumes:
-    - './_scripts/:/scripts'
-    - './worker/templates:/templates'
-    - './worker/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
-    - '../../../shared:/var/www/shared'
+  <<: *shared-volumes
 
 x-worker: &worker
   build:
     context: .
     dockerfile: './worker/Dockerfile'
   depends_on:
-      - 'amqp'
+    - 'amqp'
   <<: *shared
 
 services:
@@ -49,3 +53,4 @@ services:
 
   worker:
     <<: *worker
+
