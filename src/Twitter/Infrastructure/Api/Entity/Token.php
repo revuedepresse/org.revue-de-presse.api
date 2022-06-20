@@ -119,7 +119,7 @@ class Token implements TokenInterface
     /**
      * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
      */
-    protected ?DateTimeInterface $frozenUntil;
+    protected ?DateTimeInterface $frozenUntil = null;
 
     /**
      * @ORM\Column(name="created_at", type="datetime")
