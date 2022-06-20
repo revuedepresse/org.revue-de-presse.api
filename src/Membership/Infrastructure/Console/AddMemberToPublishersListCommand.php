@@ -153,16 +153,14 @@ class AddMemberToPublishersListCommand extends AbstractCommand
     }
 
     private function addMembersToList(PublishersList $targetList): void {
-        $membersList = $this->getListOfMembers();
+        $memberIds = $this->getListOfMembers();
 
-        $this->membersListAccessor->addMembersToList($membersList, $targetList->id());
-        $members = $this->ensureMembersExist($membersList);
+        $this->membersListAccessor->addMembersToList($memberIds, $targetList->id());
+        $members = $this->ensureMembersExist($memberIds);
 
         array_walk(
             $members,
-            function (MemberInterface $member) use ($targetList) {
-                $this->publishersListRepository->addMemberToList($member, $targetList);
-            }
+            fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
         );
 
         $this->output->writeln('All members have been successfully added to the publishers lists.');
@@ -213,8 +211,8 @@ class AddMemberToPublishersListCommand extends AbstractCommand
             array_walk(
                 $subscriptions,
                 static function (AggregateSubscription $subscription) use (&$memberList) {
-                    $memberName = $subscription->subscription->twitterScreenName();
-                    $memberList[] = $memberName;
+                    $memberId = $subscription->subscription->twitterId();
+                    $memberList[] = $memberId;
                 }
             );
 

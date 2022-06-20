@@ -18,51 +18,21 @@ class MembersListAccessor implements TwitterApiEndpointsAwareInterface, MembersL
         $this->accessor = $accessor;
     }
 
-    public function addMembersToList(array $members, string $listId): ?stdClass
+    public function addMembersToList(array $members, string $listId)
     {
-        if (count($members) > 100) {
-            $partition = array_chunk($members, 100);
-            $list = null;
+        $endpoint = strtr($this->getAddMembersToListEndpoint(), [':id' => $listId]);
 
-            while (!empty($partition)) {
-                $members = array_pop($partition);
-
-                if (array_key_exists(0, $members) && is_numeric($members[0])) {
-                    $endpoint = $this->getAddMembersToListEndpoint() .
-                        "user_id=" . implode(',', $members) .
-                        '&list_id=' . $listId;
-                } else {
-                    $endpoint = $this->getAddMembersToListEndpoint() .
-                        "screen_name=" . implode(',', $members) .
-                        '&list_id=' . $listId;
-                }
-
-                $list = $this->accessor->contactEndpoint($endpoint);
-            }
-
-            return $list;
-        }
-
-        if (array_key_exists(0, $members) && is_numeric($members[0])) {
-            $endpoint = $this->getAddMembersToListEndpoint() .
-                "user_id=" . implode(',', $members) .
-                '&list_id=' . $listId;
-        } else {
-            $endpoint = $this->getAddMembersToListEndpoint() .
-                "screen_name=" . implode(',', $members) .
-                '&list_id=' . $listId;
-        }
-
-        return $this->accessor->contactEndpoint($endpoint);
+        array_walk(
+            $members,
+            fn ($memberId) => $this->accessor->contactEndpoint("${endpoint}?user_id=${memberId}"),
+        );
     }
 
     private function getAddMembersToListEndpoint(): string
     {
         return implode([
-            $this->accessor->getApiBaseUrl(),
-            self::API_ENDPOINT_MEMBERS_LISTS,
-            '.json',
-            '?'
+            $this->accessor->getApiBaseUrl($this->accessor::TWITTER_API_VERSION_2),
+            self::API_ENDPOINT_MEMBERS_LISTS_VERSION_2,
         ]);
     }
 }

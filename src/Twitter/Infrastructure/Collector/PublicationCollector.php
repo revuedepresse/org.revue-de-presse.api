@@ -436,7 +436,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 $this->moderator->waitFor(
                     $timeout,
                     [
-                        '{{ token }}' => substr($oauthToken, 0, '8'),
+                        '{{ token }}' => substr($oauthToken, 0, 8),
                     ]
                 );
             }

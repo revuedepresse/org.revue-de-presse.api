@@ -66,10 +66,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
 {
     private const MAX_RETRIES = 5;
 
-    private const BASE_URL = 'https://api.twitter.com/1.1/';
-
-    private const TWITTER_API_VERSION_1_1 = '1.1';
-
     public StatusAccessor $statusAccessor;
 
     /**
@@ -188,33 +184,47 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
     }
 
     /**
-     * @param              $endpoint
-     * @param array        $parameters
-     *
-     * @return stdClass|array
+     * @param string $endpoint
+     * @return array|object
      */
     public function connectToEndpoint(
         string $endpoint,
         array $parameters = []
     ) {
-        $path = $this->reducePath($endpoint);
+        $matches = [];
 
-        $endpointContainsCreateAll = strpos($endpoint, 'create_all.json') !== false;
+        // [Enables the authenticated user to add a member to a List they own.](https://developer.twitter.com/en/docs/twitter-api/lists/list-members/api-reference/post-lists-id-members)
+        $matchingResult = preg_match('#\/lists\/\d+\/members#', $endpoint, $matches);
+        $isAddMemberToListEndpoint = $matchingResult !== false && $matchingResult > 0;
+
+        $sendJSONBodyParameters = $isAddMemberToListEndpoint;
+
+        $version = self::TWITTER_API_VERSION_1_1;
+
+        if ($isAddMemberToListEndpoint) {
+            $version = self::TWITTER_API_VERSION_2;
+            $this->twitterClient->setApiVersion($version);
+        }
+
+        $this->twitterApiLogger->info('About to call Twitter API', ['version' => $version]);
+
+        $path = $this->reducePath($endpoint, $version);
+
         $endpointContainsListsMembers = strpos($endpoint, 'lists/members.json') !== false;
 
         $parameters = $this->reduceParameters($endpoint, $parameters);
 
         if (
-            $endpointContainsCreateAll
+            $isAddMemberToListEndpoint
             || strpos($endpoint, 'create.json') !== false
             || strpos($endpoint, 'destroy.json') !== false
             || strpos($endpoint, 'destroy_all.json') !== false
         ) {
-            $response = $this->twitterClient->post($path, $parameters);
+            $response = $this->twitterClient->post($path, $parameters, $sendJSONBodyParameters);
 
-            if ($endpointContainsCreateAll) {
+            if ($isAddMemberToListEndpoint) {
                 $this->twitterApiLogger->info('sent POST request to "lists/members/create_all" route',
-                    ['params' => $parameters, 'path' => $path, 'response' => $response]
+                    ['params' => $parameters, 'path' => $path, 'response' => $response, 'matches' => $matches]
                 );
             }
 
@@ -234,8 +244,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
 
     /**
      * @param string $endpoint
-     *
-     * @return stdClass|array
+     * @return array|stdClass|null
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -249,6 +258,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
+     * @throws UnknownApiAccessException
      */
     public function contactEndpoint(string $endpoint)
     {
@@ -310,14 +320,13 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         $response       = $this->httpClient->getResponse();
         $encodedContent = $response->getContent();
 
-        return \Safe\json_decode($encodedContent);
+        return json_decode($encodedContent, flags: JSON_THROW_ON_ERROR);
     }
 
     /**
      * @param string $endpoint
-     * @param Token  $token
-     *
-     * @return stdClass|array
+     * @param Token $token
+     * @return array|object|stdClass
      * @throws Exception
      */
     public function contactEndpointUsingConsumerKey(
@@ -333,6 +342,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
 
         try {
             $content = $this->connectToEndpoint($endpoint);
+
             $this->checkApiLimit();
         } catch (Exception $exception) {
             // Retry in case of operation timed out error raised by curl
@@ -340,6 +350,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
                 $exception->getCode() === CURLE_OPERATION_TIMEDOUT
             ) {
                 $this->logger->info('Retrying to reach endpoint after operation timed out');
+
                 return $this->contactEndpointUsingConsumerKey($endpoint, $token);
             }
 
@@ -625,10 +636,10 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
 
     /**
      * @param string $endpoint
-     *
-     * @return string|string[]
+     * @param $version
+     * @return string
      */
-    private function reducePath(string $endpoint): string
+    private function reducePath(string $endpoint, $version = self::TWITTER_API_VERSION_1_1): string
     {
         return strtr(
             implode(
@@ -643,7 +654,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
                 ]
             ),
             [
-                self::BASE_URL => '',
+                self::BASE_URL."${version}/" => '',
                 '.json' => ''
             ]
         );
@@ -772,6 +783,12 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         Exception $exception,
         Token $token
     ) {
+        if ($exception instanceof \ErrorException && $exception->getSeverity() === E_WARNING) {
+            $this->logger->warning($exception->getMessage(), ['exception' => $exception]);
+
+            throw $exception;
+        }
+
         if ($exception->getCode() === 0) {
             $emptyErrorCodeMessage   = $this->translator->trans(
                 'logs.info.empty_error_code',
@@ -1486,18 +1503,33 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
             throw new NotFoundStatusException($message, self::ERROR_NOT_FOUND);
         }
 
-        $this->twitterApiLogger->info(
-            sprintf(
-                '[HTTP code] %s',
-                print_r($lastHttpCode, true)
-            )
-        );
-        $this->twitterApiLogger->info(
-            sprintf(
-                '[HTTP URL] %s',
-                $lastApiPath
-            )
-        );
+        if ($lastHttpCode >= 400 && $lastHttpCode !== 404) {
+            $this->twitterApiLogger->notice(
+                sprintf(
+                    '[HTTP code] %s',
+                    print_r($lastHttpCode, true)
+                )
+            );
+            $this->twitterApiLogger->notice(
+                sprintf(
+                    '[HTTP URL] %s',
+                    $lastApiPath
+                )
+            );
+        } else {
+            $this->twitterApiLogger->info(
+                sprintf(
+                    '[HTTP code] %s',
+                    print_r($lastHttpCode, true)
+                )
+            );
+            $this->twitterApiLogger->info(
+                sprintf(
+                    '[HTTP URL] %s',
+                    $lastApiPath
+                )
+            );
+        }
 
         if (isset($lastXHeaders)) {
             if (array_key_exists('x_rate_limit_limit', $lastXHeaders)) {
@@ -1897,11 +1929,8 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
 
     /**
      * @param string $endpoint
-     *
-     * @return array|stdClass
+     * @return array|object|stdClass
      * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws OptimisticLockException
      */
     private function fetchContent(string $endpoint)
     {

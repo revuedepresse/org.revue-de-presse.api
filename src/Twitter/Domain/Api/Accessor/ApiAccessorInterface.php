@@ -11,6 +11,12 @@ use stdClass;
 
 interface ApiAccessorInterface extends TwitterErrorAwareInterface
 {
+    public const BASE_URL = 'https://api.twitter.com/';
+
+    public const TWITTER_API_VERSION_1_1 = '1.1';
+
+    public const TWITTER_API_VERSION_2 = '2';
+
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface;
 
     public function guardAgainstApiLimit(
@@ -18,7 +24,7 @@ interface ApiAccessorInterface extends TwitterErrorAwareInterface
         bool $findNextAvailableToken = true
     ): ?TokenInterface;
 
-    public function getApiBaseUrl(): string;
+    public function getApiBaseUrl(string $version = self::TWITTER_API_VERSION_1_1): string;
 
     public function setAccessToken(string $token): ApiAccessorInterface;
 
