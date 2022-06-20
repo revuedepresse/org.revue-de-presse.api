@@ -6,24 +6,3 @@ services:
 
     App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
         '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'
-
-    App\NewsReview\Infrastructure\Routing\Repository\PublishersListRouteRepository:
-        class: 'App\NewsReview\Infrastructure\Routing\Repository\PublishersListRouteRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\NewsReview\Infrastructure\Routing\Entity\PublishersListRoute'
-        tags:
-            - { name: 'doctrine.repository_service' }
-
-    App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface:
-        '@App\NewsReview\Infrastructure\Routing\Repository\PublishersListRouteRepository'
-
-    App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand:
-        class: 'App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand'
-        arguments:
-            - !php/const 'App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand::COMMAND_NAME'
-            - '@App\NewsReview\Domain\Repository\PublishersListRepositoryInterface'
-            - '@App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface'
-            - '@logger'
-        tags:
-            - { name: 'console.command' }

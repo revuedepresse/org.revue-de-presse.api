@@ -64,6 +64,3 @@ services:
 
     test.App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface:
         '@App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface'
-
-    test.App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand:
-        '@App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand'
