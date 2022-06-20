@@ -33,7 +33,7 @@ make list-amqp-queues
 ```shell
 # Customize the WORKER variable value assignment
 WORKER='worker.example.org' \
-make start-process-manager
+make start
 ```
 
 ## How to dispatch AMQP messages so that member publications are fetched?
