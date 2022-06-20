@@ -293,12 +293,6 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     public function setupAccessor(array $oauthTokens): self
     {
-        if (array_key_exists('authentication_header', $oauthTokens)) {
-            $this->apiAccessor->setAuthenticationHeader($oauthTokens['authentication_header']);
-
-            return $this;
-        }
-
         $token = new Token();
         $token->setAccessToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
         $token->setAccessTokenSecret($oauthTokens[TokenInterface::FIELD_SECRET]);

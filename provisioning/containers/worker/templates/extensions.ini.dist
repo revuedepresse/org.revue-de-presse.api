@@ -9,6 +9,7 @@ html_errors                 = on
 log_errors                  = on
 output_buffering            = on
 security.limit_extensions   = '.php'
+short_open_tag              = off
 #xdebug.mode                 = debug
 #xdebug.start_with_request   = yes
 #xdebug.log                  = /var/www/__WORKER__/var/log/xdebug.log

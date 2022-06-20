@@ -41,12 +41,10 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Goutte\Client;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use stdClass;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
 use function is_null;
@@ -67,15 +65,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
     private const MAX_RETRIES = 5;
 
     public StatusAccessor $statusAccessor;
-
-    /**
-     * @var string|Client
-     */
-    public $httpClient;
-
-    public string $httpClientClass;
-
-    public string $clientClass;
 
     public string $environment = 'dev';
 
@@ -128,11 +117,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
      * @var string|null
      */
     protected ?string $consumerSecret;
-
-    /**
-     * @var string
-     */
-    protected string $authenticationHeader;
 
     protected TokenRepositoryInterface $tokenRepository;
 
@@ -303,24 +287,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         }
 
         return $this->delayUnknownExceptionHandlingOnEndpointForToken($endpoint);
-    }
-
-    /**
-     * @param string $endpoint
-     *
-     * @return stdClass
-     * @throws Exception
-     */
-    public function contactEndpointUsingBearerToken(string $endpoint)
-    {
-        $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
-        $this->httpClient->request('GET', $endpoint);
-
-        /** @var Response $response */
-        $response       = $this->httpClient->getResponse();
-        $encodedContent = $response->getContent();
-
-        return json_decode($encodedContent, flags: JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -1138,30 +1104,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
     }
 
     /**
-     * @param string $header
-     *
-     * @return $this
-     */
-    public function setAuthenticationHeader($header)
-    {
-        $this->authenticationHeader = $header;
-
-        return $this;
-    }
-
-    /**
-     * @param string $clientClass
-     *
-     * @return $this
-     */
-    public function setClientClass($clientClass)
-    {
-        $this->clientClass = $clientClass;
-
-        return $this;
-    }
-
-    /**
      * @param string $consumerKey
      *
      * @return $this
@@ -1221,16 +1163,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         $this->translator = $translator;
     }
 
-    public function setupClient()
-    {
-        $requesterClass   = $this->clientClass;
-        $this->httpClient = new $requesterClass();
-
-        $httpClientClass = $this->httpClientClass;
-        $httpClient      = new $httpClientClass();
-        $this->httpClient->setClient($httpClient);
-    }
-
     /**
      * @param string $screenName
      *
@@ -1246,18 +1178,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         return $member->isProtected()
             || $member->hasBeenDeclaredAsNotFound()
             || $member->isSuspended();
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldUseBearerToken(): bool
-    {
-        if (!isset($this->authenticationHeader)) {
-            return false;
-        }
-
-        return $this->authenticationHeader !== null;
     }
 
     /**
@@ -1934,12 +1854,6 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
      */
     private function fetchContent(string $endpoint)
     {
-        if ($this->shouldUseBearerToken()) {
-            $this->setupClient();
-
-            return $this->contactEndpointUsingBearerToken($endpoint);
-        }
-
         $token = $this->preEndpointContact($endpoint);
 
         return $this->contactEndpointUsingConsumerKey($endpoint, $token);

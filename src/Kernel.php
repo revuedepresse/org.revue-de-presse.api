@@ -8,7 +8,6 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as HttpKernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 /**
  * Registers bundles
@@ -39,7 +38,7 @@ class Kernel extends HttpKernel
     /**
      * @return string
      */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return dirname(__DIR__).'/var/cache/'.$this->getEnvironment();
     }
@@ -47,7 +46,7 @@ class Kernel extends HttpKernel
     /**
      * @return string
      */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return dirname(__DIR__).'/var/log';
     }

@@ -51,7 +51,7 @@ class RecommendSubscriptionsCommand extends Command
 
     public function configure()
     {
-        $this->setName('recommend:subscriptions')
+        $this->setName('revue-de-presse.org:recommend:subscriptions')
             ->addOption(
                 self::OPTION_REFERENCE_MEMBER,
                 'r',

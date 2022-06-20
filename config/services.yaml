@@ -160,7 +160,6 @@ services:
             twitterApiLogger:     '@monolog.logger.twitter_api'
             statusAccessor:       '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
         calls:
-            - [ 'setClientClass', [ '\Goutte\Client' ] ]
             - [ 'setConsumerKey', [ '%twitter_api.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%twitter_api.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
