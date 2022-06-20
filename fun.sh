@@ -123,7 +123,10 @@ function dispatch_amqp_messages() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        up -d app
+        up \
+        --detach \
+        --no-recreate \
+        app
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
