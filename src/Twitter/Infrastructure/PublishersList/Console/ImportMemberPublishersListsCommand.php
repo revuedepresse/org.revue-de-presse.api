@@ -36,7 +36,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ImportMemberPublishersListsCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'app:import-publishers-lists';
+    public const COMMAND_NAME = 'app:synchronize-list';
 
     use OwnershipBatchCollectedEventRepositoryTrait;
     use PublishersListCollectedEventRepositoryTrait;

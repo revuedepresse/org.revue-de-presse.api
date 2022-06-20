@@ -1,6 +1,6 @@
 # Commands
 
-## How to authorize an existing application to collect publications on behalf of a Twitter member?
+## How to authorize an existing application to access publications on behalf of a Twitter member?
 
 ```shell
 make shell-worker
@@ -53,7 +53,7 @@ docker exec -ti $(docker ps -a| \grep --fixed-strings "${PROJECT_NAME}_worker" |
 # In worker container
 LIST_NAME='w3cstaff' \
 USERNAME='w3c' \
-php ./bin/console app:import-publishers-lists --list-restriction="${LIST_NAME}" "${USERNAME}"
+php ./bin/console app:synchronize-list --list-restriction="${LIST_NAME}" "${USERNAME}"
 ```
 
 List created by [Renee Marie Parilak Teate](https://twitter.com/BecomingDataSci)  
