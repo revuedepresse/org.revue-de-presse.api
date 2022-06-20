@@ -30,7 +30,7 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('revue-de-presse.org:list-member-subscriptions');
+        $this->command = $application->find('app:list-member-subscriptions');
         $this->command->setAccessor(FriendsListAccessorBuilder::build());
         $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::build());
 

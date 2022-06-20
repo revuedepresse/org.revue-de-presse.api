@@ -27,7 +27,7 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
 
     protected function configure()
     {
-        $this->setName('revue-de-presse.org:subscribe-to-member-timelines')
+        $this->setName('app:subscribe-to-member-timelines')
             ->setDescription('Subscribe to member timelines.')
             ->addOption(
                 self::OPTION_AGGREGATE_NAME,

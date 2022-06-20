@@ -38,7 +38,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
 
     public function configure(): void
     {
-        $this->setName('revue-de-presse.org:amqp:dispatch:member_subscription_timeline_message')
+        $this->setName('app:amqp:dispatch:member_subscription_timeline_message')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
                 'screen_name',

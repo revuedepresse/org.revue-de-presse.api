@@ -34,7 +34,7 @@ class ImportMediaRelationshipsCommand extends Command
 
     public function configure()
     {
-        $this->setName('revue-de-presse.org:import-media-relationships');
+        $this->setName('app:import-media-relationships');
     }
 
     /**

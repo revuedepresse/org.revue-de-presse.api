@@ -34,7 +34,7 @@ class QueryPublicationCollectionCommand extends Command
 
     public function configure()
     {
-        $this->setName('revue-de-presse.org:query-publication-collection')
+        $this->setName('app:query-publication-collection')
             ->setDescription('Query a collection of publication from criteria.')
             ->addOption(
                 self::OPTION_SCREEN_NAME,

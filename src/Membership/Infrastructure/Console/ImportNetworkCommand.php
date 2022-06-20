@@ -38,7 +38,7 @@ class ImportNetworkCommand extends Command
 
     public function configure()
     {
-        $this->setName('revue-de-presse.org:import-network')
+        $this->setName('app:import-network')
             ->setDescription(
                 implode([
                     'Import subscriptions and ',

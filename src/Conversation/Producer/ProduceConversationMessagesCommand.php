@@ -41,7 +41,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('revue-de-presse.org:amqp:produce:conversation')
+        $this->setName('app:amqp:produce:conversation')
             ->setDescription('Produce an AMQP message to get a conversation')
          ->addOption(
             'screen_name',

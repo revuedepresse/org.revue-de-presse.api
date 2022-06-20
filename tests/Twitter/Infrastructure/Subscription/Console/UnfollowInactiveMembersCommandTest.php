@@ -35,7 +35,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('revue-de-presse.org:unfollow-inactive-members');
+        $this->command = $application->find('app:unfollow-inactive-members');
         $this->command->setListCollectedEventRepository(FriendsListCollectedEventRepositoryBuilder::build());
         $this->command->setMemberRepository($this->buildMemberRepository());
         $this->command->setMutator(FriendshipMutatorBuilder::build());

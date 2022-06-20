@@ -37,7 +37,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         $this->mutator = $mutator;
     }
 
-    public function __construct($name = 'revue-de-presse.org:unfollow-inactive-members')
+    public function __construct($name = 'app:unfollow-inactive-members')
     {
         parent::__construct($name);
     }

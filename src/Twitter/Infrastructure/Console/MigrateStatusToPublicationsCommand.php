@@ -28,7 +28,7 @@ class MigrateStatusToPublicationsCommand extends Command
     {
         parent::configure();
 
-        $this->setName('revue-de-presse.org:migrate-status-to-publications')
+        $this->setName('app:migrate-status-to-publications')
             ->setDescription('Migrate status to publications');
     }
 

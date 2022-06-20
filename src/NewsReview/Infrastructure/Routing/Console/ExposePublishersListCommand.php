@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExposePublishersListCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'revue-de-presse.org:expose-publishers-list';
+    public const COMMAND_NAME = 'app:expose-publishers-list';
     public const ARGUMENT_HOSTNAME = 'hostname';
     public const ARGUMENT_PUBLISHERS_LIST_NAME = 'publishers_list_name';
 

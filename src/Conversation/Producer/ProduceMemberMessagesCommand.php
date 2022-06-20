@@ -27,7 +27,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
     public function configure()
     {
         $this
-            ->setName('revue-de-presse.org:amqp:produce:member_messages')
+            ->setName('app:amqp:produce:member_messages')
             ->setDescription('Produce an AMQP message to get a status from a member');
     }
 

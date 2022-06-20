@@ -7,7 +7,7 @@ make shell-worker
 
 # Follow instructions to authorize an Twitter app
 # to collect publications from lists on behalf of a Twitter member  
-bin/console revue-de-presse.org:authorize-application
+bin/console app:authorize-application
 ```
 
 ## How to start worker and amqp containers?
@@ -53,7 +53,7 @@ docker exec -ti $(docker ps -a| \grep --fixed-strings "${PROJECT_NAME}_worker" |
 # In worker container
 LIST_NAME='w3cstaff' \
 USERNAME='w3c' \
-php ./bin/console revue-de-presse.org:import-publishers-lists --list-restriction="${LIST_NAME}" "${USERNAME}"
+php ./bin/console app:import-publishers-lists --list-restriction="${LIST_NAME}" "${USERNAME}"
 ```
 
 List created by [Renee Marie Parilak Teate](https://twitter.com/BecomingDataSci)  
