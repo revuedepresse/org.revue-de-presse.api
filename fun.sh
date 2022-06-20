@@ -271,6 +271,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.override.yaml \
         up \
         --detach \
+        --no-recreate \
         app
 
     docker compose \
