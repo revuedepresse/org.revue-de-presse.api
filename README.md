@@ -17,10 +17,10 @@ have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
 > Git is a free and open source distributed version control system designed 
 > to handle everything from small to very large projects with speed and efficiency.
 
-[Install Docker Docker Engine](https://docs.docker.com/engine/install/)).
+[Install Docker Docker Engine](https://docs.docker.com/engine/install/).
 > Docker Engine is an open source containerization technology for building and containerizing your applications.
 
-[Install Docker Compose](https://docs.docker.com/compose/install/)).
+[Install Docker Compose](https://docs.docker.com/compose/install/).
 > Compose is a tool for defining and running multi-container Docker applications.
 
 Install [jq](https://stedolan.github.io/jq/download/).
