@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @ORM\Table(
  *      name="weaving_user",

@@ -84,7 +84,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
              ->addArgument(

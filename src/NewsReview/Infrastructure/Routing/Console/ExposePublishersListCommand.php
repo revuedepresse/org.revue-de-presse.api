@@ -36,7 +36,7 @@ class ExposePublishersListCommand extends AbstractCommand
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this
             ->setDescription('Expose a publishers list from a public domain')

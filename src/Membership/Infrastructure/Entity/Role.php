@@ -11,7 +11,7 @@ use App\Membership\Domain\Model\RoleInterface;
  * @ORM\Entity
  * @ORM\Table(name="weaving_role")
  *
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class Role implements RoleInterface
 {

@@ -58,7 +58,7 @@ use const PHP_URL_SCHEME;
 use const PHP_URL_USER;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterface
 {

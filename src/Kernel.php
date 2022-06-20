@@ -3,22 +3,48 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
+use App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand;
+use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\Kernel as HttpKernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
 /**
- * Registers bundles
- *
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
-class Kernel extends HttpKernel
+class Kernel extends BaseKernel implements CompilerPassInterface
 {
     private const CONFIG_EXTS = '.{yaml,xml}';
 
     use MicroKernelTrait;
+
+    public function process(ContainerBuilder $container): void
+    {
+        $taggedServiceIds = $container->findTaggedServiceIds('console.command');
+
+        array_walk(
+            $taggedServiceIds,
+            function ($_, $id) use ($container) {
+                $definition = $container->findDefinition($id);
+
+                if (!in_array(
+                    $id,
+                    [
+                        AddMemberToPublishersListCommand::class,
+                        AuthorizeApplicationCommand::class,
+                        ImportMemberPublishersListsCommand::class
+                    ],
+                    true
+                )) {
+                    $definition->addMethodCall('setHidden', [true]);
+                }
+            }
+        );
+    }
 
     public function registerBundles(): iterable
     {

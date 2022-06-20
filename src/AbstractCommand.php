@@ -13,7 +13,7 @@ abstract class AbstractCommand extends Command
     protected OutputInterface $output;
     protected InputInterface $input;
 
-    protected function configure(): void
+    protected function configure()
     {
         throw new Exception('Missing description');
     }

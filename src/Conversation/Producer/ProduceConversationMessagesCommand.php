@@ -15,7 +15,7 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ProduceConversationMessagesCommand extends AggregateAwareCommand
 {

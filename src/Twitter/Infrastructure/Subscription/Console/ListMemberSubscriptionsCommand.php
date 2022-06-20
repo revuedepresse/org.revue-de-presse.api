@@ -32,7 +32,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         $this->repository = $repository;
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setName('app:list-member-subscriptions')
             ->setDescription('List the subscriptions of a member')

@@ -26,7 +26,7 @@ use function min;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method Status|null find($id, $lockMode = null, $lockVersion = null)
  * @method Status|null findOneBy(array $criteria, array $orderBy = null)

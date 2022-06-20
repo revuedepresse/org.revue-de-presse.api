@@ -9,7 +9,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)
  * @method Whisperer|null findOneBy(array $criteria, array $orderBy = null)

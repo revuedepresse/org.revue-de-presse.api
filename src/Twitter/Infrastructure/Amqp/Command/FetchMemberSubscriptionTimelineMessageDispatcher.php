@@ -26,7 +26,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCommand
 {
@@ -36,7 +36,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
     use MessageBusTrait;
     use TranslatorTrait;
 
-    public function configure(): void
+    public function configure()
     {
         $this->setName('app:amqp:dispatch:member_subscription_timeline_message')
             ->setDescription('Produce a message to get a user timeline')

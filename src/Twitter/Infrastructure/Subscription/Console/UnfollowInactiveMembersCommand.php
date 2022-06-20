@@ -42,7 +42,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setDescription(
                 'Unfollow inactive members followed by member whose screen name has been passed as argument.'

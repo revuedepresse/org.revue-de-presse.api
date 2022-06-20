@@ -55,7 +55,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
         $this->networkRepository = $repository;
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setName('app:unfollow-diff-subscriptions-subscribees')
             ->setDescription('Unfollow diff between subscriptions and subscribees')

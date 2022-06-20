@@ -10,7 +10,7 @@ use Symfony\Component\Console\Command\Command;
 
 /**
  * @package App\Twitter\Command
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class MigrateStatusToPublicationsCommand extends Command
 {
@@ -21,9 +21,6 @@ class MigrateStatusToPublicationsCommand extends Command
         $this->publicationRepository = $publicationRepository;
     }
 
-    /**
-     * Configures executable commands
-     */
     protected function configure()
     {
         parent::configure();

@@ -36,7 +36,7 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setDescription('List subscriptions of a Twitter member via publishers lists')
             ->addArgument(

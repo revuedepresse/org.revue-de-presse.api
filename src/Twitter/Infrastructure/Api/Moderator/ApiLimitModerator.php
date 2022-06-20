@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ApiLimitModerator implements ApiLimitModeratorInterface
 {

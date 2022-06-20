@@ -69,7 +69,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setDescription('Add a member list to a publisher list.')
             ->addArgument(
