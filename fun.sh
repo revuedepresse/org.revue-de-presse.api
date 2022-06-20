@@ -269,7 +269,9 @@ function install() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        up -d app
+        up \
+        --detach \
+        app
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
@@ -361,7 +363,7 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			--force-recreate \
+			--no-recreate \
 			process-manager
 SCRIPT
 )
