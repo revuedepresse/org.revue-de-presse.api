@@ -57,7 +57,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
 
     protected function configure(): void
     {
-        $this->setName('devobs:unfollow-diff-subscriptions-subscribees')
+        $this->setName('revue-de-presse.org:unfollow-diff-subscriptions-subscribees')
             ->setDescription('Unfollow diff between subscriptions and subscribees')
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,

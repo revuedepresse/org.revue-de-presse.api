@@ -68,7 +68,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('devobs:dispatch-messages-to-fetch-member-statuses');
+        $this->command = $application->find('revue-de-presse.org:dispatch-messages-to-fetch-member-statuses');
 
         $this->commandTester = new CommandTester($command);
     }

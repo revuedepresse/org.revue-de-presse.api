@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\Question;
 
 class AuthorizeApplicationCommand extends AbstractCommand implements SignalableCommandInterface
 {
-    public const COMMAND_NAME = 'devobs:authorize-application';
+    public const COMMAND_NAME = 'revue-de-presse.org:authorize-application';
 
     private LoggerInterface $logger;
 

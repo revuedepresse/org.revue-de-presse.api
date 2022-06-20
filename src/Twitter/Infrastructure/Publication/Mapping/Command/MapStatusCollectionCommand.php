@@ -55,7 +55,7 @@ class MapStatusCollectionCommand extends Command
 
     public function configure()
     {
-        $this->setName('devobs:map-status-collection')
+        $this->setName('revue-de-presse.org:map-status-collection')
             ->setDescription('Map a service to a collection of statuses.')
             ->addOption(
                 self::OPTION_MAPPING,

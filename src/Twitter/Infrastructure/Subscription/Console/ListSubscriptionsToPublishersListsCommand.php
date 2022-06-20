@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'devobs:list-subscriptions-to-publishers-lists';
+    public const COMMAND_NAME = 'revue-de-presse.org:list-subscriptions-to-publishers-lists';
     public const ARGUMENT_SCREEN_NAME = 'screen_name';
     public const OPTION_PUBLISHERS_LIST = 'publishers_list';
 

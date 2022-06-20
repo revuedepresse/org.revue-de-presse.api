@@ -44,7 +44,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('devobs:dispatch-messages-to-fetch-member-statuses')
+        $this->setName('revue-de-presse.org:dispatch-messages-to-fetch-member-statuses')
             ->setDescription('Dispatch AMQP messages to fetch member publications.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,

@@ -38,14 +38,14 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
 
     public function configure(): void
     {
-        $this->setName('weaving_the_web:amqp:dispatch:member_subscription_timeline_message')
+        $this->setName('revue-de-presse.org:amqp:dispatch:member_subscription_timeline_message')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
-            'screen_name',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'The screen name of a user'
-            )->setAliases(['wtw:amqp:d:m']);
+                'screen_name',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The screen name of a user'
+            );
     }
 
     /**

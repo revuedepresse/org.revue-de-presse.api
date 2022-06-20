@@ -26,9 +26,9 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:member_messages')
-        ->setDescription('Produce an AMQP message to get a status from a member')
-        ->setAliases(array('wtw:amqp:prd:mbm'));
+        $this
+            ->setName('revue-de-presse.org:amqp:produce:member_messages')
+            ->setDescription('Produce an AMQP message to get a status from a member');
     }
 
     /**

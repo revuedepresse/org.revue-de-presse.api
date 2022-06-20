@@ -43,7 +43,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('devobs:unfollow-diff-subscriptions-subscribees');
+        $this->command = $application->find('revue-de-presse.org:unfollow-diff-subscriptions-subscribees');
         $this->command->setSubscriptionsRepository(FriendsListCollectedEventRepositoryBuilder::build());
         $this->command->setSubscribeesRepository(FollowersListCollectedEventRepositoryBuilder::build());
         $this->command->setMemberRepository($this->buildMemberRepository());

@@ -41,7 +41,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:conversation')
+        $this->setName('revue-de-presse.org:amqp:produce:conversation')
             ->setDescription('Produce an AMQP message to get a conversation')
          ->addOption(
             'screen_name',
@@ -61,7 +61,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
             InputOption::VALUE_OPTIONAL,
             'A producer key',
             'producer.conversation_status'
-        )->setAliases(array('wtw:amqp:prd:cnv'));
+        );
     }
 
     /**
