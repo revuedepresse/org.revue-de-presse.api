@@ -38,7 +38,7 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
 
     protected function configure()
     {
-        $this->setDescription('List subscriptions of a Twitter member via publishers lists')
+        $this->setDescription('List subscriptions of a Twitter member via Twitter lists')
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,
                 InputArgument::REQUIRED,
@@ -64,7 +64,7 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
         } catch (OwnershipBatchNotFoundException $e) {
             $this->output->writeln(
                 sprintf(
-                    'No subscription to a publishers list can be found for Twitter member having "%s" as screen name.',
+                    'No subscription to a Twitter list can be found for Twitter member having "%s" as screen name.',
                     $screenName
                 )
             );

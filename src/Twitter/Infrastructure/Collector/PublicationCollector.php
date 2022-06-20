@@ -641,7 +641,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $this->logger->info(
             sprintf(
-                'About to lock processing of publishers list #%d',
+                'About to lock processing of Twitter list #%d',
                 $publishersList->getId()
             )
         );
@@ -840,7 +840,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 $this->publishersListRepository->unlockPublishersList($publishersList);
                 $this->logger->info(
                     sprintf(
-                        'Unlocked publishers list of id #%d',
+                        'Unlocked Twitter list of id #%d',
                         $publishersList->getId()
                     )
                 );

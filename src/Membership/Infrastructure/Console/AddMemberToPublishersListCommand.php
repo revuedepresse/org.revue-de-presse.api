@@ -86,13 +86,13 @@ class AddMemberToPublishersListCommand extends AbstractCommand
                 self::OPTION_LIST_NAME,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'The optional name of a list containing members to be added to a publishers list'
+                'The optional name of a list containing members to be added to a Twitter list'
             )
             ->addOption(
                 self::OPTION_PUBLISHERS_LIST_NAME,
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The name of a publishers list'
+                'The name of a Twitter list'
             )
         ;
     }
@@ -163,7 +163,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
             fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
         );
 
-        $this->output->writeln('All members have been successfully added to the publishers lists.');
+        $this->output->writeln('All members have been successfully added to the Twitter list.');
     }
 
     /**

@@ -11,7 +11,7 @@ class PublishersListNotFoundException extends Exception
     {
         throw new self(
             sprintf(
-                'Could not find publishers list having id "%s"',
+                'Could not find Twitter list having id "%s"',
                 $listId
             )
         );

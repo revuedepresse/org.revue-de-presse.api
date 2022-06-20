@@ -256,7 +256,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         $listRestriction = $this->strategy->forWhichList();
 
-        // Try to find publishers list by following the next cursor
+        // Try to find Twitter list by following the next cursor
         if (
             $this->targetListHasNotBeenFound($ownerships, $listRestriction)
             && $ownerships->nextPage() !== -1

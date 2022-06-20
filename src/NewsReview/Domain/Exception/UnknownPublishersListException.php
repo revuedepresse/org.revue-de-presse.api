@@ -9,6 +9,6 @@ class UnknownPublishersListException extends InvalidArgumentException
 {
     public static function throws(): void
     {
-        throw new self('Unknown publishers list');
+        throw new self('Unknown Twitter list');
     }
 }

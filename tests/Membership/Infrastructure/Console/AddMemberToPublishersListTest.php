@@ -78,7 +78,7 @@ class AddMemberToPublishersListTest extends KernelTestCase
             PublishersListInterface::class,
             $publishersList,
             sprintf(
-                'There should be a publishers list in the database having name "%s" for member "%s"',
+                'There should be a Twitter list in the database having name "%s" for member "%s"',
                 $targetPublishersList,
                 $memberScreenName
             )

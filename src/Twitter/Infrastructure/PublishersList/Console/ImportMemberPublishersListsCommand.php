@@ -98,7 +98,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                  InputOption::VALUE_OPTIONAL,
                  'Restrict list import to single list'
              )
-             ->setDescription('Import publishers list');
+             ->setDescription('Import Twitter list');
     }
 
     /**
@@ -178,7 +178,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                     );
 
                 $this->output->writeln(sprintf(
-                    'About to collect members of publishers list "%s"',
+                    'About to collect members of Twitter list "%s"',
                     $memberAggregateSubscription->listName()
                 ));
 
