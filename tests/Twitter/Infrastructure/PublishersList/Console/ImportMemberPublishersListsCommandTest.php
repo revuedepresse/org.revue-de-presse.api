@@ -28,11 +28,9 @@ class ImportMemberPublishersListsCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var ListSubscriptionsToPublishersListsCommand $command */
-        $command = self::$container->get('test.'.ImportMemberPublishersListsCommand::class);
-        $this->entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $command = static::getContainer()->get('test.'.ImportMemberPublishersListsCommand::class);
+        $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $application = new Application($kernel);
 

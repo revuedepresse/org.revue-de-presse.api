@@ -23,7 +23,7 @@ class PublicationPersistenceTest extends KernelTestCase
     protected function tearDown(): void
     {
         /** @var EntityManagerInterface $entityManager */
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $memberRepository = $entityManager->getRepository('App\Membership\Infrastructure\Entity\Legacy\Member');
         $members = $memberRepository->findBy(['twitter_username' => 'mariec']);
@@ -47,10 +47,9 @@ class PublicationPersistenceTest extends KernelTestCase
         // Arrange
 
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
         /** @var PublicationPersistenceInterface $publicationPersistence */
-        $publicationPersistence = self::$container->get(PublicationPersistence::class);
+        $publicationPersistence = static::getContainer()->get(PublicationPersistence::class);
 
         $member = new Member();
         $member->setTwitterScreenName('mariec');
@@ -58,7 +57,7 @@ class PublicationPersistenceTest extends KernelTestCase
         $member->setAvatar('https://gravatar.com/mariec');
         $member->setEmail('@mariec');
 
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $entityManager->persist($member);
         $entityManager->flush();
 

@@ -20,9 +20,8 @@ class PublicationFormatterTest extends KernelTestCase
     public function it_formats_publications(): void
     {
         self::$kernel    = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $publicationFormatter = self::$container->get(PublicationFormatter::class);
+        $publicationFormatter = static::getContainer()->get(PublicationFormatter::class);
 
         $formattedPublications = $publicationFormatter->format($this->publications);
 

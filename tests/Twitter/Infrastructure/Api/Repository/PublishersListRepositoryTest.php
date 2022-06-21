@@ -28,7 +28,7 @@ class PublishersListRepositoryTest extends KernelTestCase
     {
         $publishersListId = $this->publishPublishersListHavingStatus();
 
-        $publishersListRepository = self::$container->get(PublishersListRepository::class);
+        $publishersListRepository = static::getContainer()->get(PublishersListRepository::class);
         $publishersList = $publishersListRepository->findOneBy(['id' => $publishersListId]);
 
         $expectedTotalStatusPostUpdate = self::EXPECTED_TOTAL_STATUS_PUBLISHED;
@@ -40,7 +40,7 @@ class PublishersListRepositoryTest extends KernelTestCase
             $publishersList
         );
 
-        $entityManager = self::$container->get('doctrine.orm.default_entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.default_entity_manager');
         $entityManager->flush();
 
         self::assertEquals($expectedTotalStatusPostUpdate, $result['totalStatuses']);
@@ -58,9 +58,8 @@ class PublishersListRepositoryTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel    = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->connection = self::$container->get('doctrine.dbal.default_connection');
+        $this->connection = static::getContainer()->get('doctrine.dbal.default_connection');
 
         $this->tearDownFixtures();
     }

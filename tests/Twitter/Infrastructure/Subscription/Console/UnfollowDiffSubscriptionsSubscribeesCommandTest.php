@@ -36,10 +36,8 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var UnfollowDiffSubscriptionsSubscribeesCommand $command */
-        $command = self::$container->get('test.'.UnfollowDiffSubscriptionsSubscribeesCommand::class);
+        $command = static::getContainer()->get('test.'.UnfollowDiffSubscriptionsSubscribeesCommand::class);
 
         $application = new Application($kernel);
 

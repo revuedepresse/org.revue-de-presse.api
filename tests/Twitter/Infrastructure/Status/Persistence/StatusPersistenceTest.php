@@ -40,12 +40,11 @@ class StatusPersistenceTest extends KernelTestCase
         parent::setUp();
 
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
         $this->removeUnarchivedStatus();
 
         /** @var StatusPersistence $statusPersistence */
-        $this->statusPersistence = self::$container->get(StatusPersistence::class);
+        $this->statusPersistence = static::getContainer()->get(StatusPersistence::class);
     }
 
     protected function tearDown(): void
@@ -65,7 +64,7 @@ class StatusPersistenceTest extends KernelTestCase
         // Arrange
 
         /** @var StatusPersistence $statusPersistence */
-        $this->statusPersistence = self::$container->get(StatusPersistence::class);
+        $this->statusPersistence = static::getContainer()->get(StatusPersistence::class);
 
         // Act
 
@@ -310,7 +309,7 @@ class StatusPersistenceTest extends KernelTestCase
 
     private function removeUnarchivedStatus(): void
     {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Api\Entity\Status');
         $status = $statusRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
         if ($status instanceof StatusInterface) {

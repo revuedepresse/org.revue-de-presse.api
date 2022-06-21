@@ -23,10 +23,9 @@ class TaggedStatusRepositoryTest extends KernelTestCase
     public function it_should_convert_props_to_status(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
         $repository = new TaggedStatusRepository(
-            self::$container->get('doctrine.orm.entity_manager'),
+            static::getContainer()->get('doctrine.orm.entity_manager'),
             new NullLogger()
         );
 

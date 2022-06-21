@@ -32,10 +32,9 @@ class PublicationMessageDispatcherTest extends KernelTestCase
     public function it_moderates_api_calls_on_unavailable_token_exception(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
         /** @var PublicationMessageDispatcher $dispatcher */
-        $dispatcher = self::$container->get('test.'.PublicationMessageDispatcher::class);
+        $dispatcher = static::getContainer()->get('test.'.PublicationMessageDispatcher::class);
 
         $calls = 0;
 

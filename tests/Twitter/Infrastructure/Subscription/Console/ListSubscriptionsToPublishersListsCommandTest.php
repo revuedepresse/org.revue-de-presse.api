@@ -29,14 +29,12 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var ListSubscriptionsToPublishersListsCommand $command */
-        $command = self::$container->get('test.'.ListSubscriptionsToPublishersListsCommand::class);
+        $command = static::getContainer()->get('test.'.ListSubscriptionsToPublishersListsCommand::class);
 
-        $this->entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
-        $this->repository = self::$container->get('test.'.OwnershipBatchCollectedEventRepositoryInterface::class);
+        $this->repository = static::getContainer()->get('test.'.OwnershipBatchCollectedEventRepositoryInterface::class);
 
         $application = new Application($kernel);
 

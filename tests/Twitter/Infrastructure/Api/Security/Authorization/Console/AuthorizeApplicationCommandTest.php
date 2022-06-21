@@ -37,18 +37,16 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var AuthorizeApplicationCommand $command */
-        $command = self::$container->get('test.'.AuthorizeApplicationCommand::class);
+        $command = static::getContainer()->get('test.'.AuthorizeApplicationCommand::class);
 
-        $this->entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
-        $this->tokenRepository = self::$container->get('test.'.TokenRepositoryInterface::class);
-        $this->memberRepository = self::$container->get('test.'.MemberRepositoryInterface::class);
+        $this->tokenRepository = static::getContainer()->get('test.'.TokenRepositoryInterface::class);
+        $this->memberRepository = static::getContainer()->get('test.'.MemberRepositoryInterface::class);
 
-        $this->consumerKey = self::$container->getParameter('twitter_api.consumer_key');
-        $this->consumerSecret = self::$container->getParameter('twitter_api.consumer_secret');
+        $this->consumerKey = static::getContainer()->getParameter('twitter_api.consumer_key');
+        $this->consumerSecret = static::getContainer()->getParameter('twitter_api.consumer_secret');
 
         $application = new Application($kernel);
 

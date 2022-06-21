@@ -21,8 +21,7 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
     public function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
-        $this->repository = self::$container->get('test.'.FriendsListCollectedEventRepository::class);
+        $this->repository = static::getContainer()->get('test.'.FriendsListCollectedEventRepository::class);
 
         $this->truncateEventStore();
     }
@@ -54,7 +53,7 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
 
     private function truncateEventStore(): void
     {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $connection = $entityManager->getConnection();
         $connection->executeQuery('TRUNCATE TABLE member_friends_list_collected_event');
     }

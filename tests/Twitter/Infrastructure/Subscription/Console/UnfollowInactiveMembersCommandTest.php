@@ -28,10 +28,8 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var UnfollowInactiveMembersCommand $command */
-        $command = self::$container->get('test.'.UnfollowInactiveMembersCommand::class);
+        $command = static::getContainer()->get('test.'.UnfollowInactiveMembersCommand::class);
 
         $application = new Application($kernel);
 

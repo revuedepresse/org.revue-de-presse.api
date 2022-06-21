@@ -24,9 +24,7 @@ class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
 
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
-        $this->subjectUnderTest = self::$container->get('test.'.OwnershipBatchCollectedEventRepository::class);
+        $this->subjectUnderTest = static::getContainer()->get('test.'.OwnershipBatchCollectedEventRepository::class);
         $this->accessor = OwnershipAccessorBuilder::build();
     }
 

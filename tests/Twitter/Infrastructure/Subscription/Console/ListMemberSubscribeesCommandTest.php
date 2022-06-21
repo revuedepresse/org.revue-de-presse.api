@@ -23,10 +23,8 @@ class ListMemberSubscribeesCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var ListMemberSubscribeesCommand $command */
-        $command = self::$container->get('test.'.ListMemberSubscribeesCommand::class);
+        $command = static::getContainer()->get('test.'.ListMemberSubscribeesCommand::class);
 
         $application = new Application($kernel);
 

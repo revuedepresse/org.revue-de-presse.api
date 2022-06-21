@@ -61,9 +61,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
-        $command = self::$container->get(FetchPublicationMessageDispatcher::class);
+        $command = static::getContainer()->get(FetchPublicationMessageDispatcher::class);
         $command->setPublicationMessageDispatcher($this->prophesizePublicationMessagerDispatcher());
 
         $application = new Application($kernel);

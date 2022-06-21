@@ -20,8 +20,7 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
     public function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
-        $this->repository = self::$container->get('test.'.FollowersListCollectedEventRepository::class);
+        $this->repository = static::getContainer()->get('test.'.FollowersListCollectedEventRepository::class);
 
         $this->truncateEventStore();
     }
@@ -51,7 +50,7 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
 
     private function truncateEventStore(): void
     {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $connection = $entityManager->getConnection();
         $connection->executeQuery('TRUNCATE TABLE member_followers_list_collected_event');
     }

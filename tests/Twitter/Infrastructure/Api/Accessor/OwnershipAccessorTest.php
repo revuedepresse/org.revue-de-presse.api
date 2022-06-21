@@ -36,9 +36,8 @@ class OwnershipAccessorTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->eventRepository = self::$container->get('test.'.OwnershipBatchCollectedEventRepository::class);
+        $this->eventRepository = static::getContainer()->get('test.'.OwnershipBatchCollectedEventRepository::class);
     }
 
     /**

@@ -70,8 +70,7 @@ class InterruptibleCollectDeciderTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel    = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->decider = self::$container->get(InterruptibleCollectDecider::class);
+        $this->decider = static::getContainer()->get(InterruptibleCollectDecider::class);
     }
 }

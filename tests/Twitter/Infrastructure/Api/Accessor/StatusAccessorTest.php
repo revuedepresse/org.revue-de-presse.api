@@ -28,9 +28,8 @@ class StatusAccessorTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel    = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->accessor = self::$container->get(StatusAccessor::class);
+        $this->accessor = static::getContainer()->get(StatusAccessor::class);
     }
     /**
      * @test

@@ -30,12 +30,10 @@ class AddMemberToPublishersListTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var AddMemberToPublishersListCommand $command */
-        $command = self::$container->get('test.'.AddMemberToPublishersListCommand::class);
+        $command = static::getContainer()->get('test.'.AddMemberToPublishersListCommand::class);
 
-        $this->entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $application = new Application($kernel);
 

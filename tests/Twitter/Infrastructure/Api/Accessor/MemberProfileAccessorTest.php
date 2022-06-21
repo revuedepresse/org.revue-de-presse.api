@@ -33,9 +33,8 @@ class MemberProfileAccessorTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->eventRepository = self::$container->get('test.event_repository.member_profile_collected');
+        $this->eventRepository = static::getContainer()->get('test.event_repository.member_profile_collected');
     }
 
     /**
