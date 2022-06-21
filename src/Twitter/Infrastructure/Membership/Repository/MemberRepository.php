@@ -790,7 +790,7 @@ QUERY;
     {
         $member = $this->findOneBy(['twitter_username' => $memberName]);
         if (!$member instanceof MemberInterface) {
-            NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($memberName);
+            NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($memberName, 'member-not-found');
         }
 
         return $member;
