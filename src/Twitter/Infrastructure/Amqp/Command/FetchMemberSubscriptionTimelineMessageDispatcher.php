@@ -153,12 +153,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
     {
         $tokens = $this->getTokensFromInputOrFallback();
 
-
         $this->accessor->fromToken(Token::fromArray($tokens));
-
-        // noop
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
     }
 
     /**

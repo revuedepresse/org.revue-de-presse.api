@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
-use App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher;
+use App\Twitter\Infrastructure\Amqp\Command\DispatchMessagesToFetchTweets;
 use App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -37,7 +37,7 @@ class Kernel extends BaseKernel implements CompilerPassInterface
                     [
                         AddMemberToPublishersListCommand::class,
                         AuthorizeApplicationCommand::class,
-                        FetchPublicationMessageDispatcher::class,
+                        DispatchMessagesToFetchTweets::class,
                         ImportMemberPublishersListsCommand::class
                     ],
                     true

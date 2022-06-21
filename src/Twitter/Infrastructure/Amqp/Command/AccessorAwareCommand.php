@@ -102,12 +102,6 @@ abstract class AccessorAwareCommand extends Command
             && $this->input->getOption(self::OPTION_OAUTH_SECRET) !== null;
     }
 
-    protected function setUpLogger()
-    {
-        // noop for backward compatibility
-        // TODO remove all 5 calls to this method
-    }
-
     private function hasOAuthTokenBeenPassedAsOption(): bool
     {
         return $this->input->hasOption(self::OPTION_OAUTH_TOKEN) &&

@@ -31,10 +31,4 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand
 
         return $this;
     }
-
-    protected function setupAggregateRepository()
-    {
-        // noop for backward compatibility
-        // TODO remove all 5 calls to this method
-    }
 }

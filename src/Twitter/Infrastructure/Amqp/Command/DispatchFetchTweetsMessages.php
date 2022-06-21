@@ -18,20 +18,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @package App\Twitter\Infrastructure\Amqp\Command
- */
-class FetchPublicationMessageDispatcher extends AggregateAwareCommand
+class DispatchFetchTweetsMessages extends AggregateAwareCommand
 {
     private const ARGUMENT_SCREEN_NAME          = PublicationStrategyInterface::RULE_SCREEN_NAME;
 
-    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
     private const OPTION_BEFORE                 = PublicationStrategyInterface::RULE_BEFORE;
-    private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
-    private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
-    private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
-    private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
     private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
+    private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
+    private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
+    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
+    private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
+    private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
 
     private const OPTION_OAUTH_TOKEN            = 'oauth_token';
     private const OPTION_OAUTH_SECRET           = 'oauth_secret';
@@ -40,12 +37,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
 
-    private PublicationStrategyInterface $collectionStrategy;
-
     public function configure()
     {
-        $this->setName('app:dispatch-messages-to-fetch-member-statuses')
-            ->setDescription('Dispatch AMQP messages to fetch member publications.')
+        $this->setName('app:dispatch-messages-to-fetch-member-tweets')
+            ->setDescription('Dispatch AMQP messages to fetch member tweets.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,
                 null,
@@ -60,13 +55,13 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 self::OPTION_LIST,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'A list to which production is restricted to'
+                'Single list to which production is restricted to'
             )
             ->addOption(
                 self::OPTION_LISTS,
                 'l',
                 InputOption::VALUE_OPTIONAL,
-                'List to which publication of messages is restricted to'
+                'List collection to which publication of messages is restricted to'
             )
             ->addOption(
                 self::OPTION_CURSOR,
@@ -98,13 +93,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 self::ARGUMENT_SCREEN_NAME,
                 InputArgument::REQUIRED,
                 'A member screen name'
-            )
-            ->setAliases(['pr:d-m-t-f-m-s']);
+            );
     }
 
     /**
-     * \App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor->dispatchPublications
-     * method is responsible for dispatching AMQP messages
+     * Instance of MemberIdentityProcessorInterface is responsible for dispatching AMQP messages
      *
      * @param InputInterface  $input
      * @param OutputInterface $output
@@ -115,8 +108,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     {
         $this->input  = $input;
         $this->output = $output;
-
-        $this->collectionStrategy = InputToCollectionStrategy::convertInputToCollectionStrategy($input);
 
         try {
             $this->setUpDependencies();
@@ -132,7 +123,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 
         try {
             $this->publicationMessageDispatcher->dispatchPublicationMessages(
-                $this->collectionStrategy,
+                InputToCollectionStrategy::convertInputToCollectionStrategy($input),
                 Token::fromArray($this->getTokensFromInputOrFallback()),
                 function ($message) {
                     $this->output->writeln($message);
@@ -143,12 +134,12 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
             $this->logger->error(
                 $exception->getMessage(),
-                ['stacktrace' => $exception->getTraceAsString()]
+                ['exception' => $exception]
             );
         } catch (\Throwable $exception) {
             $this->logger->error(
                 $exception->getMessage(),
-                ['stacktrace' => $exception->getTraceAsString()]
+                ['exception' => $exception]
             );
         }
 
@@ -160,14 +151,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      */
     private function setUpDependencies(): void
     {
-        $this->setUpLogger();
-
         $this->accessor->fromToken(
             Token::fromArray(
                 $this->getTokensFromInputOrFallback()
             )
         );
-
-        $this->setupAggregateRepository();
     }
 }

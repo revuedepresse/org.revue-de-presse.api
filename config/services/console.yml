@@ -9,7 +9,7 @@ parameters:
     weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
     press_review.publication_message.handler.class:                             'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
-    press_review.fetch_member_status.class:                                     'App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher'
+    press_review.fetch_member_status.class:                                     'App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages'
 
 services:
     App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
@@ -25,7 +25,7 @@ services:
             - [ 'setSubscribeesRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
             - [ 'setSubscriptionsRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
+    App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages:
         class:                              "%press_review.fetch_member_status.class%"
         calls:
             - [ 'setAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]

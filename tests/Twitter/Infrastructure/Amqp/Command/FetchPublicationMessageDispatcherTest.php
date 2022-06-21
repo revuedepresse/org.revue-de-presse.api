@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Amqp\Command;
 
-use App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher;
+use App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @group command
  */
-class FetchPublicationMessageDispatcherTest extends KernelTestCase
+class DispatchFetchTweetsMessagesTest extends KernelTestCase
 {
     use ProphecyTrait;
 
@@ -61,12 +61,12 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $kernel = static::bootKernel();
 
-        $command = static::getContainer()->get(FetchPublicationMessageDispatcher::class);
+        $command = static::getContainer()->get(DispatchFetchTweetsMessages::class);
         $command->setPublicationMessageDispatcher($this->prophesizePublicationMessagerDispatcher());
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('app:dispatch-messages-to-fetch-member-statuses');
+        $this->command = $application->find('app:dispatch-messages-to-fetch-member-tweets');
 
         $this->commandTester = new CommandTester($command);
     }

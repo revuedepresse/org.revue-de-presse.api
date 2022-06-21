@@ -156,9 +156,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
     {
         $this->setProducer();
 
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
-
         $this->translator = $this->getContainer()->get('translator');
     }
 }

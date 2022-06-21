@@ -140,9 +140,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
 
     private function setUpDependencies()
     {
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
-
         $this->translator = $this->getContainer()->get('translator');
     }
 }
