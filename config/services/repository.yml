@@ -98,7 +98,7 @@ services:
 
     App\Twitter\Infrastructure\Api\Repository\PublishersListRepository:
         public: true
-        class:  'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
+        class: 'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
@@ -141,7 +141,7 @@ services:
         '@App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository'
 
     App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository:
-        class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
+        class: 'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Membership\Infrastructure\Entity\AggregateSubscription'
@@ -217,7 +217,7 @@ services:
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
-        class:                            'App\Membership\Infrastructure\Repository\NetworkRepository'
+        class: 'App\Membership\Infrastructure\Repository\NetworkRepository'
         properties:
             accessor:                     '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
             entityManager:                "@doctrine.orm.entity_manager"

@@ -56,6 +56,9 @@ shell-worker: ## Get shell in worker container
 start: ## Run worker
 	@/bin/bash -c 'source fun.sh && start'
 
+start-amqp-broker: ## Start AMQP broker
+	@/bin/bash -c 'source fun.sh && start_amqp_broker'
+
 set-up-amqp-queues: ## Set up AMQP queues
 	@/bin/bash -c 'source ./bin/console.sh && set_up_amqp_queues'
 
@@ -64,6 +67,9 @@ start-database: ## Start database
 
 stop: ## Stop worker
 	@/bin/bash -c 'source fun.sh && stop'
+
+stop-amqp-broker: ## Stop AMQP broker
+	@/bin/bash -c 'source fun.sh && stop_amqp_broker'
 
 stop-database: ## Stop database
 	@/bin/bash -c 'source fun.sh && stop_database'

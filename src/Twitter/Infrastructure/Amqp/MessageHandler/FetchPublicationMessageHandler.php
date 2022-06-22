@@ -18,9 +18,6 @@ use Exception;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function sprintf;
 
-/**
- * @package App\Twitter\Infrastructure\Amqp\MessageHandler
- */
 class FetchPublicationMessageHandler implements MessageSubscriberInterface
 {
     use LoggerTrait;

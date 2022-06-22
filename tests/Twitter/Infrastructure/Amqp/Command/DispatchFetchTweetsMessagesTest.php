@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\Command;
 
 use App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
 use Prophecy\Argument;
@@ -41,8 +41,8 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
 
         $this->commandTester->execute(
             [
-                PublicationStrategyInterface::RULE_SCREEN_NAME => ApiAccessorBuilder::SCREEN_NAME,
-                '--'.PublicationStrategyInterface::RULE_LIST => ApiAccessorBuilder::LIST_NAME,
+                CurationStrategyInterface::RULE_SCREEN_NAME => ApiAccessorBuilder::SCREEN_NAME,
+                '--'.CurationStrategyInterface::RULE_LIST => ApiAccessorBuilder::LIST_NAME,
             ]
         );
 
@@ -78,7 +78,7 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
     {
         $publicationMessageDispatcherProphecy = $this->prophesize(PublicationMessageDispatcher::class);
         $publicationMessageDispatcherProphecy->dispatchPublicationMessages(
-            Argument::type(PublicationStrategyInterface::class),
+            Argument::type(CurationStrategyInterface::class),
             Argument::type(TokenInterface::class),
             Argument::cetera()
         );

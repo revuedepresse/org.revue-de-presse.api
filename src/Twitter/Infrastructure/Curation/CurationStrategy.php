@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
@@ -15,7 +15,7 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-class PublicationStrategy implements PublicationStrategyInterface, CorrelationIdAwareInterface
+class CurationStrategy implements CurationStrategyInterface, CorrelationIdAwareInterface
 {
     use CorrelationIdAwareTrait;
 
@@ -31,7 +31,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
 
     private ?string $listRestriction = null;
 
-    private ?string $memberRestriction = null;
+    private ?string $memberFilter = null;
 
     private ?string $queryRestriction = null;
 
@@ -55,7 +55,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      *
      * @return $this
      */
-    public function forMemberHavingScreenName(string $screenName): PublicationStrategyInterface
+    public function forMemberHavingScreenName(string $screenName): CurationStrategyInterface
     {
         $this->screenName = $screenName;
 
@@ -78,7 +78,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
         return $this->queryRestriction;
     }
 
-    public function fromCursor(int $cursor): PublicationStrategyInterface
+    public function fromCursor(int $cursor): CurationStrategyInterface
     {
         $this->cursor = $cursor;
 
@@ -145,11 +145,11 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      */
     public function isSingleMemberAmqpMessagePublicationStrategyActive(MemberIdentity $memberIdentity): bool
     {
-        if ($this->noMemberRestriction()) {
+        if ($this->isMultiMemberCuration()) {
             return false;
         }
 
-        return $memberIdentity->screenName() !== $this->applyStrategyForSingleMemberOnly();
+        return $memberIdentity->screenName() !== $this->applySingleMemberCuration();
     }
 
     /**
@@ -206,9 +206,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param string|null $listRestriction
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
-    public function willApplyListRestrictionToAList(string $listRestriction): PublicationStrategyInterface
+    public function willApplyListRestrictionToAList(string $listRestriction): CurationStrategyInterface
     {
         $this->listRestriction = $listRestriction;
 
@@ -218,9 +218,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param string $queryRestriction
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
-    public function willApplyQueryRestriction(string $queryRestriction): PublicationStrategyInterface
+    public function willApplyQueryRestriction(string $queryRestriction): CurationStrategyInterface
     {
         $this->queryRestriction = $queryRestriction;
 
@@ -230,23 +230,23 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param array $listCollectionRestriction
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
     public function willApplyRestrictionToAListCollection(array $listCollectionRestriction
-    ): PublicationStrategyInterface {
+    ): CurationStrategyInterface {
         $this->listCollectionRestriction = $listCollectionRestriction;
 
         return $this;
     }
 
     /**
-     * @param string $memberRestriction
+     * @param string $memberName
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
-    public function willApplyRestrictionToAMember(string $memberRestriction): PublicationStrategyInterface
+    public function willFilterByMember(string $memberName): CurationStrategyInterface
     {
-        $this->memberRestriction = $memberRestriction;
+        $this->memberFilter = $memberName;
 
         return $this;
     }
@@ -254,9 +254,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param string|null $date
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
-    public function willCollectPublicationsPreceding(?string $date): PublicationStrategyInterface
+    public function willCollectPublicationsPreceding(?string $date): CurationStrategyInterface
     {
         $this->dateBeforeWhichPublicationsAreCollected = $date;
 
@@ -266,9 +266,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param bool $ignoreWhispers
      *
-     * @return PublicationStrategyInterface
+     * @return CurationStrategyInterface
      */
-    public function willIgnoreWhispers(bool $ignoreWhispers): PublicationStrategyInterface
+    public function willIgnoreWhispers(bool $ignoreWhispers): CurationStrategyInterface
     {
         $this->ignoreWhispers = $ignoreWhispers;
 
@@ -280,7 +280,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      *
      * @return $this
      */
-    public function willIncludeOwner(bool $includeOwner): PublicationStrategyInterface
+    public function willIncludeOwner(bool $includeOwner): CurationStrategyInterface
     {
         $this->includeOwner = $includeOwner;
 
@@ -290,9 +290,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @param bool $priorityToAggregates
      *
-     * @return PublicationStrategy
+     * @return CurationStrategy
      */
-    public function willPrioritizeAggregates(bool $priorityToAggregates): PublicationStrategyInterface
+    public function willPrioritizeAggregates(bool $priorityToAggregates): CurationStrategyInterface
     {
         $this->weightedAggregates = $priorityToAggregates;
 
@@ -330,20 +330,17 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
         return count($this->listCollectionRestriction) === 0;
     }
 
-    /**
-     * @return string
-     */
-    private function applyStrategyForSingleMemberOnly(): ?string
+    private function applySingleMemberCuration(): ?string
     {
-        return $this->memberRestriction;
+        return $this->memberFilter;
     }
 
     /**
      * @return bool
      */
-    private function noMemberRestriction(): bool
+    private function isMultiMemberCuration(): bool
     {
-        return $this->applyStrategyForSingleMemberOnly() === null;
+        return $this->applySingleMemberCuration() === null;
     }
 
     /**

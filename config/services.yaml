@@ -44,7 +44,7 @@ services:
             - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
 
     App\Twitter\Infrastructure\Api\Repository\StatusRepository:
-        class:  'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+        class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
@@ -66,7 +66,7 @@ services:
     App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
 
     App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository:
-        class:  'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
+        class: 'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
@@ -83,7 +83,7 @@ services:
             registry:               '@doctrine'
 
     weaving_the_web_twitter.repository.read.status:
-        class:  'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+        class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
@@ -198,12 +198,12 @@ services:
             - { name: 'kernel.event_subscriber' }
 
     App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator:
-        class:  'App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator'
+        class: 'App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator'
         arguments:
             - '@?logger'
 
     App\Twitter\Infrastructure\Collector\PublicationCollector:
-        class:  'App\Twitter\Infrastructure\Collector\PublicationCollector'
+        class: 'App\Twitter\Infrastructure\Collector\PublicationCollector'
         calls:
             - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider' ] ]

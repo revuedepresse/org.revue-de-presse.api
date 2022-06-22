@@ -5,8 +5,8 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Infrastructure\Curation\PublicationStrategy;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Infrastructure\Curation\CurationStrategy;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
@@ -68,10 +68,10 @@ class PublicationMessageDispatcherTest extends KernelTestCase
         $dispatcher->setOwnershipAccessor($ownershipAccessor->reveal());
 
         $publicationStrategy = $this->prophesize(
-            PublicationStrategy::class
+            CurationStrategy::class
         );
 
-        /** @var PublicationStrategyInterface|PublicationStrategy $publicationStrategy */
+        /** @var CurationStrategyInterface|CurationStrategy $publicationStrategy */
         $publicationStrategy->onBehalfOfWhom()->willReturn('test_member');
         $publicationStrategy->noListRestriction()->willReturn(true);
         $publicationStrategy->shouldFetchPublicationsFromCursor()->willReturn(-1);

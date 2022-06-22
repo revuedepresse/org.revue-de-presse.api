@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\InputConverter;
 
-use App\Twitter\Infrastructure\Curation\PublicationStrategy;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Infrastructure\Curation\CurationStrategy;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareCommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use function array_walk;
@@ -16,8 +16,8 @@ class InputToCollectionStrategy
 
     public static function convertInputToCollectionStrategy(
         InputInterface $input
-    ): PublicationStrategyInterface {
-        $strategy = new PublicationStrategy(self::convertInputOptionIntoCorrelationId($input));
+    ): CurationStrategyInterface {
+        $strategy = new CurationStrategy(self::convertInputOptionIntoCorrelationId($input));
 
         $strategy->forMemberHavingScreenName(self::screenName($input));
 
@@ -40,37 +40,37 @@ class InputToCollectionStrategy
     protected static function screenName(
         InputInterface $input
     ): string {
-        return $input->getArgument(PublicationStrategyInterface::RULE_SCREEN_NAME);
+        return $input->getArgument(CurationStrategyInterface::RULE_SCREEN_NAME);
     }
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function listRestriction(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_LIST)
-            && $input->getOption(PublicationStrategyInterface::RULE_LIST) !== null
+            $input->hasOption(CurationStrategyInterface::RULE_LIST)
+            && $input->getOption(CurationStrategyInterface::RULE_LIST) !== null
         ) {
-            $strategy->willApplyListRestrictionToAList($input->getOption(PublicationStrategyInterface::RULE_LIST));
+            $strategy->willApplyListRestrictionToAList($input->getOption(CurationStrategyInterface::RULE_LIST));
         }
     }
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function listCollectionRestriction(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
-        if ($input->hasOption(PublicationStrategyInterface::RULE_LISTS) && $input->getOption(PublicationStrategyInterface::RULE_LISTS) !== null) {
+        if ($input->hasOption(CurationStrategyInterface::RULE_LISTS) && $input->getOption(CurationStrategyInterface::RULE_LISTS) !== null) {
             $listCollectionRestriction = explode(
                 ',',
-                $input->getOption(PublicationStrategyInterface::RULE_LISTS)
+                $input->getOption(CurationStrategyInterface::RULE_LISTS)
             );
 
             $restiction       = (object) [];
@@ -88,82 +88,82 @@ class InputToCollectionStrategy
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function collectionSchedule(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_BEFORE)
-            && $input->getOption(PublicationStrategyInterface::RULE_BEFORE) !== null
+            $input->hasOption(CurationStrategyInterface::RULE_BEFORE)
+            && $input->getOption(CurationStrategyInterface::RULE_BEFORE) !== null
         ) {
             $strategy->willCollectPublicationsPreceding(
-                $input->getOption(PublicationStrategyInterface::RULE_BEFORE)
+                $input->getOption(CurationStrategyInterface::RULE_BEFORE)
             );
         }
     }
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function memberRestriction(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_MEMBER_RESTRICTION)
+            $input->hasOption(CurationStrategyInterface::RULE_MEMBER_RESTRICTION)
             && $input->getOption(
-                PublicationStrategyInterface::RULE_MEMBER_RESTRICTION
+                CurationStrategyInterface::RULE_MEMBER_RESTRICTION
             )
         ) {
-            $strategy->willApplyRestrictionToAMember($input->getOption(PublicationStrategyInterface::RULE_MEMBER_RESTRICTION));
+            $strategy->willFilterByMember($input->getOption(CurationStrategyInterface::RULE_MEMBER_RESTRICTION));
         }
     }
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function ignoreWhispers(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_IGNORE_WHISPERS)
+            $input->hasOption(CurationStrategyInterface::RULE_IGNORE_WHISPERS)
             && $input->getOption(
-                PublicationStrategyInterface::RULE_IGNORE_WHISPERS
+                CurationStrategyInterface::RULE_IGNORE_WHISPERS
             )
         ) {
-            $strategy->willIgnoreWhispers($input->getOption(PublicationStrategyInterface::RULE_IGNORE_WHISPERS));
+            $strategy->willIgnoreWhispers($input->getOption(CurationStrategyInterface::RULE_IGNORE_WHISPERS));
         }
     }
 
     /**
      * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      */
     private static function includeOwner(
         InputInterface $input,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
-            && $input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
+            $input->hasOption(CurationStrategyInterface::RULE_INCLUDE_OWNER)
+            && $input->getOption(CurationStrategyInterface::RULE_INCLUDE_OWNER)
         ) {
-            $strategy->willIncludeOwner($input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER));
+            $strategy->willIncludeOwner($input->getOption(CurationStrategyInterface::RULE_INCLUDE_OWNER));
         }
     }
 
-    private static function fromCursor(InputInterface $input, PublicationStrategyInterface $strategy): void
+    private static function fromCursor(InputInterface $input, CurationStrategyInterface $strategy): void
     {
         if (
-            $input->hasOption(PublicationStrategyInterface::RULE_CURSOR) &&
-            $input->getOption(PublicationStrategyInterface::RULE_CURSOR)
+            $input->hasOption(CurationStrategyInterface::RULE_CURSOR) &&
+            $input->getOption(CurationStrategyInterface::RULE_CURSOR)
         ) {
             $strategy->fromCursor(
-                (int) $input->getOption(PublicationStrategyInterface::RULE_CURSOR)
+                (int) $input->getOption(CurationStrategyInterface::RULE_CURSOR)
             );
         }
     }

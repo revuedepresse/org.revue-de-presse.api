@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Command;
 
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
@@ -20,15 +20,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DispatchFetchTweetsMessages extends AggregateAwareCommand
 {
-    private const ARGUMENT_SCREEN_NAME          = PublicationStrategyInterface::RULE_SCREEN_NAME;
+    private const ARGUMENT_SCREEN_NAME          = CurationStrategyInterface::RULE_SCREEN_NAME;
 
-    private const OPTION_BEFORE                 = PublicationStrategyInterface::RULE_BEFORE;
-    private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
-    private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
-    private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
-    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
-    private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
-    private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
+    private const OPTION_BEFORE                 = CurationStrategyInterface::RULE_BEFORE;
+    private const OPTION_CURSOR                 = CurationStrategyInterface::RULE_CURSOR;
+    private const OPTION_IGNORE_WHISPERS        = CurationStrategyInterface::RULE_IGNORE_WHISPERS;
+    private const OPTION_INCLUDE_OWNER          = CurationStrategyInterface::RULE_INCLUDE_OWNER;
+    private const OPTION_LIST                   = CurationStrategyInterface::RULE_LIST;
+    private const OPTION_LISTS                  = CurationStrategyInterface::RULE_LISTS;
+    private const OPTION_MEMBER_RESTRICTION     = CurationStrategyInterface::RULE_MEMBER_RESTRICTION;
 
     private const OPTION_OAUTH_TOKEN            = 'oauth_token';
     private const OPTION_OAUTH_SECRET           = 'oauth_secret';
@@ -36,6 +36,8 @@ class DispatchFetchTweetsMessages extends AggregateAwareCommand
     use OwnershipAccessorTrait;
     use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
+
+    private CurationStrategyInterface $collectionStrategy;
 
     public function configure()
     {

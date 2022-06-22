@@ -8,9 +8,6 @@ parameters:
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
-    press_review.publication_message.handler.class:                             'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
-    press_review.fetch_member_status.class:                                     'App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages'
-
 services:
     App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
@@ -26,7 +23,7 @@ services:
             - [ 'setSubscriptionsRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
     App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages:
-        class:                              "%press_review.fetch_member_status.class%"
+        class: 'App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages'
         calls:
             - [ 'setAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]
             - [ 'setAggregateRepository',           [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'] ]
@@ -59,8 +56,8 @@ services:
             - { name: 'console.command' }
         public: true
 
-    press_review.fetch_status:
-        class:                          "%press_review.publication_message.handler.class%"
+    App\Twitter\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
         calls:
             - [ 'setCollector',         [ '@App\Twitter\Infrastructure\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
@@ -73,7 +70,7 @@ services:
                 handles: App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus
 
     App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
-        class:  'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
+        class: 'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
         calls:
             - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
         tags:
@@ -90,14 +87,14 @@ services:
             - { name: 'console.command' }
 
     command.select_status_collection:
-        class:                      "%command.select_status_collection.class%"
+        class: "%command.select_status_collection.class%"
         properties:
             statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         tags:
             - { name: 'console.command' }
 
     command.import_network:
-        class:                 "%command.import_network.class%"
+        class: "%command.import_network.class%"
         properties:
             networkRepository: '@App\Membership\Infrastructure\Repository\NetworkRepository'
             #
@@ -111,7 +108,7 @@ services:
             - { name: 'console.command' }
 
     command.map_status_collection:
-        class:                      "%command.map_status_collection.class%"
+        class: "%command.map_status_collection.class%"
         properties:
             statusRepository:       '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
             refreshStatusMapping:   '@mapping.refresh_status'
@@ -121,14 +118,14 @@ services:
             - { name: 'console.command' }
 
     command.recommend_subscriptions:
-        class:                  'App\Recommendation\Command\RecommendSubscriptionsCommand'
+        class: 'App\Recommendation\Command\RecommendSubscriptionsCommand'
         properties:
             entityManager:      '@doctrine.orm.entity_manager'
         tags:
             - { name: 'console.command' }
 
     command.subscribe_to_member_timelines:
-        class:                               'App\Membership\Infrastructure\Console\SubscribeToMemberTimelinesCommand'
+        class: 'App\Membership\Infrastructure\Console\SubscribeToMemberTimelinesCommand'
         properties:
             accessor:                        '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
             aggregateSubscriptionRepository: '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
@@ -137,7 +134,7 @@ services:
             - { name: 'console.command' }
 
     weaving_the_web_amqp.consumer.conversation_status:
-        class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
+        class: "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
             - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
@@ -147,15 +144,8 @@ services:
             aggregateRepository:    '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
 
-    weaving_the_web_amqp.twitter:
-        class:                       "%press_review.publication_message.handler.class%"
-        properties:
-            tokenRepository:         '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
-        calls:
-            - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
-
     weaving_the_web_amqp.producer.conversation_status:
-        class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
+        class: "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
         properties:
             filesystem:      '@filesystem'
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
@@ -163,7 +153,7 @@ services:
             - { name: 'console.command' }
 
     weaving_the_web_amqp.producer.member_status:
-        class:               "%weaving_the_web_amqp.producer.produce_member_messages_command.class%"
+        class: "%weaving_the_web_amqp.producer.produce_member_messages_command.class%"
         properties:
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:

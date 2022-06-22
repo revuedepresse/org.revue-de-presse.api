@@ -10,7 +10,7 @@ use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Entity\NullToken;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\PublishersList;
@@ -54,7 +54,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
     private Closure $writer;
 
-    private PublicationStrategyInterface $strategy;
+    private CurationStrategyInterface $strategy;
 
     public function __construct(
         ApiAccessorInterface $accessor,
@@ -71,14 +71,14 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     }
 
     /**
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      * @param TokenInterface               $token
      * @param Closure                      $writer
      */
     public function dispatchPublicationMessages(
-        PublicationStrategyInterface $strategy,
-        TokenInterface $token,
-        Closure $writer
+        CurationStrategyInterface $strategy,
+        TokenInterface            $token,
+        Closure                   $writer
     ): void {
         $this->writer   = $writer;
         $this->strategy = $strategy;

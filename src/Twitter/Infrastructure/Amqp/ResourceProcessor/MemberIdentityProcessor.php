@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationStrategyInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Membership\MemberwiseStrategy;
 use App\Twitter\Domain\Resource\MemberIdentity;
@@ -57,7 +57,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
     /**
      * @param MemberIdentity               $memberIdentity
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      * @param TokenInterface               $token
      * @param PublishersList              $list
      *
@@ -67,10 +67,10 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @throws StopPublicationException
      */
     public function process(
-        MemberIdentity $memberIdentity,
-        PublicationStrategyInterface $strategy,
-        TokenInterface $token,
-        PublishersList $list
+        MemberIdentity            $memberIdentity,
+        CurationStrategyInterface $strategy,
+        TokenInterface            $token,
+        PublishersList            $list
     ): int {
         try {
             $this->dispatchAmqpMessagesForFetchingMemberPublications(
@@ -102,7 +102,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
     /**
      * @param MemberIdentity $memberIdentity
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      * @param TokenInterface $token
      * @param PublishersList $list
      * @throws SkippableMemberException
@@ -110,10 +110,10 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @throws OptimisticLockException
      */
     private function dispatchAmqpMessagesForFetchingMemberPublications(
-        MemberIdentity $memberIdentity,
-        PublicationStrategyInterface $strategy,
-        TokenInterface $token,
-        PublishersList $list
+        MemberIdentity            $memberIdentity,
+        CurationStrategyInterface $strategy,
+        TokenInterface            $token,
+        PublishersList            $list
     ): void {
         $this->isSkippingMemberDictatedByStrategy($memberIdentity, $strategy);
 
@@ -142,13 +142,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
     /**
      * @param MemberIdentity               $memberIdentity
-     * @param PublicationStrategyInterface $strategy
+     * @param CurationStrategyInterface $strategy
      *
      * @throws SkippableMemberException
      */
     private function isSkippingMemberDictatedByStrategy(
         MemberIdentity $memberIdentity,
-        PublicationStrategyInterface $strategy
+        CurationStrategyInterface $strategy
     ): void {
         if ($strategy->isSingleMemberAmqpMessagePublicationStrategyActive($memberIdentity)) {
             throw new SkippableMemberException(

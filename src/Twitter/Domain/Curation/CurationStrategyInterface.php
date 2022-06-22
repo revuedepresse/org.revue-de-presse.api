@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-interface PublicationStrategyInterface
+interface CurationStrategyInterface
 {
     public const RULE_BEFORE                 = 'before';
     public const RULE_SCREEN_NAME            = 'screen_name';

@@ -385,10 +385,8 @@ SCRIPT
     /bin/bash -c "${command}"
 }
 
-function start_database() {
+function start_amqp_broker() {
     guard_against_missing_variables
-
-    remove_container_image 'database'
 
     local command
     command=$(cat <<-SCRIPT
@@ -397,7 +395,26 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			--force-recreate \
+			--no-recreate \
+			amqp
+SCRIPT
+)
+
+    echo 'About to execute "'"${command}"'"'
+    /bin/bash -c "${command}"
+}
+
+function start_database() {
+    guard_against_missing_variables
+
+    local command
+    command=$(cat <<-SCRIPT
+docker compose \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
+			up \
+			--detach \
+			--no-recreate \
 			database
 SCRIPT
 )
@@ -412,6 +429,12 @@ function stop() {
     remove_container_image 'app'
     remove_container_image 'process-manager'
     remove_container_image 'worker'
+}
+
+function stop_amqp_broker() {
+    guard_against_missing_variables
+
+    remove_container_image 'amqp'
 }
 
 function stop_database() {
