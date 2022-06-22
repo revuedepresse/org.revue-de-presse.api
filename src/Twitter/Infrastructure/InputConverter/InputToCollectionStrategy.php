@@ -113,12 +113,12 @@ class InputToCollectionStrategy
         CurationStrategyInterface $strategy
     ): void {
         if (
-            $input->hasOption(CurationStrategyInterface::RULE_MEMBER_RESTRICTION)
+            $input->hasOption(CurationStrategyInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME)
             && $input->getOption(
-                CurationStrategyInterface::RULE_MEMBER_RESTRICTION
+                CurationStrategyInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME
             )
         ) {
-            $strategy->willFilterByMember($input->getOption(CurationStrategyInterface::RULE_MEMBER_RESTRICTION));
+            $strategy->willFilterByMember($input->getOption(CurationStrategyInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME));
         }
     }
 

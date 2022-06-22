@@ -71,7 +71,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         try {
             $success = $this->collector->collect(
                 $options,
-                $greedy = true
+                greedy: true
             );
             if (!$success) {
                 $this->logger->info(

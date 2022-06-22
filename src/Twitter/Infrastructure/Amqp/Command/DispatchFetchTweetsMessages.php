@@ -20,18 +20,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DispatchFetchTweetsMessages extends AggregateAwareCommand
 {
-    private const ARGUMENT_SCREEN_NAME          = CurationStrategyInterface::RULE_SCREEN_NAME;
+    private const ARGUMENT_SCREEN_NAME                  = CurationStrategyInterface::RULE_SCREEN_NAME;
 
-    private const OPTION_BEFORE                 = CurationStrategyInterface::RULE_BEFORE;
-    private const OPTION_CURSOR                 = CurationStrategyInterface::RULE_CURSOR;
-    private const OPTION_IGNORE_WHISPERS        = CurationStrategyInterface::RULE_IGNORE_WHISPERS;
-    private const OPTION_INCLUDE_OWNER          = CurationStrategyInterface::RULE_INCLUDE_OWNER;
-    private const OPTION_LIST                   = CurationStrategyInterface::RULE_LIST;
-    private const OPTION_LISTS                  = CurationStrategyInterface::RULE_LISTS;
-    private const OPTION_MEMBER_RESTRICTION     = CurationStrategyInterface::RULE_MEMBER_RESTRICTION;
+    private const OPTION_BEFORE                         = CurationStrategyInterface::RULE_BEFORE;
+    private const OPTION_CURSOR                         = CurationStrategyInterface::RULE_CURSOR;
+    private const OPTION_FILTER_BY_TWEET_OWNER_USERNAME = CurationStrategyInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME;
+    private const OPTION_IGNORE_WHISPERS                = CurationStrategyInterface::RULE_IGNORE_WHISPERS;
+    private const OPTION_INCLUDE_OWNER                  = CurationStrategyInterface::RULE_INCLUDE_OWNER;
+    private const OPTION_LIST                           = CurationStrategyInterface::RULE_LIST;
+    private const OPTION_LISTS                          = CurationStrategyInterface::RULE_LISTS;
 
-    private const OPTION_OAUTH_TOKEN            = 'oauth_token';
-    private const OPTION_OAUTH_SECRET           = 'oauth_secret';
+    private const OPTION_OAUTH_TOKEN                    = 'oauth_token';
+    private const OPTION_OAUTH_SECRET                   = 'oauth_secret';
 
     use OwnershipAccessorTrait;
     use PublicationMessageDispatcherTrait;
@@ -71,10 +71,10 @@ class DispatchFetchTweetsMessages extends AggregateAwareCommand
                 InputOption::VALUE_OPTIONAL,
                 'Cursor from which ownership are to be fetched'
             )->addOption(
-                self::OPTION_MEMBER_RESTRICTION,
-                'mr',
+                self::OPTION_FILTER_BY_TWEET_OWNER_USERNAME,
+                'fo',
                 InputOption::VALUE_OPTIONAL,
-                'Restrict to member, which screen name has been passed as value of this option'
+                'Filter by Twitter member username'
             )->addOption(
                 self::OPTION_BEFORE,
                 null,
