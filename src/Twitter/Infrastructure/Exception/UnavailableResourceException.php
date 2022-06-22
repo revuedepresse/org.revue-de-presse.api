@@ -194,7 +194,7 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         }
 
         $message = sprintf($message, $options[FetchPublicationInterface::SCREEN_NAME]);
-        $logger->error($message);
+        $logger->error($message, ['exception' => $exception]);
 
         return $message;
     }
