@@ -157,7 +157,7 @@ function guard_against_missing_variables() {
     fi
 }
 
-function remove_container_image() {
+function remove_running_container_and_image_in_debug_mode() {
     local container_name
     container_name="${1}"
 
@@ -217,9 +217,9 @@ function clean() {
         return 0
     fi
 
-    remove_container_image 'app'
-    remove_container_image 'process-manager'
-    remove_container_image 'worker'
+    remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'process-manager'
+    remove_running_container_and_image_in_debug_mode 'worker'
 }
 
 function clear_cache_warmup() {
@@ -234,7 +234,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
-        remove_container_image 'app'
+        remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
@@ -355,7 +355,7 @@ function start() {
 
     clean ''
 
-    remove_container_image 'process-manager'
+    remove_running_container_and_image_in_debug_mode 'process-manager'
 
     local command
     command=$(cat <<-SCRIPT
@@ -426,21 +426,21 @@ SCRIPT
 function stop() {
     guard_against_missing_variables
 
-    remove_container_image 'app'
-    remove_container_image 'process-manager'
-    remove_container_image 'worker'
+    remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'process-manager'
+    remove_running_container_and_image_in_debug_mode 'worker'
 }
 
 function stop_amqp_broker() {
     guard_against_missing_variables
 
-    remove_container_image 'amqp'
+    remove_running_container_and_image_in_debug_mode 'amqp'
 }
 
 function stop_database() {
     guard_against_missing_variables
 
-    remove_container_image 'database'
+    remove_running_container_and_image_in_debug_mode 'database'
 }
 
 function validate_docker_compose_configuration() {
