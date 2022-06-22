@@ -66,8 +66,8 @@ services:
             tokenRepository:            '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
         tags:
             -
-                name: messenger.message_handler
-                handles: App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus
+                name:       'messenger.message_handler'
+                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchTweet'
 
     App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
         class: 'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'

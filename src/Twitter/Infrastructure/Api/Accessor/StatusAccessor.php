@@ -8,7 +8,7 @@ use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
@@ -368,7 +368,7 @@ class StatusAccessor implements StatusAccessorInterface
                     'Extremum (%s%s) retrieved for "%s": #%s',
                     $logPrefix,
                     $option,
-                    $options[FetchPublicationInterface::SCREEN_NAME],
+                    $options[FetchTweetInterface::SCREEN_NAME],
                     $options[$option]
                 )
             );
@@ -384,7 +384,7 @@ class StatusAccessor implements StatusAccessorInterface
             sprintf(
                 '[No %s retrieved for "%s"] ',
                 $logPrefix . 'extremum',
-                $options[FetchPublicationInterface::SCREEN_NAME]
+                $options[FetchTweetInterface::SCREEN_NAME]
             )
         );
 
@@ -412,14 +412,14 @@ class StatusAccessor implements StatusAccessorInterface
     ): array {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->statusRepository->findNextExtremum(
-                $options[FetchPublicationInterface::SCREEN_NAME],
+                $options[FetchTweetInterface::SCREEN_NAME],
                 $findingDirection,
                 $selectors->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
         return $this->statusRepository->findLocalMaximum(
-            $options[FetchPublicationInterface::SCREEN_NAME],
+            $options[FetchTweetInterface::SCREEN_NAME],
             $selectors->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
@@ -480,10 +480,10 @@ class StatusAccessor implements StatusAccessorInterface
                                    $options
     ) {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
-            unset($options[FetchPublicationInterface::BEFORE]);
+            unset($options[FetchTweetInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
-            unset($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
+        if (array_key_exists(FetchTweetInterface::PUBLISHERS_LIST_ID, $options)) {
+            unset($options[FetchTweetInterface::PUBLISHERS_LIST_ID]);
         }
 
         return $options;

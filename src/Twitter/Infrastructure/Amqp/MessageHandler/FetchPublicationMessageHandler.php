@@ -6,8 +6,8 @@ namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Domain\Collector\PublicationCollectorInterface;
@@ -28,7 +28,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      */
     public static function getHandledMessages(): iterable
     {
-        yield FetchMemberStatus::class => [
+        yield FetchTweet::class => [
             'from_transport' => 'publications'
         ];
     }
@@ -44,11 +44,11 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     protected PublicationCollectorInterface $collector;
 
     /**
-     * @param FetchPublicationInterface $message
+     * @param FetchTweetInterface $message
      *
      * @return bool
      */
-    public function __invoke(FetchPublicationInterface $message): bool
+    public function __invoke(FetchTweetInterface $message): bool
     {
         $success = false;
 
@@ -121,12 +121,12 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param FetchPublicationInterface $message
+     * @param FetchTweetInterface $message
      *
      * @return array
      * @throws Exception
      */
-    public function processMessage(FetchPublicationInterface $message): array
+    public function processMessage(FetchTweetInterface $message): array
     {
         $oauthToken = $this->extractOAuthToken($message);
 
@@ -143,7 +143,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $this->collector = $collector;
     }
 
-    private function extractOAuthToken(FetchPublicationInterface $message): array
+    private function extractOAuthToken(FetchTweetInterface $message): array
     {
         $token = $message->token();
 

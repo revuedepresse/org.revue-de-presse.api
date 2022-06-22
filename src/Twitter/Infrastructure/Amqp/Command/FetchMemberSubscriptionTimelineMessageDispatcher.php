@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Amqp\Command;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberFriendsCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
@@ -176,7 +176,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $messageBody['aggregate_id'] = $aggregate->getId();
         $messageBody['screen_name'] = $twitterUsername;
 
-        $message = new FetchMemberStatus(
+        $message = new FetchTweet(
             $twitterUsername,
             $aggregate->getId(),
             (new Token)

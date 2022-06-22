@@ -7,7 +7,7 @@ use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -186,15 +186,17 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
             $logger->error(
                 sprintf(
                     $message,
-                    $options[FetchPublicationInterface::SCREEN_NAME]
+                    $options[FetchTweetInterface::SCREEN_NAME]
                 )
             );
 
             return $message;
         }
 
-        $message = sprintf($message, $options[FetchPublicationInterface::SCREEN_NAME]);
-        $logger->error($message, ['exception' => $exception]);
+        $message = sprintf($message, $options[FetchTweetInterface::SCREEN_NAME]);
+        $logger->error(
+            $message, ['trace' => $exception->getTrace()]
+        );
 
         return $message;
     }

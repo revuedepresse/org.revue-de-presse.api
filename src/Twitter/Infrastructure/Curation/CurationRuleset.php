@@ -66,10 +66,12 @@ class CurationRuleset implements CurationRulesetInterface, CorrelationIdAwareInt
         return $this;
     }
 
-    public function guardAgainstWhisperingMember(
+    public function skipLowVolumeTweetingMember(
         MemberInterface $member,
         MemberIdentity $memberIdentity
     ): void {
+        return;
+
         if ($this->shouldIgnoreMemberWhenWhispering($member)) {
             throw new SkippableMemberException(
                 sprintf(

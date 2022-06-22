@@ -513,11 +513,6 @@ QUERY;
         }
     }
 
-    /**
-     * @param array $aggregateIds
-     *
-     * @return array
-     */
     private function castIds(array $aggregateIds): array
     {
         return array_map(
@@ -527,10 +522,6 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     * @param string $listName
-     *
-     * @return null|object
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -538,14 +529,14 @@ QUERY;
         string $screenName,
         string $listName
     ) {
-        $aggregate = $this->findOneBy(
+        $twitterList = $this->findOneBy(
             [
                 'screenName' => $screenName,
                 'name'       => $listName
             ]
         );
 
-        if ($aggregate instanceof PublishersList) {
+        if ($twitterList instanceof PublishersList) {
             $aggregates = $this->findBy(
                 [
                     'screenName' => $screenName,
@@ -557,23 +548,23 @@ QUERY;
                 /** @var PublishersListInterface $firstAggregate */
                 $firstAggregate = $aggregates[0];
 
-                foreach ($aggregates as $index => $aggregate) {
+                foreach ($aggregates as $index => $twitterList) {
                     if ($index === 0) {
                         continue;
                     }
 
                     $statuses = $this->statusRepository
-                        ->findByAggregate($aggregate);
+                        ->findByAggregate($twitterList);
 
                     /** @var StatusInterface $status */
                     foreach ($statuses as $status) {
                         /** @var StatusInterface $status */
-                        $status->removeFrom($aggregate);
+                        $status->removeFrom($twitterList);
                         $status->addToAggregates($firstAggregate);
                     }
 
                     $timelyStatuses = $this->timelyStatusRepository
-                        ->findBy(['aggregate' => $aggregate]);
+                        ->findBy(['twitterList' => $twitterList]);
 
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
@@ -583,21 +574,21 @@ QUERY;
 
                 $this->getEntityManager()->flush();
 
-                foreach ($aggregates as $index => $aggregate) {
+                foreach ($aggregates as $index => $twitterList) {
                     if ($index === 0) {
                         continue;
                     }
 
-                    $this->getEntityManager()->remove($aggregate);
+                    $this->getEntityManager()->remove($twitterList);
                 }
 
                 $this->getEntityManager()->flush();
 
-                $aggregate = $firstAggregate;
+                $twitterList = $firstAggregate;
             }
         }
 
-        return $aggregate;
+        return $twitterList;
     }
 
     /**

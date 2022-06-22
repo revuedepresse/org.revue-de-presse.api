@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Membership\Domain\Model\MemberInterface;
 
-interface FetchPublicationInterface
+interface FetchTweetInterface
 {
     public const BEFORE = 'before';
     public const PUBLISHERS_LIST_ID = 'aggregate_id';
@@ -21,10 +21,10 @@ interface FetchPublicationInterface
 
     public function token(): TokenInterface;
 
-    public static function makeMemberIdentityCard(
+    public static function identifyMember(
         PublishersList $aggregate,
         TokenInterface $token,
         MemberInterface $member,
         ?string $dateBeforeWhichStatusAreCollected
-    ): FetchPublicationInterface;
+    ): FetchTweetInterface;
 }

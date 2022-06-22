@@ -7,7 +7,7 @@ use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Membership\Domain\Model\MemberInterface;
 
-trait FetchPublicationTrait
+trait FetchTweetTrait
 {
     /**
      * @var string
@@ -79,12 +79,12 @@ trait FetchPublicationTrait
         return $this->token;
     }
 
-    public static function makeMemberIdentityCard(
+    public static function identifyMember(
         PublishersListInterface $aggregate,
         TokenInterface $token,
         MemberInterface $member,
         ?string $dateBeforeWhichStatusAreCollected
-    ): FetchPublicationInterface {
+    ): FetchTweetInterface {
         return new self(
             $member->twitterScreenName(),
             $aggregate->getId(),

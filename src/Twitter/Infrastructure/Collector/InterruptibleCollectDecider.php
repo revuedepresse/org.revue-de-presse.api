@@ -10,7 +10,7 @@ use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
@@ -156,10 +156,10 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function guardAgainstExceptionalMember(array $options): void
     {
         if (
-            !array_key_exists(FetchPublicationInterface::SCREEN_NAME, $options)
-            || $options[FetchPublicationInterface::SCREEN_NAME] === null
+            !array_key_exists(FetchTweetInterface::SCREEN_NAME, $options)
+            || $options[FetchTweetInterface::SCREEN_NAME] === null
             || $this->apiAccessor->shouldSkipCollectForMemberWithScreenName(
-                $options[FetchPublicationInterface::SCREEN_NAME]
+                $options[FetchTweetInterface::SCREEN_NAME]
             )
         ) {
             throw new MembershipException(
@@ -273,7 +273,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
                 sprintf(
                     'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
                     $statuses[0]->id_str,
-                    $options[FetchPublicationInterface::SCREEN_NAME]
+                    $options[FetchTweetInterface::SCREEN_NAME]
                 )
             );
             SkippableMessageException::stopMessageConsumption();
@@ -281,7 +281,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
 
         $savedItems = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
-            $options[FetchPublicationInterface::SCREEN_NAME],
+            $options[FetchTweetInterface::SCREEN_NAME],
             $this->selectors
         );
 
@@ -304,13 +304,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
+        if (!array_key_exists(FetchTweetInterface::PUBLISHERS_LIST_ID, $options)) {
             return null;
         }
 
-        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
+        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchTweetInterface::PUBLISHERS_LIST_ID]);
 
-        return $options[FetchPublicationInterface::PUBLISHERS_LIST_ID];
+        return $options[FetchTweetInterface::PUBLISHERS_LIST_ID];
     }
 
     /**
@@ -337,7 +337,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $this->whispererRepository->saveWhisperer($whisperer);
 
         $this->logger->info(sprintf(
-            'Skipping whisperer "%s"', $options[FetchPublicationInterface::SCREEN_NAME]
+            'Skipping whisperer "%s"', $options[FetchTweetInterface::SCREEN_NAME]
         ));
     }
 
@@ -351,7 +351,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $options
     ): ?Whisperer {
         $whisperer = $this->whispererRepository->findOneBy(
-            ['name' => $options[FetchPublicationInterface::SCREEN_NAME]]
+            ['name' => $options[FetchTweetInterface::SCREEN_NAME]]
         );
         if (!$whisperer instanceof Whisperer) {
             SkippableMessageException::continueMessageConsumption();
@@ -360,11 +360,11 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $whisperer->member = $eventRepository->collectedMemberProfile(
             $this->apiAccessor,
-            [$eventRepository::OPTION_SCREEN_NAME => $options[FetchPublicationInterface::SCREEN_NAME]]
+            [$eventRepository::OPTION_SCREEN_NAME => $options[FetchTweetInterface::SCREEN_NAME]]
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchPublicationInterface::SCREEN_NAME]);
+        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchTweetInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

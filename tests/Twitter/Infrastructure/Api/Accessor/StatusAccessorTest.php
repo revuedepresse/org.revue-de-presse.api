@@ -6,7 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 use App\Twitter\Infrastructure\Api\Accessor\StatusAccessor;
 use App\Twitter\Infrastructure\Curation\CurationSelectors;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -40,8 +40,8 @@ class StatusAccessorTest extends KernelTestCase
     {
         $selectors = CurationSelectors::fromArray(
             [
-                FetchPublicationInterface::BEFORE       => '2010-01-01',
-                FetchPublicationInterface::PUBLISHERS_LIST_ID => 1
+                FetchTweetInterface::BEFORE       => '2010-01-01',
+                FetchTweetInterface::PUBLISHERS_LIST_ID => 1
             ]
         );
 
@@ -51,7 +51,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $selectors,
             [
-                FetchPublicationInterface::SCREEN_NAME => 'pierrec'
+                FetchTweetInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );
@@ -69,7 +69,7 @@ class StatusAccessorTest extends KernelTestCase
     {
         $selectors = CurationSelectors::fromArray(
             [
-                FetchPublicationInterface::PUBLISHERS_LIST_ID => 1
+                FetchTweetInterface::PUBLISHERS_LIST_ID => 1
             ]
         );
 
@@ -79,7 +79,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $selectors,
             [
-                FetchPublicationInterface::SCREEN_NAME => 'pierrec'
+                FetchTweetInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );

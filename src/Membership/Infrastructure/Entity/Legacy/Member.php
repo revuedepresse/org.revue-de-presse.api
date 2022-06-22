@@ -161,7 +161,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     public function twitterScreenName(): ?string
     {
-        return $this->twitter_username;
+        return strtolower($this->twitter_username);
     }
 
     /**

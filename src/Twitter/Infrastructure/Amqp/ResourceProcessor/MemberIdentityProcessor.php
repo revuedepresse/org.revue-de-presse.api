@@ -13,7 +13,7 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
@@ -92,6 +92,9 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         }
     }
 
+    /**
+     * @throws SkippableMemberException
+     */
     private function dispatchAmqpMessagesForFetchingMemberPublications(
         MemberIdentity           $memberIdentity,
         CurationRulesetInterface $ruleset,
@@ -111,12 +114,12 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             $memberIdentity
         );
 
-        $ruleset->guardAgainstWhisperingMember($member, $memberIdentity);
+        $ruleset->skipLowVolumeTweetingMember($member, $memberIdentity);
 
         Compliance::skipProtectedMember($member, $memberIdentity);
         Compliance::skipSuspendedMember($member, $memberIdentity);
 
-        $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
+        $FetchMemberStatus = FetchTweet::identifyMember(
             $this->aggregateRepository->byName(
                 $member->twitterScreenName(),
                 $list->name(),

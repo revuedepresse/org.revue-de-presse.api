@@ -68,9 +68,6 @@ class MemberProfileAccessor implements MemberProfileAccessorInterface
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
-     *
-     * @return MemberInterface
      * @throws UnexpectedApiResponseException
      * @throws MembershipException
      */

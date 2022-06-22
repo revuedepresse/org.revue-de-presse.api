@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Identification;
 
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -82,7 +82,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         array                      $options,
         ?int                       $lastCollectionBatchSize
     ) {
-        $selectors->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
+        $selectors->optInToCollectStatusFor($options[FetchTweetInterface::SCREEN_NAME]);
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
