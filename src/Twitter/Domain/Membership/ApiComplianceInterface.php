@@ -6,7 +6,7 @@ namespace App\Twitter\Domain\Membership;
 use App\Twitter\Domain\Membership\Exception\ExceptionalMemberInterface;
 use Exception;
 
-interface MemberFacingStrategyInterface extends ExceptionalMemberInterface
+interface ApiComplianceInterface extends ExceptionalMemberInterface
 {
     public static function shouldBreakPublication(Exception $exception): bool;
 

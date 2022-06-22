@@ -5,11 +5,11 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Infrastructure\Curation\CurationStrategy;
-use App\Twitter\Domain\Curation\CurationStrategyInterface;
+use App\Twitter\Infrastructure\Curation\CurationRuleset;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
 use App\Twitter\Infrastructure\Api\Selector\AuthenticatedSelector;
@@ -18,9 +18,9 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * @group publication_message_dispatcher
+ * @group fetch_tweets_message_dispatcher
  */
-class PublicationMessageDispatcherTest extends KernelTestCase
+class FetchTweetsMessageDispatcherTest extends KernelTestCase
 {
     use ProphecyTrait;
 
@@ -33,8 +33,8 @@ class PublicationMessageDispatcherTest extends KernelTestCase
     {
         self::$kernel = self::bootKernel();
 
-        /** @var PublicationMessageDispatcher $dispatcher */
-        $dispatcher = static::getContainer()->get('test.'.PublicationMessageDispatcher::class);
+        /** @var FetchTweetsMessageDispatcher $dispatcher */
+        $dispatcher = static::getContainer()->get('test.'.FetchTweetsMessageDispatcher::class);
 
         $calls = 0;
 
@@ -67,18 +67,18 @@ class PublicationMessageDispatcherTest extends KernelTestCase
 
         $dispatcher->setOwnershipAccessor($ownershipAccessor->reveal());
 
-        $publicationStrategy = $this->prophesize(
-            CurationStrategy::class
+        $ruleset = $this->prophesize(
+            CurationRuleset::class
         );
 
-        /** @var CurationStrategyInterface|CurationStrategy $publicationStrategy */
-        $publicationStrategy->onBehalfOfWhom()->willReturn('test_member');
-        $publicationStrategy->noListRestriction()->willReturn(true);
-        $publicationStrategy->shouldFetchPublicationsFromCursor()->willReturn(-1);
-        $publicationStrategy->correlationId()->willReturn(CorrelationId::generate());
+        /** @var CurationRulesetInterface|CurationRuleset $ruleset */
+        $ruleset->whoseListSubscriptionsAreCurated()->willReturn('test_member');
+        $ruleset->isSingleListFilterInactive()->willReturn(true);
+        $ruleset->isCurationCursorActive()->willReturn(-1);
+        $ruleset->correlationId()->willReturn(CorrelationId::generate());
 
-        $dispatcher->dispatchPublicationMessages(
-            $publicationStrategy->reveal(),
+        $dispatcher->dispatchFetchTweetsMessages(
+            $ruleset->reveal(),
             (new Token())->unfreeze(),
             function ($message) {}
         );

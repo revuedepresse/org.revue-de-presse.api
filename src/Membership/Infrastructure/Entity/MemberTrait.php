@@ -193,11 +193,16 @@ trait MemberTrait
     }
 
     /**
-     * @return bool
+     * @deprecated
      */
     public function isAWhisperer(): bool
     {
         return false;
+    }
+
+    public function isLowVolumeTweetWriter(): bool
+    {
+        return $this->isAWhisperer();
     }
 
     public function getDescription(): ?string

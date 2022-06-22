@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Twitter\Infrastructure\Api\Accessor\StatusAccessor;
-use App\Twitter\Infrastructure\Curation\CollectionStrategy;
+use App\Twitter\Infrastructure\Curation\CurationSelectors;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
@@ -38,7 +38,7 @@ class StatusAccessorTest extends KernelTestCase
      */
     public function it_should_update_extremum_for_ascending_order_finding(): void
     {
-        $strategy = CollectionStrategy::fromArray(
+        $selectors = CurationSelectors::fromArray(
             [
                 FetchPublicationInterface::BEFORE       => '2010-01-01',
                 FetchPublicationInterface::PUBLISHERS_LIST_ID => 1
@@ -49,7 +49,7 @@ class StatusAccessorTest extends KernelTestCase
         $this->accessor->setStatusRepository($statusRepository->reveal());
 
         $options = $this->accessor->updateExtremum(
-            $strategy,
+            $selectors,
             [
                 FetchPublicationInterface::SCREEN_NAME => 'pierrec'
             ],
@@ -67,7 +67,7 @@ class StatusAccessorTest extends KernelTestCase
      */
     public function it_should_update_extremum_for_descending_order_finding(): void
     {
-        $strategy = CollectionStrategy::fromArray(
+        $selectors = CurationSelectors::fromArray(
             [
                 FetchPublicationInterface::PUBLISHERS_LIST_ID => 1
             ]
@@ -77,7 +77,7 @@ class StatusAccessorTest extends KernelTestCase
         $this->accessor->setStatusRepository($statusRepository->reveal());
 
         $options = $this->accessor->updateExtremum(
-            $strategy,
+            $selectors,
             [
                 FetchPublicationInterface::SCREEN_NAME => 'pierrec'
             ],

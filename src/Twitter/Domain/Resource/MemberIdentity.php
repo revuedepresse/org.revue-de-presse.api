@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Resource;
 
+use Assert\Assert;
+
 class MemberIdentity
 {
     private string $screenName;
@@ -11,8 +13,17 @@ class MemberIdentity
 
     public function __construct(string $screenName, string $id)
     {
-        $this->screenName = $screenName;
-        $this->id = $id;
+        Assert::that($id)
+            ->numeric('Member id should be numeric.')
+            ->notEmpty('Member id should not be empty.')
+            ->all();
+
+        Assert::that($screenName)
+            ->notEmpty('Member screen name should not be empty.')
+            ->all();
+
+        $this->screenName = strtolower(trim($screenName));
+        $this->id = strtolower(trim($id));
     }
 
     public function id(): string

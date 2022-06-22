@@ -10,7 +10,7 @@ use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Entity\NullToken;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Domain\Curation\CurationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\PublishersList;
@@ -39,7 +39,7 @@ use function implode;
 use function in_array;
 use function sprintf;
 
-class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface, CorrelationIdAwareInterface
+class FetchTweetsMessageDispatcher implements FetchTweetsMessageDispatcherInterface, CorrelationIdAwareInterface
 {
     use ApiLimitModeratorTrait;
     use OwnershipBatchCollectedEventRepositoryTrait;
@@ -54,7 +54,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
     private Closure $writer;
 
-    private CurationStrategyInterface $strategy;
+    private CurationRulesetInterface $ruleset;
 
     public function __construct(
         ApiAccessorInterface $accessor,
@@ -70,18 +70,13 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $this->logger                   = $logger;
     }
 
-    /**
-     * @param CurationStrategyInterface $strategy
-     * @param TokenInterface               $token
-     * @param Closure                      $writer
-     */
-    public function dispatchPublicationMessages(
-        CurationStrategyInterface $strategy,
-        TokenInterface            $token,
-        Closure                   $writer
+    public function dispatchFetchTweetsMessages(
+        CurationRulesetInterface $ruleset,
+        TokenInterface           $token,
+        Closure                  $writer
     ): void {
         $this->writer   = $writer;
-        $this->strategy = $strategy;
+        $this->ruleset = $ruleset;
 
         $memberOwnerships = $this->fetchMemberOwnerships($token);
 
@@ -89,12 +84,12 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         foreach ($memberOwnerships->ownershipCollection()->toArray() as $list) {
             try {
                 $publishedMessages = $this->guardAgainstTokenFreeze(
-                    function (TokenInterface $token) use ($list, $strategy) {
+                    function (TokenInterface $token) use ($list, $ruleset) {
                         return $this->publishersListProcessor
                             ->processPublishersList(
                                 $list,
                                 $token,
-                                $strategy
+                                $ruleset
                             );
                     },
                     $memberOwnerships->token()
@@ -125,15 +120,15 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
     public function correlationId(): CorrelationIdInterface
     {
-        if ($this->strategy instanceof CorrelationIdAwareInterface) {
-            return $this->strategy->correlationId();
+        if ($this->ruleset instanceof CorrelationIdAwareInterface) {
+            return $this->ruleset->correlationId();
         }
 
         return CorrelationId::generate();
     }
 
     private function fetchMemberOwnerships(TokenInterface $token): MemberOwnerships {
-        $cursor = $this->strategy->shouldFetchPublicationsFromCursor();
+        $cursor = $this->ruleset->isCurationCursorActive();
 
         $memberOwnership = null;
         $allOwnerships   = [[]];
@@ -145,7 +140,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                         ->getOwnershipsForMemberHavingScreenNameAndToken(
                             new AuthenticatedSelector(
                                 $token,
-                                $this->strategy->onBehalfOfWhom(),
+                                $this->ruleset->whoseListSubscriptionsAreCurated(),
                                 $this->correlationId()
                             ),
                             $memberOwnership
@@ -200,11 +195,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         $eventRepository = $this->ownershipBatchCollectedEventRepository;
 
-        if ($this->strategy->listRestriction()) {
+        if ($this->ruleset->isSingleListFilterActive()) {
             return $eventRepository->collectedOwnershipBatch(
                 $this->ownershipAccessor,
                 new MemberOwnershipsBatchSelector(
-                    $this->strategy->onBehalfOfWhom(),
+                    $this->ruleset->whoseListSubscriptionsAreCurated(),
                     (string) $ownerships->nextPage(),
                     $this->correlationId()
                 )
@@ -213,12 +208,12 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         while ($this->targetListHasNotBeenFound(
             $ownerships,
-            $this->strategy->forWhichList()
+            $this->ruleset->singleListFilter()
         )) {
             $ownerships = $eventRepository->collectedOwnershipBatch(
                 $this->ownershipAccessor,
                 new MemberOwnershipsBatchSelector(
-                    $this->strategy->onBehalfOfWhom(),
+                    $this->ruleset->whoseListSubscriptionsAreCurated(),
                     (string) $ownerships->nextPage(),
                     $this->correlationId()
                 )
@@ -233,7 +228,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                                 'Does the Twitter API access token used belong to "%s"?',
                             ]
                         ),
-                        $this->strategy->onBehalfOfWhom()
+                        $this->ruleset->whoseListSubscriptionsAreCurated()
                     )
                 );
 
@@ -250,11 +245,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         OwnershipCollectionInterface $ownerships,
         TokenInterface $token
     ): OwnershipCollectionInterface {
-        if ($this->strategy->noListRestriction()) {
+        if ($this->ruleset->isSingleListFilterInactive()) {
             return $ownerships;
         }
 
-        $listRestriction = $this->strategy->forWhichList();
+        $listRestriction = $this->ruleset->singleListFilter();
 
         // Try to find Twitter list by following the next cursor
         if (
@@ -326,11 +321,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         }
     }
 
-    /**
-     * @param $memberOwnership
-     *
-     * @return bool
-     */
     private function keepDispatching($memberOwnership): bool
     {
         return $memberOwnership === null
@@ -346,12 +336,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         );
     }
 
-    /**
-     * @param int|null              $cursor
-     * @param MemberOwnerships|null $memberOwnership
-     *
-     * @return bool
-     */
     private function shouldSkipDispatch(?int $cursor, ?MemberOwnerships $memberOwnership): bool
     {
         return $cursor !== -1
@@ -360,12 +344,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                     && $memberOwnership->ownershipCollection()->nextPage() !== $cursor));
     }
 
-    /**
-     * @param $ownerships
-     * @param $listRestriction
-     *
-     * @return bool
-     */
     private function targetListHasBeenFound($ownerships, string $listRestriction): bool
     {
         $listNames = $this->mapOwnershipsLists($ownerships);
@@ -373,20 +351,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         return in_array($listRestriction, $listNames, true);
     }
 
-    /**
-     * @param        $ownerships
-     * @param string $listRestriction
-     *
-     * @return bool
-     */
     private function targetListHasNotBeenFound($ownerships, string $listRestriction): bool
     {
         return !$this->targetListHasBeenFound($ownerships, $listRestriction);
     }
 
-    /**
-     * @param string $message
-     */
     private function write(string $message): void
     {
         $write = $this->writer;

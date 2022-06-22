@@ -11,8 +11,8 @@ use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationExcepti
 use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Infrastructure\Curation\CollectionStrategy;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Infrastructure\Curation\CurationSelectors;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
@@ -78,12 +78,9 @@ class PublicationCollector implements PublicationCollectorInterface
 
     private const MESSAGE_OPTION_TOKEN = 'oauth';
 
-    /**
-     * @var LoggerInterface
-     */
     public LoggerInterface $twitterApiLogger;
 
-    private CollectionStrategyInterface $collectionStrategy;
+    private CurationSelectorsInterface $selectors;
 
     /**
      * @param array $options
@@ -114,11 +111,11 @@ class PublicationCollector implements PublicationCollectorInterface
     ): bool {
         $success = false;
 
-        $this->collectionStrategy = CollectionStrategy::fromArray($options);
+        $this->selectors = CurationSelectors::fromArray($options);
 
         try {
             $this->interruptibleCollectDecider->decideWhetherCollectShouldBeSkipped(
-                $this->collectionStrategy,
+                $this->selectors,
                 $options
             );
         } catch (SkipCollectException $exception) {
@@ -133,7 +130,7 @@ class PublicationCollector implements PublicationCollectorInterface
             $this->updateLastStatusPublicationDate($options);
         }
 
-        if ($this->collectionStrategy->oneOfTheOptionsIsActive()) {
+        if ($this->selectors->oneOfTheOptionsIsActive()) {
             $options = $this->removeCollectOptions(
                 $options
             );
@@ -160,7 +157,7 @@ class PublicationCollector implements PublicationCollectorInterface
             return isset($remainingItemsToCollect) ?: false;
         }
 
-        if ($this->collectionStrategy->shouldLookUpPublicationsWithMinId(
+        if ($this->selectors->shouldLookUpPublicationsWithMinId(
             $this->statusRepository,
             $this->memberRepository
         )) {
@@ -168,7 +165,7 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         $options = $this->statusAccessor->updateExtremum(
-            $this->collectionStrategy,
+            $this->selectors,
             $options,
             $discoverPublicationsWithMaxId
         );
@@ -255,7 +252,7 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     public function hitCollectionLimit($statuses): bool
     {
-        return $statuses >= (CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
+        return $statuses >= (CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
 
     /**
@@ -276,7 +273,7 @@ class PublicationCollector implements PublicationCollectorInterface
     public function removeCollectOptions(
         $options
     ) {
-        if ($this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+        if ($this->selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
         if (array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
@@ -483,7 +480,7 @@ class PublicationCollector implements PublicationCollectorInterface
          */
         $statusesCount    = max(
             $memberProfile->statuses_count,
-            CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER
+            CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER
         );
         $discoveredStatus = $this->translator->trans(
             'logs.info.status_discovered',
@@ -501,23 +498,23 @@ class PublicationCollector implements PublicationCollectorInterface
 
     /**
      * @param                             $options
-     * @param CollectionStrategyInterface $collectionStrategy
+     * @param CurationSelectorsInterface  $selectors
      *
      * @return int|null
      * @throws ProtectedAccountException
      */
     protected function saveStatusesMatchingCriteria(
         $options,
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ): ?int {
         $options  = $this->declareOptionsToCollectStatuses($options);
 
         try {
             $statuses = $this->publicationBatchCollectedEventRepository
-                ->collectedPublicationBatch($collectionStrategy, $options);
+                ->collectedPublicationBatch($selectors, $options);
         } catch (ApiRateLimitingException $e) {
             if ($this->isTwitterApiAvailable()) {
-                return $this->saveStatusesMatchingCriteria($options, $collectionStrategy);
+                return $this->saveStatusesMatchingCriteria($options, $selectors);
             }
         }
 
@@ -554,11 +551,11 @@ class PublicationCollector implements PublicationCollectorInterface
         $lastCollectionBatchSize = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $collectionStrategy
+            $selectors
         );
 
         $this->whispererIdentification->identifyWhisperer(
-            $collectionStrategy,
+            $selectors,
             $options,
             $options[FetchPublicationInterface::SCREEN_NAME],
             (int) $lastCollectionBatchSize
@@ -625,7 +622,7 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         $publishersList = $this->publishersListRepository->findOneBy(
-            ['id' => $this->collectionStrategy->publishersListId()]
+            ['id' => $this->selectors->publishersListId()]
         );
 
         if (!$publishersList instanceof PublishersListInterface) {
@@ -666,7 +663,7 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     private function isCollectingStatusesForAggregate(): bool
     {
-        return $this->collectionStrategy->publishersListId() !== null;
+        return $this->selectors->publishersListId() !== null;
     }
 
     /**
@@ -765,19 +762,19 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $this->collectStatusLogger->logIntentionWithRegardsToAggregate(
             $options,
-            $this->collectionStrategy
+            $this->selectors
         );
 
         $lastCollectionBatchSize = $this->saveStatusesMatchingCriteria(
             $options,
-            $this->collectionStrategy
+            $this->selectors
         );
 
         if (
             $discoverPublicationsWithMaxId
             || (
                 $lastCollectionBatchSize !== null
-                && $lastCollectionBatchSize === CollectionStrategyInterface::MAX_BATCH_SIZE
+                && $lastCollectionBatchSize === CurationSelectorsInterface::MAX_BATCH_SIZE
             )
         ) {
             // When some of the last batch of publications have been collected for the first time,
@@ -789,9 +786,9 @@ class PublicationCollector implements PublicationCollectorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchPublicationInterface::PUBLISHERS_LIST_ID] = $this->collectionStrategy->publishersListId();
+                $options[FetchPublicationInterface::PUBLISHERS_LIST_ID] = $this->selectors->publishersListId();
                 $options[FetchPublicationInterface::BEFORE]              =
-                    $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected();
+                    $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
 
                 $success = $this->collect(
                     $options,
@@ -802,18 +799,18 @@ class PublicationCollector implements PublicationCollectorInterface
                 $discoverPublicationWithMinId = !$discoverPublicationsWithMaxId;
                 if (
                     $discoverPublicationWithMinId
-                    && $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected() === null
+                    && $this->selectors->dateBeforeWhichPublicationsAreToBeCollected() === null
                 ) {
                     unset($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
 
                     $options = $this->statusAccessor->updateExtremum(
-                        $this->collectionStrategy,
+                        $this->selectors,
                         $options,
                         $discoverPublicationsWithMaxId = false
                     );
                     $options = $this->apiAccessor->guessMaxId(
                         $options,
-                        $this->collectionStrategy->shouldLookUpPublicationsWithMinId(
+                        $this->selectors->shouldLookUpPublicationsWithMinId(
                             $this->statusRepository,
                             $this->memberRepository
                         )
@@ -821,7 +818,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
                     $this->saveStatusesMatchingCriteria(
                         $options,
-                        $this->collectionStrategy
+                        $this->selectors
                     );
                 }
             }
@@ -834,7 +831,7 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         if ($this->isCollectingStatusesForAggregate()) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publishersListId()]
+                ['id' => $this->selectors->publishersListId()]
             );
             if ($publishersList instanceof PublishersListInterface) {
                 $this->publishersListRepository->unlockPublishersList($publishersList);

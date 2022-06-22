@@ -54,7 +54,10 @@ interface MemberInterface extends UserInterface
 
     public function hasNotBeenDeclaredAsNotFound(): bool;
 
+    /** @deprecated */
     public function isAWhisperer(): bool;
+
+    public function isLowVolumeTweetWriter(): bool;
 
     public function getDescription(): ?string;
 

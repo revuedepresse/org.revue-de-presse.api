@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Api\Accessor;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
@@ -257,9 +257,9 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param array                       $options
-     * @param bool                        $discoverPublicationWithMaxId
+     * @param CurationSelectorsInterface $selectors
+     * @param array                      $options
+     * @param bool                       $discoverPublicationWithMaxId
      *
      * @return array
      * @throws ApiRateLimitingException
@@ -277,13 +277,13 @@ class StatusAccessor implements StatusAccessorInterface
      * @throws UnexpectedApiResponseException
      */
     public function fetchPublications(
-        CollectionStrategyInterface $collectionStrategy,
-        $options,
-        bool $discoverPublicationWithMaxId = true
+        CurationSelectorsInterface $selectors,
+                                   $options,
+        bool                       $discoverPublicationWithMaxId = true
     ): array {
-        $options = $this->removeCollectOptions($collectionStrategy, $options);
+        $options = $this->removeCollectOptions($selectors, $options);
         $options = $this->updateExtremum(
-            $collectionStrategy,
+            $selectors,
             $options,
             $discoverPublicationWithMaxId
         );
@@ -292,14 +292,14 @@ class StatusAccessor implements StatusAccessorInterface
         // are to be collected, pick the date over the upper bound for collection
         if (
             array_key_exists('max_id', $options)
-            && $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected() // Looking into the past
+            && $selectors->dateBeforeWhichPublicationsAreToBeCollected() // Looking into the past
         ) {
             unset($options['max_id']);
         }
 
         $statuses = $this->publicationBatchCollectedEventRepository
             ->collectedPublicationBatch(
-                $collectionStrategy,
+                $selectors,
                 $options
             );
 
@@ -324,7 +324,7 @@ class StatusAccessor implements StatusAccessorInterface
             }
 
             $statuses = $this->fetchPublications(
-                $collectionStrategy,
+                $selectors,
                 $options,
                 $discoverPublicationWithMaxId = false
             );
@@ -334,11 +334,11 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     public function updateExtremum(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        bool $discoverPublicationsWithMaxId = true
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+        bool                       $discoverPublicationsWithMaxId = true
     ): array {
-        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+        if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             $discoverPublicationsWithMaxId = true;
         }
 
@@ -346,12 +346,12 @@ class StatusAccessor implements StatusAccessorInterface
 
         $findingDirection = $this->getExtremumUpdateMethod($discoverPublicationsWithMaxId);
         $extremum           = $this->findExtremum(
-            $collectionStrategy,
+            $selectors,
             $options,
             $findingDirection
         );
 
-        $logPrefix = $this->getLogPrefix($collectionStrategy);
+        $logPrefix = $this->getLogPrefix($selectors);
 
         if (array_key_exists('statusId', $extremum) && (count($extremum) === 1)) {
             $option = $this->getExtremumOption($discoverPublicationsWithMaxId);
@@ -405,29 +405,22 @@ class StatusAccessor implements StatusAccessorInterface
         return 1;
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param array                       $options
-     * @param string                      $findingDirection
-     *
-     * @return array|mixed
-     */
     private function findExtremum(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        $findingDirection
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+                                   $findingDirection
     ): array {
-        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+        if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->statusRepository->findNextExtremum(
                 $options[FetchPublicationInterface::SCREEN_NAME],
                 $findingDirection,
-                $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
+                $selectors->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
         return $this->statusRepository->findLocalMaximum(
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
+            $selectors->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
 
@@ -473,31 +466,20 @@ class StatusAccessor implements StatusAccessorInterface
         return $options;
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     *
-     * @return string
-     */
-    private function getLogPrefix(CollectionStrategyInterface $collectionStrategy): string
+    private function getLogPrefix(CurationSelectorsInterface $selectors): string
     {
-        if (!$collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+        if (!$selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             return '';
         }
 
         return 'local ';
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param                             $options
-     *
-     * @return mixed
-     */
     private function removeCollectOptions(
-        CollectionStrategyInterface $collectionStrategy,
-        $options
+        CurationSelectorsInterface $selectors,
+                                   $options
     ) {
-        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+        if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
         if (array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {

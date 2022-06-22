@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-interface CurationStrategyInterface
+interface CurationRulesetInterface
 {
     public const RULE_BEFORE                            = 'before';
     public const RULE_CURSOR                            = 'cursor';
@@ -14,7 +14,7 @@ interface CurationStrategyInterface
     public const RULE_LISTS                             = 'lists';
     public const RULE_SCREEN_NAME                       = 'screen_name';
 
-    public function dateBeforeWhichPublicationsAreCollected(): ?string;
+    public function tweetCreationDateFilter(): ?string;
 
-    public function shouldFetchPublicationsFromCursor(): ?int;
+    public function isCurationCursorActive(): ?int;
 }

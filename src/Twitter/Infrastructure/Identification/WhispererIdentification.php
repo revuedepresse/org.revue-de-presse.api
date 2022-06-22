@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Identification;
 
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
@@ -25,10 +25,10 @@ class WhispererIdentification implements WhispererIdentificationInterface
     use WhispererRepositoryTrait;
 
     public function identifyWhisperer(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        string $screenName,
-        ?int $lastCollectionBatchSize
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+        string                     $screenName,
+        ?int                       $lastCollectionBatchSize
     ): bool {
         if ($this->justCollectedSomeStatuses($lastCollectionBatchSize)) {
             return false;
@@ -43,7 +43,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         $totalCollectedStatuses = 0;
         try {
             $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
-                $collectionStrategy,
+                $selectors,
                 $options,
                 $lastCollectionBatchSize
             );
@@ -70,19 +70,19 @@ class WhispererIdentification implements WhispererIdentificationInterface
     }
 
     /**
-     * @param CollectionStrategyInterface $collectionStrategy
+     * @param CurationSelectorsInterface $selectors
      *
-     * @param array                       $options
-     * @param int|null                    $lastCollectionBatchSize
+     * @param array                      $options
+     * @param int|null                   $lastCollectionBatchSize
      *
      * @return mixed
      */
     private function logHowManyItemsHaveBeenCollected(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        ?int $lastCollectionBatchSize
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+        ?int                       $lastCollectionBatchSize
     ) {
-        $collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
+        $selectors->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
@@ -96,11 +96,11 @@ class WhispererIdentification implements WhispererIdentificationInterface
         };
 
         $totalStatuses = $countCollectedItems(
-            $collectionStrategy->screenName(),
+            $selectors->screenName(),
         );
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
-            $collectionStrategy,
+            $selectors,
             (int) $totalStatuses,
             [
                 'plural'   => $subjectInPluralForm,

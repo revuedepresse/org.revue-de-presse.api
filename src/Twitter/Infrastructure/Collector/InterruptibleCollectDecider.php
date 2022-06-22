@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Collector;
 
 use App\Twitter\Domain\Collector\InterruptibleCollectDeciderInterface;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
@@ -53,13 +53,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     use WhispererRepositoryTrait;
 
     /**
-     * @var CollectionStrategyInterface
+     * @var CurationSelectorsInterface
      */
-    private CollectionStrategyInterface $collectionStrategy;
+    private CurationSelectorsInterface $selectors;
 
     /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param array                       $options
+     * @param CurationSelectorsInterface $selectors
+     * @param array                      $options
      *
      * @throws ProtectedAccountException
      * @throws RateLimitedException
@@ -68,10 +68,10 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
      * @throws Exception
      */
     public function decideWhetherCollectShouldBeSkipped(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options
+        CurationSelectorsInterface $selectors,
+        array                      $options
     ): void {
-        $this->collectionStrategy = $collectionStrategy;
+        $this->selectors = $selectors;
 
         try {
             if ($this->shouldSkipCollect(
@@ -171,16 +171,16 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function guardAgainstLockedPublishersList(): ?PublishersListInterface
     {
         $publishersList = null;
-        if ($this->collectionStrategy->publishersListId() !== null) {
+        if ($this->selectors->publishersListId() !== null) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publishersListId()]
+                ['id' => $this->selectors->publishersListId()]
             );
         }
 
         if (
             ($publishersList instanceof PublishersListInterface)
             && $publishersList->isLocked()
-            && !$this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
+            && !$this->selectors->dateBeforeWhichPublicationsAreToBeCollected()
         ) {
             LockedPublishersListException::throws(
                 'Will skip message consumption for locked aggregate #%d',
@@ -212,18 +212,18 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         }
 
         if ($this->memberRepository->hasBeenUpdatedBetween7HoursAgoAndNow(
-            $this->collectionStrategy->screenName()
+            $this->selectors->screenName()
         )) {
             $this->logger->info(sprintf(
                 'Publications have been recently collected for %s',
-                $this->collectionStrategy->screenName()
+                $this->selectors->screenName()
             ));
 
             return true;
         }
 
         $statuses = $this->statusAccessor->fetchPublications(
-            $this->collectionStrategy,
+            $this->selectors,
             $options
         );
 
@@ -282,11 +282,11 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $savedItems = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $this->collectionStrategy
+            $this->selectors
         );
 
         if ($savedItems === null ||
-            count($statuses) < CollectionStrategyInterface::MAX_BATCH_SIZE
+            count($statuses) < CurationSelectorsInterface::MAX_BATCH_SIZE
         ) {
             SkippableMessageException::stopMessageConsumption();
         }
@@ -308,7 +308,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             return null;
         }
 
-        $this->collectionStrategy->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
+        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
 
         return $options[FetchPublicationInterface::PUBLISHERS_LIST_ID];
     }
@@ -371,8 +371,8 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         }
 
         if (
-            $whispers >= $this->collectionStrategy::MAX_AVAILABLE_TWEETS_PER_USER
-            && $storedWhispers < $this->collectionStrategy::MAX_AVAILABLE_TWEETS_PER_USER
+            $whispers >= $this->selectors::MAX_AVAILABLE_TWEETS_PER_USER
+            && $storedWhispers < $this->selectors::MAX_AVAILABLE_TWEETS_PER_USER
         ) {
             SkippableMessageException::continueMessageConsumption();
         }

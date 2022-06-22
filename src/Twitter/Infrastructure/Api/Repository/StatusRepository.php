@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Repository;
 
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
@@ -106,7 +106,7 @@ class StatusRepository extends ArchivedStatusRepository
                 JSON_THROW_ON_ERROR
             );
 
-            if ($decodedStatusDocument['user']['statuses_count'] > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
+            if ($decodedStatusDocument['user']['statuses_count'] > CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 

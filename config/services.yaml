@@ -119,8 +119,8 @@ services:
             - '@App\Twitter\Infrastructure\Translation\Translator'
             - '@logger'
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher'
         arguments:
             - '@App\Twitter\Infrastructure\Api\Accessor'
             - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'

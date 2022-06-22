@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
-use App\Twitter\Domain\Curation\CurationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
@@ -55,9 +55,9 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     }
 
     /**
-     * @param PublishersList              $list
-     * @param TokenInterface               $token
-     * @param CurationStrategyInterface $strategy
+     * @param PublishersList           $list
+     * @param TokenInterface           $token
+     * @param CurationRulesetInterface $ruleset
      *
      * @return int
      * @throws Exception
@@ -65,9 +65,9 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     public function processPublishersList(
         PublishersList $list,
         TokenInterface $token,
-        CurationStrategyInterface $strategy
+        CurationRulesetInterface $ruleset
     ): int {
-        if ($strategy->shouldProcessList($list)) {
+        if ($ruleset->isCurationByListActive($list)) {
             $eventRepository = $this->publishersListCollectedEventRepository;
             $memberCollection = $eventRepository->collectedPublishersList(
                 $this->accessor,
@@ -78,7 +78,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
             );
             $memberCollection = $this->addOwnerToListOptionally(
                 $memberCollection,
-                $strategy
+                $ruleset
             );
 
             if ($memberCollection->isEmpty()) {
@@ -103,7 +103,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
                 $memberCollection,
                 $list,
                 $token,
-                $strategy
+                $ruleset
             );
 
             try {
@@ -128,7 +128,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         MemberCollectionInterface $members,
         PublishersList $list,
         TokenInterface $token,
-        CurationStrategyInterface $strategy
+        CurationRulesetInterface $ruleset
     ): int {
         $publishedMessages = 0;
 
@@ -137,7 +137,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
             try {
                 $publishedMessages += $this->memberIdentityProcessor->process(
                     $memberIdentity,
-                    $strategy,
+                    $ruleset,
                     $token,
                     $list
                 );
@@ -171,18 +171,19 @@ class PublishersListProcessor implements PublishersListProcessorInterface
 
     private function addOwnerToListOptionally(
         MemberCollectionInterface $memberCollection,
-        CurationStrategyInterface $strategy
+        CurationRulesetInterface $ruleset
     ): MemberCollectionInterface
     {
         $members = $memberCollection->toArray();
-        if ($strategy->shouldIncludeOwner()) {
+
+        if ($ruleset->isListOwnerTweetsCurationActive()) {
             $eventRepository = $this->memberProfileCollectedEventRepository;
             $additionalMember = $eventRepository->collectedMemberProfile(
                 $this->accessor,
-                [$eventRepository::OPTION_SCREEN_NAME => $strategy->onBehalfOfWhom()]
+                [$eventRepository::OPTION_SCREEN_NAME => $ruleset->whoseListSubscriptionsAreCurated()]
             );
             array_unshift($members, $additionalMember);
-            $strategy->willIncludeOwner(false);
+            $ruleset->isListOwnerIncluded(false);
         }
 
         return MemberCollection::fromArray($members);

@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Collector;
 
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 
 interface InterruptibleCollectDeciderInterface
 {
     public function decideWhetherCollectShouldBeSkipped(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options
+        CurationSelectorsInterface $selectors,
+        array                      $options
     );
 
     public function delayingConsumption(): bool;

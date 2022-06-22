@@ -3,33 +3,33 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use function array_key_exists;
 use const INF;
 
-class CollectionStrategy implements CollectionStrategyInterface
+class CurationSelectors implements CurationSelectorsInterface
 {
     public static function fromArray(array $options): self
     {
-        $strategy = new self();
+        $selectors = new self();
 
         if (array_key_exists('aggregate_id', $options) && $options['aggregate_id']) {
-            $strategy->optInToCollectStatusForPublishersListOfId(
+            $selectors->optInToCollectStatusForPublishersListOfId(
                 $options['aggregate_id']
             );
         }
 
         if (array_key_exists('before', $options) && $options['before']) {
-            $strategy->optInToCollectStatusPublishedBefore($options['before']);
+            $selectors->optInToCollectStatusPublishedBefore($options['before']);
         }
 
         if (array_key_exists('screen_name', $options) && $options['screen_name']) {
-            $strategy->optInToCollectStatusFor($options['screen_name']);
+            $selectors->optInToCollectStatusFor($options['screen_name']);
         }
 
-        return $strategy;
+        return $selectors;
     }
 
     private ?string $dateBeforeWhichStatusAreCollected = null;
@@ -87,7 +87,7 @@ class CollectionStrategy implements CollectionStrategyInterface
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
-    public function optInToCollectStatusFor(string $screenName): CollectionStrategyInterface
+    public function optInToCollectStatusFor(string $screenName): CurationSelectorsInterface
     {
         $this->screenName = $screenName;
 
@@ -109,14 +109,14 @@ class CollectionStrategy implements CollectionStrategyInterface
         return $this;
     }
 
-    public function optInToCollectStatusWhichIdIsLessThan($maxStatusId): CollectionStrategyInterface
+    public function optInToCollectStatusWhichIdIsLessThan($maxStatusId): CurationSelectorsInterface
     {
         $this->maxStatusId = $maxStatusId;
 
         return $this;
     }
 
-    public function optInToCollectStatusWhichIdIsGreaterThan($minStatusId): CollectionStrategyInterface
+    public function optInToCollectStatusWhichIdIsGreaterThan($minStatusId): CurationSelectorsInterface
     {
         $this->minStatusId = $minStatusId;
 

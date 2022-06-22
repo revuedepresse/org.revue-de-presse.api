@@ -5,8 +5,8 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\Command;
 
 use App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Curation\CurationStrategyInterface;
-use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -41,8 +41,8 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
 
         $this->commandTester->execute(
             [
-                CurationStrategyInterface::RULE_SCREEN_NAME => ApiAccessorBuilder::SCREEN_NAME,
-                '--'.CurationStrategyInterface::RULE_LIST => ApiAccessorBuilder::LIST_NAME,
+                CurationRulesetInterface::RULE_SCREEN_NAME => ApiAccessorBuilder::SCREEN_NAME,
+                '--'.CurationRulesetInterface::RULE_LIST => ApiAccessorBuilder::LIST_NAME,
             ]
         );
 
@@ -62,7 +62,7 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
         $kernel = static::bootKernel();
 
         $command = static::getContainer()->get(DispatchFetchTweetsMessages::class);
-        $command->setPublicationMessageDispatcher($this->prophesizePublicationMessagerDispatcher());
+        $command->setFetchTweetsMessageDispatcher($this->prophesizePublicationMessagerDispatcher());
 
         $application = new Application($kernel);
 
@@ -76,13 +76,13 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
      */
     private function prophesizePublicationMessagerDispatcher()
     {
-        $publicationMessageDispatcherProphecy = $this->prophesize(PublicationMessageDispatcher::class);
-        $publicationMessageDispatcherProphecy->dispatchPublicationMessages(
-            Argument::type(CurationStrategyInterface::class),
+        $fetchTweetsMessageDispatcherProphecy = $this->prophesize(FetchTweetsMessageDispatcher::class);
+        $fetchTweetsMessageDispatcherProphecy->dispatchFetchTweetsMessages(
+            Argument::type(CurationRulesetInterface::class),
             Argument::type(TokenInterface::class),
             Argument::cetera()
         );
 
-        return $publicationMessageDispatcherProphecy->reveal();
+        return $fetchTweetsMessageDispatcherProphecy->reveal();
     }
 }

@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
@@ -221,7 +221,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function savePublicationsForScreenName(
         array $statuses,
         string $screenName,
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ) {
         $success = null;
 
@@ -230,7 +230,7 @@ class StatusPersistence implements StatusPersistenceInterface
         }
 
         $publishersList = null;
-        $publishersListId = $collectionStrategy->publishersListId();
+        $publishersListId = $selectors->publishersListId();
         if ($publishersListId !== null) {
             /** @var PublishersList $publishersList */
             $publishersList = $this->publishersListRepository->findOneBy(
@@ -245,7 +245,7 @@ class StatusPersistence implements StatusPersistenceInterface
 
         $savedStatuses = $this->saveStatuses(
             $statuses,
-            $collectionStrategy,
+            $selectors,
             $publishersList
         );
 
@@ -256,9 +256,9 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function saveStatuses(
-        array $statuses,
-        CollectionStrategyInterface $collectionStrategy,
-        PublishersList $publishersList = null
+        array                      $statuses,
+        CurationSelectorsInterface $selectors,
+        PublishersList             $publishersList = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,

@@ -14,6 +14,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use JsonException;
 use Throwable;
 use const JSON_THROW_ON_ERROR;
 
@@ -56,6 +57,10 @@ class PublishersListCollectedEventRepository extends ServiceEntityRepository imp
         return $membershipCollection;
     }
 
+    /**
+     * @throws PublishersListNotFoundException
+     * @throws JsonException
+     */
     public function byListId(string $listId): MemberCollectionInterface
     {
         $event = $this->findOneBy(['listId' => $listId], ['occurredAt' => 'DESC']);

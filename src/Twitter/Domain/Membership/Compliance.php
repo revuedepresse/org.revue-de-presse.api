@@ -9,7 +9,7 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use Exception;
 use function sprintf;
 
-class MemberwiseStrategy implements MemberFacingStrategyInterface
+class Compliance implements ApiComplianceInterface
 {
     /**
      * @param MemberInterface $member
@@ -17,7 +17,7 @@ class MemberwiseStrategy implements MemberFacingStrategyInterface
      *
      * @throws SkippableMemberException
      */
-    public static function guardAgainstProtectedMember(
+    public static function skipProtectedMember(
         MemberInterface $member,
         MemberIdentity $memberIdentity
     ): void {
@@ -37,7 +37,7 @@ class MemberwiseStrategy implements MemberFacingStrategyInterface
      *
      * @throws SkippableMemberException
      */
-    public static function guardAgainstSuspendedMember(
+    public static function skipSuspendedMember(
         MemberInterface $member,
         MemberIdentity $memberIdentity
     ): void {

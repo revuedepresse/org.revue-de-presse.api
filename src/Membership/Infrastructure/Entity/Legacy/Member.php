@@ -458,10 +458,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return !$this->hasBeenDeclaredAsNotFound();
     }
 
-    /**
-     * @return bool
-     * @throws \Exception
-     */
+    /** @deprecated */
     public function isAWhisperer(): bool
     {
         $oneMonthAgo = new DateTime('now', new \DateTimeZone('UTC'));
@@ -469,6 +466,10 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
         return !is_null($this->lastStatusPublicationDate)
             && ($this->lastStatusPublicationDate < $oneMonthAgo);
+    }
+
+    public function isLowVolumeTweetWriter(): bool {
+        return $this->isAWhisperer();
     }
 
     /**

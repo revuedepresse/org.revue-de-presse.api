@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Repository;
 
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 
 interface PublicationBatchCollectedEventRepositoryInterface
 {
     public function collectedPublicationBatch(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options
+        CurationSelectorsInterface $selectors,
+        array                      $options
     );
 }

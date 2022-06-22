@@ -40,7 +40,7 @@
       <group>persistence</group>
       <group>production_fixtures</group>
       <group>publication</group>
-      <group>publication_message_dispatcher</group>
+      <group>fetch_tweets_message_dispatcher</group>
       <group>publishers_list</group>
       <group>repository_publishers_list</group>
       <group>status_decoration</group>

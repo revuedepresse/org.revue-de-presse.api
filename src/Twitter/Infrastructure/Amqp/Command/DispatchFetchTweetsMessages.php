@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Command;
 
-use App\Twitter\Domain\Curation\CurationStrategyInterface;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchTweetsMessageDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
-use App\Twitter\Infrastructure\InputConverter\InputToCollectionStrategy;
+use App\Twitter\Infrastructure\InputConverter\InputToCurationRuleset;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,24 +20,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DispatchFetchTweetsMessages extends AggregateAwareCommand
 {
-    private const ARGUMENT_SCREEN_NAME                  = CurationStrategyInterface::RULE_SCREEN_NAME;
+    private const ARGUMENT_SCREEN_NAME                  = CurationRulesetInterface::RULE_SCREEN_NAME;
 
-    private const OPTION_BEFORE                         = CurationStrategyInterface::RULE_BEFORE;
-    private const OPTION_CURSOR                         = CurationStrategyInterface::RULE_CURSOR;
-    private const OPTION_FILTER_BY_TWEET_OWNER_USERNAME = CurationStrategyInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME;
-    private const OPTION_IGNORE_WHISPERS                = CurationStrategyInterface::RULE_IGNORE_WHISPERS;
-    private const OPTION_INCLUDE_OWNER                  = CurationStrategyInterface::RULE_INCLUDE_OWNER;
-    private const OPTION_LIST                           = CurationStrategyInterface::RULE_LIST;
-    private const OPTION_LISTS                          = CurationStrategyInterface::RULE_LISTS;
+    private const OPTION_BEFORE                         = CurationRulesetInterface::RULE_BEFORE;
+    private const OPTION_CURSOR                         = CurationRulesetInterface::RULE_CURSOR;
+    private const OPTION_FILTER_BY_TWEET_OWNER_USERNAME = CurationRulesetInterface::RULE_FILTER_BY_TWEET_OWNER_USERNAME;
+    private const OPTION_IGNORE_WHISPERS                = CurationRulesetInterface::RULE_IGNORE_WHISPERS;
+    private const OPTION_INCLUDE_OWNER                  = CurationRulesetInterface::RULE_INCLUDE_OWNER;
+    private const OPTION_LIST                           = CurationRulesetInterface::RULE_LIST;
+    private const OPTION_LISTS                          = CurationRulesetInterface::RULE_LISTS;
 
     private const OPTION_OAUTH_TOKEN                    = 'oauth_token';
     private const OPTION_OAUTH_SECRET                   = 'oauth_secret';
 
     use OwnershipAccessorTrait;
-    use PublicationMessageDispatcherTrait;
+    use FetchTweetsMessageDispatcherTrait;
     use TranslatorTrait;
 
-    private CurationStrategyInterface $collectionStrategy;
+    private CurationRulesetInterface $ruleset;
 
     public function configure()
     {
@@ -45,56 +45,48 @@ class DispatchFetchTweetsMessages extends AggregateAwareCommand
             ->setDescription('Dispatch AMQP messages to fetch member tweets.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'A token is required'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'A token is required'
             )->addOption(
                 self::OPTION_OAUTH_SECRET,
                 null,
-                InputOption::VALUE_OPTIONAL,
-                'A secret is required'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'A secret is required'
             )->addOption(
                 self::OPTION_LIST,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Single list to which production is restricted to'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'Single list to which production is restricted to'
             )
             ->addOption(
                 self::OPTION_LISTS,
-                'l',
-                InputOption::VALUE_OPTIONAL,
-                'List collection to which publication of messages is restricted to'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'List collection to which publication of messages is restricted to'
             )
             ->addOption(
                 self::OPTION_CURSOR,
-                'c',
-                InputOption::VALUE_OPTIONAL,
-                'Cursor from which ownership are to be fetched'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'Cursor from which ownership are to be fetched'
             )->addOption(
                 self::OPTION_FILTER_BY_TWEET_OWNER_USERNAME,
-                'fo',
-                InputOption::VALUE_OPTIONAL,
-                'Filter by Twitter member username'
+                mode: InputOption::VALUE_OPTIONAL,
+                description:'Filter by Twitter member username'
             )->addOption(
                 self::OPTION_BEFORE,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Date before which statuses should have been created'
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'Date before which statuses should have been created'
             )->addOption(
                 self::OPTION_INCLUDE_OWNER,
-                null,
-                InputOption::VALUE_NONE,
-                'Should add owner to the list of accounts to be considered'
+                mode: InputOption::VALUE_NONE,
+                description: 'Should add owner to the list of accounts to be considered'
             )->addOption(
                 self::OPTION_IGNORE_WHISPERS,
-                'iw',
-                InputOption::VALUE_NONE,
-                'Should ignore whispers (publication from members having not published anything for a month)'
+                mode: InputOption::VALUE_NONE,
+                description: 'Should ignore whispers (publication from members having not published anything for a month)'
             )
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,
-                InputArgument::REQUIRED,
-                'A member screen name'
+                mode: InputArgument::REQUIRED,
+                description: 'A member screen name'
             );
     }
 
@@ -124,8 +116,8 @@ class DispatchFetchTweetsMessages extends AggregateAwareCommand
         $returnStatus = self::FAILURE;
 
         try {
-            $this->publicationMessageDispatcher->dispatchPublicationMessages(
-                InputToCollectionStrategy::convertInputToCollectionStrategy($input),
+            $this->fetchTweetsMessageDispatcher->dispatchFetchTweetsMessages(
+                InputToCurationRuleset::convertInputToCurationRuleset($input),
                 Token::fromArray($this->getTokensFromInputOrFallback()),
                 function ($message) {
                     $this->output->writeln($message);

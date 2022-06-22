@@ -6,7 +6,7 @@ services:
 
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
-    test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher'
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'

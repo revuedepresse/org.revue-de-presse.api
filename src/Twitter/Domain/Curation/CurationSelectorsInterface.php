@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-interface CollectionStrategyInterface
+interface CurationSelectorsInterface
 {
     public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
