@@ -33,14 +33,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         ];
     }
 
-    /**
-     * @var TokenRepositoryInterface
-     */
     public TokenRepositoryInterface $tokenRepository;
 
-    /**
-     * @var PublicationCollectorInterface $collector
-     */
     protected PublicationCollectorInterface $collector;
 
     /**

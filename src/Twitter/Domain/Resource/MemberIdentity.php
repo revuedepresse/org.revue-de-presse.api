@@ -13,14 +13,14 @@ class MemberIdentity
 
     public function __construct(string $screenName, string $id)
     {
-        Assert::that($id)
-            ->numeric('Member id should be numeric.')
-            ->notEmpty('Member id should not be empty.')
-            ->all();
-
-        Assert::that($screenName)
-            ->notEmpty('Member screen name should not be empty.')
-            ->all();
+        Assert::lazy()
+            ->tryAll()
+            ->that($id)
+                ->numeric('Member id should be numeric.')
+                ->notEmpty('Member id should not be empty.')
+            ->that($screenName)
+                ->notEmpty('Member screen name should not be empty.')
+            ->verifyNow();
 
         $this->screenName = strtolower(trim($screenName));
         $this->id = strtolower(trim($id));

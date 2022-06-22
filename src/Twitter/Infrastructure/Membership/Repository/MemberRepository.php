@@ -15,6 +15,7 @@ use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
@@ -207,16 +208,16 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @param int    $totalLikes
-     * @param string $memberName
+     * @param string $screenName
      *
      * @return MemberInterface
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function declareTotalLikesOfMemberWithName(int $totalLikes, string $memberName): MemberInterface
+    public function declareTotalLikesOfMemberWithName(int $totalLikes, string $screenName): MemberInterface
     {
-        $member = $this->ensureMemberExists($memberName);
+        $member = $this->ensureMemberExists($screenName);
 
         if ($totalLikes > $member->totalLikes) {
             $member->totalLikes = $totalLikes;
@@ -435,7 +436,7 @@ QUERY;
 
     /**
      * @param int    $likesToBeAdded
-     * @param string $memberName
+     * @param string $screenName
      *
      * @return MemberInterface
      * @throws NotFoundMemberException
@@ -444,9 +445,9 @@ QUERY;
      */
     public function incrementTotalLikesOfMemberWithName(
         int $likesToBeAdded,
-        string $memberName
+        string $screenName
     ): MemberInterface {
-        $member = $this->ensureMemberExists($memberName);
+        $member = $this->ensureMemberExists($screenName);
 
         $member->totalLikes = $member->totalLikes + $likesToBeAdded;
 
@@ -457,7 +458,7 @@ QUERY;
 
     /**
      * @param int    $statusesToBeAdded
-     * @param string $memberName
+     * @param string $screenName
      *
      * @return MemberInterface
      * @throws NotFoundMemberException
@@ -466,9 +467,9 @@ QUERY;
      */
     public function incrementTotalStatusesOfMemberWithName(
         int $statusesToBeAdded,
-        string $memberName
+        string $screenName
     ): MemberInterface {
-        $member = $this->ensureMemberExists($memberName);
+        $member = $this->ensureMemberExists($screenName);
 
         $member->setTotalStatus($member->totalStatus() + $statusesToBeAdded);
         $this->saveMember($member);
@@ -781,16 +782,21 @@ QUERY;
     }
 
     /**
-     * @param string $memberName
-     *
-     * @return MemberInterface
      * @throws NotFoundMemberException
      */
-    private function ensureMemberExists(string $memberName): MemberInterface
+    private function ensureMemberExists(string $screenName): MemberInterface
     {
-        $member = $this->findOneBy(['twitter_username' => $memberName]);
+        Assert::lazy()
+            ->that($screenName)
+                ->notEmpty()
+            ->verifyNow();
+
+        $screenName = strtolower($screenName);
+
+        $member = $this->findOneBy(['twitter_username' => $screenName]);
+
         if (!$member instanceof MemberInterface) {
-            NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($memberName, 'member-not-found');
+            NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($screenName, 'member-not-found');
         }
 
         return $member;

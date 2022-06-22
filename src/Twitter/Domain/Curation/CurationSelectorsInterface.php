@@ -21,7 +21,7 @@ interface CurationSelectorsInterface
 
     public function oneOfTheOptionsIsActive(): bool;
 
-    public function optInToCollectStatusFor(string $screenName): self;
+    public function selectTweetsByMemberScreenName(string $screenName): self;
 
     public function optInToCollectStatusWhichIdIsGreaterThan($minId): self;
 

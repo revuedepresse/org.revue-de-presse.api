@@ -82,7 +82,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         array                      $options,
         ?int                       $lastCollectionBatchSize
     ) {
-        $selectors->optInToCollectStatusFor($options[FetchTweetInterface::SCREEN_NAME]);
+        $selectors->selectTweetsByMemberScreenName($options[FetchTweetInterface::SCREEN_NAME]);
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';

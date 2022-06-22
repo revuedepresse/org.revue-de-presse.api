@@ -6,6 +6,7 @@ namespace App\Twitter\Infrastructure\Curation;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use Assert\Assert;
 use function array_key_exists;
 use const INF;
 
@@ -26,7 +27,7 @@ class CurationSelectors implements CurationSelectorsInterface
         }
 
         if (array_key_exists('screen_name', $options) && $options['screen_name']) {
-            $selectors->optInToCollectStatusFor($options['screen_name']);
+            $selectors->selectTweetsByMemberScreenName($options['screen_name']);
         }
 
         return $selectors;
@@ -36,7 +37,7 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private ?int $publishersListId = null;
 
-    private string $screenName;
+    private string $memberSelectorByScreenName;
 
     private $maxStatusId;
 
@@ -87,9 +88,14 @@ class CurationSelectors implements CurationSelectorsInterface
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
-    public function optInToCollectStatusFor(string $screenName): CurationSelectorsInterface
+    public function selectTweetsByMemberScreenName(string $screenName): CurationSelectorsInterface
     {
-        $this->screenName = $screenName;
+        Assert::lazy()
+            ->that($screenName)
+                ->notEmpty()
+            ->verifyNow();
+
+        $this->memberSelectorByScreenName = strtolower($screenName);
 
         return $this;
     }
@@ -130,6 +136,6 @@ class CurationSelectors implements CurationSelectorsInterface
 
     public function screenName(): string
     {
-        return $this->screenName;
+        return $this->memberSelectorByScreenName;
     }
 }
