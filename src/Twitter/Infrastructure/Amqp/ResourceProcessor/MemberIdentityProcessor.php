@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Domain\Membership\Compliance\Compliance;
+use App\Membership\Domain\Compliance\Compliance;
 use App\Membership\Domain\Exception\MembershipException;
 use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;

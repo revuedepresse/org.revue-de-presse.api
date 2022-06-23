@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain\Membership\Compliance;
+namespace App\Membership\Domain\Compliance;
 
 use App\Membership\Domain\Compliance\ApiComplianceInterface;
 use App\Membership\Domain\Model\MemberInterface;
