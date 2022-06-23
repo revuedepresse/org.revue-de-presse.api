@@ -26,3 +26,6 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Twitter\Infrastructure\Amqp\Message\FetchTweet': publications
+
+    router:
+        enabled:    false
