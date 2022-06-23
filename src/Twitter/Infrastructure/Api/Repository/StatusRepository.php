@@ -96,7 +96,7 @@ class StatusRepository extends ArchivedStatusRepository
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select('t.id as identifier')
-            ->andWhere('LOWER(s.screenName) = :screenName');
+            ->andWhere('LOWER(t.screenName) = :screenName');
 
         $queryBuilder->setParameter('screenName', strtolower($screenName));
 
