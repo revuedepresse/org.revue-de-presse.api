@@ -1,4 +1,5 @@
 services:
+
     App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider:
         class: 'App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider'
         calls:
@@ -14,3 +15,11 @@ services:
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
+
+    App\NewsReview\Infrastructure\Repository\PublishersListRepository:
+        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+        arguments:
+            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
+
+    App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
+        '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'
