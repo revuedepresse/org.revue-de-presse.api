@@ -518,7 +518,7 @@ QUERY;
     {
         $queryBuilder = $this->createQueryBuilder('m');
         $queryBuilder->select('m.id as identifier')
-            ->andWhere('LOWER(s.twitter_username) = :screenName');
+            ->andWhere('LOWER(m.twitter_username) = :screenName');
 
         $queryBuilder->setParameter('screenName', strtolower($screenName));
 
