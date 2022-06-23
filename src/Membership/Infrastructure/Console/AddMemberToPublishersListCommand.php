@@ -2,7 +2,7 @@
 
 namespace App\Membership\Infrastructure\Console;
 
-use App\AbstractCommand;
+use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
