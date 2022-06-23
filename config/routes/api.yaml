@@ -1,0 +1,86 @@
+aggregate:
+    path:     '/api/twitter/admin/lists'
+    defaults: { _controller: controller.list::getAggregates }
+
+authentication_verify:
+    path:     '/api/authentication/verify'
+    defaults: { _controller: controller.authentication::verify }
+
+bulk_collect_statuses:
+    path:     '/api/twitter/admin/bulk-collect-statuses'
+    defaults: { _controller: controller.list::bulkCollectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
+
+collect:
+    path:     '/api/twitter/admin/collect'
+    defaults: { _controller: controller.list::requestCollection }
+    methods:  [POST, OPTIONS]
+
+collect_statuses:
+    path:     '/api/twitter/admin/aggregate/collect-statuses'
+    defaults: { _controller: controller.publishers_list::collectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
+
+healthcheck:
+    path:     '/api/healthcheck'
+    defaults: { _controller: controller.healthcheck::areServicesHealthy }
+
+highlight:
+    path:     '/api/twitter/highlights'
+    defaults: { _controller: controller.list::getHighlights }
+
+keywords:
+    path:     '/api/twitter/admin/keywords'
+    defaults: { _controller: controller.keyword::getKeywords }
+
+member:
+    path:     '/api/twitter/admin/members'
+    defaults: { _controller: controller.list::getMembers }
+
+status:
+    path:     '/api/twitter/admin/statuses'
+    defaults: { _controller: controller.list::getStatuses }
+
+logged_in_member_profile:
+    path:     '/api/twitter/admin/logged-in-member/profile'
+    defaults: { _controller: controller.logged_in_member::getProfile }
+    methods:  [POST, OPTIONS]
+
+refresh_member_profile:
+    path:     '/api/twitter/admin/member/refresh-profile'
+    defaults: { _controller: controller.member::refreshProfile }
+    methods:  [POST, OPTIONS]
+
+remove_aggregate:
+    path:     '/api/twitter/admin/aggregate'
+    defaults: { _controller: controller.publishers_list::bulkRemoveAggregates }
+    methods:  [POST, OPTIONS]
+
+reset_total_members_for_aggregate:
+    path:     '/api/twitter/admin/aggregate/reset-total-statuses'
+    defaults: { _controller: controller.publishers_list::resetTotalStatusesForAggregates }
+    methods:  [POST, OPTIONS]
+
+member_subscriptions:
+    path:     '/api/twitter/admin/member-subscriptions'
+    defaults: { _controller: controller.subscription::getMemberSubscriptions }
+
+publication:
+    path:     '/api/twitter/publication/{publicationId}'
+    defaults:       { _controller: controller.publication::getPublication }
+    methods:        [GET, OPTIONS]
+    requirements:
+        status_id: \d+
+
+publications:
+    path:     '/api/twitter/admin/publications'
+    defaults: { _controller: controller.publication::getPublications }
+
+publishers_lists:
+    path:     '/api/twitter/admin/publication-lists'
+    defaults: { _controller: controller.publishers_list::getPublishersLists }
+
+unlock:
+    path:     '/api/twitter/admin/unlock-aggregate'
+    defaults: { _controller: controller.list::unlockAggregate }
+    methods:  [POST, OPTIONS]
