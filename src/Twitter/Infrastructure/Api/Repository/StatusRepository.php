@@ -92,11 +92,19 @@ class StatusRepository extends ArchivedStatusRepository
      * @throws \App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function tweetSharedByMemberHavingScreenName(string $screenName, $orderBy = []): StatusInterface
+    public function tweetSharedByMemberHavingScreenName(string $screenName, $orderBy = null): StatusInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select('t.id as identifier')
-            ->andWhere('LOWER(t.screenName) = :screenName');
+            ->andWhere('LOWER(t.screenName) = :screenName')
+            ->setMaxResults(1);
+
+        if (is_array($orderBy)) {
+            $column = key($orderBy);
+            reset($orderBy);
+
+            $queryBuilder->orderBy($column, $orderBy[$column]);
+        }
 
         $queryBuilder->setParameter('screenName', strtolower($screenName));
 
