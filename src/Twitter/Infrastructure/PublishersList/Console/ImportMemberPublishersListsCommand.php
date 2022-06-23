@@ -6,16 +6,15 @@ namespace App\Twitter\Infrastructure\PublishersList\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberPublishersListSubscriptionRepositoryInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
@@ -23,11 +22,12 @@ use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListColl
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -145,8 +145,8 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
-     * @param array          $membersIndexedByTwitterId
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
+     * @param array                                                    $membersIndexedByTwitterId
      *
      * @return MemberInterface|object|null
      * @throws NotFoundMemberException

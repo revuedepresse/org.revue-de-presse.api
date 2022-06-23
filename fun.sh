@@ -126,14 +126,14 @@ function dispatch_amqp_messages() {
         up \
         --detach \
         --no-recreate \
-        app
+        worker
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
         --env _WORKER="${WORKER}" \
-        -T app \
+        -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
 

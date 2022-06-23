@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -21,7 +21,7 @@ class MemberProfileAccessorBuilder extends TestCase
 
         $accessor->getMemberByIdentity(Argument::type(MemberIdentity::class))
             ->will(function ($arguments) {
-                /** @var MemberIdentity $memberIdentity */
+                /** @var \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity */
                 $memberIdentity = $arguments[0];
 
                 return (new Member())

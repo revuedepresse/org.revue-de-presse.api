@@ -13,7 +13,7 @@ use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 
 class TimelyStatusRepository extends ServiceEntityRepository implements TimelyStatusRepositoryInterface

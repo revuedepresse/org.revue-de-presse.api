@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\TwitterMemberInterface;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Entity\ExceptionalMember;
-use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\NotFoundMember;
 use App\Membership\Infrastructure\Entity\ProtectedMember;
 use App\Membership\Infrastructure\Entity\SuspendedMember;
@@ -18,7 +17,7 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Psr\Log\LoggerInterface;
 
 class NetworkRepository implements NetworkRepositoryInterface
@@ -27,7 +26,7 @@ class NetworkRepository implements NetworkRepositoryInterface
 
     public MemberSubscriptionRepository $memberSubscriptionRepository;
 
-    public MemberRepository $memberRepository;
+    public \App\Membership\Infrastructure\Repository\MemberRepository $memberRepository;
 
     public EntityManager $entityManager;
 

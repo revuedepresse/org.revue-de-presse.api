@@ -47,8 +47,8 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
         $this->output = $output;
 
         $messageBody = [
-            'secret' => $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default'),
-            'token' => $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default')
+            'secret' => $this->getContainer()->getParameter('app.twitter.oauth_secret.default'),
+            'token' => $this->getContainer()->getParameter('app.twitter.oauth_token.default')
         ];
 
         $this->setUpDependencies();

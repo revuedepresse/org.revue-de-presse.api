@@ -4,11 +4,11 @@ declare (strict_types=1);
 namespace App\Tests\Membership\Builder\Repository;
 
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -19,7 +19,7 @@ use Throwable;
 
 class NetworkRepositoryBuilder extends TestCase
 {
-    public static function build(MemberRepositoryInterface $repository, LoggerInterface $logger)
+    public static function build(\App\Membership\Domain\Repository\MemberRepositoryInterface $repository, LoggerInterface $logger)
     {
         $testCase = new class() extends TestCase {
             use ProphecyTrait;
@@ -54,10 +54,10 @@ class NetworkRepositoryBuilder extends TestCase
     }
 
     /**
-     * @param MemberRepositoryInterface $repository
+     * @param \App\Membership\Domain\Repository\MemberRepositoryInterface $repository
      * @return MemberInterface
      */
-    private static function ensureMembersExistsInDatabase(MemberRepositoryInterface $repository): MemberInterface
+    private static function ensureMembersExistsInDatabase(\App\Membership\Domain\Repository\MemberRepositoryInterface $repository): MemberInterface
     {
         $twitterId = ApiAccessorBuilder::PUBLISHERS_LIST_MEMBER_TWITTER_ID;
 

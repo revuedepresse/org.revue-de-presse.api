@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
-use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository;
-use App\Twitter\Infrastructure\Api\Accessor\MemberProfileAccessor;
-use App\Twitter\Infrastructure\Api\UnavailableResourceHandler;
-use App\Twitter\Domain\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Domain\Api\UnavailableResourceHandlerInterface;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Api\Accessor\MemberProfileAccessor;
+use App\Twitter\Infrastructure\Api\UnavailableResourceHandler;
+use App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Exception;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

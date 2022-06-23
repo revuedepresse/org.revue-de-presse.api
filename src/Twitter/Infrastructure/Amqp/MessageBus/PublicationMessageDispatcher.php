@@ -3,24 +3,24 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
+use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
+use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
-use App\Twitter\Domain\Resource\MemberOwnerships;
-use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Domain\Resource\PublishersList;
-use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
+use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use Closure;
 use DateTimeImmutable;
 use Exception;
@@ -235,7 +235,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
      * @param OwnershipCollection $ownerships
      * @param TokenInterface      $token
      *
-     * @return OwnershipCollection
+     * @return \App\Twitter\Infrastructure\Http\Resource\OwnershipCollection
      * @throws InvalidListNameException
      */
     private function guardAgainstInvalidListName(

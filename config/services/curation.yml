@@ -1,12 +1,12 @@
 services:
 
-    App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider:
-        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider'
+    App\Twitter\Infrastructure\Collector\InterruptibleCurator:
+        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCurator'
         calls:
             - [ 'setApiAccessor',                           [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setModerator',                             [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublishersListRepository',             [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setStatusAccessor',                        [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
@@ -16,10 +16,15 @@ services:
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
 
-    App\NewsReview\Infrastructure\Repository\PublishersListRepository:
-        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRepository'
-        arguments:
-            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
-
-    App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
-        '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+    App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler'
+        calls:
+            - [ 'setCurator',           [ '@App\Twitter\Infrastructure\Collector\TweetCurator' ] ]
+            - [ 'setLogger',            [ '@monolog.logger.twitter_api' ] ]
+            - [ 'setMemberRepository',  [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
+        properties:
+            tokenRepository:            '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
+        tags:
+            -
+                name:       'messenger.message_handler'
+                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchTweet'

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use Assert\Assert;
 use function array_key_exists;

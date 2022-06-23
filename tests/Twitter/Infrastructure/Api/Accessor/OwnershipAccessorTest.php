@@ -3,19 +3,18 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
-use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberOwnerships;
-use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
-use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Entity\TokenChangeBuilder;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
-use App\Twitter\Infrastructure\Exception\OverCapacityException;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
+use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
+use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
+use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\Api\Selector\AuthenticatedSelector;
+use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
+use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use Exception;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

@@ -3,11 +3,11 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Mutator;
 
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
-use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator;
 use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;

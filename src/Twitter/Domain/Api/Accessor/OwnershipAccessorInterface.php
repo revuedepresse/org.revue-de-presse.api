@@ -5,8 +5,8 @@ namespace App\Twitter\Domain\Api\Accessor;
 
 use App\Twitter\Domain\Api\Selector\AuthenticatedSelectorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
-use App\Twitter\Domain\Resource\MemberOwnerships;
-use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 
 interface OwnershipAccessorInterface extends TwitterApiEndpointsAwareInterface
 {

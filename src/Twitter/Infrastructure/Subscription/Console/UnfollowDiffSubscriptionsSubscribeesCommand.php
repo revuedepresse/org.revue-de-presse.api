@@ -3,18 +3,18 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
-use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
-use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
+use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

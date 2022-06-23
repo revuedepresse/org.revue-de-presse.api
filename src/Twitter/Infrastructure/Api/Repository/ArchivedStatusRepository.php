@@ -3,28 +3,28 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
+use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
-use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Operation\Collection\CollectionInterface;
-use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -33,7 +33,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -96,13 +96,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
-     * @param $screenName
-     *
-     * @return int
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function countHowManyStatusesFor($screenName): int
+    public function countHowManyStatusesFor(string $screenName): int
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')

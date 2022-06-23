@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Operation\Collection\Collection;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
+use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
+use App\Twitter\Infrastructure\Operation\Collection\Collection;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use Doctrine\ORM\EntityManagerInterface;
 use function count;
 

@@ -4,9 +4,9 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 

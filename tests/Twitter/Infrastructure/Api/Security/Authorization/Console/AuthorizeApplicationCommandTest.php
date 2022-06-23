@@ -4,10 +4,10 @@ declare (strict_types=1);
 namespace App\Tests\Twitter\Api\Security\Authorization\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Tests\Twitter\Infrastructure\Api\Security\Authorization\Builder\AuthorizeAccessBuilder;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -45,8 +45,8 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
         $this->tokenRepository = static::getContainer()->get('test.'.TokenRepositoryInterface::class);
         $this->memberRepository = static::getContainer()->get('test.'.MemberRepositoryInterface::class);
 
-        $this->consumerKey = static::getContainer()->getParameter('twitter_api.consumer_key');
-        $this->consumerSecret = static::getContainer()->getParameter('twitter_api.consumer_secret');
+        $this->consumerKey = static::getContainer()->getParameter('app.twitter_api.consumer_key');
+        $this->consumerSecret = static::getContainer()->getParameter('app.twitter_api.consumer_secret');
 
         $application = new Application($kernel);
 

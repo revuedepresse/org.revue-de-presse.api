@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Api\Resource;
 
 use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Closure;
 use function count;
 
@@ -18,7 +18,7 @@ class MemberCollection implements MemberCollectionInterface
     {
         $this->members = array_map(
             function ($member) {
-                if ($member instanceof MemberIdentity) {
+                if ($member instanceof \App\Twitter\Infrastructure\Http\Resource\MemberIdentity) {
                     return $member;
                 }
 
@@ -66,7 +66,7 @@ class MemberCollection implements MemberCollectionInterface
     }
 
     /**
-     * @return array<MemberIdentity>
+     * @return array<\App\Twitter\Infrastructure\Http\Resource\MemberIdentity>
      *
      * @inheritDoc
      */

@@ -4,15 +4,15 @@ declare (strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Mutator;
 
 use Abraham\TwitterOAuth\TwitterOAuthException;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
-use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
-use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 
 class FriendshipMutator implements FriendshipMutatorInterface
 {

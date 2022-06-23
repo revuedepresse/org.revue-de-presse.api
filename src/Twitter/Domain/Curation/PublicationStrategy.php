@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\PublishersList;
 use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -139,7 +139,7 @@ class PublicationStrategy implements PublicationStrategyInterface
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
      *
      *
      * @return bool

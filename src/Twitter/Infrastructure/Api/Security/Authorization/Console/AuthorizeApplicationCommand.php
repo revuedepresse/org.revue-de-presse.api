@@ -3,16 +3,16 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Security\Authorization\Console;
 
+use App\Membership\Domain\Exception\MembershipException;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Security\Authorization\AuthorizeAccessInterface;
-use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Api\Security\Authorization\InvalidPinCodeException;
 use App\Twitter\Infrastructure\Api\Security\Authorization\Verifier;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Console\Exception\InterruptedConsoleCommandException;
-use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Input\InputInterface;

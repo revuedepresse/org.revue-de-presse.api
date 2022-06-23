@@ -29,6 +29,8 @@ interface MemberInterface extends UserInterface
 
     public function twitterScreenName(): ?string;
 
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface;
+
     /**
      * @deprecated
      */
@@ -63,9 +65,13 @@ interface MemberInterface extends UserInterface
 
     public function getUrl(): ?string;
 
-    public function totalStatus(): int;
+    public function totalLikes(): int;
 
-    public function setTotalStatus($totalStatus): MemberInterface;
+    public function setTotalLikes(int $totalLikes): MemberInterface;
+
+    public function totalTweets(): int;
+
+    public function setTotalTweets($totalTweets): MemberInterface;
 
     public function getMinStatusId(): int;
 

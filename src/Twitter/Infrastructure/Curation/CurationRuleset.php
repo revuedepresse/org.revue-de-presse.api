@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\PublishersList;
-use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareTrait;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;

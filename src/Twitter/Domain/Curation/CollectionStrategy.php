@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-use App\Twitter\Domain\Publication\Repository\LikedStatusRepositoryInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
+use App\Twitter\Domain\Publication\Repository\LikedStatusRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use function array_key_exists;
 use const INF;
 

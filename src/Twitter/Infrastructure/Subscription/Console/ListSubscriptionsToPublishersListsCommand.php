@@ -5,9 +5,9 @@ namespace App\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
-use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;

@@ -2,17 +2,17 @@
 
 namespace App\Membership\Infrastructure\Console;
 
-use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddMemberToPublishersListCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'app:add-member-to-list';
+    public const COMMAND_NAME = 'app:add-members-to-list';
 
     public const OPTION_PUBLISHERS_LIST_NAME = 'publishers_list_name';
 

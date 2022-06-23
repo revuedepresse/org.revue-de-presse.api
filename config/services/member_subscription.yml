@@ -4,7 +4,7 @@ services:
         arguments:
             - !php/const 'App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand::COMMAND_NAME'
             - '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
-            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             - '@App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface'
             - '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface'
@@ -24,7 +24,7 @@ services:
         calls:
             - [ 'setApiAccessor', [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface' ] ]
             - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
@@ -40,7 +40,7 @@ services:
         calls:
             - [ 'setMutator', [ '@App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator' ] ]
             - [ 'setListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
         tags:
             - { name: 'console.command' }
 

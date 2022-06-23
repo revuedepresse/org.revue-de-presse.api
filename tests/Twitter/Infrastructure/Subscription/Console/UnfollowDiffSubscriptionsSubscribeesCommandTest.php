@@ -3,16 +3,16 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
-use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
-use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;

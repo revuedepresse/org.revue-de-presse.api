@@ -7,17 +7,18 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use function array_key_exists;
@@ -88,17 +89,51 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param $screenName
-     *
-     * @return int
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws \App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function countHowManyStatusesFor($screenName): int
+    public function tweetSharedByMemberHavingScreenName(string $screenName, $orderBy = []): StatusInterface
     {
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
-        if ($member instanceof MemberInterface && $member->totalStatuses !== 0) {
-            $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select('t.id as identifier')
+            ->andWhere('LOWER(s.screenName) = :screenName');
+
+        $queryBuilder->setParameter('screenName', strtolower($screenName));
+
+        try {
+            $statusIdentifier = $queryBuilder->getQuery()->getSingleResult()['identifier'];
+            $status = $this->findOneBy(['id' => $statusIdentifier], $orderBy);
+
+            if (!$status instanceof StatusInterface) {
+                throw new NoResultException();
+            }
+
+        } catch (NoResultException $exception) {
+            throw new NotFoundStatusException(sprintf(
+                'No status was found for member with screen name "%s"',
+                $screenName
+            ), $exception->getCode(), $exception);
+        }
+
+        return $status;
+    }
+
+    /**
+     * @throws \App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
+    public function countHowManyStatusesFor(string $screenName): int
+    {
+        $member = $this->memberRepository->memberHavingScreenName($screenName);
+
+        if ($member->totalTweets() !== 0) {
+            $status = $this->tweetSharedByMemberHavingScreenName($screenName, ['createdAt' => 'DESC']);
+
             $decodedStatusDocument = json_decode(
                 $status->getApiDocument(),
                 true,
@@ -110,7 +145,7 @@ class StatusRepository extends ArchivedStatusRepository
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 
-            return $member->totalStatuses;
+            return $member->totalTweets();
         }
 
         $queryBuilder = $this->createQueryBuilder('s');
@@ -136,11 +171,10 @@ class StatusRepository extends ArchivedStatusRepository
      */
     public function updateLastStatusPublicationDate($screenName): MemberInterface
     {
-        /** @var MemberInterface $member */
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->memberHavingScreenName($screenName);
 
         $lastStatus = $this->getLastKnownStatusFor($screenName);
-        $member->lastStatusPublicationDate = $lastStatus->getCreatedAt();
+        $member->setLastStatusPublicationDate($lastStatus->getCreatedAt());
 
         return $this->memberRepository->saveMember($member);
     }

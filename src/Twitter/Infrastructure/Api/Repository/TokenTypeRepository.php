@@ -8,7 +8,7 @@ use App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\TokenType;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 
 /**
  * @method TokenType|null find($id, $lockMode = null, $lockVersion = null)

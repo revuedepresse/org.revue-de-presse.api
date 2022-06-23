@@ -1,5 +1,5 @@
 imports:
-    - { resource: services/api.yml }
+    - { resource: services/_parameters.yml }
     - { resource: services/curation.yml }
     - { resource: services/console.yml }
     - { resource: services/mapping.yml }
@@ -9,6 +9,7 @@ imports:
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
+    - { resource: services/twitter_api.yml }
     - { resource: services/worker.yml }
 
 services:
@@ -22,12 +23,6 @@ services:
     #    App\:
     #        resource: '../src/*'
     #        exclude: '../src/{Controler,DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
-
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Twitter/Infrastructure/PublishersList/Controller/.*.php'
-        tags: ['controller.service_arguments']
 
     App\Twitter\Infrastructure\Log\StatusLogger:
         class: 'App\Twitter\Infrastructure\Log\StatusLogger'
@@ -46,7 +41,7 @@ services:
         class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Status'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
@@ -68,7 +63,7 @@ services:
         class: 'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.archived_status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\ArchivedStatus'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
@@ -81,13 +76,13 @@ services:
             connection:             '@doctrine.dbal.default_connection'
             registry:               '@doctrine'
 
-    weaving_the_web_twitter.repository.read.status:
+    app.twitter.repository.read.status:
         class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Status'
         calls:
-            - [ 'setOauthTokens',            [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
+            - [ 'setOauthTokens',            [ [ '%app.twitter.oauth_token.default%' ] ] ]
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
@@ -148,10 +143,10 @@ services:
     App\Twitter\Infrastructure\Api\Accessor:
         class: 'App\Twitter\Infrastructure\Api\Accessor'
         arguments:
-            - '%twitter_api.consumer_key%'
-            - '%twitter_api.consumer_secret%'
-            - '%weaving_the_web_twitter.oauth_token.default%'
-            - '%weaving_the_web_twitter.oauth_secret.default%'
+            - '%app.twitter_api.consumer_key%'
+            - '%app.twitter_api.consumer_secret%'
+            - '%app.twitter.oauth_token.default%'
+            - '%app.twitter.oauth_secret.default%'
             - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
             - '@monolog.logger.twitter_api'
         properties:
@@ -159,13 +154,13 @@ services:
             twitterApiLogger:     '@monolog.logger.twitter_api'
             statusAccessor:       '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
         calls:
-            - [ 'setConsumerKey', [ '%twitter_api.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%twitter_api.consumer_secret%' ] ]
+            - [ 'setConsumerKey', [ '%app.twitter_api.consumer_key%' ] ]
+            - [ 'setConsumerSecret', [ '%app.twitter_api.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setTranslator', [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
-            - [ 'setAccessToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
-            - [ 'setAccessTokenSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
+            - [ 'setAccessToken', [ '%app.twitter.oauth_token.default%' ] ]
+            - [ 'setAccessTokenSecret', [ '%app.twitter.oauth_secret.default%' ] ]
 
     App\Twitter\Domain\Api\Accessor\ApiAccessorInterface:
         '@App\Twitter\Infrastructure\Api\Accessor'
@@ -179,7 +174,7 @@ services:
         calls:
             - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger',                                    [ '@logger' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
@@ -201,14 +196,14 @@ services:
         arguments:
             - '@?logger'
 
-    App\Twitter\Infrastructure\Collector\PublicationCollector:
-        class: 'App\Twitter\Infrastructure\Collector\PublicationCollector'
+    App\Twitter\Infrastructure\Collector\TweetCurator:
+        class: 'App\Twitter\Infrastructure\Collector\TweetCurator'
         calls:
             - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-            - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider' ] ]
+            - [ 'setInterruptibleCurator',                      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCurator' ] ]
             - [ 'setLogger',                                    [ '@monolog.logger.twitter_api' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setModerator',                                 [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository' ] ]
             - [ 'setPublishersListRepository',                  [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
@@ -222,39 +217,10 @@ services:
             - [ 'setWhispererIdentification',                   [ '@App\Twitter\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                       [ '@repository.whisperer' ] ]
         properties:
-            twitterApiLogger:       '@monolog.logger.twitter_api'
+            twitterApiLogger:                                   '@monolog.logger.twitter_api'
 
     App\Twitter\Infrastructure\Translation\Translator:
         class: 'App\Twitter\Infrastructure\Translation\Translator'
         arguments:
             - '@translator'
             - '@logger'
-
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
-parameters:
-    monolog_channels:
-        - 'deprecation' # Deprecations are logged in the dedicated "deprecation" channel when it exists
-        - 'twitter_api'
-        - 'development'
-        - 'membership'
-
-    weaving_the_web_twitter.api_host:                             'api.twitter.com'
-
-    twitter_api.consumer_key:                                     '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
-    twitter_api.consumer_secret:                                  '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
-
-    weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
-    weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
-
-    weaving_the_web_twitter.entity.archived_status.class:         'App\Twitter\Infrastructure\Api\Entity\ArchivedStatus'
-    weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
-
-    repository.publishers_list.class:                            '%weaving_the_web_api.repository.publishers_list.class%'
-
-    weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
-
-    publishers_list_default:                                      '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'

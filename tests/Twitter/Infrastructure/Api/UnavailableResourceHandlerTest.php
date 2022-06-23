@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api;
 
-use App\Twitter\Domain\Membership\Exception\ExceptionalMemberInterface;
-use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Api\UnavailableResource;
-use App\Twitter\Infrastructure\Api\UnavailableResourceHandler;
+use App\Membership\Domain\Exception\ExceptionalMemberInterface;
+use App\Membership\Domain\Exception\MembershipException;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Infrastructure\Api\UnavailableResource;
+use App\Twitter\Infrastructure\Api\UnavailableResourceHandler;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 

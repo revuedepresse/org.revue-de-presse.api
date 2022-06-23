@@ -2,20 +2,19 @@
 
 namespace App\Conversation\Consumer;
 
-use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
+use App\Conversation\ConversationAwareTrait;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Repository\MemberRepository;
+use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
-use App\Conversation\ConversationAwareTrait;
-use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\Operation\OperationClock;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
-use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -197,7 +196,7 @@ class ConversationStatusConsumer
      *
      * @return Member
      * @throws OptimisticLockException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\Exception\ORMException
      */
     private function ensureStatusAuthorExists(Status $status): Member
     {

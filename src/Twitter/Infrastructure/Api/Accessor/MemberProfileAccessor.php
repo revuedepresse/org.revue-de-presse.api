@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Accessor;
 
-use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
-use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Api\UnavailableResource;
-use App\Twitter\Domain\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Exception\InvalidMemberException;
+use App\Membership\Domain\Exception\MembershipException;
 use App\Membership\Domain\Model\Member;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
+use App\Twitter\Domain\Api\UnavailableResourceHandlerInterface;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Api\UnavailableResource;
+use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 
 class MemberProfileAccessor implements MemberProfileAccessorInterface
 {
@@ -69,7 +69,7 @@ class MemberProfileAccessor implements MemberProfileAccessorInterface
 
     /**
      * @throws UnexpectedApiResponseException
-     * @throws MembershipException
+     * @throws \App\Membership\Domain\Exception\MembershipException
      */
     public function getMemberByIdentity(
         MemberIdentity $memberIdentity

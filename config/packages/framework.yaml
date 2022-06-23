@@ -1,3 +1,31 @@
 framework:
+    messenger:
+        failure_transport: failed
+
+        # @see https://symfony.com/doc/current/messenger.html#middleware-for-doctrine
+        buses:
+            messenger.bus.default:
+                middleware:
+                    # each time a message is handled, the Doctrine connection
+                    # is "pinged" and reconnected if it's closed. Useful
+                    # if your workers run for a long time and the database
+                    # connection is sometimes lost
+                    - doctrine_ping_connection
+
+        transports:
+            publications:
+                dsn:            '%env(MESSENGER_TRANSPORT_DSN_PUBLICATIONS)%'
+                options:
+                    persistent: true
+
+            failed:
+                dsn:            '%env(MESSENGER_TRANSPORT_DSN_FAILURES)%'
+                options:
+                    persistent: true
+
+        routing:
+            # Route your messages to the transports
+            'App\Twitter\Infrastructure\Amqp\Message\FetchTweet': publications
+
     router:
         enabled:    false

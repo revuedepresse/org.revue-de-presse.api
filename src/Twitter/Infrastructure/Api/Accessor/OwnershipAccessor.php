@@ -3,23 +3,19 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Accessor;
 
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Selector\AuthenticatedSelectorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
-use App\Twitter\Domain\Resource\MemberOwnerships;
-use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
+use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
-use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
-use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
-use Doctrine\ORM\NonUniqueResultException;
+use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 use Psr\Log\LoggerInterface;
 
 class OwnershipAccessor implements OwnershipAccessorInterface
@@ -95,11 +91,7 @@ class OwnershipAccessor implements OwnershipAccessorInterface
         $totalUnfrozenToken = $this->tokenRepository->howManyUnfrozenTokenAreThere();
         $ownershipCollection = OwnershipCollection::fromArray([]);
 
-        if ($selector instanceof CorrelationIdAwareInterface) {
-            $correlationId = $selector->correlationId();
-        } else {
-            $correlationId = CorrelationIdInterface::generate();
-        }
+        $correlationId = $selector->correlationId();
 
         $eventRepository = $this->ownershipBatchCollectedEventRepository;
 

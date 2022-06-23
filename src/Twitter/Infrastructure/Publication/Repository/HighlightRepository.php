@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
-use App\NewsReview\Domain\Repository\SearchParamsInterface;
-use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use App\Twitter\Domain\Api\SearchParamsInterface;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
+use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
@@ -28,7 +28,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
-    public string $aggregate;
+    public string $twitterList;
 
     private const TABLE_ALIAS = 'h';
 
@@ -249,12 +249,12 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         if ($searchParams->hasParam('term')
         ) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
-            $queryBuilder->setParameter('aggregate', $this->aggregate);
+            $queryBuilder->setParameter('aggregate', $this->twitterList);
 
             return $this;
         }
 
-        $aggregates = [$this->aggregate];
+        $aggregates = [$this->twitterList];
         if ($searchParams->hasParam('aggregate')) {
             $aggregates = explode(',', $searchParams->getParams()['aggregate']);
         }
@@ -312,7 +312,7 @@ QUERY;
             $statement = $connection->executeQuery(
                 $queryDistinctAggregates,
                 [
-                    $this->aggregate,
+                    $this->twitterList,
                     $searchParams->getParams()['startDate'],
                     $searchParams->getParams()['endDate'],
                     $searchParams->getParams()['startDate'],

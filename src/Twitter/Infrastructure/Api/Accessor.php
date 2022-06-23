@@ -9,6 +9,7 @@ use Abraham\TwitterOAuth\TwitterOAuthException;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
@@ -34,12 +35,11 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Twitter\Infrastructure\Translation\Translator;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Exception;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
@@ -1407,6 +1407,9 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         );
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException
+     */
     protected function checkApiLimit()
     {
         $lastHttpCode = $this->twitterClient->getLastHttpCode();
@@ -1420,8 +1423,11 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
                 $lastApiPath
             );
             $this->twitterApiLogger->info($message);
+
             throw new NotFoundStatusException($message, self::ERROR_NOT_FOUND);
         }
+
+        usleep(500000);
 
         if ($lastHttpCode >= 400 && $lastHttpCode !== 404) {
             $this->twitterApiLogger->notice(

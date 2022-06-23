@@ -35,7 +35,7 @@ use const JSON_THROW_ON_ERROR;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Membership\Repository\MemberRepository")
+ * @ORM\Entity(repositoryClass="App\Membership\Infrastructure\Repository\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member"})
@@ -80,11 +80,21 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     public int $totalStatuses = 0;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="total_likes", type="integer", options={"default": 0})
      */
     public $totalLikes = 0;
+
+    public function totalLikes(): int
+    {
+        return $this->totalLikes;
+    }
+
+    public function setTotalLikes(int $totalLikes): MemberInterface
+    {
+        $this->totalLikes = $totalLikes;
+
+        return $this;
+    }
 
     /**
      * @ORM\Column(name="description", type="text", nullable=true)
@@ -97,11 +107,16 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     public ?string $url = null;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="last_status_publication_date", type="datetime", nullable=true)
      */
-    public ?DateTime $lastStatusPublicationDate = null;
+    public ?\DateTimeInterface $lastStatusPublicationDate = null;
+
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface
+    {
+        $this->lastStatusPublicationDate = $lastStatusPublicationDate;
+
+        return $this;
+    }
 
     /**
      * @var integer
@@ -606,14 +621,14 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function setTotalStatus($totalStatus): MemberInterface
+    public function setTotalTweets($totalTweets): MemberInterface
     {
-        $this->totalStatuses = $totalStatus;
+        $this->totalStatuses = $totalTweets;
 
         return $this;
     }
 
-    public function totalStatus(): int
+    public function totalTweets(): int
     {
         return $this->totalStatuses;
     }

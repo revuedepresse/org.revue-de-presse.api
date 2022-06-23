@@ -1,0 +1,16 @@
+parameters:
+    monolog_channels:
+      - 'deprecation' # Deprecations are logged in the dedicated "deprecation" channel when it exists
+      - 'twitter_api'
+      - 'development'
+      - 'membership'
+
+    app.twitter_api.consumer_key:       '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
+    app.twitter_api.consumer_secret:    '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
+    app.twitter.oauth_token.default:    '%env(resolve:API_TWITTER_USER_TOKEN)%'
+    app.twitter.oauth_secret.default:   '%env(resolve:API_TWITTER_USER_SECRET)%'
+    app.twitter.version:                '%env(resolve:API_TWITTER_VERSION)%'
+
+    publishers_list_default:            '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'
+
+    repository.publishers_list.class:   'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'

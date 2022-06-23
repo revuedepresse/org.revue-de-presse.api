@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
+use App\Membership\Domain\Repository\WhispererRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
-use App\Twitter\Domain\Membership\Repository\WhispererRepositoryInterface;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 
 /**
  * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>

@@ -17,7 +17,7 @@ services:
     App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface:
         factory: [ 'App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberProfileAccessorBuilder', 'build' ]
 
-    test.App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface: '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+    test.App\Membership\Domain\Repository\MemberRepositoryInterface: '@App\Membership\Domain\Repository\MemberRepositoryInterface'
     test.App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
     test.App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
@@ -29,7 +29,7 @@ services:
     App\Twitter\Domain\Api\Accessor\ApiAccessorInterface:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']
         arguments:
-            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@logger'
             - !php/const 'App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME'
 
@@ -39,7 +39,7 @@ services:
     App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\StatusAccessorBuilder', 'willEnsureMemberHavingNameExists']
         arguments:
-            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
 
     App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MembersListAccessorBuilder', 'willAddMembersToList']
@@ -47,7 +47,7 @@ services:
     App\Membership\Domain\Repository\NetworkRepositoryInterface:
         factory: ['App\Tests\Membership\Builder\Repository\NetworkRepositoryBuilder', 'build']
         arguments:
-            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@logger'
 
     test.App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand:

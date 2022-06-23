@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Api;
 
-use App\Twitter\Domain\Membership\Exception\ExceptionalMemberInterface;
-use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Membership\Domain\Exception\ExceptionalMemberInterface;
+use App\Membership\Domain\Exception\MembershipException;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 
 interface UnavailableResourceHandlerInterface extends ExceptionalMemberInterface
 {
     /**
-     * @param MemberIdentity                $memberIdentity
-     * @param UnavailableResourceInterface $resource
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
+     * @param UnavailableResourceInterface                             $resource
      *
-     * @throws MembershipException
+     * @throws \App\Membership\Domain\Exception\MembershipException
      */
     public function handle(
         MemberIdentity $memberIdentity,

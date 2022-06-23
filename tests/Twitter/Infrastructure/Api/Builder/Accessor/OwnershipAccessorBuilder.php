@@ -5,15 +5,11 @@ namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
 use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
+use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
-use Psr\Log\LoggerInterface;
 
 class OwnershipAccessorBuilder extends TestCase
 {

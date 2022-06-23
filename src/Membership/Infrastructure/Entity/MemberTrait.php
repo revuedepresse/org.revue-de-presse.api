@@ -68,6 +68,10 @@ trait MemberTrait
         return $this->twitterId();
     }
 
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface {
+        return $this;
+    }
+
     /**
      * @deprecated
      */
@@ -144,12 +148,22 @@ trait MemberTrait
         return $this->description;
     }
 
-    public function totalStatus(): int
+    public function totalLikes(): int
     {
         return 0;
     }
 
-    public function setTotalStatus($totalStatus): MemberInterface
+    public function setTotalLikes(int $totalLikes): MemberInterface
+    {
+        return $this;
+    }
+
+    public function totalTweets(): int
+    {
+        return 0;
+    }
+
+    public function setTotalTweets($totalTweets): MemberInterface
     {
         return $this;
     }

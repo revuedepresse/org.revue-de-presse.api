@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api;
 
+use App\Membership\Domain\Exception\MembershipException;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Api\UnavailableResourceHandlerInterface;
 use App\Twitter\Domain\Api\UnavailableResourceInterface;
-use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Psr\Log\LoggerInterface;
 use function sprintf;
 
@@ -37,8 +37,8 @@ class UnavailableResourceHandler implements UnavailableResourceHandlerInterface
     }
 
     /**
-     * @param MemberIdentity               $memberIdentity
-     * @param UnavailableResourceInterface $resource
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
+     * @param UnavailableResourceInterface                             $resource
      *
      * @throws MembershipException
      */
@@ -56,7 +56,7 @@ class UnavailableResourceHandler implements UnavailableResourceHandlerInterface
      * @param MemberIdentity               $memberIdentity
      * @param UnavailableResourceInterface $resource
      *
-     * @throws MembershipException
+     * @throws \App\Membership\Domain\Exception\MembershipException
      */
     private function handleMemberNotFound(
         MemberIdentity $memberIdentity,
@@ -134,8 +134,8 @@ class UnavailableResourceHandler implements UnavailableResourceHandlerInterface
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
-     * @param UnavailableResourceInterface $resource
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
+     * @param UnavailableResourceInterface                             $resource
      *
      * @throws MembershipException
      */

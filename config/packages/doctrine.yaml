@@ -148,11 +148,11 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Membership\Infrastructure\Entity\Legacy
                         type:       annotation
-                    PressMedia:
-                        alias:      'PressMedia'
+                    MediaShareholders:
+                        alias:      'FrenchMediaShareholders'
                         dir:        '%kernel.project_dir%/config/model/press-media'
                         is_bundle:  false
-                        prefix:     App\PressMedia\Entity
+                        prefix:     App\FrenchMediaShareholders\Entity
                         type:       xml
                     Popularity:
                         alias:      'Popularity'

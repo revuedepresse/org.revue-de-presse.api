@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription
 use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use const JSON_THROW_ON_ERROR;
 
 class MemberAggregateSubscriptionRepository extends ServiceEntityRepository implements MemberPublishersListSubscriptionRepositoryInterface
