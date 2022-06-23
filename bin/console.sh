@@ -171,7 +171,7 @@ function get_project_dir {
 
 function get_project_name() {
     local project_name
-    project_name='wildcard'
+    project_name='revue-de-presse.org'
 
     if [ -n "${PROJECT_NAME}" ]; then
         project_name="${PROJECT_NAME}"
@@ -362,7 +362,7 @@ function run_php_script() {
     then
         printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
         printf '%s%s' 'example:' $'\n' 1>&2
-        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="revue-de-presse.org"' '\n' 1>&2
 
         return 1
     fi

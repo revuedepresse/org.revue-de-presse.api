@@ -32,7 +32,7 @@ make list-amqp-queues
 
 ```shell
 # Customize the WORKER variable value assignment
-WORKER='worker.example.org' \
+WORKER='revue-de-presse.org' \
 make start
 ```
 
@@ -55,6 +55,3 @@ LIST_NAME='w3cstaff' \
 USERNAME='w3c' \
 php ./bin/console app:synchronize-list --list-restriction="${LIST_NAME}" "${USERNAME}"
 ```
-
-List created by [Renee Marie Parilak Teate](https://twitter.com/BecomingDataSci)  
-

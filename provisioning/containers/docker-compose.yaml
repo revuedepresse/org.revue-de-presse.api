@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: 'wildcard'
+name: 'revue-de-presse.org'
 
 x-vol: &shared-volumes
   volumes:

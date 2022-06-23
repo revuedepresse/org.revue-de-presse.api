@@ -19,7 +19,7 @@ start() {
         MEMORY_LIMIT=256M \
         MESSAGES=100 \
         PROJECT_DIR="${project_dir}" \
-        PROJECT_NAME='wildcard' \
+        PROJECT_NAME='revue-de-presse.org' \
         SYMFONY_ENV=prod \
         TIME_LIMIT=600
 

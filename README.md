@@ -1,10 +1,12 @@
-# snapshots.fr worker
+# revue-de-presse.org worker
 
-![api.snapshots.fr continuous integration](https://github.com/thierrymarianne/api.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
+![api.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
 Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 
-This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
+API serving daily short lists (10 items) of top news in France sorted by popularity.
+
+See [revue-de-presse.org](https://revue-de-presse.org).
 
 ## Installation
 

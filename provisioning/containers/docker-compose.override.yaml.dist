@@ -1,6 +1,6 @@
 x-volumes: &app-volume
   volumes:
-    - '../../:/var/www/worker.example.org'
+    - '../../:/var/www/revue-de-presse.org'
 
 services:
 
