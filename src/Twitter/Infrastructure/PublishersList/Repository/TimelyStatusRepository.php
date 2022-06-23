@@ -48,29 +48,29 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             return $timelyStatus->updateTimeRange();
         }
 
-        $aggregate = $this->aggregateRepository->findOneBy([
+        $twitterList = $this->aggregateRepository->findOneBy([
             'id' => $properties['aggregate_id'],
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->aggregateRepository->findOneBy([
+        if (!($twitterList instanceof PublishersList)) {
+            $twitterList = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($aggregate instanceof PublishersList)) {
-                $aggregate = $this->aggregateRepository->make(
+            if (!($twitterList instanceof PublishersList)) {
+                $twitterList = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
                 );
-                $this->aggregateRepository->save($aggregate);
+                $this->aggregateRepository->save($twitterList);
             }
         }
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $twitterList,
             $status->getCreatedAt()
         );
     }
@@ -103,7 +103,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
     public function fromAggregatedStatus(
         StatusInterface $status,
-        PublishersList $aggregate = null
+        PublishersList $twitterList = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status
@@ -115,7 +115,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $twitterList,
             $status->getCreatedAt()
         );
     }
@@ -196,7 +196,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         $queryBuilder->select('s.apiDocument as original_document');
         $queryBuilder->addSelect('t.memberName as screen_name');
         $queryBuilder->addSelect('t.memberName as screenName');
-        $queryBuilder->addSelect('t.aggregateName as aggregateName');
+        $queryBuilder->addSelect('t.twitterListName as twitterListName');
         $queryBuilder->addSelect('a.id as aggregateId');
         $queryBuilder->addSelect('s.id as id');
         $queryBuilder->addSelect('s.statusId as twitterId');

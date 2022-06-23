@@ -9,10 +9,6 @@ use Exception;
 
 trait TimeRangeAwareTrait
 {
-    /**
-     * @return TimeRangeAwareInterface
-     * @throws Exception
-     */
     public function updateTimeRange(): TimeRangeAwareInterface
     {
         /** @var Status $status */
@@ -21,15 +17,9 @@ trait TimeRangeAwareTrait
 
         $this->timeRange = $this->mapDateToTimeRange($statusPublicationDate);
 
-        /** @var TimeRangeAwareInterface $this */
         return $this;
     }
 
-    /**
-     * @param DateTime $statusPublicationDate
-     * @return int
-     * @throws Exception
-     */
     public function mapDateToTimeRange(DateTime $statusPublicationDate)
     {
         $now = new DateTime('now', new \DateTimeZone('UTC'));

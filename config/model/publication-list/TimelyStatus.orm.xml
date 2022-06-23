@@ -31,21 +31,22 @@
 
         <many-to-one
             target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
-            field="aggregate"
-            inversed-by="timelyStatuses"
+            field="twitterList"
+            inversed-by="timelyStatuses">
+            <join-column name="aggregate_id" />
+        </many-to-one>
+
+        <field
+            name="twitterListName"
+            column="aggregate_name"
+            type="string"
+            length="100"
         />
 
         <field
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
-        />
-
-        <field
-            name="aggregateName"
-            column="aggregate_name"
-            type="string"
-            length="100"
         />
 
         <field

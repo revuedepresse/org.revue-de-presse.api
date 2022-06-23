@@ -568,7 +568,7 @@ QUERY;
 
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
-                        $timelyStatus->updateAggregate($firstAggregate);
+                        $timelyStatus->tagAsBelongingToTwitterList($firstAggregate);
                     }
                 }
 

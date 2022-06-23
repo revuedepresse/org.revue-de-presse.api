@@ -77,7 +77,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        PublishersList $aggregate = null
+        PublishersList $twitterList = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -93,7 +93,7 @@ class StatusPersistence implements StatusPersistenceInterface
                 $statusCollection = $this->persistStatus(
                     $statusCollection,
                     $taggedStatus,
-                    $aggregate
+                    $twitterList
                 );
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
@@ -143,18 +143,18 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?PublishersList $aggregate
+        ?PublishersList $twitterList
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
-            ->convertPropsToStatus($extract, $aggregate);
+            ->convertPropsToStatus($extract, $twitterList);
 
         $this->logStatusToBeInserted($status);
 
         $status = $this->unarchiveStatus($status, $this->entityManager);
         $this->refreshUpdatedAt($status);
 
-        $this->persistTimelyStatus($aggregate, $status);
+        $this->persistTimelyStatus($twitterList, $status);
 
         $this->entityManager->persist($status);
 
@@ -162,13 +162,13 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?PublishersList $aggregate,
+        ?PublishersList $twitterList,
         StatusInterface $status
     ): void {
-        if ($aggregate instanceof PublishersList) {
+        if ($twitterList instanceof PublishersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
-                $aggregate
+                $twitterList
             );
             $this->entityManager->persist($timelyStatus);
         }
@@ -229,11 +229,11 @@ class StatusPersistence implements StatusPersistenceInterface
             return $success;
         }
 
-        $publishersList = null;
+        $twitterList = null;
         $publishersListId = $selectors->publishersListId();
         if ($publishersListId !== null) {
-            /** @var PublishersList $publishersList */
-            $publishersList = $this->publishersListRepository->findOneBy(
+            /** @var PublishersList $twitterList */
+            $twitterList = $this->publishersListRepository->findOneBy(
                 ['id' => $publishersListId]
             );
         }
@@ -246,7 +246,7 @@ class StatusPersistence implements StatusPersistenceInterface
         $savedStatuses = $this->saveStatuses(
             $statuses,
             $selectors,
-            $publishersList
+            $twitterList
         );
 
         return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
@@ -258,12 +258,12 @@ class StatusPersistence implements StatusPersistenceInterface
     private function saveStatuses(
         array                      $statuses,
         CurationSelectorsInterface $selectors,
-        PublishersList             $publishersList = null
+        PublishersList $twitterList = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
             new AccessToken($this->apiAccessor->getAccessToken()),
-            $publishersList
+            $twitterList
         );
     }
 }

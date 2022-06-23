@@ -14,55 +14,32 @@ class TimelyStatus implements TimeRangeAwareInterface
 {
     use TimeRangeAwareTrait;
 
-    private UuidInterface $id;
-
-    /**
-     * @var Status
-     */
-    private StatusInterface $status;
-
-    private PublishersList $aggregate;
-
-    /**
-     * @var DateTimeInterface
-     */
+    private UuidInterface     $id;
+    private string            $memberName;
     private DateTimeInterface $publicationDateTime;
-
-    /**
-     * @var string
-     */
-    private string $aggregateName;
-
-    /**
-     * @var int
-     */
-    private int $timeRange;
-
-    /**
-     * @var string
-     */
-    private string $memberName;
+    private StatusInterface   $status;
+    private PublishersList    $twitterList;
+    private int               $timeRange;
+    private string            $twitterListName;
 
     public function __construct(
-        StatusInterface $status,
-        PublishersList $aggregate,
+        StatusInterface    $status,
+        PublishersList     $twitterList,
         \DateTimeInterface $publicationDateTime
     ) {
-
-        $this->status = $status;
-        $this->aggregate = $aggregate;
-        $this->publicationDateTime = $publicationDateTime;
-
-        $this->aggregateName = $this->aggregate->name();
         $this->memberName = $status->getScreenName();
+        $this->publicationDateTime = $publicationDateTime;
+        $this->status = $status;
+        $this->twitterList = $twitterList;
+        $this->twitterListName = $this->twitterList->name();
 
         $this->updateTimeRange();
     }
 
-    public function updateAggregate(PublishersList $aggregate)
+    public function tagAsBelongingToTwitterList(PublishersList $twitterList)
     {
-        $this->aggregate = $aggregate;
-        $this->aggregateName = $aggregate->name();
+        $this->twitterList = $twitterList;
+        $this->twitterListName = $twitterList->name();
 
         $this->updateTimeRange();
     }
