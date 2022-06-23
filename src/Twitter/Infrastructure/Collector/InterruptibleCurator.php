@@ -106,7 +106,8 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 sprintf(
                     'An error occurred when checking if a collect could be skipped ("%s")',
                     $exception->getMessage()
-                )
+                ),
+                ['trace' => json_encode($exception->getTrace())],
             );
 
             throw new SkipCollectException(
