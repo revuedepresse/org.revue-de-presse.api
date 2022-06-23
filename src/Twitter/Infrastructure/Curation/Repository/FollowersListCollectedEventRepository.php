@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\Entity\FollowersListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\FollowersList;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Api\Resource\FollowersList;
+use App\Twitter\Domain\Api\Resource\ResourceList;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Throwable;
 use function json_encode;
 
@@ -33,12 +33,12 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
         ListAccessorInterface $accessor,
         string $screenName
     ): ResourceList {
-        $correlationId = UuidV4::uuid4();
+        $correlationId = CorrelationId::generate();
 
         $selector = new FollowersListSelector(
-            $correlationId,
             $screenName,
-            ListSelector::DEFAULT_CURSOR
+            ListSelectorInterface::DEFAULT_CURSOR,
+            $correlationId
         );
 
         $list = $this->collectedList(
@@ -49,9 +49,9 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
 
         while ($nextList->count() === 200 && $nextList->nextCursor() !== -1) {
             $selector = new FollowersListSelector(
-                $correlationId,
                 $screenName,
-                $nextList->nextCursor()
+                $nextList->nextCursor(),
+                $correlationId
             );
 
             $nextList = $this->collectedList(
@@ -70,7 +70,7 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
 
     public function collectedList(
         ListAccessorInterface $accessor,
-        ListSelector $selector
+        ListSelectorInterface $selector
     ): ResourceList {
         return $accessor->getListAtCursor(
             $selector,
@@ -105,7 +105,7 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
         return $event;
     }
 
-    private function startCollectOfFollowers(ListSelector $selector): ListCollectedEvent {
+    private function startCollectOfFollowers(ListSelectorInterface $selector): ListCollectedEvent {
         $now = new \DateTimeImmutable();
 
         $event = new FollowersListCollectedEvent(
@@ -119,7 +119,7 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
 
     private function onFinishCollection(
         ListCollectedEvent $event,
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         string $method
     ): Closure {
         return function (array $list) use ($event, $method, $selector) {

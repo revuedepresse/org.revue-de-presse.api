@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Collection\Repository;
 
 use App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
+use App\Twitter\Infrastructure\Api\Selector\FriendsListSelector;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FriendsListAccessorBuilder;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -21,8 +21,7 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
     public function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
-        $this->repository = self::$container->get('test.'.FriendsListCollectedEventRepository::class);
+        $this->repository = static::getContainer()->get('test.'.FriendsListCollectedEventRepository::class);
 
         $this->truncateEventStore();
     }
@@ -32,12 +31,11 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_should_collect_friends_list_of_a_member(): void
     {
-        $accessor = FriendsListAccessorBuilder::make();
+        $accessor = FriendsListAccessorBuilder::build();
 
         $friendsList = $this->repository->collectedList(
             $accessor,
             new FriendsListSelector(
-                UuidV4::uuid4(),
                 self::SCREEN_NAME
             )
         );
@@ -55,7 +53,7 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
 
     private function truncateEventStore(): void
     {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $connection = $entityManager->getConnection();
         $connection->executeQuery('TRUNCATE TABLE member_friends_list_collected_event');
     }

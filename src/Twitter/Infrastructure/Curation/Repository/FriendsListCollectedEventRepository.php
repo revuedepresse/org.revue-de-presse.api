@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\Entity\FriendsListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\FriendsList;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Api\Resource\FriendsList;
+use App\Twitter\Domain\Api\Resource\ResourceList;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Api\Selector\FriendsListSelector;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Throwable;
 use function json_encode;
 
@@ -34,12 +34,12 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         ListAccessorInterface $accessor,
         string $screenName
     ): ResourceList {
-        $correlationId = UuidV4::uuid4();
+        $correlationId = CorrelationId::generate();
 
         $selector = new FriendsListSelector(
-            $correlationId,
             $screenName,
-            ListSelector::DEFAULT_CURSOR
+            ListSelectorInterface::DEFAULT_CURSOR,
+            $correlationId
         );
 
         $list = $this->collectedList(
@@ -50,9 +50,9 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
 
         while ($nextList->count() === 200 && $nextList->nextCursor() !== -1) {
             $selector = new FollowersListSelector(
-                $correlationId,
                 $screenName,
-                $nextList->nextCursor()
+                $nextList->nextCursor(),
+                $correlationId
             );
 
             $nextList = $this->collectedList(
@@ -71,7 +71,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
 
     public function collectedList(
         ListAccessorInterface $accessor,
-        ListSelector $selector
+        ListSelectorInterface $selector
     ): ResourceList {
         return $accessor->getListAtCursor(
             $selector,
@@ -106,7 +106,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         return $event;
     }
 
-    private function startCollectOfFriends(ListSelector $selector): ListCollectedEvent {
+    private function startCollectOfFriends(ListSelectorInterface $selector): ListCollectedEvent {
         $now = new \DateTimeImmutable();
 
         $event = new FriendsListCollectedEvent(
@@ -120,7 +120,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
 
     private function onFinishCollection(
         ListCollectedEvent $event,
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         string $method
     ): Closure {
         return function (array $list) use ($event, $method, $selector) {

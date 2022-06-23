@@ -2,62 +2,34 @@
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
-use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Membership\Domain\Entity\AggregateSubscription;
-use App\Membership\Domain\Entity\MemberSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
+use App\Membership\Infrastructure\Entity\AggregateSubscription;
+use App\Membership\Infrastructure\Entity\MemberSubscription;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Psr\Log\LoggerInterface;
-use App\Twitter\Infrastructure\Api\Accessor;
 
-class AggregateSubscriptionRepository extends ServiceEntityRepository
+class AggregateSubscriptionRepository extends ServiceEntityRepository implements PublishersListSubscriptionRepositoryInterface
 {
-    /**
-     * @var Accessor
-     */
-    public $accessor;
+    public ApiAccessorInterface $accessor;
 
-    /**
-     * @var LoggerInterface
-     */
-    public $logger;
+    public MemberAggregateSubscriptionRepository $memberAggregateSubscriptionRepository;
 
-    /**
-     * @var MemberAggregateSubscriptionRepository
-     */
-    public $memberAggregateSubscriptionRepository;
+    public MemberSubscriptionRepository $memberSubscriptionRepository;
 
-    /**
-     * @var MemberSubscriptionRepository
-     */
-    public $memberSubscriptionRepository;
+    public NetworkRepositoryInterface $networkRepository;
 
-    /**
-     * @var NetworkRepository
-     */
-    public $networkRepository;
-
-    /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string          $className
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $className
-    )
-    {
-        parent::__construct($managerRegistry, $className);
-    }
+    public LoggerInterface $logger;
 
     /**
      * @param MemberAggregateSubscription $memberAggregateSubscription
-     * @param MemberInterface             $subscription
+     * @param MemberInterface $subscription
      * @return AggregateSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function make(
         MemberAggregateSubscription $memberAggregateSubscription,
@@ -78,7 +50,6 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
     /**
      * @param AggregateSubscription $aggregateSubscription
      * @return AggregateSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function saveAggregateSubscription(AggregateSubscription $aggregateSubscription)
     {
@@ -91,7 +62,7 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
     /**
      * @param string $aggregateName
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function findSubscriptionsByAggregateName(string $aggregateName)
     {
@@ -100,7 +71,7 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
         ;
 
         if (!($memberAggregateSubscription instanceof MemberAggregateSubscription)) {
-            throw new \Exception(
+            throw new Exception(
                 sprintf(
                     'No member aggregate subscription could be found for name "%s"',
                     $aggregateName
@@ -115,10 +86,6 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
     /**
      * @param string $memberName
      * @param string $aggregateName
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function letMemberSubscribeToAggregate(string $memberName, string $aggregateName): void
     {
@@ -126,7 +93,7 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
 
         try {
             $subscriptions = $this->findSubscriptionsByAggregateName($aggregateName);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
 
             return;
@@ -148,7 +115,7 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
                     function () use ($subscription) {
                         $this->accessor->subscribeToMemberTimeline($subscription);
                     },
-                    $subscription->subscription->getTwitterID()
+                    $subscription->subscription->twitterId()
                 );
 
                 $this->memberSubscriptionRepository->saveMemberSubscription(

@@ -2,7 +2,6 @@
 
 namespace App\PressMedia\Command;
 
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\PressMedia\Repository\MediaRepository;
 use App\PressMedia\Repository\OwnerRepository;
 use Symfony\Component\Console\Command\Command;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-class ImportMediaRelationshipsCommand extends Command implements CommandReturnCodeAwareInterface
+class ImportMediaRelationshipsCommand extends Command
 {
     /**
      * @var \Psr\Log\LoggerInterface
@@ -35,7 +34,7 @@ class ImportMediaRelationshipsCommand extends Command implements CommandReturnCo
 
     public function configure()
     {
-        $this->setName('import-media-relationships');
+        $this->setName('app:import-media-relationships');
     }
 
     /**
@@ -64,10 +63,10 @@ class ImportMediaRelationshipsCommand extends Command implements CommandReturnCo
             $this->logger->critical($exception->getMessage());
             $output->writeln($exception->getMessage());
 
-            return self::RETURN_STATUS_FAILURE;
+            return self::FAILURE;
         }
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

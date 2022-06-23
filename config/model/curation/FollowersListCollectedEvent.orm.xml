@@ -5,13 +5,13 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Twitter\Domain\Curation\Entity\FollowersListCollectedEvent"
+    <entity name="App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent"
             repository-class="App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository"
             table="member_followers_list_collected_event">
 
         <indexes>
-            <index name="occurrence_idx" columns="screen_name,at_cursor,occurred_at"/>
-            <index name="correlation_idx" columns="screen_name,correlation_id"/>
+            <index name="followers_list_occurrence_idx" columns="screen_name,at_cursor,occurred_at"/>
+            <index name="followers_list_correlation_idx" columns="screen_name,correlation_id"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -22,7 +22,7 @@
         <field
             name="correlationId"
             column="correlation_id"
-            type="uuid"
+            type="correlation_id"
         />
 
         <field

@@ -179,16 +179,6 @@ class SearchParams implements SearchParamsInterface
 
     /**
      * @param string $name
-     * @param        $value
-     * @return bool
-     */
-    public function paramIs(string $name, $value): bool
-    {
-        return $this->hasParam($name) && $this->params[$name] === $value;
-    }
-
-    /**
-     * @param string $name
      * @param array  $options
      *
      * @return bool
@@ -205,5 +195,15 @@ class SearchParams implements SearchParamsInterface
     public function getFingerprint()
     {
         return sha1(serialize($this));
+    }
+
+    /**
+     * @param string $name
+     * @param        $value
+     * @return bool
+     */
+    public function paramIs(string $name, $value): bool
+    {
+        return $this->hasParam($name) && $this->params[$name] === $value;
     }
 }

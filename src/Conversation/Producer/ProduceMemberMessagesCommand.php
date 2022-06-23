@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace App\Conversation\Producer;
 
 use App\Twitter\Infrastructure\Amqp\Command\AggregateAwareCommand;
-use App\Twitter\Infrastructure\Operation\OperationClock;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ProduceMemberMessagesCommand extends AggregateAwareCommand
 {
@@ -25,16 +24,11 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      */
     private TranslatorInterface $translator;
 
-    /**
-     * @var OperationClock
-     */
-    public OperationClock $operationClock;
-
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:member_messages')
-        ->setDescription('Produce an AMQP message to get a status from a member')
-        ->setAliases(array('wtw:amqp:prd:mbm'));
+        $this
+            ->setName('app:amqp:produce:member_messages')
+            ->setDescription('Produce an AMQP message to get a status from a member');
     }
 
     /**
@@ -45,10 +39,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
 //        $this->producer = $this->getContainer()->get(
 //            'old_sound_rabbit_mq.weaving_the_web_amqp.producer.member_status_producer'
 //        );
@@ -100,7 +90,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
                         return;
                     }
 
-                    $messageBody['screen_name'] = $member->getTwitterUsername();
+                    $messageBody['screen_name'] = $member->twitterScreenName();
                     $messageBody['aggregate_id'] = $record['aggregate_id'];
 
 
@@ -150,9 +140,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
 
     private function setUpDependencies()
     {
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
-
         $this->translator = $this->getContainer()->get('translator');
     }
 }

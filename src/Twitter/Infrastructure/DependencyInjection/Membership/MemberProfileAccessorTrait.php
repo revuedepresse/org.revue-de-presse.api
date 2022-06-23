@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Membership;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
 
 trait MemberProfileAccessorTrait
 {

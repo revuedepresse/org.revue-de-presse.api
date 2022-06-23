@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Log;
 
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 
 interface StatusLoggerInterface
 {
     public function logHowManyItemsHaveBeenCollected(
-        CollectionStrategyInterface $collectionStrategy,
-        int $totalStatuses,
-        array $forms,
-        int $lastCollectionBatchSize
+        CurationSelectorsInterface $selectors,
+        int                        $totalStatuses,
+        array                      $forms,
+        int                        $lastCollectionBatchSize
     ): void;
 
     public function logHowManyItemsHaveBeenFetched(
@@ -22,7 +22,7 @@ interface StatusLoggerInterface
 
     public function logIntentionWithRegardsToAggregate(
         $options,
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ): void;
 
     public function logStatus(StatusInterface $status): void;

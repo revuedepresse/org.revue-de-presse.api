@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Infrastructure\Curation\Entity\PublicationBatchCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\PublicationBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
 use const JSON_THROW_ON_ERROR;
@@ -21,10 +21,10 @@ class PublicationBatchCollectedEventRepository extends ServiceEntityRepository i
     use ApiAccessorTrait;
 
     public function collectedPublicationBatch(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options
+        CurationSelectorsInterface $selectors,
+        array                      $options
     ) {
-        $event    = $this->startCollectOfPublicationBatch($collectionStrategy);
+        $event    = $this->startCollectOfPublicationBatch($selectors);
         $statuses = $this->apiAccessor->fetchStatuses($options);
         $this->finishCollectOfPublicationBatch(
             $event,
@@ -51,10 +51,10 @@ class PublicationBatchCollectedEventRepository extends ServiceEntityRepository i
     }
 
     private function startCollectOfPublicationBatch(
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ): PublicationBatchCollectedEvent {
         $member = $this->memberRepository->findOneBy(
-            ['twitter_username' => $collectionStrategy->screenName()]
+            ['twitter_username' => $selectors->screenName()]
         );
 
         return $this->startCollectOfPublicationBatchForMember(

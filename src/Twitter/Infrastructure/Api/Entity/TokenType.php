@@ -8,16 +8,17 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Table(name="weaving_token_type")
- * @ORM\Entity()
+ * @ORM\Entity
  */
 class TokenType
 {
-    const USER = 'user';
+    public const USER = 'user';
 
-    const APPLICATION = 'application';
+    public const APPLICATION = 'application';
 
-    public function __construct()
+    public function __construct($name)
     {
+        $this->name = $name;
         $this->tokens = new ArrayCollection();
     }
 

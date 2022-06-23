@@ -3,18 +3,19 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Domain\Model\TwitterMemberInterface;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
-use App\Membership\Domain\Entity\ExceptionalMember;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Membership\Domain\Entity\NotFoundMember;
-use App\Membership\Domain\Entity\ProtectedMember;
-use App\Membership\Domain\Entity\SuspendedMember;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Membership\Infrastructure\Entity\ExceptionalMember;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Infrastructure\Entity\NotFoundMember;
+use App\Membership\Infrastructure\Entity\ProtectedMember;
+use App\Membership\Infrastructure\Entity\SuspendedMember;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -41,10 +42,15 @@ class NetworkRepository implements NetworkRepositoryInterface
      * @return bool
      * @throws DBALException
      */
-    private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
-    {
+    private function saveMemberSubscriptions(
+        MemberInterface $member,
+        array $subscriptions
+    ): bool {
+        $this->memberSubscriptionRepository->cancelAllSubscriptionsFor($member);
+
         if (count($subscriptions) > 0) {
-            $subscriptions = $this->memberSubscriptionRepository->findMissingSubscriptions($member, $subscriptions);
+            $subscriptions = $this->memberSubscriptionRepository
+                ->findMissingSubscriptions($member, $subscriptions);
         }
 
         return array_walk(
@@ -69,8 +75,8 @@ class NetworkRepository implements NetworkRepositoryInterface
 
                 $this->logger->info(sprintf(
                     'About to save subscription of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscriptionMember->getTwitterUsername()
+                    $member->twitterScreenName(),
+                    $subscriptionMember->twitterScreenName()
                 ));
 
                 $memberSubscription = $this->memberSubscriptionRepository->saveMemberSubscription(
@@ -89,10 +95,13 @@ class NetworkRepository implements NetworkRepositoryInterface
      * @return bool
      * @throws DBALException
      */
-    private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
-    {
+    private function saveMemberSubscribees(
+        MemberInterface $member,
+        array $subscribees
+    ): bool {
         if (count($subscribees) > 0) {
-            $subscribees = $this->memberSubscribeeRepository->findMissingSubscribees($member, $subscribees);
+            $subscribees = $this->memberSubscribeeRepository
+                ->findMissingSubscribees($member, $subscribees);
         }
 
         return array_walk(
@@ -117,8 +126,8 @@ class NetworkRepository implements NetworkRepositoryInterface
 
                 $this->logger->info(sprintf(
                     'About to save subscribees of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscribeeMember->getTwitterUsername()
+                    $member->twitterScreenName(),
+                    $subscribeeMember->twitterScreenName()
                 ));
 
                 $memberSubscribee = $this->memberSubscribeeRepository->saveMemberSubscribee(
@@ -160,12 +169,15 @@ class NetworkRepository implements NetworkRepositoryInterface
             function (string $member) {
                 $member = $this->accessor->ensureMemberHavingNameExists($member);
 
-                $friends = $this->accessor->getFriendsOfMemberHavingScreenName($member->getTwitterUsername());
+                $friends = $this->accessor->getFriendsOfMemberHavingScreenName($member->twitterScreenName());
                 if ($member instanceof MemberInterface) {
-                    $this->saveMemberSubscriptions($member, $friends->ids);
+                    $this->saveMemberSubscriptions(
+                        $member,
+                        $friends->ids
+                    );
                 }
 
-                $subscribees = $this->accessor->showMemberSubscribees($member->getTwitterUsername());
+                $subscribees = $this->accessor->showMemberSubscribees($member->twitterScreenName());
                 if ($member instanceof MemberInterface) {
                     $this->saveMemberSubscribees($member, $subscribees->ids);
                 }
@@ -188,6 +200,8 @@ class NetworkRepository implements NetworkRepositoryInterface
         callable $doing,
         string $memberId
     ) {
+        $member = null;
+
         try {
             $existingMember = $doing($memberId);
         } catch (NotFoundMemberException $exception) {
@@ -224,7 +238,7 @@ class NetworkRepository implements NetworkRepositoryInterface
                 return $existingMember;
             }
 
-            if (!isset($exception->screenName)) {
+            if ($exception->screenName === null) {
                 $this->logger->critical($exception->getMessage());
 
                 throw $exception;
@@ -238,9 +252,12 @@ class NetworkRepository implements NetworkRepositoryInterface
             }
 
             if ($existingMember instanceof MemberInterface) {
-                if ($existingMember->getTwitterID() !== $member->getTwitterID() &&
-                    $member->getTwitterID() !== null) {
-                    $existingMember->setTwitterID($member->getTwitterID());
+                if (
+                    $member instanceof TwitterMemberInterface &&
+                    $member->hasTwitterId() &&
+                    ($existingMember->twitterId() !== $member->twitterId())
+                ) {
+                    $existingMember->setTwitterID($member->twitterId());
 
                     return $this->memberRepository->saveMember($existingMember);
                 }

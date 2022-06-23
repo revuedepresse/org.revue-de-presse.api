@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Twitter\Domain\Publication\PublishersListIdentity;
+use App\Twitter\Infrastructure\Publication\Dto\PublishersListIdentity;
 use App\Twitter\Domain\Publication\PublishersListIdentityInterface;
 use App\Twitter\Infrastructure\Http\PaginationParams;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
-use App\Membership\Domain\Entity\MemberSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Entity\MemberSubscription;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use function array_diff;
@@ -96,7 +94,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if ($this->emptyResults($results, 'count_')) {
             return 0;
         }
@@ -114,7 +112,7 @@ QUERY;
     public function findMissingSubscriptions(MemberInterface $member, array $subscriptions)
     {
         $query = <<< QUERY
-            SELECT GROUP_CONCAT(sm.usr_twitter_id) subscription_ids
+            SELECT array_agg(sm.usr_twitter_id) subscription_ids
             FROM member_subscription s,
             weaving_user sm
             WHERE sm.usr_id = s.subscription_id
@@ -135,7 +133,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $remainingSubscriptions = $subscriptions;
         if (array_key_exists(0, $results) && array_key_exists('subscription_ids', $results[0])) {
@@ -159,7 +157,7 @@ QUERY;
         if ($publishersListIdentity) {
             $restrictionByAggregate = sprintf(
                 <<<QUERY
-                AND a.name IN ( SELECT name FROM weaving_aggregate WHERE id = %d)
+                AND a.name IN ( SELECT name FROM publishers_list WHERE id = %d)
 QUERY
                 ,
                 (int) ((string) $publishersListIdentity)
@@ -172,7 +170,7 @@ QUERY
                 <<<QUERY
                 FROM member_subscription ms,
                 weaving_user u
-                {join} weaving_aggregate a
+                {join} publishers_list a
                 ON a.screen_name = u.usr_twitter_username
                 AND a.screen_name IS NOT NULL 
                 WHERE member_id = :member_id 
@@ -250,7 +248,7 @@ QUERY
               COALESCE(a.id, 0),
               CONCAT(
                 '{',
-                GROUP_CONCAT(
+                array_agg(
                   CONCAT('"', a.id, '": "', a.name, '"') ORDER BY a.name DESC SEPARATOR ","
                 ), 
                 '}'
@@ -265,8 +263,6 @@ QUERY;
      * @param MemberInterface $subscription
      *
      * @return MemberSubscription
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveMemberSubscription(
         MemberInterface $member,
@@ -301,10 +297,10 @@ QUERY
         $connection = $this->getEntityManager()->getConnection();
         $statement = $connection->executeQuery(
             $queryCancelledMemberSubscriptionsIds,
-            ['screen_name' => $subscriber->getTwitterUsername()]
+            ['screen_name' => $subscriber->twitterScreenName()]
         );
 
-        $cancelledSubscriptions = $statement->fetchAll();
+        $cancelledSubscriptions = $statement->fetchAllAssociative();
 
         return array_map(
             static fn (array $subscription) => (string) $subscription['subscription_id'],
@@ -365,7 +361,7 @@ QUERY
         );
         $statement = $connection->executeQuery($query);
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if (!array_key_exists(0, $results)) {
             return [];
         }
@@ -411,7 +407,7 @@ QUERY
             <<<QUERY
                 SELECT CONCAT(
                     '{',
-                    GROUP_CONCAT(
+                    array_agg(
                         DISTINCT CONCAT(
                             '"',
                             select_.id, 
@@ -443,7 +439,7 @@ QUERY
                 ]
             )
         );
-        $aggregateResults = $statement->fetchAll();
+        $aggregateResults = $statement->fetchAllAssociative();
 
         $aggregates = [];
         if (!$this->emptyResults($aggregateResults, 'aggregates')) {

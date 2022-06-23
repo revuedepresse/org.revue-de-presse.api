@@ -3,18 +3,38 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Membership\Exception;
 
+use App\Membership\Domain\Model\MemberInterface;
 use Exception;
+use Throwable;
 
 class MembershipException extends Exception
 {
-    /**
-     * @param string $message
-     * @param int    $errorCode
-     *
-     * @throws MembershipException
-     */
-    public static function throws(string $message, int $errorCode): void
+    private ?MemberInterface $exceptionalMember;
+
+    public function exceptionalMember(): ?MemberInterface
     {
-        throw new self($message, $errorCode);
+        return $this->exceptionalMember;
+    }
+
+    public function __construct(
+        string $message = '',
+        int $code = 0,
+        Throwable $previous = null,
+        ?MemberInterface $exceptionMember = null
+    )
+    {
+        parent::__construct($message, $code, $previous);
+
+        $this->exceptionalMember = $exceptionMember;
+    }
+
+    public static function throws(
+        string $message,
+        int $errorCode,
+        ?MemberInterface $exceptionalMember = null,
+        Throwable $previous = null
+    ): void
+    {
+        throw new self($message, $errorCode, $previous, $exceptionalMember);
     }
 }

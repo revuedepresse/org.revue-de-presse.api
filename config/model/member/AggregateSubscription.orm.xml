@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Membership\Domain\Entity\AggregateSubscription"
+    <entity name="App\Membership\Infrastructure\Entity\AggregateSubscription"
             repository-class="App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository"
             table="aggregate_subscription">
 
@@ -14,7 +14,10 @@
         </indexes>
 
         <unique-constraints>
-            <unique-constraint columns="member_aggregate_subscription_id,subscription_id" name="unique_subscription" />
+            <unique-constraint
+                name="aggregate_subscription_unique"
+                columns="member_aggregate_subscription_id,subscription_id"
+             />
         </unique-constraints>
 
         <id name="id" column="id" type="uuid">
@@ -24,7 +27,7 @@
 
         <many-to-one
             field="memberAggregateSubscription"
-            target-entity="App\PublishersList\Entity\MemberAggregateSubscription"
+            target-entity="App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription"
         >
             <join-column
                 name="member_aggregate_subscription_id"
@@ -33,7 +36,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+            target-entity="App\Membership\Infrastructure\Entity\Legacy\Member"
             field="subscription"
         >
             <join-column

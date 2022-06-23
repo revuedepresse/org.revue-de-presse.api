@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -17,9 +18,9 @@ use function sprintf;
 
 /**
  * @package App\Twitter\Infrastructure\Exception
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
-class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
+class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface, TwitterApiEndpointsAwareInterface
 {
 
     /**
@@ -119,7 +120,10 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         }
 
         if ($errorCode === self::ERROR_EXCEEDED_RATE_LIMIT) {
-            $onApiLimitExceeded($endpoint);
+            if (self::exceptWhenAccessingApiRateLimitStatus($endpoint)) {
+                $onApiLimitExceeded($endpoint);
+            }
+
             throw new ApiRateLimitingException(
                 $error->message,
                 $error->code
@@ -182,16 +186,27 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
             $logger->error(
                 sprintf(
                     $message,
-                    $options[FetchPublicationInterface::SCREEN_NAME]
+                    $options[FetchTweetInterface::SCREEN_NAME]
                 )
             );
 
             return $message;
         }
 
-        $message = sprintf($message, $options[FetchPublicationInterface::SCREEN_NAME]);
-        $logger->error($message);
+        $message = sprintf($message, $options[FetchTweetInterface::SCREEN_NAME]);
+        $logger->error(
+            $message, ['trace' => $exception->getTrace()]
+        );
 
         return $message;
+    }
+
+    /**
+     * @param string $endpoint
+     * @return bool
+     */
+    private static function exceptWhenAccessingApiRateLimitStatus(string $endpoint): bool
+    {
+        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) === false;
     }
 }

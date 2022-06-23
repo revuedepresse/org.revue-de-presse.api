@@ -10,9 +10,9 @@ use Symfony\Component\Console\Command\Command;
 
 /**
  * @package App\Twitter\Command
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
-class MigrateStatusToPublicationsCommand extends Command implements CommandReturnCodeAwareInterface
+class MigrateStatusToPublicationsCommand extends Command
 {
     private PublicationRepositoryInterface $publicationRepository;
 
@@ -21,14 +21,11 @@ class MigrateStatusToPublicationsCommand extends Command implements CommandRetur
         $this->publicationRepository = $publicationRepository;
     }
 
-    /**
-     * Configures executable commands
-     */
     protected function configure()
     {
         parent::configure();
 
-        $this->setName('press-review:migrate-status-to-publications')
+        $this->setName('app:migrate-status-to-publications')
             ->setDescription('Migrate status to publications');
     }
 
@@ -41,6 +38,6 @@ class MigrateStatusToPublicationsCommand extends Command implements CommandRetur
     {
         $this->publicationRepository->migrateStatusesToPublications();
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 }

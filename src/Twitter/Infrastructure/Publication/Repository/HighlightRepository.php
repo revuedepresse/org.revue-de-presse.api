@@ -4,27 +4,31 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\NewsReview\Domain\Repository\SearchParamsInterface;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
+use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
+use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
+    private const SEARCH_PERIOD_DATE_FORMAT = 'Y-m-d';
+
     use PaginationAwareTrait;
     use ConversationAwareTrait;
     use LoggerTrait;
 
     public string $aggregate;
-
-    public string $adminRouteName;
 
     private const TABLE_ALIAS = 'h';
 
@@ -41,7 +45,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     /**
      * @param SearchParams $searchParams
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function findHighlights(SearchParams $searchParams): array
     {
@@ -60,21 +64,18 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
 
         $maxResults = min($searchParams->getPageSize(), 10);
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $maxResults = 100;
-        }
 
         $queryBuilder->setMaxResults($maxResults);
 
         $this->applyCriteria($queryBuilder, $searchParams);
 
-        $queryBuilder->groupBy('h.status');
+        $queryBuilder->groupBy(self::TABLE_ALIAS.'.status');
         $queryBuilder->addOrderBy('total_retweets', 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
 
         return [
-            'aggregates' => $this->selectDistinctAggregates($searchParams),
+            'links' => $this->selectDistinctAggregates($searchParams),
             'statuses' => $this->mapStatuses($searchParams, $results),
         ];
     }
@@ -99,10 +100,15 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
         $this->applyConstraintAboutPopularity($queryBuilder, $searchParams);
         $this->applyConstraintAboutPublicationDateTime($queryBuilder, $searchParams)
-        ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
-        ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
-        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
-        ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
+            ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
+            ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
+            ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
+            ->applyConstraintAboutEnclosingAggregate($queryBuilder, $searchParams)
+            ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
+
+        if ($searchParams->hasParam('term')) {
+            $this->applyConstraintAboutTerm($queryBuilder, $searchParams);
+        }
 
         if ($searchParams->hasParam('term')) {
             $this->applyConstraintAboutTerm($queryBuilder, $searchParams);
@@ -117,15 +123,53 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     /**
      * @param QueryBuilder $queryBuilder
      * @param SearchParams $searchParams
+     *
+     * @return $this
+     */
+    private function applyConstraintAboutEnclosingAggregate(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ): self {
+        if ($searchParams->hasParam('aggregateIds') &&
+            count($searchParams->getParams()['aggregateIds']) > 0
+        ) {
+            $queryBuilder->innerJoin(
+                self::TABLE_ALIAS.'.aggregate',
+                PublishersListRepository::TABLE_ALIAS
+            );
+
+            $queryBuilder->innerJoin(
+                PublishersListRepository::TABLE_ALIAS.'.memberAggregateSubscription',
+                MemberAggregateSubscriptionRepository::TABLE_ALIAS,
+                Join::WITH,
+                implode([
+                    MemberAggregateSubscriptionRepository::TABLE_ALIAS,
+                    '.',
+                    'id in (:aggregate_ids)'
+                ])
+            );
+
+            $queryBuilder->setParameter(
+                'aggregate_ids',
+                $searchParams->getParams()['aggregateIds']
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
      * @return HighlightRepository
      */
     private function applyConstraintAboutPublicationDateOfRetweetedStatus(
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        $retweetedStatusPublicationDate = "COALESCE(
+        $retweetedStatusPublicationDate = 'COALESCE(
                 DATE(
-                    DATEADD(" .
+                    DATEADD(' .
             self::TABLE_ALIAS . ".retweetedStatusPublicationDate, 1, 'HOUR'
                     )
                 ),
@@ -137,8 +181,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         if ($this->overMoreThanADay($searchParams)) {
-            $queryBuilder->andWhere($retweetedStatusPublicationDate . " >= :startDate");
-            $queryBuilder->andWhere($retweetedStatusPublicationDate . " <= :endDate");
+            $queryBuilder->andWhere($retweetedStatusPublicationDate . ' >= :startDate');
+            $queryBuilder->andWhere($retweetedStatusPublicationDate . ' <= :endDate');
         }
 
         return $this;
@@ -202,8 +246,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        if ($this->accessingAdministrativeRoute($searchParams)
-            || $searchParams->hasParam('term')
+        if ($searchParams->hasParam('term')
         ) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
             $queryBuilder->setParameter('aggregate', $this->aggregate);
@@ -224,33 +267,19 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
     /**
      * @param SearchParams $searchParams
-     * @return bool
-     */
-    private function accessingAdministrativeRoute(SearchParams $searchParams): bool
-    {
-        return $searchParams->paramIs('routeName', $this->adminRouteName);
-    }
-
-    /**
-     * @param SearchParams $searchParams
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function selectDistinctAggregates(SearchParams $searchParams): array
     {
-        $aggregateRestriction = 'AND a.name = ? ';
-        $groupBy = 'GROUP BY h.member_id';
-
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $aggregateRestriction = 'AND a.name != ? ';
-            $groupBy = 'GROUP BY h.aggregate_id';
-        }
-
         $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
         $clauseAboutRetweets = '';
         if ($excludeRetweets) {
             $clauseAboutRetweets = 'AND h.is_retweet = 0';
         }
+
+        $aggregateRestriction = $this->getConditionOnAggregateToSelectDistinctAggregates($searchParams);
+        $groupBy = $this->getGroupByClauseToSelectDistinctAggregates($searchParams);
 
         $queryDistinctAggregates = <<< QUERY
                 SELECT
@@ -260,7 +289,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 usr_id as memberId,
                 count(h.id) totalHighlights
                 FROM highlight h,
-                weaving_aggregate a,
+                publishers_list a,
                 weaving_status s,
                 weaving_user m
                 WHERE h.member_id = m.usr_id
@@ -307,9 +336,7 @@ QUERY;
             return [];
         }
 
-        $aggregates = $statement->fetchAll();
-
-        return $aggregates;
+        return $statement->fetchAllAssociative();
     }
 
     /**
@@ -368,12 +395,58 @@ QUERY;
 
     /**
      * @param SearchParams $searchParams
+     */
+    private function assertSearchPeriodIsValid(SearchParams $searchParams): void {
+        if (
+            !($searchParams->getParams()['startDate'] instanceof \DateTime)
+            || !($searchParams->getParams()['endDate'] instanceof \DateTime)
+        ) {
+            throw new InvalidArgumentException(
+                'Expected end date and start date to be instances of ' . \DateTime::class
+            );
+        }
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     *
+     * @return string
+     */
+    private function getConditionOnAggregateToSelectDistinctAggregates(
+        SearchParams $searchParams
+    ): string {
+        $aggregateRestriction = 'AND a.name = ? ';
+
+        return $aggregateRestriction;
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     *
+     * @return string
+     */
+    private function getGroupByClauseToSelectDistinctAggregates(
+        SearchParams $searchParams
+    ): string {
+        $groupBy = 'GROUP BY h.member_id';
+
+        if ($searchParams->hasParam(SearchParams::PARAM_AGGREGATE_IDS)) {
+            return $groupBy;
+        }
+
+        return $groupBy;
+    }
+
+    /**
+     * @param SearchParams $searchParams
      * @return bool
      */
     private function overOneDay(SearchParams $searchParams): bool
     {
-        return $searchParams->getParams()['startDate']->format('Y-m-d') ===
-            $searchParams->getParams()['endDate']->format('Y-m-d');
+        $this->assertSearchPeriodIsValid($searchParams);
+
+        return $searchParams->getParams()['startDate']->format(self::SEARCH_PERIOD_DATE_FORMAT) ===
+            $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
     /**
@@ -382,16 +455,24 @@ QUERY;
      */
     private function overMoreThanADay(SearchParams $searchParams): bool
     {
-        return $searchParams->getParams()['startDate']->format('Y-m-d') !==
-            $searchParams->getParams()['endDate']->format('Y-m-d');
+        $this->assertSearchPeriodIsValid($searchParams);
+
+        return $searchParams->getParams()['startDate']->format(self::SEARCH_PERIOD_DATE_FORMAT) !==
+            $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
     public function mapStatuses(SearchParamsInterface $searchParams, $results): array
     {
         return array_map(
             function ($status) use ($searchParams) {
+                $statusKey = 'status';
+                $totalFavoritesKey = 'total_favorites';
+                $totalRetweetsKey = 'total_retweets';
+                $favoriteCountKey = 'favorite_count';
+                $originalDocumentKey = 'original_document';
+
                 $extractedProperties = [
-                    'status' => $this->extractStatusProperties(
+                    $statusKey => $this->extractStatusProperties(
                         [$status],
                         false)[0]
                 ];
@@ -407,8 +488,8 @@ QUERY;
                 $status['lastUpdate'] = $status['last_update'];
 
                 $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties['status']['favorite_count'] === 0) {
-                    $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
+                if ($includeRetweets && $extractedProperties[$statusKey][$favoriteCountKey] === 0) {
+                    $extractedProperties[$statusKey][$favoriteCountKey] = $decodedDocument['retweeted_status'][$favoriteCountKey];
                 }
 
                 unset(

@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Twitter\Domain\Curation\Entity\Highlight"
+    <entity name="App\Twitter\Infrastructure\Curation\Entity\Highlight"
             repository-class="App\Twitter\Infrastructure\Publication\Repository\HighlightRepository"
             table="highlight">
 
@@ -29,7 +29,7 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Membership\Domain\Entity\Legacy\Member">
+            target-entity="App\Membership\Infrastructure\Entity\Legacy\Member">
             <join-column name="member_id" referenced-column-name="usr_id" />
         </many-to-one>
 
@@ -46,10 +46,10 @@
         />
 
         <many-to-one
-            target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
+            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
             field="aggregate"
             inversed-by="timelyStatuses">
-            <join-column name="aggregate_id" />
+            <join-column name="aggregate_id" nullable="false" />
         </many-to-one>
 
         <field

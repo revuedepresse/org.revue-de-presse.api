@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
-use App\Twitter\Domain\Publication\Entity\Publication;
+use App\Twitter\Infrastructure\Publication\Entity\Publication;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
@@ -11,7 +11,7 @@ use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +19,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 
 /**
- * App\Twitter\Domain\Curation\Entity
+ * App\Twitter\Infrastructure\Curation\Entity
  */
 class PublicationRepository extends ServiceEntityRepository implements PublicationRepositoryInterface
 {
@@ -211,7 +211,7 @@ QUERY
         }
     }
 
-    public function getLatestPublications(): Collection
+    public function getLatestPublications(): CollectionInterface
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
 

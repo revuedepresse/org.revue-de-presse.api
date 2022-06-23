@@ -3,22 +3,36 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Mutator;
 
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophet;
 
 class FriendshipMutatorBuilder extends TestCase
 {
-    public static function make(): FriendshipMutatorInterface
+    use ProphecyTrait;
+
+    public function __construct()
+    {
+        $this->prophet = $this->getProphet();
+    }
+
+    public function prophet(): Prophet
+    {
+        return $this->prophet;
+    }
+
+    public static function build(): FriendshipMutatorInterface
     {
         $testCase = new self();
 
         /** @var FriendshipMutatorInterface $mutator */
-        $mutator = $testCase->prophesize(FriendshipMutator::class);
+        $mutator = $testCase->prophet()->prophesize(FriendshipMutator::class);
 
         $mutator->unfollowMembers(
             Argument::type(MemberCollection::class),

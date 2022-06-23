@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\Entity\MemberProfileCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\MemberProfileCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\MemberProfileCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use stdClass;
 use Throwable;

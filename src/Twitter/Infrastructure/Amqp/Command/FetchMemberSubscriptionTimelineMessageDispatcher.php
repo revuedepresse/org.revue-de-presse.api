@@ -6,14 +6,14 @@ namespace App\Twitter\Infrastructure\Amqp\Command;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberFriendsCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -26,7 +26,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCommand
 {
@@ -36,16 +36,16 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
     use MessageBusTrait;
     use TranslatorTrait;
 
-    public function configure(): void
+    public function configure()
     {
-        $this->setName('weaving_the_web:amqp:dispatch:member_subscription_timeline_message')
+        $this->setName('app:amqp:dispatch:member_subscription_timeline_message')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
-            'screen_name',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'The screen name of a user'
-            )->setAliases(['wtw:amqp:d:m']);
+                'screen_name',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The screen name of a user'
+            );
     }
 
     /**
@@ -61,7 +61,6 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
     {
         $this->input = $input;
         $this->output = $output;
-
 
         $this->setUpDependencies();
 
@@ -116,7 +115,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
                 try {
                     $this->handlePreExistingMember(
                         $member,
-                        $member->getTwitterUsername(),
+                        $member->twitterScreenName(),
                         $messageBody
                     );
                 } catch (SkippableMemberException $exception) {
@@ -133,7 +132,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
             )
         );
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**
@@ -154,12 +153,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
     {
         $tokens = $this->getTokensFromInputOrFallback();
 
-
-        $this->accessor->setAccessToken(Token::fromArray($tokens));
-
-        // noop
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
+        $this->accessor->fromToken(Token::fromArray($tokens));
     }
 
     /**
@@ -173,21 +167,21 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $screenName,
         $messageBody
     ): void {
-        $twitterUsername = $member->getTwitterUsername();
+        $twitterUsername = $member->twitterScreenName();
 
         $this->guardAgainstMembersWhichShouldBeSkipped($member, $screenName);
 
-        $aggregate = $this->getListAggregateByName($twitterUsername, 'user :: ' . $twitterUsername);
+        $aggregate = $this->byName($twitterUsername, 'user :: ' . $twitterUsername);
 
         $messageBody['aggregate_id'] = $aggregate->getId();
         $messageBody['screen_name'] = $twitterUsername;
 
-        $message = new FetchMemberStatus(
+        $message = new FetchTweet(
             $twitterUsername,
             $aggregate->getId(),
             (new Token)
-                ->setOAuthToken($this->getOAuthToken())
-                ->setOAuthSecret($this->getOAuthSecret())
+                ->setAccessToken($this->getAccessToken())
+                ->setAccessTokenSecret($this->getAccessTokenSecret())
         );
 
         $this->dispatcher->dispatch($message);
@@ -333,7 +327,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
                 $member->setNotFound(false);
             }
 
-            $member->setTwitterUsername($twitterMember->screen_name);
+            $member->setTwitterScreenName($twitterMember->screen_name);
             $member->setTwitterID($memberIdentifier);
             $member->setEnabled(false);
             $member->setLocked(false);

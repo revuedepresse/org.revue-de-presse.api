@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Status;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Exception;
 use Psr\Log\LoggerInterface;
 
-class TaggedStatusRepository implements TaggedStatusRepositoryInterface
+class TaggedStatusRepository extends ServiceEntityRepository implements TaggedStatusRepositoryInterface
 {
     use StatusRepositoryTrait;
 
@@ -35,22 +35,12 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
         LoggerInterface $logger
     ) {
         $this->entityManager    = $entityManager;
-        $this->statusRepository = $entityManager->getRepository(
-            Status::class
-        );
         $this->logger           = $logger;
     }
 
-    /**
-     * @param array          $properties
-     * @param Aggregate|null $aggregate
-     *
-     * @return StatusInterface
-     * @throws Exception
-     */
     public function convertPropsToStatus(
         array $properties,
-        ?Aggregate $aggregate
+        ?PublishersList $aggregate
     ): StatusInterface {
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 

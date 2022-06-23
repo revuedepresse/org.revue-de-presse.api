@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
+use App\Twitter\Domain\Collector\PublicationCollectorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -20,9 +18,6 @@ use Exception;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function sprintf;
 
-/**
- * @package App\Twitter\Infrastructure\Amqp\MessageHandler
- */
 class FetchPublicationMessageHandler implements MessageSubscriberInterface
 {
     use LoggerTrait;
@@ -33,31 +28,21 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      */
     public static function getHandledMessages(): iterable
     {
-        yield FetchMemberStatus::class => [
-            'from_transport' => 'news_status'
-        ];
-
-        yield FetchMemberLikes::class => [
-            'from_transport' => 'news_likes'
+        yield FetchTweet::class => [
+            'from_transport' => 'publications'
         ];
     }
 
-    /**
-     * @var TokenRepositoryInterface
-     */
     public TokenRepositoryInterface $tokenRepository;
 
-    /**
-     * @var PublicationCollectorInterface $collector
-     */
     protected PublicationCollectorInterface $collector;
 
     /**
-     * @param FetchPublicationInterface $message
+     * @param FetchTweetInterface $message
      *
      * @return bool
      */
-    public function __invoke(FetchPublicationInterface $message): bool
+    public function __invoke(FetchTweetInterface $message): bool
     {
         $success = false;
 
@@ -70,18 +55,17 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         }
 
         $options = [
-            LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $message->shouldFetchLikes(),
-            $message::publishers_list_ID                              => $message->aggregateId(),
-            $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
-            'count'                                                    => 200,
-            'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],
-            $message::SCREEN_NAME                                      => $message->screenName(),
+            $message::PUBLISHERS_LIST_ID => $message->aggregateId(),
+            $message::BEFORE             => $message->dateBeforeWhichStatusAreCollected(),
+            'count'                      => 200,
+            'oauth'                      => $options[TokenInterface::FIELD_TOKEN],
+            $message::SCREEN_NAME        => $message->screenName(),
         ];
 
         try {
             $success = $this->collector->collect(
                 $options,
-                $greedy = true
+                greedy: true
             );
             if (!$success) {
                 $this->logger->info(
@@ -131,12 +115,12 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param FetchPublicationInterface $message
+     * @param FetchTweetInterface $message
      *
      * @return array
      * @throws Exception
      */
-    public function processMessage(FetchPublicationInterface $message): array
+    public function processMessage(FetchTweetInterface $message): array
     {
         $oauthToken = $this->extractOAuthToken($message);
 
@@ -153,14 +137,14 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $this->collector = $collector;
     }
 
-    private function extractOAuthToken(FetchPublicationInterface $message): array
+    private function extractOAuthToken(FetchTweetInterface $message): array
     {
         $token = $message->token();
 
         if ($token->isValid()) {
             return [
-                TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
-                TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
+                TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
+                TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret(),
             ];
         }
 
@@ -168,8 +152,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $token = $this->tokenRepository->findFirstUnfrozenToken();
 
         return [
-            TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
-            TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
+            TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
+            TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret(),
         ];
     }
 }

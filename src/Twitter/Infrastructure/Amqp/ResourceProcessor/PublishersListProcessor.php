@@ -3,19 +3,22 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
+use App\Twitter\Domain\Membership\Exception\MembershipException;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
+use App\Twitter\Infrastructure\Api\Exception\CanNotReplaceAccessTokenException;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -52,9 +55,9 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     }
 
     /**
-     * @param PublishersList              $list
-     * @param TokenInterface               $token
-     * @param PublicationStrategyInterface $strategy
+     * @param PublishersList           $list
+     * @param TokenInterface           $token
+     * @param CurationRulesetInterface $ruleset
      *
      * @return int
      * @throws Exception
@@ -62,20 +65,20 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     public function processPublishersList(
         PublishersList $list,
         TokenInterface $token,
-        PublicationStrategyInterface $strategy
+        CurationRulesetInterface $ruleset
     ): int {
-        if ($strategy->shouldProcessList($list)) {
+        if ($ruleset->isCurationByListActive($list)) {
             $eventRepository = $this->publishersListCollectedEventRepository;
             $memberCollection = $eventRepository->collectedPublishersList(
                 $this->accessor,
                 [
-                    $eventRepository::OPTION_publishers_list_ID => $list->id(),
-                    $eventRepository::OPTION_publishers_list_NAME => $list->name()
+                    $eventRepository::OPTION_PUBLISHERS_LIST_ID => $list->id(),
+                    $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $list->name()
                 ]
             );
             $memberCollection = $this->addOwnerToListOptionally(
                 $memberCollection,
-                $strategy
+                $ruleset
             );
 
             if ($memberCollection->isEmpty()) {
@@ -100,16 +103,20 @@ class PublishersListProcessor implements PublishersListProcessorInterface
                 $memberCollection,
                 $list,
                 $token,
-                $strategy
+                $ruleset
             );
 
-            // Change token for each list
-            // Members lists can only be accessed by authenticated users owning the lists
-            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-            $this->tokenChange->replaceAccessToken(
-                $token,
-                $this->accessor
-            );
+            try {
+                // Change token for each list unless there is only one single token available
+                // Members lists can only be accessed by authenticated users owning the lists
+                // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
+                $this->tokenChange->replaceAccessToken(
+                    $token,
+                    $this->accessor
+                );
+            } catch (CanNotReplaceAccessTokenException $exception) {
+                // keep going with the current token
+            }
 
             return $publishedMessages;
         }
@@ -117,20 +124,11 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         return 0;
     }
 
-    /**
-     * @param MemberCollection             $members
-     * @param PublishersList              $list
-     * @param TokenInterface               $token
-     *
-     * @param PublicationStrategyInterface $strategy
-     *
-     * @return int
-     */
     private function processMemberOriginatingFromListWithToken(
-        MemberCollection $members,
+        MemberCollectionInterface $members,
         PublishersList $list,
         TokenInterface $token,
-        PublicationStrategyInterface $strategy
+        CurationRulesetInterface $ruleset
     ): int {
         $publishedMessages = 0;
 
@@ -139,7 +137,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
             try {
                 $publishedMessages += $this->memberIdentityProcessor->process(
                     $memberIdentity,
-                    $strategy,
+                    $ruleset,
                     $token,
                     $list
                 );
@@ -148,6 +146,10 @@ class PublishersListProcessor implements PublishersListProcessorInterface
 
                 continue;
             } catch (StopPublicationException $exception) {
+                if ($exception->getPrevious() instanceof MembershipException) {
+                    continue;
+                }
+
                 $this->logger->error($exception->getMessage());
 
                 break;
@@ -167,26 +169,21 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         return $publishedMessages;
     }
 
-    /**
-     * @param MemberCollection             $memberCollection
-     * @param PublicationStrategyInterface $strategy
-     *
-     * @return MemberCollection
-     */
     private function addOwnerToListOptionally(
-        MemberCollection $memberCollection,
-        PublicationStrategyInterface $strategy
-    ): MemberCollection
+        MemberCollectionInterface $memberCollection,
+        CurationRulesetInterface $ruleset
+    ): MemberCollectionInterface
     {
         $members = $memberCollection->toArray();
-        if ($strategy->shouldIncludeOwner()) {
+
+        if ($ruleset->isListOwnerTweetsCurationActive()) {
             $eventRepository = $this->memberProfileCollectedEventRepository;
             $additionalMember = $eventRepository->collectedMemberProfile(
                 $this->accessor,
-                [$eventRepository::OPTION_SCREEN_NAME => $strategy->onBehalfOfWhom()]
+                [$eventRepository::OPTION_SCREEN_NAME => $ruleset->whoseListSubscriptionsAreCurated()]
             );
             array_unshift($members, $additionalMember);
-            $strategy->willIncludeOwner(false);
+            $ruleset->isListOwnerIncluded(false);
         }
 
         return MemberCollection::fromArray($members);

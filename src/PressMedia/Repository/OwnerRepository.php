@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace App\PressMedia\Repository;
 
 use App\PressMedia\Entity\Owner;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
 
-class OwnerRepository extends EntityRepository
+class OwnerRepository extends ServiceEntityRepository
 {
     /**
      * @var LoggerInterface

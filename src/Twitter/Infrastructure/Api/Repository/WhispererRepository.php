@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Repository;
 
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
-use App\Twitter\Infrastructure\Repository\Membership\WhispererRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\WhispererRepositoryInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)
  * @method Whisperer|null findOneBy(array $criteria, array $orderBy = null)

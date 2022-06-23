@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Log;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector;
+use App\Twitter\Infrastructure\Collector\PublicationCollector;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
@@ -37,30 +37,22 @@ class StatusLogger implements StatusLoggerInterface
         $this->logger     = $logger;
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param int                         $totalStatuses
-     * @param array                       $forms
-     * @param int                         $batchSize
-     *
-     * @return mixed
-     */
     public function logHowManyItemsHaveBeenCollected(
-        CollectionStrategyInterface $collectionStrategy,
-        int $totalStatuses,
-        array $forms,
-        int $batchSize
+        CurationSelectorsInterface $selectors,
+        int                        $totalStatuses,
+        array                      $forms,
+        int                        $batchSize
     ): void {
-        if ($collectionStrategy->minStatusId()) {
-            $extremumId = $collectionStrategy->minStatusId();
-            if (is_infinite($collectionStrategy->minStatusId())) {
+        if ($selectors->minStatusId()) {
+            $extremumId = $selectors->minStatusId();
+            if (is_infinite($selectors->minStatusId())) {
                 $extremumId = '-infinity';
             }
         }
 
-        if ($collectionStrategy->maxStatusId()) {
-            $extremumId = $collectionStrategy->maxStatusId();
-            if (is_infinite($collectionStrategy->maxStatusId())) {
+        if ($selectors->maxStatusId()) {
+            $extremumId = $selectors->maxStatusId();
+            if (is_infinite($selectors->maxStatusId())) {
                 $extremumId = '+infinity';
             }
         }
@@ -72,12 +64,12 @@ class StatusLogger implements StatusLoggerInterface
                 $forms['plural'],
                 $forms['singular'],
                 $extremumId,
-                $collectionStrategy->screenName()
+                $selectors->screenName()
             )
         );
 
         $this->logCollectionProgress(
-            $collectionStrategy,
+            $selectors,
             $batchSize,
             $totalStatuses
         );
@@ -103,22 +95,16 @@ class StatusLogger implements StatusLoggerInterface
     /**
      * @param int    $statusesCount
      * @param string $memberName
-     * @param bool   $collectingLikes
      *
      * @return int
      */
     public function logHowManyItemsHaveBeenSaved(
         int $statusesCount,
-        string $memberName,
-        bool $collectingLikes
+        string $memberName
     ): int {
         if ($statusesCount > 0) {
             $messageKey = 'logs.info.status_saved';
             $total      = 'total_status';
-            if ($collectingLikes) {
-                $messageKey = 'logs.info.likes_saved';
-                $total      = 'total_likes';
-            }
 
             $savedTweets = $this->translator->trans(
                 $messageKey,
@@ -140,15 +126,11 @@ class StatusLogger implements StatusLoggerInterface
         return 0;
     }
 
-    /**
-     * @param                             $options
-     * @param CollectionStrategyInterface $collectionStrategy
-     */
     public function logIntentionWithRegardsToAggregate(
         $options,
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ): void {
-        if ($collectionStrategy->publishersListId() === null) {
+        if ($selectors->publishersListId() === null) {
             $this->logger->info(sprintf(
                 'No aggregate id for "%s"', $options['screen_name']
             ));
@@ -160,7 +142,7 @@ class StatusLogger implements StatusLoggerInterface
             sprintf(
                 'About to save status for "%s" in aggregate #%d',
                 $options['screen_name'],
-                $collectionStrategy->publishersListId()
+                $selectors->publishersListId()
             )
         );
     }
@@ -192,20 +174,12 @@ class StatusLogger implements StatusLoggerInterface
         );
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param                             $lastCollectionBatchSize
-     * @param                             $totalCollectedStatuses
-     */
     private function logCollectionProgress(
-        CollectionStrategyInterface $collectionStrategy,
-        int $lastCollectionBatchSize,
-        int $totalCollectedStatuses
+        CurationSelectorsInterface $selectors,
+        int                        $lastCollectionBatchSize,
+        int                        $totalCollectedStatuses
     ): void {
         $subject = 'statuses';
-        if ($collectionStrategy->fetchLikes()) {
-            $subject = 'likes';
-        }
 
         if ($this->collectedAllAvailableStatuses(
             $lastCollectionBatchSize,
@@ -215,7 +189,7 @@ class StatusLogger implements StatusLoggerInterface
                 sprintf(
                     'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
                     $subject,
-                    $collectionStrategy->screenName(),
+                    $selectors->screenName(),
                     $subject,
                     $totalCollectedStatuses
                 )
@@ -229,8 +203,8 @@ class StatusLogger implements StatusLoggerInterface
                 '%d more %s in the past have been saved for "%s" in aggregate #%d',
                 $lastCollectionBatchSize,
                 $subject,
-                $collectionStrategy->screenName(),
-                $collectionStrategy->publishersListId()
+                $selectors->screenName(),
+                $selectors->publishersListId()
             )
         );
     }
@@ -264,7 +238,7 @@ class StatusLogger implements StatusLoggerInterface
      */
     public function hitCollectionLimit($statuses): bool
     {
-        return $statuses >= (CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
+        return $statuses >= (CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
 
     /**
@@ -309,8 +283,8 @@ class StatusLogger implements StatusLoggerInterface
         $aggregateName = 'without aggregate';
         if (!$memberStatus->getAggregates()->isEmpty()) {
             $aggregate = $memberStatus->getAggregates()->first();
-            if ($aggregate instanceof Aggregate) {
-                $aggregateName = $aggregate->getName();
+            if ($aggregate instanceof PublishersList) {
+                $aggregateName = $aggregate->name();
             }
         }
 

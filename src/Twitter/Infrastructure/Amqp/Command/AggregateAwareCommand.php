@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Command;
 
-use App\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\ORM\EntityManager;
 
 /**
  * @package App\Twitter\Infrastructure\Amqp\Command
  */
-abstract class AggregateAwareCommand extends AccessorAwareCommand implements CommandReturnCodeAwareInterface
+abstract class AggregateAwareCommand extends AccessorAwareCommand
 {
     use AggregateAwareTrait;
 
@@ -31,11 +30,5 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
         $this->entityManager = $entityManager;
 
         return $this;
-    }
-
-    protected function setupAggregateRepository()
-    {
-        // noop for backward compatibility
-        // TODO remove all 5 calls to this method
     }
 }

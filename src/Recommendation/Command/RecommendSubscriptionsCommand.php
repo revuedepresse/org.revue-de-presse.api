@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Recommendation\Command;
 
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RecommendSubscriptionsCommand extends Command implements CommandReturnCodeAwareInterface
+class RecommendSubscriptionsCommand extends Command
 {
     const OPTION_REFERENCE_MEMBER = 'reference-member';
 
@@ -52,7 +51,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
 
     public function configure()
     {
-        $this->setName('recommend:subscriptions')
+        $this->setName('app:recommend:subscriptions')
             ->addOption(
                 self::OPTION_REFERENCE_MEMBER,
                 'r',
@@ -119,8 +118,8 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
     private function findAllDistinctSubscriptions(): self
     {
         $allSubscriptions = $this->entityManager->getConnection()->executeQuery('
-            SELECT GROUP_CONCAT(distinct subscription_id) all_subscription_ids FROM member_subscription
-        ')->fetchAll()[0]['all_subscription_ids'];
+            SELECT array_agg(distinct subscription_id) all_subscription_ids FROM member_subscription
+        ')->fetchAllAssociative()[0]['all_subscription_ids'];
 
         $allSubscriptions = explode(',', $allSubscriptions);
         $allSubscriptions = array_map(
@@ -144,7 +143,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
     {
         $query = <<<QUERY
             SELECT member_id,
-            GROUP_CONCAT(
+            array_agg(
                 FIND_IN_SET(
                     COALESCE(subscription_id, 0),
                     (
@@ -164,7 +163,7 @@ QUERY;
         $statement = $this->entityManager->getConnection()->executeQuery(
             str_replace(':member_name', $this->input->getOption(self::OPTION_REFERENCE_MEMBER), $query)
         );
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         if (!array_key_exists(0, $results)) {
             throw new \LogicException('There should be subscriptions for the reference member');
@@ -187,7 +186,7 @@ QUERY;
         $query = <<<QUERY
             SELECT                                               
             u.usr_twitter_username identifier,                   
-            GROUP_CONCAT(                                        
+            array_agg(                                        
               FIND_IN_SET(                                       
                 subscription_id,                                 
                 (SELECT group_concat(DISTINCT subscription_id)   
@@ -216,7 +215,7 @@ QUERY;
                     ]
                 )
             );
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $memberVectors = array_map(function ($record) {
             return $this->reduceMemberVector($record['subscription_ids']);

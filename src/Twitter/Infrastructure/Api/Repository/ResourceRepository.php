@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Api\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  * @package App\Twitter\Infrastructure\Api\Repository
  */
 abstract class ResourceRepository extends ServiceEntityRepository

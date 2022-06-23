@@ -4,6 +4,9 @@ namespace App\Twitter\Infrastructure\Amqp;
 
 use PhpAmqpLib\Message\AMQPMessage;
 
+/**
+ * @deprecated
+ */
 trait AmqpMessageAwareTrait
 {
     /**

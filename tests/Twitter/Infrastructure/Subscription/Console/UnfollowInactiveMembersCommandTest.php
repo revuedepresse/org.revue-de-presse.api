@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Mutator\FriendshipMutatorBuilder;
@@ -28,17 +28,15 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var UnfollowInactiveMembersCommand $command */
-        $command = self::$container->get('test.'.UnfollowInactiveMembersCommand::class);
+        $command = static::getContainer()->get('test.'.UnfollowInactiveMembersCommand::class);
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:unfollow-inactive-members');
-        $this->command->setListCollectedEventRepository(FriendsListCollectedEventRepositoryBuilder::make());
+        $this->command = $application->find('app:unfollow-inactive-members');
+        $this->command->setListCollectedEventRepository(FriendsListCollectedEventRepositoryBuilder::build());
         $this->command->setMemberRepository($this->buildMemberRepository());
-        $this->command->setMutator(FriendshipMutatorBuilder::make());
+        $this->command->setMutator(FriendshipMutatorBuilder::build());
 
         $this->commandTester = new CommandTester($command);
     }
@@ -53,7 +51,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
-            'The status code of a command should be successful',
+            'The return code of this command execution should be successful.',
         );
     }
 
@@ -62,7 +60,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
         return MemberRepositoryBuilder::newMemberRepositoryBuilder()
             ->willFindAMemberByTwitterScreenName(
                 self::SUBSCRIBER_SCREEN_NAME,
-                (new Member())->setScreenName(self::SUBSCRIBER_SCREEN_NAME)
+                (new Member())->setTwitterScreenName(self::SUBSCRIBER_SCREEN_NAME)
             )
             ->build();
     }

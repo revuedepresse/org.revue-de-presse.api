@@ -3,14 +3,14 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Domain\Curation\Entity\FriendsListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,12 +37,12 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         $this->mutator = $mutator;
     }
 
-    public function __construct($name = 'press-review:unfollow-inactive-members')
+    public function __construct($name = 'app:unfollow-inactive-members')
     {
         parent::__construct($name);
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setDescription(
                 'Unfollow inactive members followed by member whose screen name has been passed as argument.'
@@ -55,7 +55,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
             ->setAliases(['pr:ufw']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
 

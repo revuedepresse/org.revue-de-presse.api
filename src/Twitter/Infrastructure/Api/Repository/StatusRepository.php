@@ -3,17 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector;
+use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
@@ -29,7 +26,7 @@ use function min;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method Status|null find($id, $lockMode = null, $lockVersion = null)
  * @method Status|null findOneBy(array $criteria, array $orderBy = null)
@@ -64,20 +61,6 @@ class StatusRepository extends ArchivedStatusRepository
         }
 
         return $status;
-    }
-
-    /**
-     * @param MappingAwareInterface $service
-     * @param ArrayCollection       $statuses
-     * @return ArrayCollection
-     */
-    public function mapStatusCollectionToService(
-        MappingAwareInterface $service,
-        ArrayCollection $statuses
-    ) {
-        return $statuses->map(function (Status $status) use ($service) {
-            return $service->apply($status);
-        });
     }
 
     /**
@@ -123,7 +106,7 @@ class StatusRepository extends ArchivedStatusRepository
                 JSON_THROW_ON_ERROR
             );
 
-            if ($decodedStatusDocument['user']['statuses_count'] > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
+            if ($decodedStatusDocument['user']['statuses_count'] > CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 
@@ -188,27 +171,6 @@ class StatusRepository extends ArchivedStatusRepository
         return $status->setUpdatedAt(
             new DateTime('now', new \DateTimeZone('UTC'))
         );
-    }
-
-    /**
-     * @param string    $memberScreenName
-     * @param DateTime $earliestDate
-     * @param DateTime $latestDate
-     * @return ArrayCollection
-     */
-    public function queryPublicationCollection(
-        string $memberScreenName,
-        DateTime $earliestDate,
-        DateTime $latestDate
-    ) {
-        $queryBuilder = $this->createQueryBuilder('s');
-
-        $this->between($queryBuilder, $earliestDate, $latestDate);
-
-        $queryBuilder->andWhere('s.screenName = :screen_name');
-        $queryBuilder->setParameter('screen_name', $memberScreenName);
-
-        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 
     /**
@@ -285,7 +247,7 @@ class StatusRepository extends ArchivedStatusRepository
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
             ->andWhere('s.apiDocument is not null')
-            ->orderBy('s.statusId + 0', $direction)
+            ->orderBy('CAST(s.statusId AS bigint)', $direction)
             ->setMaxResults(1);
 
         $queryBuilder->setParameter('screenName', $screenName);
@@ -373,46 +335,10 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param        $status
-     * @param string $memberName
-     *
-     * @return MemberInterface
-     */
-    public function declareMaximumLikedStatusId(
-        $status,
-        string $memberName
-    ): MemberInterface {
-        $maxStatus = $status->id_str;
-
-        return $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
-            $maxStatus,
-            $memberName
-        );
-    }
-
-    /**
-     * @param        $status
-     * @param string $memberName
-     *
-     * @return MemberInterface
-     */
-    public function declareMinimumLikedStatusId(
-        $status,
-        string $memberName
-    ): MemberInterface {
-        $minStatus = $status->id_str;
-
-        return $this->memberRepository->declareMinLikeIdForMemberWithScreenName(
-            $minStatus,
-            $memberName
-        );
-    }
-
-    /**
-     * @param Aggregate $aggregate
+     * @param PublishersList $aggregate
      * @return array
      */
-    public function findByAggregate(Aggregate $aggregate)
+    public function findByAggregate(PublishersList $aggregate)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->join('s.aggregates', 'a');
@@ -438,7 +364,7 @@ QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 
     /**
@@ -462,7 +388,7 @@ QUERY;
 QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
-        $result = $statement->fetchAll();
+        $result = $statement->fetchAllAssociative();
 
         $criteria = ['id' => $result[0]['id']];
 

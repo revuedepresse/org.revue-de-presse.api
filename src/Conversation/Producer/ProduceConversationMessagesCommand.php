@@ -2,7 +2,6 @@
 
 namespace App\Conversation\Producer;
 
-use App\Twitter\Infrastructure\Operation\OperationClock;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
@@ -16,7 +15,7 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ProduceConversationMessagesCommand extends AggregateAwareCommand
 {
@@ -31,11 +30,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
     private $translator;
 
     /**
-     * @var OperationClock
-     */
-    public $operationClock;
-
-    /**
      * @var Filesystem
      */
     public $filesystem;
@@ -47,7 +41,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:conversation')
+        $this->setName('app:amqp:produce:conversation')
             ->setDescription('Produce an AMQP message to get a conversation')
          ->addOption(
             'screen_name',
@@ -67,7 +61,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
             InputOption::VALUE_OPTIONAL,
             'A producer key',
             'producer.conversation_status'
-        )->setAliases(array('wtw:amqp:prd:cnv'));
+        );
     }
 
     /**
@@ -75,16 +69,9 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
      * @param OutputInterface $output
      * @return int|mixed|null
      * @throws SuspendedAccountException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 
@@ -168,9 +155,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
     private function setUpDependencies()
     {
         $this->setProducer();
-
-        $this->setUpLogger();
-        $this->setupAggregateRepository();
 
         $this->translator = $this->getContainer()->get('translator');
     }

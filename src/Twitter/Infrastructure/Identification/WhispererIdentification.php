@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Identification;
 
 use App\Twitter\Infrastructure\Api\Entity\Whisperer;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -18,7 +17,6 @@ use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 class WhispererIdentification implements WhispererIdentificationInterface
 {
     use ApiAccessorTrait;
-    use LikedStatusRepositoryTrait;
     use LoggerTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use StatusLoggerTrait;
@@ -27,10 +25,10 @@ class WhispererIdentification implements WhispererIdentificationInterface
     use WhispererRepositoryTrait;
 
     public function identifyWhisperer(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        string $screenName,
-        ?int $lastCollectionBatchSize
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+        string                     $screenName,
+        ?int                       $lastCollectionBatchSize
     ): bool {
         if ($this->justCollectedSomeStatuses($lastCollectionBatchSize)) {
             return false;
@@ -45,7 +43,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         $totalCollectedStatuses = 0;
         try {
             $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
-                $collectionStrategy,
+                $selectors,
                 $options,
                 $lastCollectionBatchSize
             );
@@ -72,19 +70,19 @@ class WhispererIdentification implements WhispererIdentificationInterface
     }
 
     /**
-     * @param CollectionStrategyInterface $collectionStrategy
+     * @param CurationSelectorsInterface $selectors
      *
-     * @param array                       $options
-     * @param int|null                    $lastCollectionBatchSize
+     * @param array                      $options
+     * @param int|null                   $lastCollectionBatchSize
      *
      * @return mixed
      */
     private function logHowManyItemsHaveBeenCollected(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        ?int $lastCollectionBatchSize
+        CurationSelectorsInterface $selectors,
+        array                      $options,
+        ?int                       $lastCollectionBatchSize
     ) {
-        $collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
+        $selectors->selectTweetsByMemberScreenName($options[FetchTweetInterface::SCREEN_NAME]);
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
@@ -96,25 +94,13 @@ class WhispererIdentification implements WhispererIdentificationInterface
                 $maxId = INF
             );
         };
-        if ($collectionStrategy->fetchLikes()) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function (
-                string $memberName
-            ) {
-                return $this->likedStatusRepository->countCollectedLikes(
-                    $memberName,
-                    $maxId = INF
-                );
-            };
-        }
 
         $totalStatuses = $countCollectedItems(
-            $collectionStrategy->screenName(),
+            $selectors->screenName(),
         );
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
-            $collectionStrategy,
+            $selectors,
             (int) $totalStatuses,
             [
                 'plural'   => $subjectInPluralForm,

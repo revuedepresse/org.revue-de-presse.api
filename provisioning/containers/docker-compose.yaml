@@ -1,67 +1,53 @@
 version: '3.8'
 
-name: 'news-review'
+name: 'revue-de-presse.org'
+
+x-vol: &shared-volumes
+  volumes:
+    - './_scripts/:/scripts'
+    - './worker/templates:/templates'
+    - './worker/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
+    - '../../../shared:/var/www/shared'
+
+x-shared: &shared
+  env_file:
+    - '../../.env.local'
+  restart: 'always'
+  <<: *shared-volumes
+
+x-worker: &worker
+  build:
+    context: .
+    dockerfile: './worker/Dockerfile'
+  <<: *shared
 
 services:
 
-    web:
-        build: ./apache
-        volumes:
-            - ../containers/apache/templates:/templates
-            - ../containers/apache/tasks:/tasks
-            - ../containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini
-            - ../containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini
-            - ../containers/apache/templates/blackfire/agent:/etc/blackfire/agent
-            - ../../:/var/www/devobs
-        external_links:
-            - mysql
-        depends_on:
-            - cache
-            - worker
+  amqp:
+    build: './amqp'
+    expose:
+      - "5672"
+    restart: 'always'
+    env_file:
+      - '../../.env.local'
 
-    worker:
-        build: ./php
-        volumes:
-            - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../../:/var/www/devobs
-        depends_on:
-            - messenger
+  app:
+    <<: *worker
 
-    db_read:
-        build: ./mysql
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/mysql:/var/lib/mysql
+  database:
+    image: 'postgres:14-bullseye'
+    restart: 'always'
+    env_file:
+      - '../../.env.local'
 
-    db_write:
-        build: ./mariadb
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/mariadb:/var/lib/mysql
-            - ./mariadb/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
+  process-manager:
+    build:
+      context: .
+      dockerfile: './process-manager/Dockerfile'
+    depends_on:
+      - 'worker'
+    <<: *shared
 
-    messenger:
-        build: ./rabbitmq
-        expose:
-            - "5672"
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/rabbitmq:/var/lib/rabbitmq
-
-    cache:
-        image: redis
-        command:
-            redis-server --appendonly yes
-        expose:
-            - "6379"
-        restart: always
-        volumes:
-            - ../volumes/redis:/data
+  worker:
+    <<: *worker
 

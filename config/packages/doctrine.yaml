@@ -71,7 +71,7 @@ parameters:
             any_value: DoctrineExtensions\Query\Mysql\AnyValue
             ascii: DoctrineExtensions\Query\Mysql\Ascii
             binary: DoctrineExtensions\Query\Mysql\Binary
-            cast: DoctrineExtensions\Query\Mysql\Cast
+            cast: Oro\ORM\Query\AST\Functions\Cast
             char_length: DoctrineExtensions\Query\Mysql\CharLength
             collate: DoctrineExtensions\Query\Mysql\Collate
             concat_ws: DoctrineExtensions\Query\Mysql\ConcatWs
@@ -117,16 +117,10 @@ doctrine:
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
-                server_version: '5.7'
-                charset: utf8mb4
-                logging: false
-            write:
-                url: '%env(resolve:DATABASE_WRITE_URL)%'
-                server_version: '5.7'
-                charset: utf8mb4
                 logging: false
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
+            correlation_id:  App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdType
     orm:
         auto_generate_proxy_classes: true
         entity_managers:
@@ -135,7 +129,7 @@ doctrine:
                 auto_mapping: false
                 connection: default
                 dql: "%doctrine_extensions_dql%"
-                mappings: &mappings_write
+                mappings:
                     Api:
                         alias:      'Api'
                         is_bundle:  false
@@ -146,13 +140,13 @@ doctrine:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity
+                        prefix:     App\Membership\Infrastructure\Entity
                         type:       xml
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
+                        dir:        '%kernel.project_dir%/src/Membership/Infrastructure/Entity/Legacy'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity\Legacy
+                        prefix:     App\Membership\Infrastructure\Entity\Legacy
                         type:       annotation
                     PressMedia:
                         alias:      'PressMedia'
@@ -164,29 +158,23 @@ doctrine:
                         alias:      'Popularity'
                         dir:        '%kernel.project_dir%/config/model/popularity'
                         is_bundle:  false
-                        prefix:     App\PublicationPopularity\Entity
+                        prefix:     App\Twitter\Infrastructure\PublicationPopularity\Entity
                         type:       xml
+                    Publication:
+                        alias:      'Publication'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Publication/Entity'
+                        is_bundle:  false
+                        prefix:     App\Twitter\Infrastructure\Publication\Entity
+                        type:       annotation
                     PublicationBatchCollectedEvent:
                         alias:      'PublicationBatchCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Twitter\Domain\Curation\Entity
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
                     PublishersList:
                         alias:      'PublishersList'
                         dir:        '%kernel.project_dir%/config/model/publication-list'
                         is_bundle:  false
-                        prefix:     App\PublishersList\Entity
+                        prefix:     App\Twitter\Infrastructure\PublishersList\Entity
                         type:       xml
-                    Publication:
-                        alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
-                        is_bundle:  false
-                        prefix:     App\Twitter\Domain\Publication\Entity
-                        type:       annotation
-            write:
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                connection: write
-                dql: "%doctrine_extensions_dql%"
-                mappings:
-                    <<: *mappings_write

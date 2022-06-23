@@ -3,25 +3,24 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Security\Authentication;
 
-use App\PublishersList\Controller\Exception\InvalidRequestException;
-use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
+use App\Twitter\Infrastructure\PublishersList\Controller\Exception\InvalidRequestException;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait AuthenticationTokenValidationTrait
 {
-    use TokenRepositoryTrait;
+    public TokenRepositoryInterface $tokenRepository;
 
     /**
      * @param $corsHeaders
      *
-     * @return Token
-     * @throws InvalidRequestException
+     * @return TokenInterface
      */
-    private function guardAgainstInvalidAuthenticationToken($corsHeaders): Token
+    private function guardAgainstInvalidAuthenticationToken($corsHeaders): TokenInterface
     {
         $token = $this->tokenRepository->findFirstUnfrozenToken();
-        if (!($token instanceof Token)) {
+        if (!($token instanceof TokenInterface)) {
             $exceptionMessage = 'Could not process your request at the moment';
             $jsonResponse = new JsonResponse(
                 $exceptionMessage,

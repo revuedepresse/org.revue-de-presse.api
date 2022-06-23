@@ -2,17 +2,17 @@
 
 namespace App\Conversation\Consumer;
 
-use App\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Operation\OperationClock;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -29,8 +29,6 @@ class ConversationStatusConsumer
     use LoggerTrait;
 
     private const ERROR_CODE_USER_NOT_FOUND = 100;
-
-    public OperationClock $operationClock;
 
     public EntityManagerInterface $entityManager;
 
@@ -58,10 +56,6 @@ class ConversationStatusConsumer
      */
     public function execute(AmqpMessage $message)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return true;
-        }
-
         try {
             $options = $this->parseMessage($message);
         } catch (\Exception $exception) {
@@ -91,7 +85,7 @@ class ConversationStatusConsumer
 
             $member = $this->ensureStatusAuthorExists($status);
 
-            $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
+            $aggregate = $this->aggregateRepository->byName($member->twitterScreenName(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
             [$aggregate, $status] = $this->handleMemberNotFoundException($notFoundMemberException, $options);
         } catch (NotFoundStatusException $exception) {
@@ -164,7 +158,7 @@ class ConversationStatusConsumer
         array $options
     ): array {
         $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
-        $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
+        $aggregate = $this->byName($member->twitterScreenName(), $options['aggregate_name']);
         $status = $this->statusAccessor->refreshStatusByIdentifier(
             $options['status_id'],
             $skipExistingStatus = false,
@@ -210,7 +204,7 @@ class ConversationStatusConsumer
         $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof MemberInterface) {
             $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
-            $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->getTwitterID()]);
+            $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->twitterId()]);
 
             if ($existingMember) {
                 return $existingMember;
