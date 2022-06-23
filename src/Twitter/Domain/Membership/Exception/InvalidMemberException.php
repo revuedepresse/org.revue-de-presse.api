@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Membership\Exception;
 
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use function sprintf;
 
 class InvalidMemberException extends \Exception
@@ -38,14 +38,14 @@ class InvalidMemberException extends \Exception
     }
 
     /**
-     * @param MemberRepository $memberRepository
-     * @param string           $username
+     * @param MemberRepositoryInterface $memberRepository
+     * @param string                    $username
      *
      * @return MemberInterface
      * @throws InvalidMemberException
      */
     public static function ensureMemberHavingUsernameIsAvailable(
-        MemberRepository $memberRepository,
+        MemberRepositoryInterface $memberRepository,
         string $username
     ): MemberInterface {
         $member = $memberRepository->findOneBy(['twitter_username' => $username]);

@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ApiLimitModerator implements ApiLimitModeratorInterface
 {
@@ -39,7 +39,6 @@ class ApiLimitModerator implements ApiLimitModeratorInterface
 
             $message = 'API limit has been reached for token "{{ token }}...", '.
                 'operations are currently frozen (waiting for {{ wait_time }} )';
-            ;
             $parameters['{{ wait_time }}'] = $humanlyReadableWaitTime;
             $this->logger->info(strtr($message, $parameters));
         }

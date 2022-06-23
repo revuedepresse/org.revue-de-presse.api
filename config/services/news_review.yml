@@ -1,0 +1,8 @@
+services:
+    App\NewsReview\Infrastructure\Repository\PublishersListRepository:
+        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+        arguments:
+            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
+
+    App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
+        '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'

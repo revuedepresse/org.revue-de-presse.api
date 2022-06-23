@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Collection;
 
-use App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDeciderInterface;
+use App\Twitter\Domain\Collector\InterruptibleCollectDeciderInterface;
 
 trait InterruptibleCollectDeciderTrait
 {

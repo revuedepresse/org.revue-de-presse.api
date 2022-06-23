@@ -1,15 +1,27 @@
-version: '3.8'
+x-volumes: &app-volume
+  volumes:
+    - '../../:/var/www/worker.example.org'
 
 services:
 
-    db_write:
-        #ports:
-        #    - "127.0.0.1:3306:3306"
-        volumes:
-            - ./mariadb/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
+#  amqp:
+#    volumes:
+
+  app:
+    <<: *app-volume
+
+#  database:
+#    ports:
+#      - "127.0.0.1:5434:5432"
+#    volumes:
+
+  process-manager:
+    <<: *app-volume
+
+  worker:
+    <<: *app-volume
 
 networks:
-    default:
-        name: # [Network Configuration Reference](https://docs.docker.com/compose/compose-file/compose-file-v3/#network-configuration-reference)
-        external: true
-
+  default:
+    # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
+    name: # external-network-name

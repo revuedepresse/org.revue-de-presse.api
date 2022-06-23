@@ -6,19 +6,14 @@ namespace App\Twitter\Infrastructure\Exception;
 class NotFoundMemberException extends UnavailableResourceException
 {
     public string $screenName;
+    public string $twitterId;
 
-    /**
-     * @param string          $screenName
-     * @param int             $code
-     * @param \Throwable|null $previous
-     * @return NotFoundMemberException
-     * @throws NotFoundMemberException
-     */
     public static function raiseExceptionAboutNotFoundMemberHavingScreenName(
         string $screenName,
+        string $twitterId,
         int $code = 0,
         \Throwable $previous = null
-    ): self {
+    ): void {
         $exception = new self(
             sprintf(
                 'Could not find member with screen name "%s"',
@@ -28,6 +23,7 @@ class NotFoundMemberException extends UnavailableResourceException
             $previous
         );
         $exception->screenName = $screenName;
+        $exception->twitterId = $twitterId;
 
         throw $exception;
     }

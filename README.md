@@ -1,77 +1,39 @@
-# Press review
+# snapshots.fr worker
 
-[![Codeship Status for thierrymarianne/daily-press-review](https://app.codeship.com/projects/24369620-8f96-0136-7068-0e8ef5ba2310/status?branch=main)](https://app.codeship.com/projects/304052)
+![api.snapshots.fr continuous integration](https://github.com/thierrymarianne/api.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
 
-Easing observation of Twitter lists to publish a daily press review
+Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
+
+This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
 
 ## Installation
 
-The shell scripts written to install the project dependencies
-have been tested under Ubuntu 19.10.
+The shell scripts written for bash   
+have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
 
 ### Requirements
 
-Install git by following instructions from the [official documentation](https://git-scm.org/).
+Install [git](https://git-scm.com/downloads).
+> Git is a free and open source distributed version control system designed 
+> to handle everything from small to very large projects with speed and efficiency.
 
-Install Docker by following instructions from the [official documentation](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
+Install [Docker Docker Engine](https://docs.docker.com/engine/install/).
+> Docker Engine is an open source containerization technology for building and containerizing your applications.
 
-Install Docker compose by following instructions from the [official documentation](https://docs.docker.com/compose/install/).
+Install [Docker Compose](https://docs.docker.com/compose/install/).
+> Compose is a tool for defining and running multi-container Docker applications.
 
-### MySQL
+Install [jq](https://stedolan.github.io/jq/download/).
+> jq is a lightweight and flexible command-line JSON processor.
 
-```
-# Generate queries to be executed
-# when the project data model has been modified
-make diff-schema
-```
-
-### RabbitMQ
-
-List AMQP messages
+### Documentation
 
 ```
-make list-amqp-messages
+make help
 ```
 
-## Running containers
+## License
 
-```
-make run-stack
-```
+GNU General Public License v3.0 or later
 
-## Available commands
-
-Add members to a list
-
-```
-bin/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="list-name" \
---member-list="member-username"
-```
-
-Import subscriptions related to a list
-
-```
-bin/console import-aggregates -e prod \
---member-name="username-of-list-owner" \
---find-ownerships
-```
-
-Add members from a list to another list 
-(requires importing source list beforehand)
-
-```
-bin/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="name-of-destination-list" 
---list="name-of-source-list"
-```
-
-## Testing
-
-Run unit tests with PHPUnit 
-
-```
-make run-php-unit-tests
-```
+See [COPYING](./COPYING) to see the full text.

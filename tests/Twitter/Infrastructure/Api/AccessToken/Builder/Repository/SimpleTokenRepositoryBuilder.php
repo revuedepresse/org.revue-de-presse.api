@@ -3,12 +3,12 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
 class SimpleTokenRepositoryBuilder extends TestCase
 {
-    public static function make(): TokenRepositoryInterface
+    public static function build(): TokenRepositoryInterface
     {
         $testCase = new self();
 

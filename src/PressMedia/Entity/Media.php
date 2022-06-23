@@ -2,7 +2,7 @@
 
 namespace App\PressMedia\Entity;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class Media

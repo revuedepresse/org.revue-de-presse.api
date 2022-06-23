@@ -4,25 +4,25 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Entity;
 
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Curation\Entity\StatusTrait;
+use App\Twitter\Infrastructure\Curation\Entity\StatusTrait;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository")
+ * @ORM\Entity
  * @ORM\Table(
  *      name="weaving_archived_status",
  *      uniqueConstraints={
  *          @ORM\UniqueConstraint(
- *              name="unique_hash", columns={"ust_hash", "ust_access_token", "ust_full_name"}),
+ *              name="archived_status_unique_hash", columns={"ust_hash", "ust_access_token", "ust_full_name"}),
  *      },
  *      indexes={
  *          @ORM\Index(name="hash", columns={"ust_hash"}),
- *          @ORM\Index(name="screen_name", columns={"ust_full_name"}),
- *          @ORM\Index(name="status_id", columns={"ust_status_id"}),
- *          @ORM\Index(name="ust_created_at", columns={"ust_created_at"}),
- *          @ORM\Index(name="idx_published", columns={"is_published"})
+ *          @ORM\Index(name="archived_status_screen_name", columns={"ust_full_name"}),
+ *          @ORM\Index(name="archived_status_id", columns={"ust_status_id"}),
+ *          @ORM\Index(name="archived_status_created_at", columns={"ust_created_at"}),
+ *          @ORM\Index(name="archived_status_published", columns={"is_published"})
  *      }
  * )
  */
@@ -118,7 +118,11 @@ class ArchivedStatus implements StatusInterface
     protected ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Aggregate", inversedBy="userStreams", cascade={"persist"})
+     * @ORM\ManyToMany(
+     *      targetEntity="App\Twitter\Infrastructure\Publication\Entity\PublishersList",
+     *     inversedBy="userStreams",
+     *     cascade={"persist"}
+     * )
      * @ORM\JoinTable(name="weaving_archived_status_aggregate",
      *      joinColumns={@ORM\JoinColumn(name="status_id", referencedColumnName="ust_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="aggregate_id", referencedColumnName="id")}

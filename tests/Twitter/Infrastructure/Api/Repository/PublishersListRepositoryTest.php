@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException as DBALExceptionAlias;
 use Doctrine\DBAL\ParameterType;
-use Faker\Factory;
+use Ramsey\Uuid\Rfc4122\UuidV5;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -28,7 +28,7 @@ class PublishersListRepositoryTest extends KernelTestCase
     {
         $publishersListId = $this->publishPublishersListHavingStatus();
 
-        $publishersListRepository = self::$container->get(PublishersListRepository::class);
+        $publishersListRepository = static::getContainer()->get(PublishersListRepository::class);
         $publishersList = $publishersListRepository->findOneBy(['id' => $publishersListId]);
 
         $expectedTotalStatusPostUpdate = self::EXPECTED_TOTAL_STATUS_PUBLISHED;
@@ -40,17 +40,17 @@ class PublishersListRepositoryTest extends KernelTestCase
             $publishersList
         );
 
-        $entityManager = self::$container->get('doctrine.orm.default_entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.default_entity_manager');
         $entityManager->flush();
 
         self::assertEquals($expectedTotalStatusPostUpdate, $result['totalStatuses']);
 
-        $statement = $this->connection->query('
+        $statement = $this->connection->executeQuery('
             SELECT total_statuses AS total_status
-            FROM weaving_aggregate    
+            FROM publishers_list    
             WHERE id = '.$publishersListId.'
         ');
-        $result = $statement->fetch();
+        $result = $statement->fetchAssociative();
 
         self::assertEquals($expectedTotalStatusPostUpdate, $result['total_status']);
     }
@@ -58,9 +58,8 @@ class PublishersListRepositoryTest extends KernelTestCase
     protected function setUp(): void
     {
         self::$kernel    = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
-        $this->connection = self::$container->get('doctrine.dbal.default_connection');
+        $this->connection = static::getContainer()->get('doctrine.dbal.default_connection');
 
         $this->tearDownFixtures();
     }
@@ -75,26 +74,31 @@ class PublishersListRepositoryTest extends KernelTestCase
     private function preparePublishersList(): int
     {
         $insertPublishersList = <<<QUERY
-            INSERT INTO weaving_aggregate (
+            INSERT INTO publishers_list (
                 screen_name,
                 name,
+                public_id,
                 locked,
                 locked_at,
                 created_at
             ) VALUES (
-                "New York Times",
-                "press review",
-                0,
+                'New York Times',
+                'press review',
+                ?,
+                true,
                 null,
                 NOW()
             )
 QUERY;
-        $this->connection->executeQuery($insertPublishersList);
+        $this->connection->executeQuery(
+            $insertPublishersList,
+            [UuidV5::uuid5('c2670e5e-f575-4ea7-acb3-cce1367b51e4', 'press review')]
+        );
 
-        $statement = $this->connection->query(
+        $statement = $this->connection->executeQuery(
             '
             SELECT id as publication_id
-            FROM weaving_aggregate
+            FROM publishers_list
         '
         );
         $result    = $statement->fetch();
@@ -106,13 +110,13 @@ QUERY;
     {
         $this->publishStatus();
 
-        $statement = $this->connection->query(
+        $statement = $this->connection->executeQuery(
             '
             SELECT ust_id as status_id
             FROM weaving_status
         '
         );
-        $results   = $statement->fetchAll();
+        $results   = $statement->fetchAllAssociative();
 
         $publishersListId = $this->preparePublishersList();
 
@@ -163,8 +167,6 @@ QUERY;
             VALUES 
 QUERY;
 
-        $faker = Factory::create();
-
         $placeholders = [];
         $statusParams = [];
         $paramsTypes  = [];
@@ -173,8 +175,8 @@ QUERY;
 
             $placeholders[] = '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-            $firstName = $faker->firstName;
-            $lastName  = $faker->lastName;
+            $firstName = 'John';
+            $lastName  = 'Doe';
 
             $statusParams[] = sha1((string) random_int(0, 1000000));
             $statusParams[] = $firstName . ' ' . $lastName;
@@ -211,15 +213,15 @@ QUERY;
     private function tearDownFixtures(): void
     {
         $this->connection->executeQuery(
-            'DELETE FROM weaving_status_aggregate WHERE 1'
+            'DELETE FROM weaving_status_aggregate'
         );
 
         $this->connection->executeQuery(
-            'DELETE FROM timely_status WHERE 1'
+            'DELETE FROM timely_status'
         );
 
         $this->connection->executeQuery(
-            'DELETE FROM weaving_status WHERE 1'
+            'DELETE FROM weaving_status'
         );
     }
 }

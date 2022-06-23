@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
@@ -17,16 +17,16 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Domain\Curation\Entity\LikedStatus;
+use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
+use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -59,8 +59,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
-
-    public LikedStatusRepository $likedStatusRepository;
 
     public Connection $connection;
 
@@ -174,7 +172,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
         $queryBuilder->select('s.statusId')
                      ->andWhere('s.screenName = :screenName')
                      ->andWhere('s.apiDocument is not null')
-                     ->orderBy('s.statusId + 0', $direction)
+                     ->orderBy('CAST(s.statusId AS bigint)', $direction)
                      ->setMaxResults(1);
 
         $queryBuilder->setParameter('screenName', $screenName);
@@ -269,7 +267,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public function hasBeenSavedBefore(array $statuses): bool
     {
         if (count($statuses) === 0) {
-            throw new \Exception('There should be one item at least');
+            throw new Exception('There should be one item at least');
         }
 
         $identifier         = '';
@@ -307,20 +305,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
         );
     }
 
-    /**
-     * @param array           $statuses
-     * @param                 $identifier
-     * @param Aggregate       $aggregate
-     * @param LoggerInterface $logger
-     * @param MemberInterface $likedBy
-     * @param callable        $ensureMemberExists
-     *
-     * @return CollectionInterface
-     */
     public function saveLikes(
         array $statuses,
         $identifier,
-        ?Aggregate $aggregate,
+        ?PublishersList $aggregate,
         LoggerInterface $logger,
         MemberInterface $likedBy,
         callable $ensureMemberExists
@@ -340,8 +328,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
             },
             $this->appLogger
         );
-
-        $likedStatuses = [];
 
         $entityManager = $this->getEntityManager();
 
@@ -388,13 +374,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
                 }
 
                 if ($member instanceof MemberInterface) {
-                    $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
-                        $member,
-                        $memberStatus,
-                        $likedBy,
-                        $aggregate
-                    );
-
                     $entityManager->persist($memberStatus);
                 }
             } catch (ORMException $exception) {
@@ -409,12 +388,11 @@ class ArchivedStatusRepository extends ResourceRepository implements
         }
 
         $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
-        $this->flushLikedStatuses($likedStatuses, $entityManager);
 
         if (count($extracts) > 0) {
             $this->memberRepository->incrementTotalLikesOfMemberWithName(
                 count($extracts),
-                $likedBy->getTwitterUsername()
+                $likedBy->twitterScreenName()
             );
         }
 
@@ -463,25 +441,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
-     * @param                        $likedStatuses
-     * @param EntityManagerInterface $entityManager
-     */
-    private function flushLikedStatuses(
-        $likedStatuses,
-        EntityManagerInterface $entityManager
-    ): void {
-        (new ArrayCollection($likedStatuses))->map(
-            function (LikedStatus $likedStatus) use ($entityManager) {
-                $entityManager->persist($likedStatus);
-            }
-        );
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation(
-            $entityManager
-        );
-    }
-
-    /**
      * @param array $statuses
      *
      * @return array
@@ -494,5 +453,29 @@ class ArchivedStatusRepository extends ResourceRepository implements
             },
             $statuses
         );
+    }
+
+    public function mapStatusCollectionToService(
+        MappingAwareInterface $service,
+        ArrayCollection $statuses
+    ): iterable {
+        return $statuses->map(function (Status $status) use ($service) {
+            return $service->apply($status);
+        });
+    }
+
+    public function queryPublicationCollection(
+        string $memberScreenName,
+        DateTimeInterface $earliestDate,
+        DateTimeInterface $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->andWhere('s.screenName = :screen_name');
+        $queryBuilder->setParameter('screen_name', $memberScreenName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 }

@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\AccessToken\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface;
+use App\Twitter\Domain\Api\Security\Authorization\AccessTokenInterface;
+use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Api\Entity\TokenType;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -11,20 +16,14 @@ use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\NoResultException;
-
+use Doctrine\Persistence\ManagerRegistry;
 use Exception;
-use Psr\Log\LoggerInterface;
-
-use App\Twitter\Infrastructure\Api\Entity\Token,
-    App\Twitter\Infrastructure\Api\Entity\TokenType;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method TokenInterface|null findOneBy(array $criteria, array $orderBy = null)
  * @method TokenInterface[]    findAll()
@@ -33,6 +32,26 @@ use App\Twitter\Infrastructure\Api\Entity\Token,
 class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface, ConnectionAwareInterface
 {
     use LoggerTrait;
+
+    private string $consumerKey;
+    private string $consumerSecret;
+    /**
+     * @var TokenTypeRepositoryInterface
+     */
+    private TokenTypeRepositoryInterface $tokenTypeRepository;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        string $entityClass,
+        TokenTypeRepositoryInterface $tokenTypeRepository,
+        string $consumerKey,
+        string $consumerSecret
+    ) {
+        parent::__construct($registry, $entityClass);
+        $this->consumerKey = $consumerKey;
+        $this->consumerSecret = $consumerSecret;
+        $this->tokenTypeRepository = $tokenTypeRepository;
+    }
 
     /**
      * @param $properties
@@ -47,27 +66,25 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-
         /** @var TokenType $tokenType */
-        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+        $tokenType = $this->tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
         $token->setType($tokenType);
 
-        $token->setOauthToken($properties['oauth_token']);
-        $token->setOauthTokenSecret($properties['oauth_token_secret']);
+        $token->setAccessToken($properties['oauth_token']);
+        $token->setAccessTokenSecret($properties['oauth_token_secret']);
 
         // Ensure the newly created token is not frozen yet
         // equivalent to setting the frozen until date in the past
-        $token->setFrozenUntil(new DateTime('now - 15min'));
+        $token->unfreeze();
 
         return $token;
     }
 
-    public function ensureTokenExists(
-        $oauthToken,
-        $oauthTokenSecret,
-        $consumerKey,
-        $consumerSecret
+    public function ensureAccessTokenExists(
+        string $oauthToken,
+        string $oauthTokenSecret,
+        string $consumerKey,
+        string $consumerSecret
     ): void {
         if ($this->findOneBy(['oauthToken' => $oauthToken]) !== null) {
             return;
@@ -83,56 +100,36 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $this->save($token);
     }
 
-    /**
-     * @param $oauthToken
-     * @param string $until
-     * @throws Exception
-     */
-    public function freezeToken($oauthToken, $until = 'now + 15min'): void
+    public function freezeToken(TokenInterface $oauthToken): void
     {
-        /** @var Token $token */
-        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        $token->setFrozenUntil(new DateTime($until));
+        /** @var TokenInterface $token */
+        $token = $this->findOneBy([
+            'oauthToken' => $oauthToken->getAccessToken(),
+            'consumerKey' => $oauthToken->getConsumerKey()
+        ]);
+
+        if (!($token instanceof TokenInterface)) {
+            UnavailableTokenException::throws();
+        }
+
+        $token->freeze();
 
         $this->save($token);
     }
 
-    /**
-     * @param string          $oauthToken
-     * @param LoggerInterface $logger
-     *
-     * @return TokenInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function refreshFreezeCondition(
-        string $oauthToken,
-        LoggerInterface $logger
-    ): TokenInterface {
-        $frozen = false;
+    public function findByUserToken(string $userToken): TokenInterface {
+        $matchingTokens= $this->findBy(['oauthToken' => $userToken]);
 
-        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-
-        if ($token === null) {
-            $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => '']);
-            $this->save($token);
-
-            $logger->info('[token creation] ' . $token->getOauthToken());
-        } elseif ($this->isTokenFrozen($token)) {
-            /**
-             * The token is frozen if the "frozen until" date is in the future
-             */
-            $frozen = true;
+        if (empty($matchingTokens)) {
+            throw new UnavailableTokenException(
+                sprintf(
+                    'No token matching "%s" user token',
+                    $userToken
+                )
+            );
         }
-        /**
-         *  else {
-         *      The token was frozen but not anymore as "frozen until" date is now in the past
-         *  }
-         */
 
-        $token->setFrozen($frozen);
-
-        return $token;
+        return $matchingTokens[0];
     }
 
     /**
@@ -147,6 +144,17 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
             $token->getFrozenUntil()->getTimestamp() >
                 (new DateTime('now', new DateTimeZone('UTC')))
                     ->getTimestamp();
+    }
+
+    /**
+     * @param Token $token
+     *
+     * @return bool
+     * @throws Exception
+     */
+    protected function isTokenNotFrozen(Token $token): bool
+    {
+        return !$this->isTokenFrozen($token);
     }
 
     /**
@@ -202,15 +210,32 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         }
     }
 
+    public function howManyUnfrozenTokenAreThereExceptFrom(TokenInterface $excludedToken): int
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select('COUNT(t.id) as count_');
+
+        $queryBuilder->andWhere('t.oauthToken != :user_token');
+        $queryBuilder->setParameter(':user_token', $excludedToken->getAccessToken());
+
+        $this->applyUnfrozenTokenCriteria($this->createQueryBuilder('t'));
+
+        try {
+            return $queryBuilder->getQuery()->getSingleResult()['count_'];
+        } catch (NoResultException $exception) {
+            UnavailableTokenException::throws();
+        }
+    }
+
     /**
      * @param QueryBuilder $queryBuilder
      *
      * @return QueryBuilder
      */
     private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder {
+        $tokenType = $this->tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
+
         $queryBuilder->andWhere('t.type = :type');
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
         $queryBuilder->setParameter('type', $tokenType);
 
         $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');
@@ -230,12 +255,12 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
 
         $token = new Token();
-        $token->setOauthToken($applicationToken);
-        $token->setOauthTokenSecret($accessToken);
+        $token->setAccessToken($applicationToken);
+        $token->setAccessTokenSecret($accessToken);
         $token->setType($tokenType);
         $token->setCreatedAt(new DateTime());
 
@@ -269,7 +294,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
 
         $queryBuilder->andWhere('t.type = :type');
@@ -313,20 +338,47 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $queryBuilder->getQuery()->getSingleResult();
     }
 
-    private function save(Token $token): void
+    private function save(TokenInterface $token): TokenInterface
     {
+        $token->setUpdatedAt(new DateTime('now', new DateTimeZone('UTC')));
+
         $entityManager = $this->getEntityManager();
 
         try {
             $entityManager->persist($token);
             $entityManager->flush();
+
+            return $token;
         } catch (\Throwable $exception) {
-            $this->logger->error($exception->getMessage(), ['token' => $token->getOAuthToken()]);
+            $this->logger->error($exception->getMessage(), ['token' => $token->getAccessToken()]);
         }
     }
 
     public function reconnect(): void {
         $entityManager = $this->getEntityManager();
         $entityManager->getConnection()->connect();
+    }
+
+    public function saveAccessToken(AccessTokenInterface $accessToken): TokenInterface
+    {
+        $this->tokenTypeRepository->ensureTokenTypesExist();
+
+        $existingToken = $this->findOneBy(['oauthToken' => $accessToken->token()]);
+
+        if ($existingToken instanceof TokenInterface) {
+            $existingToken->setAccessToken($accessToken->token());
+            $existingToken->setAccessTokenSecret($accessToken->secret());
+
+            return $this->save($existingToken);
+        }
+
+        $token = $this->makeToken([
+            'oauth_token' => $accessToken->token(),
+            'oauth_token_secret' => $accessToken->secret()
+        ]);
+        $token->setConsumerKey($this->consumerKey);
+        $token->setConsumerSecret($this->consumerSecret);
+
+        return $this->save($token);
     }
 }

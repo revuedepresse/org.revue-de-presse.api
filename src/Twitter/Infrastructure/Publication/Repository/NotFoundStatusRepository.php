@@ -2,7 +2,7 @@
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
-use App\Twitter\Domain\Curation\Entity\NotFoundStatus;
+use App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;

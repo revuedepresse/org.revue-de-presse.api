@@ -5,12 +5,13 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublishersList\Entity\MemberAggregateSubscription"
-            repository-class="App\PublishersList\Repository\MemberAggregateSubscriptionRepository"
+    <entity name="App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription"
+            repository-class="App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository"
             table="member_aggregate_subscription">
 
         <indexes>
-            <index name="member_aggregate_subscription" columns="id,member_id,list_id" />
+            <index name="member_aggregate_subscription_idx" columns="id,member_id,list_id,list_name" />
+            <index name="mas_id_name" columns="list_name" />
         </indexes>
 
         <unique-constraints>
@@ -24,13 +25,18 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+            target-entity="App\Membership\Infrastructure\Entity\Legacy\Member"
         >
             <join-column
                 name="member_id"
                 referenced-column-name="usr_id"
             />
         </many-to-one>
+
+        <one-to-many
+            field="aggregates"
+            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
+            mapped-by="memberAggregateSubscription" />
 
         <field
             name="listName"

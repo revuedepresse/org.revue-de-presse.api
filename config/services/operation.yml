@@ -1,10 +1,14 @@
 services:
-    operation.clock:
-        class:                                 'App\Twitter\Infrastructure\Operation\OperationClock'
-        properties:
-            timeAfterWhichOperationIsSkipped:  '%env(resolve:OPERATIONS_SKIPPED_AFTER)%'
-            timeBeforeWhichOperationIsSkipped: '%env(resolve:OPERATIONS_SKIPPED_BEFORE)%'
-            logger:                            '@monolog.logger.twitter_api'
+    App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository:
+        class: App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Twitter\Infrastructure\Api\Entity\TokenType'
+        calls:
+            - [ 'setLogger', [ '@monolog.logger.doctrine' ]]
+        tags:
+            - { name: 'doctrine.repository_service' }
 
-    monolog.json_formatter:
-        class:                                  'Monolog\Formatter\JsonFormatter'
+    App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository'
+
+    App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository'

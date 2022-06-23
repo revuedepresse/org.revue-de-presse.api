@@ -3,10 +3,9 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Collection\Repository;
 
+use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
 use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FriendsListAccessorBuilder;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -21,8 +20,7 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
     public function setUp(): void
     {
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
-        $this->repository = self::$container->get('test.'.FollowersListCollectedEventRepository::class);
+        $this->repository = static::getContainer()->get('test.'.FollowersListCollectedEventRepository::class);
 
         $this->truncateEventStore();
     }
@@ -32,14 +30,11 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_should_collect_friends_list_of_a_member(): void
     {
-        $accessor = FriendsListAccessorBuilder::make();
+        $accessor = FollowersListAccessorBuilder::build();
 
         $followersList = $this->repository->collectedList(
             $accessor,
-            new FollowersListSelector(
-                UuidV4::uuid4(),
-                self::SCREEN_NAME
-            )
+            new FollowersListSelector(self::SCREEN_NAME)
         );
 
         self::assertEquals(200, $followersList->count());
@@ -55,7 +50,7 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
 
     private function truncateEventStore(): void
     {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $connection = $entityManager->getConnection();
         $connection->executeQuery('TRUNCATE TABLE member_followers_list_collected_event');
     }

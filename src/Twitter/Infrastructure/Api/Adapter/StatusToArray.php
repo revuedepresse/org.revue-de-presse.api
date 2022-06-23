@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Adapter;
 
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use function hash;
 
 class StatusToArray

@@ -3,25 +3,25 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
+use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
+use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
+use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
 
 interface MemberIdentityProcessorInterface
 {
     /**
-     * @param MemberIdentity               $memberIdentity
-     * @param PublicationStrategyInterface $strategy
-     * @param TokenInterface               $token
-     * @param PublishersList              $list
-     *
-     * @return int
+     * @throws ContinuePublicationException
+     * @throws MembershipException
+     * @throws StopPublicationException
      */
     public function process(
-        MemberIdentity $memberIdentity,
-        PublicationStrategyInterface $strategy,
-        TokenInterface $token,
-        PublishersList $list
+        MemberIdentity           $memberIdentity,
+        CurationRulesetInterface $ruleset,
+        TokenInterface           $token,
+        PublishersList           $list
     ): int;
 }

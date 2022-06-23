@@ -25,8 +25,8 @@ class KeywordRepository extends ServiceEntityRepository
             IF(h.total_retweets = 0, 1, h.total_retweets) weight 
             FROM keyword k
             LEFT JOIN highlight h ON h.status_id = k.status_id
-            WHERE 1
-            AND keyword LIKE '#%' 
+            WHERE
+            keyword LIKE '#%' 
             {{ dates }}
             GROUP BY REPLACE(REPLACE(keyword, ',', ''), ':', '')
             ORDER BY h.total_retweets, weight DESC
@@ -111,6 +111,6 @@ QUERY;
             $types
         );
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 }

@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
-use App\Twitter\Infrastructure\Api\Accessor;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface
@@ -22,7 +22,7 @@ class RefreshStatusMapping implements MappingAwareInterface
 
     private array $oauthTokens;
 
-    public function __construct(Accessor $accessor)
+    public function __construct(ApiAccessorInterface $accessor)
     {
         $this->apiAccessor = $accessor;
     }
@@ -42,8 +42,8 @@ class RefreshStatusMapping implements MappingAwareInterface
     {
         $this->apiAccessor->propagateNotFoundStatuses = true;
 
-        $this->apiAccessor->setUserToken($oauthTokens['token']);
-        $this->apiAccessor->setUserSecret($oauthTokens['secret']);
+        $this->apiAccessor->setAccessToken($oauthTokens['token']);
+        $this->apiAccessor->setAccessTokenSecret($oauthTokens['secret']);
 
         if (array_key_exists('consumer_token', $oauthTokens)) {
             $this->apiAccessor->setConsumerKey($oauthTokens['consumer_token']);
@@ -69,7 +69,7 @@ class RefreshStatusMapping implements MappingAwareInterface
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
 
         $aggregate = $status->getAggregates()->first();
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = null;
         }
 

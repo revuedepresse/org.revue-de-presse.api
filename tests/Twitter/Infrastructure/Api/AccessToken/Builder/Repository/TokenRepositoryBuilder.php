@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use Prophecy\Prophet;
 
 class TokenRepositoryBuilder
@@ -48,6 +48,15 @@ class TokenRepositoryBuilder
     {
         $this->prophecy
             ->howManyUnfrozenTokenAreThere()
+            ->willReturn($count);
+
+        return $this;
+    }
+
+    public function willReturnTheCountOfUnfrozenTokensExceptFrom(TokenInterface $token, int $count): TokenRepositoryBuilder
+    {
+        $this->prophecy
+            ->howManyUnfrozenTokenAreThereExceptFrom($token)
             ->willReturn($count);
 
         return $this;

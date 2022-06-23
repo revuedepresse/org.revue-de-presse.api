@@ -23,16 +23,14 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var ListMemberSubscriptionsCommand $command */
-        $command = self::$container->get('test.'.ListMemberSubscriptionsCommand::class);
+        $command = static::getContainer()->get('test.'.ListMemberSubscriptionsCommand::class);
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:list-member-subscriptions');
-        $this->command->setAccessor(FriendsListAccessorBuilder::make());
-        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::make());
+        $this->command = $application->find('app:list-member-subscriptions');
+        $this->command->setAccessor(FriendsListAccessorBuilder::build());
+        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::build());
 
         $this->commandTester = new CommandTester($command);
     }
@@ -49,42 +47,42 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
-            'The status code of a command should be successful',
+            'The return code of this command execution should be successful.',
         );
 
         $display = $this->commandTester->getDisplay();
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Name',
             $display,
             'The command output contains a name.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Description',
             $display,
             'The command output contains a description.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'URL',
             $display,
             'The command output contains a URL.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Followers',
             $display,
             'The command output contains a followers count.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Friends',
             $display,
             'The command output contains a friends count.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Location',
             $display,
             'The command output contains a location.'

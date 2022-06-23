@@ -3,17 +3,18 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -23,6 +24,8 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     private const SUBSCRIBER_SCREEN_NAME = 'thierrymarianne';
 
     private UnfollowDiffSubscriptionsSubscribeesCommand $command;
@@ -33,16 +36,14 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        self::$container = $kernel->getContainer();
-
         /** @var UnfollowDiffSubscriptionsSubscribeesCommand $command */
-        $command = self::$container->get('test.'.UnfollowDiffSubscriptionsSubscribeesCommand::class);
+        $command = static::getContainer()->get('test.'.UnfollowDiffSubscriptionsSubscribeesCommand::class);
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:unfollow-diff-subscriptions-subscribees');
-        $this->command->setSubscriptionsRepository(FriendsListCollectedEventRepositoryBuilder::make());
-        $this->command->setSubscribeesRepository(FollowersListCollectedEventRepositoryBuilder::make());
+        $this->command = $application->find('app:unfollow-diff-subscriptions-subscribees');
+        $this->command->setSubscriptionsRepository(FriendsListCollectedEventRepositoryBuilder::build());
+        $this->command->setSubscribeesRepository(FollowersListCollectedEventRepositoryBuilder::build());
         $this->command->setMemberRepository($this->buildMemberRepository());
         $this->command->setMutator($this->buildMutator());
         $this->command->setNetworkRepository($this->buildNetworkRepository());
@@ -60,7 +61,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
-            'The status code of a command should be successful',
+            'The return code of this command execution should be successful.',
         );
     }
 
@@ -88,7 +89,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
         return MemberRepositoryBuilder::newMemberRepositoryBuilder()
             ->willFindAMemberByTwitterScreenName(
                 self::SUBSCRIBER_SCREEN_NAME,
-                (new Member())->setScreenName(self::SUBSCRIBER_SCREEN_NAME)
+                (new Member())->setTwitterScreenName(self::SUBSCRIBER_SCREEN_NAME)
             )
             ->build();
     }

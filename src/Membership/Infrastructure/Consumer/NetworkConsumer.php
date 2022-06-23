@@ -23,19 +23,16 @@ class NetworkConsumer implements ConsumerInterface
     public $networkRepository;
 
     /**
-     * @param AmqpMessage $message
-     * @return bool|mixed
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @param AMQPMessage $message
+     *
+     * @return bool
      */
-    public function execute(AMQPMessage $message)
+    public function execute(AMQPMessage $message): bool
     {
         try {
             $members = $this->parseMessage($message);
             $this->networkRepository->saveNetwork($members);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
             return false;

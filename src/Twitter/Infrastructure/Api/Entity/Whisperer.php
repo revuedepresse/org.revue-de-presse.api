@@ -3,11 +3,11 @@
 namespace App\Twitter\Infrastructure\Api\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use MyProject\Proxies\__CG__\stdClass;
+use \stdClass;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
- * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\WhispererRepository")
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
+ * @ORM\Entity
  * @ORM\Table(name="weaving_whisperer",
  *  uniqueConstraints={
  *      @ORM\UniqueConstraint(

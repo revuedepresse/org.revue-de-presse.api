@@ -1,22 +1,36 @@
 services:
-    App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor:
-        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'
+    App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand:
+        class: 'App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand'
         arguments:
-            - '@App\Twitter\Infrastructure\Api\Accessor'
+            - !php/const 'App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand::COMMAND_NAME'
+            - '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
+            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
+            - '@App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface'
+            - '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface'
+            - '@App\Twitter\Domain\Api\Accessor\StatusAccessorInterface'
+            - '@logger'
+        tags:
+            - { name: 'console.command' }
+
+    App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor:
+        class: 'App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor'
+        arguments:
+            - '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
             - '@logger'
 
-    App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator:
-        class: 'App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
+    App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator:
+        class: 'App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator'
         calls:
-            - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setApiAccessor', [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface' ] ]
             - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:
-            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'] ]
+            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor'] ]
             - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }
@@ -24,8 +38,34 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
         calls:
-            - [ 'setMutator', [ '@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
+            - [ 'setMutator', [ '@App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator' ] ]
             - [ 'setListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+        tags:
+            - { name: 'console.command' }
+
+    App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand:
+        class: 'App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand'
+        arguments:
+            - !php/const 'App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand::COMMAND_NAME'
+            - '@App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface'
+            - '@logger'
+        tags:
+            - { name: 'console.command' }
+
+    App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
+        class: 'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'
+        arguments:
+            - !php/const 'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand::COMMAND_NAME'
+            - '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
+            - '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface'
+            - '@App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface'
+            - '@App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+            - '@App\Membership\Domain\Repository\NetworkRepositoryInterface'
+            - '@user_manager'
+            - '@logger'
+        calls:
+            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }

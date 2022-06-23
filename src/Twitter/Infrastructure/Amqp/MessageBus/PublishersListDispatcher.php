@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Publication\Exception\InvalidMemberAggregate;
 
 class PublishersListDispatcher implements PublishersListDispatcherInterface
@@ -21,7 +20,7 @@ class PublishersListDispatcher implements PublishersListDispatcherInterface
         MemberInterface $member,
         TokenInterface $accessToken
     ): void {
-        $username = $member->getTwitterUsername();
+        $username = $member->twitterScreenName();
 
         $aggregate = $this->publishersListRepository
             ->getMemberAggregateByUsername($username);
@@ -30,14 +29,11 @@ class PublishersListDispatcher implements PublishersListDispatcherInterface
             InvalidMemberAggregate::guardAgainstInvalidUsername($username);
         }
 
-        $fetchMemberStatus = new FetchMemberStatus(
+        $fetchMemberStatus = new FetchTweet(
             $username,
             $aggregate->getId(),
             $accessToken
         );
         $this->dispatcher->dispatch($fetchMemberStatus);
-
-        $fetchLikedStatusMessage = FetchMemberLikes::from($fetchMemberStatus);
-        $this->dispatcher->dispatch($fetchLikedStatusMessage);
     }
 }

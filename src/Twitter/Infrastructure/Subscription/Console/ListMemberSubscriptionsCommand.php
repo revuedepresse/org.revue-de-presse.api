@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Subscription\Console;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\MissingDependency;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
 use stdClass;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,9 +32,9 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         $this->repository = $repository;
     }
 
-    protected function configure(): void
+    protected function configure()
     {
-        $this->setName('press-review:list-member-subscriptions')
+        $this->setName('app:list-member-subscriptions')
             ->setDescription('List the subscriptions of a member')
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,
@@ -62,7 +62,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
             }
         );
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

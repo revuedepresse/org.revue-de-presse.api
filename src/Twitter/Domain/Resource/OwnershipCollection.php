@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Resource;
 
-use App\Twitter\Infrastructure\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 
-class OwnershipCollection implements StrictCollectionInterface
+class OwnershipCollection implements OwnershipCollectionInterface
 {
     /**
      * @var array
@@ -41,12 +40,12 @@ class OwnershipCollection implements StrictCollectionInterface
         return $this;
     }
 
-    public function map(Closure $closure): StrictCollectionInterface
+    public function map(Closure $closure): OwnershipCollectionInterface
     {
         return self::fromArray(array_map($closure, $this->ownerships));
     }
 
-    public static function fromArray(array $ownerships, int $nextPage = -1): self
+    public static function fromArray(array $ownerships, int $nextPage = -1): OwnershipCollectionInterface
     {
         return new self($ownerships, $nextPage);
     }
@@ -76,10 +75,7 @@ class OwnershipCollection implements StrictCollectionInterface
         return $this->nextPage;
     }
 
-    /**
-     * @return PublishersList
-     */
-    public function first()
+    public function first(): PublishersList
     {
         return $this->ownerships[0];
     }

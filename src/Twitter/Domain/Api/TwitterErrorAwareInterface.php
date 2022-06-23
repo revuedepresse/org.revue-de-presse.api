@@ -84,6 +84,8 @@ interface TwitterErrorAwareInterface
 
     public const ERROR_UNAUTHORIZED_ACTIONS = 261;
 
+    public const ERROR_PROTECTED_ACCOUNT = 2048;
+
     public const ERROR_CODES = [
         self::ERROR_HOST_RESOLUTION,
 
@@ -134,5 +136,7 @@ interface TwitterErrorAwareInterface
         self::ERROR_RETIRED_URL,
 
         self::ERROR_UNAUTHORIZED_ACTIONS,
+
+        self::ERROR_PROTECTED_ACCOUNT,
     ];
 }

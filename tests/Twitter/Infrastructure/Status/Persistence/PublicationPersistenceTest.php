@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,9 +23,9 @@ class PublicationPersistenceTest extends KernelTestCase
     protected function tearDown(): void
     {
         /** @var EntityManagerInterface $entityManager */
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
-        $memberRepository = $entityManager->getRepository('App\Membership\Domain\Entity\Legacy\Member');
+        $memberRepository = $entityManager->getRepository('App\Membership\Infrastructure\Entity\Legacy\Member');
         $members = $memberRepository->findBy(['twitter_username' => 'mariec']);
 
         array_map(
@@ -47,18 +47,17 @@ class PublicationPersistenceTest extends KernelTestCase
         // Arrange
 
         self::$kernel = self::bootKernel();
-        self::$container = self::$kernel->getContainer();
 
         /** @var PublicationPersistenceInterface $publicationPersistence */
-        $publicationPersistence = self::$container->get(PublicationPersistence::class);
+        $publicationPersistence = static::getContainer()->get(PublicationPersistence::class);
 
         $member = new Member();
-        $member->setScreenName('mariec');
+        $member->setTwitterScreenName('mariec');
         $member->setName('Marie Curie');
         $member->setAvatar('https://gravatar.com/mariec');
         $member->setEmail('@mariec');
 
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
         $entityManager->persist($member);
         $entityManager->flush();
 

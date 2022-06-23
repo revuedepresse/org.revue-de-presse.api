@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Twitter\Domain\Curation\Entity\Keyword"
+    <entity name="App\Twitter\Infrastructure\Curation\Entity\Keyword"
             repository-class="App\Twitter\Infrastructure\Publication\Repository\KeywordRepository"
             table="keyword">
 
@@ -29,14 +29,14 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Membership\Domain\Entity\Legacy\Member">
+            target-entity="App\Membership\Infrastructure\Entity\Legacy\Member">
             <join-column
                 name="member_id"
                 referenced-column-name="usr_id" />
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
+            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
             field="aggregate"
             inversed-by="timelyStatuses">
             <join-column name="aggregate_id" />

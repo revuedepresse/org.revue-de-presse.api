@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 interface PublishersListDispatcherInterface
 {

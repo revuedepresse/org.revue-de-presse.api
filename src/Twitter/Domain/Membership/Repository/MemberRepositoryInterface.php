@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Membership\Repository;
 
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 interface MemberRepositoryInterface
 {
@@ -13,6 +13,8 @@ interface MemberRepositoryInterface
     public function declareMemberAsNotFound(MemberInterface $member): MemberInterface;
 
     public function findOneBy(array $criteria, ?array $orderBy = null);
+
+    public function saveMember(MemberInterface $member): MemberInterface;
 
     public function saveApiConsumer(MemberIdentity $memberIdentity, string $apiKey): MemberInterface;
 

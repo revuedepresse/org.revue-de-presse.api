@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use function mt_rand;
 use function sha1;
 use function uniqid;
@@ -139,7 +139,7 @@ abstract class Member implements MemberInterface
      * @param $usernameCanonical
      * @return $this
      */
-    public function setUsernameCanonical($usernameCanonical): self
+    public function setUsernameCanonical($usernameCanonical): MemberInterface
     {
         $this->usernameCanonical = $usernameCanonical;
 
@@ -166,7 +166,7 @@ abstract class Member implements MemberInterface
      * @param $email
      * @return $this
      */
-    public function setEmail(string $email): self
+    public function setEmail(string $email): MemberInterface
     {
         $this->email = $email;
 
@@ -202,7 +202,7 @@ abstract class Member implements MemberInterface
      * @param $username
      * @return $this
      */
-    public function setUsername($username): self
+    public function setUsername(string $username): MemberInterface
     {
         $this->username = $username;
 
@@ -213,7 +213,7 @@ abstract class Member implements MemberInterface
      * @param $emailCanonical
      * @return $this
      */
-    public function setEmailCanonical(string $emailCanonical): self
+    public function setEmailCanonical(string $emailCanonical): MemberInterface
     {
         $this->emailCanonical = $emailCanonical;
 
@@ -224,7 +224,7 @@ abstract class Member implements MemberInterface
      * @param bool $enabled
      * @return $this
      */
-    public function setEnabled(bool $enabled): self
+    public function setEnabled(bool $enabled): MemberInterface
     {
         $this->enabled = $enabled;
 
@@ -261,5 +261,29 @@ abstract class Member implements MemberInterface
     public function getRoles(): array
     {
         return ['ROLE_USER'];
+    }
+
+    public function addToken(TokenInterface $token): MemberInterface
+    {
+        $tokenToBeRevised = $this->tokens->filter(function (TokenInterface $existingToken) use ($token) {
+            return $existingToken->getConsumerKey() === $token->getConsumerKey() &&
+                $existingToken->getConsumerSecret() === $token->getConsumerSecret();
+        })->first();
+
+        $this->tokens->map(function (TokenInterface $token) use ($tokenToBeRevised) {
+            if ($token === $tokenToBeRevised) {
+                $token->setAccessToken($token->getAccessToken());
+                $token->setAccessTokenSecret($token->getAccessTokenSecret());
+                $token->setUpdatedAt($token->updatedAt());
+            }
+        });
+
+        if ($tokenToBeRevised) {
+            return $this;
+        }
+
+        $this->tokens[] = $token;
+
+        return $this;
     }
 }

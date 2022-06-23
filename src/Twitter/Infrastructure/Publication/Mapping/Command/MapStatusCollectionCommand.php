@@ -1,19 +1,18 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Mapping\Command;
 
-
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
+use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwareInterface
+class MapStatusCollectionCommand extends Command
 {
     const OPTION_SCREEN_NAME = 'screen-name';
 
@@ -37,10 +36,7 @@ class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwa
      */
     private $output;
 
-    /**
-     * @var StatusRepository
-     */
-    public $statusRepository;
+    public StatusRepositoryInterface $statusRepository;
 
     /**
      * @var RefreshStatusMapping
@@ -59,7 +55,7 @@ class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwa
 
     public function configure()
     {
-        $this->setName('press-review:map-status-collection')
+        $this->setName('app:map-status-collection')
             ->setDescription('Map a service to a collection of statuses.')
             ->addOption(
                 self::OPTION_MAPPING,
@@ -108,7 +104,7 @@ class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwa
         $tokens = $this->getTokensFromInput();
         $this->refreshStatusMapping->setOAuthTokens($tokens);
 
-        $statusCollection = $this->statusRepository->selectStatusCollection(
+        $statusCollection = $this->statusRepository->queryPublicationCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
             new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
@@ -121,7 +117,7 @@ class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwa
 
         $this->output->writeln($this->getSuccessMessage($mappedStatuses));
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

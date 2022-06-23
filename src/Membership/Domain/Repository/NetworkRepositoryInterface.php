@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Membership\Domain\Repository;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 interface NetworkRepositoryInterface
 {

@@ -3,19 +3,22 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Entity;
 
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
+use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use function array_key_exists;
 
 /**
- * @package App\Twitter\Infrastructure\Api\Entity
- *
  * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface")
+ * @ORM\Entity
  */
 class Token implements TokenInterface
 {
@@ -26,7 +29,7 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
 
@@ -39,42 +42,40 @@ class Token implements TokenInterface
     protected $type;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="token", type="string", length=255)
      */
-    protected $oauthToken;
+    protected string $oauthToken;
 
-    /**
-     * @param string $oauthToken
-     *
-     * @return Token
-     */
-    public function setOAuthToken($oauthToken): self
+    public function setAccessToken(string $accessToken): TokenInterface
     {
-        $this->oauthToken = $oauthToken;
+        $this->oauthToken = $accessToken;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getOAuthToken(): string
+    public function getAccessToken(): string
     {
         return $this->oauthToken;
     }
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
     protected ?string $oauthTokenSecret;
 
+    public function setAccessTokenSecret(string $accessTokenSecret): TokenInterface
+    {
+        $this->oauthTokenSecret = $accessTokenSecret;
+
+        return $this;
+    }
+
+    public function getAccessTokenSecret(): string
+    {
+        return $this->oauthTokenSecret;
+    }
+
     /**
-     * @var string
-     *
      * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
      */
     public ?string $consumerKey = null;
@@ -118,7 +119,7 @@ class Token implements TokenInterface
     /**
      * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
      */
-    protected ?DateTimeInterface $frozenUntil;
+    protected ?DateTimeInterface $frozenUntil = null;
 
     /**
      * @ORM\Column(name="created_at", type="datetime")
@@ -131,14 +132,9 @@ class Token implements TokenInterface
     protected ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="tokens")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Infrastructure\Entity\Legacy\Member", mappedBy="tokens")
      */
     protected Collection $users;
-
-    /**
-     * @var boolean
-     */
-    protected ?bool $frozen;
 
     /**
      * @return integer
@@ -149,29 +145,9 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param string $oauthTokenSecret
-     *
-     * @return Token
-     */
-    public function setOauthTokenSecret($oauthTokenSecret)
-    {
-        $this->oauthTokenSecret = $oauthTokenSecret;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOauthTokenSecret()
-    {
-        return $this->getOAuthSecret();
-    }
-
-    /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param DateTime $createdAt
      *
      * @return Token
      */
@@ -182,35 +158,23 @@ class Token implements TokenInterface
         return $this;
     }
 
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Token
-     */
-    public function setUpdatedAt($updatedAt)
+    public function setUpdatedAt(DateTimeInterface $updatedAt): TokenInterface
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
+    public function updatedAt(): DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
     public function getUpdatedAt()
     {
         return $this->updatedAt;
@@ -254,14 +218,14 @@ class Token implements TokenInterface
      *
      * @return $this
      */
-    public function setFrozenUntil(DateTimeInterface $frozenUntil): self
+    protected function setFrozenUntil(DateTimeInterface $frozenUntil): self
     {
         $this->frozenUntil = $frozenUntil;
 
         return $this;
     }
 
-    public function getFrozenUntil(): \DateTimeInterface
+    public function getFrozenUntil(): ?\DateTimeInterface
     {
         return $this->frozenUntil;
     }
@@ -271,14 +235,9 @@ class Token implements TokenInterface
      */
     public function __toString()
     {
-        return $this->getOAuthToken();
+        return $this->getAccessToken();
     }
 
-    /**
-     * @param TokenType $type
-     *
-     * @return Token
-     */
     public function setType(TokenType $type = null)
     {
         $this->type = $type;
@@ -295,43 +254,24 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param $frozen
-     *
-     * @return $this
-     */
-    public function setFrozen($frozen)
-    {
-        $this->frozen = $frozen;
-
-        return $this;
-    }
-
-    /**
      * @return bool
+     * @throws Exception
      */
     public function isFrozen(): bool
     {
-        return $this->frozen;
+        return $this->getFrozenUntil() !== null &&
+            $this->getFrozenUntil()->getTimestamp() >
+                (new DateTime('now', new DateTimeZone('UTC')))
+                    ->getTimestamp();
     }
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function isNotFrozen(): bool
     {
         return !$this->isFrozen();
-    }
-
-    public function getOAuthSecret(): string
-    {
-        return $this->oauthTokenSecret;
-    }
-
-    public function setOAuthSecret($oauthSecret): self
-    {
-        $this->oauthTokenSecret = $oauthSecret;
-
-        return $this;
     }
 
     /**
@@ -362,8 +302,8 @@ class Token implements TokenInterface
             $consumerSecret = $properties['consumer_secret'];
         }
 
-        $token->setOAuthToken($properties['token']);
-        $token->setOAuthSecret($properties['secret']);
+        $token->setAccessToken($properties['token']);
+        $token->setAccessTokenSecret($properties['secret']);
         $token->setConsumerKey($consumerKey);
         $token->setConsumerSecret($consumerSecret);
 
@@ -372,12 +312,36 @@ class Token implements TokenInterface
 
     public function isValid(): bool
     {
-        return $this->getOAuthToken() !== null
-            && $this->getOAuthSecret() !== null;
+        return $this->getAccessToken() !== null
+            && $this->getAccessTokenSecret() !== null;
     }
 
     public function firstIdentifierCharacters(): string
     {
-        return substr($this->getOAuthToken(), 0, 8);
+        return substr($this->getAccessToken(), 0, 8);
+    }
+
+    /** The token is frozen when the "frozen until" date is in the future */
+    public function freeze(): TokenInterface
+    {
+        return $this->setFrozenUntil($this->nextFreezeEndsAt());
+    }
+
+    public function unfreeze(): TokenInterface
+    {
+        return $this->setFrozenUntil(
+            new DateTimeImmutable(
+                'now - 15min',
+                new DateTimeZone('UTC')
+            )
+        );
+    }
+
+    public function nextFreezeEndsAt(): DateTimeInterface
+    {
+        return new DateTimeImmutable(
+            'now + 15min',
+            new DateTimeZone('UTC')
+        );
     }
 }

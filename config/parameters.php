@@ -1,5 +1,8 @@
 <?php
 
+use Psr\Container\ContainerInterface;
+
+/** @var ContainerInterface $container */
 $container->loadFromExtension(
     'doctrine',
     array(

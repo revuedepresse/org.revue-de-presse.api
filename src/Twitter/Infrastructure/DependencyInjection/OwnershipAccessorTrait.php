@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 
 trait OwnershipAccessorTrait
 {

@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\StatusCollection;
+use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
@@ -21,9 +21,8 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;
 use DateTimeZone;
@@ -78,7 +77,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        Aggregate $aggregate = null
+        PublishersList $aggregate = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -144,7 +143,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?Aggregate $aggregate
+        ?PublishersList $aggregate
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
@@ -163,10 +162,10 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?Aggregate $aggregate,
+        ?PublishersList $aggregate,
         StatusInterface $status
     ): void {
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublishersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
                 $aggregate
@@ -222,7 +221,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function savePublicationsForScreenName(
         array $statuses,
         string $screenName,
-        CollectionStrategyInterface $collectionStrategy
+        CurationSelectorsInterface $selectors
     ) {
         $success = null;
 
@@ -231,9 +230,9 @@ class StatusPersistence implements StatusPersistenceInterface
         }
 
         $publishersList = null;
-        $publishersListId = $collectionStrategy->publishersListId();
+        $publishersListId = $selectors->publishersListId();
         if ($publishersListId !== null) {
-            /** @var Aggregate $publishersList */
+            /** @var PublishersList $publishersList */
             $publishersList = $this->publishersListRepository->findOneBy(
                 ['id' => $publishersListId]
             );
@@ -244,55 +243,26 @@ class StatusPersistence implements StatusPersistenceInterface
             $screenName
         );
 
-        $likedBy = null;
-        if ($collectionStrategy->fetchLikes()) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
         $savedStatuses = $this->saveStatuses(
             $statuses,
-            $collectionStrategy,
-            $publishersList,
-            $likedBy
+            $selectors,
+            $publishersList
         );
 
         return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
             $savedStatuses->count(),
-            $screenName,
-            $collectionStrategy->fetchLikes()
+            $screenName
         );
     }
 
-    /**
-     * @param array                       $statuses
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param Aggregate|null              $publishersList
-     * @param MemberInterface|null        $likedBy
-     *
-     * @return CollectionInterface
-     */
     private function saveStatuses(
-        array $statuses,
-        CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publishersList = null,
-        MemberInterface $likedBy = null
+        array                      $statuses,
+        CurationSelectorsInterface $selectors,
+        PublishersList             $publishersList = null
     ): CollectionInterface {
-        if ($likedBy !== null && $collectionStrategy->fetchLikes()) {
-            return $this->statusRepository->saveLikes(
-                $statuses,
-                $this->apiAccessor->getOAuthToken(),
-                $publishersList,
-                $this->logger,
-                $likedBy,
-                function ($memberName) {
-                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
-                }
-            );
-        }
-
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
-            new AccessToken($this->apiAccessor->getOAuthToken()),
+            new AccessToken($this->apiAccessor->getAccessToken()),
             $publishersList
         );
     }
