@@ -64,7 +64,6 @@
         "thecodingmachine/safe": "^2.2.0"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
