@@ -43,10 +43,15 @@ See [COPYING](./COPYING) to see the full text.
 
 ## Acknowledgment
 
-We're grateful towards the following
- - contributors,
- - organizations and
- - projects
+We're grateful towards all amazing contributors involved in the following  
+communities, organizations and projects (in lexicographic order):
 
- [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)
+ - [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)
+ - [Composer](http://getcomposer.org/)
+ - [Debian](https://www.debian.org/)
+ - [Docker](docker.com)
+ - [Doctrine](https://www.doctrine-project.org/)
+ - [PHP](https://www.php.net/)
+ - [GitHub](https://github.com/)
+ - [Symfony](https://symfony.com/)
 
