@@ -58,5 +58,6 @@ communities, organizations and projects (in lexicographic order):
 
 ### Logos
 
- - [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)
+[![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
+
 
