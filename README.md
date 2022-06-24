@@ -39,3 +39,14 @@ make help
 GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.
+
+
+## Acknowledgment
+
+We're grateful towards the following
+ - contributors,
+ - organizations and
+ - projects
+
+ [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)
+
