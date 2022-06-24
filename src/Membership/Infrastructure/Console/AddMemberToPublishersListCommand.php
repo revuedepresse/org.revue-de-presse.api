@@ -53,7 +53,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
         PublishersListRepositoryInterface    $publishersListRepository,
         MembersBatchAwareHttpClientInterface $membersListAccessor,
         ListAwareHttpClientInterface         $ownershipAccessor,
-        TweetAwareHttpClientInterface        $statusAccessor,
+        TweetAwareHttpClientInterface        $tweetAwareHttpClient,
         LoggerInterface                      $logger
     ) {
         $this->listSubscriptionRepository = $aggregateSubscriptionRepository;
@@ -62,7 +62,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
 
         $this->membersBatchHttpClient = $membersListAccessor;
         $this->listAwareHttpClient = $ownershipAccessor;
-        $this->tweetAwareHttpClient = $statusAccessor;
+        $this->tweetAwareHttpClient = $tweetAwareHttpClient;
 
         $this->logger = $logger;
 

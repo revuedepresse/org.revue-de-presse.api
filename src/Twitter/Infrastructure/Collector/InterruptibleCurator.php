@@ -41,20 +41,17 @@ use function substr;
 class InterruptibleCurator implements InterruptibleCuratorInterface
 {
     use HttpClientTrait;
-    use RateLimitComplianceTrait;
-    use MemberRepositoryTrait;
-    use MemberProfileCollectedEventRepositoryTrait;
-    use PublishersListRepositoryTrait;
-    use TweetAwareHttpClientTrait;
-    use StatusRepositoryTrait;
-    use StatusPersistenceTrait;
-    use TokenRepositoryTrait;
     use LoggerTrait;
+    use MemberProfileCollectedEventRepositoryTrait;
+    use MemberRepositoryTrait;
+    use PublishersListRepositoryTrait;
+    use RateLimitComplianceTrait;
+    use StatusPersistenceTrait;
+    use StatusRepositoryTrait;
+    use TokenRepositoryTrait;
+    use TweetAwareHttpClientTrait;
     use WhispererRepositoryTrait;
 
-    /**
-     * @var CurationSelectorsInterface
-     */
     private CurationSelectorsInterface $selectors;
 
     /**
@@ -219,7 +216,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return true;
         }
 
-        $statuses = $this->statusAccessor->fetchPublications(
+        $statuses = $this->tweetAwareHttpClient->fetchPublications(
             $this->selectors,
             $options
         );

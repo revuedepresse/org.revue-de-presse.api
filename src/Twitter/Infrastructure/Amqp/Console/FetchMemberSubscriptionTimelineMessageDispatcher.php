@@ -70,7 +70,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends TwitterListAwareC
 
         $eventRepository = $this->memberFriendsCollectedEventRepository;
         $friends = $eventRepository->collectedMemberFriends(
-            $this->accessor,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
 
@@ -153,7 +153,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends TwitterListAwareC
     {
         $tokens = $this->getTokensFromInputOrFallback();
 
-        $this->accessor->fromToken(Token::fromArray($tokens));
+        $this->httpClient->fromToken(Token::fromArray($tokens));
     }
 
     /**
@@ -315,7 +315,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends TwitterListAwareC
     ): MemberInterface {
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $twitterMember = $eventRepository->collectedMemberProfile(
-            $this->accessor,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $memberIdentifier]
         );
 

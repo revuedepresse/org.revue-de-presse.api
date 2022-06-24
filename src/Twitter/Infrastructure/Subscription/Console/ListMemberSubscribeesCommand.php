@@ -4,10 +4,9 @@ declare (strict_types=1);
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\DependencyInjection\MissingDependency;
 use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
+use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\DependencyInjection\MissingDependency;
 use stdClass;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,13 +16,13 @@ class ListMemberSubscribeesCommand extends AbstractCommand
 {
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    public CursorAwareHttpClientInterface $accessor;
+    public CursorAwareHttpClientInterface $cursorAwareHttpClient;
 
     private PaginatedBatchCollectedEventRepositoryInterface $repository;
 
-    public function setAccessor(CursorAwareHttpClientInterface $accessor): void
+    public function setCursorAwareHttpClient(CursorAwareHttpClientInterface $cursorAwareHttpClient): void
     {
-        $this->accessor = $accessor;
+        $this->cursorAwareHttpClient = $cursorAwareHttpClient;
     }
 
     public function setRepository(PaginatedBatchCollectedEventRepositoryInterface $repository): void
@@ -48,7 +47,7 @@ class ListMemberSubscribeesCommand extends AbstractCommand
 
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $friendsList = $this->repository->aggregatedLists(
-            $this->accessor,
+            $this->cursorAwareHttpClient,
             $screenName
         )->getList();
 
@@ -69,7 +68,7 @@ class ListMemberSubscribeesCommand extends AbstractCommand
      */
     private function guardAgainstMissingDependency(): void
     {
-        if (!($this->accessor instanceof CursorAwareHttpClientInterface)) {
+        if (!($this->cursorAwareHttpClient instanceof CursorAwareHttpClientInterface)) {
             throw new MissingDependency(
                 sprintf(
                     'Dependency of type "%s" is missing',

@@ -30,8 +30,8 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:
-            - [ 'setAccessor',   ['@App\Twitter\Infrastructure\Http\Client\FriendsBatchAwareHttpClient'] ]
-            - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
+            - [ 'setCursorAwareHttpClient', ['@App\Twitter\Infrastructure\Http\Client\FriendsBatchAwareHttpClient'] ]
+            - [ 'setRepository',            ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }
 

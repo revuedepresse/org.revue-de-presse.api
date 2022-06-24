@@ -168,7 +168,7 @@ EMERGENCY,
      */
     private function setUpDependencies(): void
     {
-        $this->accessor->fromToken(
+        $this->httpClient->fromToken(
             Token::fromArray(
                 $this->getTokensFromInputOrFallback()
             )

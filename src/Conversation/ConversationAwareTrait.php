@@ -121,12 +121,12 @@ trait ConversationAwareTrait
             $updatedStatus['in_conversation']               = true;
 
             try {
-                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                $repliedToStatus = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                     $updatedStatus['id_of_status_replied_to']
                 );
             } catch (NotFoundMemberException $notFoundMemberException) {
-                $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
-                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                $this->tweetAwareHttpClient->ensureMemberHavingNameExists($notFoundMemberException->screenName);
+                $repliedToStatus = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                     $updatedStatus['id_of_status_replied_to']
                 );
             }
@@ -284,7 +284,7 @@ trait ConversationAwareTrait
     private function findStatusOrFetchItByIdentifier($statusId, $shouldRefreshStatus = false)
     {
         if ($shouldRefreshStatus) {
-            return $this->statusAccessor->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
+            return $this->tweetAwareHttpClient->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
         }
 
         return $this->statusRepository->findStatusIdentifiedBy($statusId);

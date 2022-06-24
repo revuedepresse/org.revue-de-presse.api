@@ -8,7 +8,7 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
         calls:
-            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Http\Client\FollowersBatchAwareHttpClient'] ]
-            - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
+            - [ 'setCursorAwareHttpClient', ['@App\Twitter\Infrastructure\Http\Client\FollowersBatchAwareHttpClient'] ]
+            - [ 'setRepository',            ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }

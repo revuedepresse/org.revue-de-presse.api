@@ -29,7 +29,7 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $this->command = $application->find('app:list-member-subscriptions');
-        $this->command->setAccessor(FriendsBatchAwareHttpClientBuilder::build());
+        $this->command->setCursorAwareHttpClient(FriendsBatchAwareHttpClientBuilder::build());
         $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::build());
 
         $this->commandTester = new CommandTester($command);

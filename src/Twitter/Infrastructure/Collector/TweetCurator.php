@@ -160,7 +160,7 @@ class TweetCurator implements TweetCuratorInterface
             $discoverPublicationsWithMaxId = false;
         }
 
-        $options = $this->statusAccessor->updateExtremum(
+        $options = $this->tweetAwareHttpClient->updateExtremum(
             $this->selectors,
             $options,
             $discoverPublicationsWithMaxId
@@ -796,7 +796,7 @@ class TweetCurator implements TweetCuratorInterface
                 ) {
                     unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
 
-                    $options = $this->statusAccessor->updateExtremum(
+                    $options = $this->tweetAwareHttpClient->updateExtremum(
                         $this->selectors,
                         $options,
                         $discoverPublicationsWithMaxId = false

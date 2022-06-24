@@ -6,12 +6,6 @@ namespace App\Twitter\Infrastructure\PublishersList;
 trait TwitterListAwareTrait
 {
 
-    /**
-     * @param string      $screenName
-     * @param string      $listName
-     * @param string|null $listId
-     * @return mixed
-     */
     protected function byName(
         string $screenName,
         string $listName,

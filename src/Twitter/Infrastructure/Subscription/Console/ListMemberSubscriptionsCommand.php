@@ -15,13 +15,13 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 {
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    public CursorAwareHttpClientInterface $accessor;
+    public CursorAwareHttpClientInterface $cursorAwareHttpClient;
 
     private PaginatedBatchCollectedEventRepositoryInterface $repository;
 
-    public function setAccessor(CursorAwareHttpClientInterface $accessor): void
+    public function setCursorAwareHttpClient(CursorAwareHttpClientInterface $cursorAwareHttpClient): void
     {
-        $this->accessor = $accessor;
+        $this->cursorAwareHttpClient = $cursorAwareHttpClient;
     }
 
     public function setRepository(PaginatedBatchCollectedEventRepositoryInterface $repository): void
@@ -44,7 +44,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
     {
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $friendsList = $this->repository->aggregatedLists(
-            $this->accessor,
+            $this->cursorAwareHttpClient,
             $screenName
         )->getList();
 

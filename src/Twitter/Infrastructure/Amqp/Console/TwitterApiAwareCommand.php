@@ -17,16 +17,13 @@ abstract class TwitterApiAwareCommand extends Command
     private const OPTION_OAUTH_SECRET = 'oauth_secret';
     private const OPTION_OAUTH_TOKEN  = 'oauth_token';
 
-    protected HttpClientInterface $accessor;
+    protected HttpClientInterface $httpClient;
 
     /**
      * @var string
      */
     protected string $defaultSecret;
 
-    /**
-     * @var string
-     */
     protected string $defaultToken;
 
     protected TokenRepositoryInterface $tokenRepository;
@@ -35,9 +32,9 @@ abstract class TwitterApiAwareCommand extends Command
 
     protected OutputInterface $output;
 
-    public function setAccessor(HttpClientInterface $accessor): self
+    public function setHttpClient(HttpClientInterface $httpClient): self
     {
-        $this->accessor = $accessor;
+        $this->httpClient = $httpClient;
 
         return $this;
     }

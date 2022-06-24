@@ -9,9 +9,9 @@ trait TweetAwareHttpClientTrait
 {
     private TweetAwareHttpClientInterface $tweetAwareHttpClient;
 
-    public function setTweetAwareHttpClient(TweetAwareHttpClientInterface $statusAccessor): self
+    public function setTweetAwareHttpClient(TweetAwareHttpClientInterface $tweetAwareHttpClient): self
     {
-        $this->tweetAwareHttpClient = $statusAccessor;
+        $this->tweetAwareHttpClient = $tweetAwareHttpClient;
 
         return $this;
     }

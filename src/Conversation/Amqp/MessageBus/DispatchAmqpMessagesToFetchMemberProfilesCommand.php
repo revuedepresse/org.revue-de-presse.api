@@ -15,7 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class DispatchAmqpMessagesToFetchMemberProfilesCommand extends TwitterListAwareCommand
 {
     /**
-     * TODO replace message producer with message bus
+     * FIXME by replacing message producer with messenger.message_handler tag
      */
 //    private $producer;
 
@@ -32,9 +32,6 @@ class DispatchAmqpMessagesToFetchMemberProfilesCommand extends TwitterListAwareC
     }
 
     /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int|mixed|null
      * @throws Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)

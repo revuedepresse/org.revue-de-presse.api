@@ -72,7 +72,7 @@ class ConversationStatusConsumer
 
         try {
             $this->statusRepository->shouldExtractProperties = false;
-            $status = $this->statusAccessor->refreshStatusByIdentifier(
+            $status = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                 $options['status_id'],
                 $skipExistingStatus = false,
                 $extractProperties = false
@@ -148,9 +148,9 @@ class ConversationStatusConsumer
         NotFoundMemberException $notFoundMemberException,
         array $options
     ): array {
-        $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
+        $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($notFoundMemberException->screenName);
         $aggregate = $this->byName($member->twitterScreenName(), $options['aggregate_name']);
-        $status = $this->statusAccessor->refreshStatusByIdentifier(
+        $status = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
             $options['status_id'],
             $skipExistingStatus = false,
             $extractProperties = false
@@ -179,7 +179,7 @@ class ConversationStatusConsumer
     {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof MemberInterface) {
-            $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
+            $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($status->getScreenName());
             $existingMember = $this->memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
 
             if ($existingMember) {

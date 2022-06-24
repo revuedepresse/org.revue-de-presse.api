@@ -63,11 +63,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 {
     private const MAX_RETRIES = 5;
 
-    public TweetAwareHttpClient $statusAccessor;
-
     public string $environment = 'dev';
-
-    public LoggerInterface $twitterApiLogger;
 
     public string $userToken;
 
@@ -76,6 +72,10 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     public bool $shouldRaiseExceptionOnApiLimit = false;
 
     protected string $apiHost = 'api.twitter.com';
+
+    public TweetAwareHttpClient $tweetAwareHttpClient;
+
+    public LoggerInterface $twitterApiLogger;
 
     protected ?LoggerInterface $logger;
 
@@ -318,12 +318,12 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
     public function ensureMemberHavingIdExists(string $memberId): MemberInterface
     {
-        return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
+        return $this->tweetAwareHttpClient->ensureMemberHavingIdExists($memberId);
     }
 
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {
-        return $this->statusAccessor->ensureMemberHavingNameExists($memberName);
+        return $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberName);
     }
 
     public function extractContentErrorAsException(stdClass $content)
@@ -1133,7 +1133,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         try {
             return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
         } catch (NotFoundStatusException $exception) {
-            $this->statusAccessor->declareStatusNotFoundByIdentifier($identifier);
+            $this->tweetAwareHttpClient->declareStatusNotFoundByIdentifier($identifier);
 
             throw $exception;
         }

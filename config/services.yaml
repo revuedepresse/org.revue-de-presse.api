@@ -149,9 +149,9 @@ services:
             - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
             - '@monolog.logger.twitter_api'
         properties:
-            environment:        '%kernel.environment%'
-            statusAccessor:     '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
-            twitterApiLogger:   '@monolog.logger.twitter_api'
+            environment:            '%kernel.environment%'
+            tweetAwareHttpClient:   '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
+            twitterApiLogger:       '@monolog.logger.twitter_api'
         calls:
             - [ 'setConsumerKey', [ '%app.twitter_api.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%app.twitter_api.consumer_secret%' ] ]
