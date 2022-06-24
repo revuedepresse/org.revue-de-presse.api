@@ -16,7 +16,7 @@ use Ramsey\Uuid\Rfc4122\UuidV5;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository")
+ * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Http\Repository\PublishersListRepository")
  * @ORM\Table(
  *     name="publishers_list",
  *     indexes={
@@ -187,7 +187,7 @@ class PublishersList implements PublishersListInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Twitter\Infrastructure\Api\Entity\Status", mappedBy="aggregates")
+     * @ORM\ManyToMany(targetEntity="App\Twitter\Infrastructure\Http\Entity\Status", mappedBy="aggregates")
      */
     protected Collection $userStreams;
 }

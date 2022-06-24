@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: 'wildcard'
+#name: 'wildcard'
 
 x-vol: &shared-volumes
   volumes:
@@ -10,8 +10,6 @@ x-vol: &shared-volumes
     - '../../../shared:/var/www/shared'
 
 x-shared: &shared
-  env_file:
-    - '../../.env.local'
   restart: 'always'
   <<: *shared-volumes
 
@@ -28,8 +26,6 @@ services:
     expose:
       - "5672"
     restart: 'always'
-    env_file:
-      - '../../.env.local'
 
   app:
     <<: *worker
@@ -37,8 +33,6 @@ services:
   database:
     image: 'postgres:14-bullseye'
     restart: 'always'
-    env_file:
-      - '../../.env.local'
 
   process-manager:
     build:

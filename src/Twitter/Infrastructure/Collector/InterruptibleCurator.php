@@ -12,14 +12,12 @@ use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Collector\Exception\SkipCollectException;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
@@ -31,6 +29,8 @@ use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
+use App\Twitter\Infrastructure\Http\Entity\Whisperer;
 use DateTime;
 use Exception;
 use function array_key_exists;
@@ -40,12 +40,12 @@ use function substr;
 
 class InterruptibleCurator implements InterruptibleCuratorInterface
 {
-    use ApiAccessorTrait;
-    use ApiLimitModeratorTrait;
+    use HttpClientTrait;
+    use RateLimitComplianceTrait;
     use MemberRepositoryTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use PublishersListRepositoryTrait;
-    use StatusAccessorTrait;
+    use TweetAwareHttpClientTrait;
     use StatusRepositoryTrait;
     use StatusPersistenceTrait;
     use TokenRepositoryTrait;
@@ -74,9 +74,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $this->selectors = $selectors;
 
         try {
-            if ($this->shouldSkipCollect(
-                $options
-            )) {
+            if ($this->shouldSkipCollect($options)) {
                 throw new SkipCollectException('Skipped pretty naturally ^_^');
             }
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
@@ -97,7 +95,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
             throw new SkipCollectException('Skipped because of bad authentication credentials');
         } /** @noinspection BadExceptionsProcessingInspection */
-        catch (ApiRateLimitingException $exception) {
+        catch (ApiAccessRateLimitException $exception) {
             $this->delayingConsumption();
 
             throw new RateLimitedException('No more call to the API can be made.');
@@ -135,7 +133,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
 
         $this->logger->info('The API is not available right now.');
-        $this->moderator->waitFor(
+        $this->rateLimitCompliance->waitFor(
             $timeout,
             [
                 '{{ token }}' => substr(
@@ -150,8 +148,6 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array $options
-     *
      * @throws \App\Membership\Domain\Exception\MembershipException
      */
     private function guardAgainstExceptionalMember(array $options): void
@@ -159,7 +155,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         if (
             !array_key_exists(FetchTweetInterface::SCREEN_NAME, $options)
             || $options[FetchTweetInterface::SCREEN_NAME] === null
-            || $this->apiAccessor->shouldSkipCollectForMemberWithScreenName(
+            || $this->apiClient->skipCuratingTweetsForMemberHavingScreenName(
                 $options[FetchTweetInterface::SCREEN_NAME]
             )
         ) {
@@ -305,13 +301,13 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchTweetInterface::PUBLISHERS_LIST_ID, $options)) {
+        if (!array_key_exists(FetchTweetInterface::TWITTER_LIST_ID, $options)) {
             return null;
         }
 
-        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchTweetInterface::PUBLISHERS_LIST_ID]);
+        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchTweetInterface::TWITTER_LIST_ID]);
 
-        return $options[FetchTweetInterface::PUBLISHERS_LIST_ID];
+        return $options[FetchTweetInterface::TWITTER_LIST_ID];
     }
 
     /**
@@ -360,7 +356,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $whisperer->member = $eventRepository->collectedMemberProfile(
-            $this->apiAccessor,
+            $this->apiClient,
             [$eventRepository::OPTION_SCREEN_NAME => $options[FetchTweetInterface::SCREEN_NAME]]
         );
         $whispers          = (int) $whisperer->member->statuses_count;

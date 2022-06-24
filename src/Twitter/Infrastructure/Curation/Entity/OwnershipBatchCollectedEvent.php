@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Entity;
 
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Curation\Entity\JsonSerializableInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;

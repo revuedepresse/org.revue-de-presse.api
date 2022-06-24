@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 
 class NullStatus extends Status
 {

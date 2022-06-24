@@ -4,76 +4,46 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Amqp\Message;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Membership\Domain\Model\MemberInterface;
 
 trait FetchTweetTrait
 {
-    /**
-     * @var string
-     */
     private string $screenName;
 
-    /**
-     * @var int
-     */
-    private int $aggregateId;
+    private int $listId;
 
-    /**
-     * @var TokenInterface $token
-     */
     private TokenInterface $token;
 
-    /**
-     * @var bool
-     */
     private ?bool $dateBeforeWhichStatusAreCollected;
 
-    /**
-     * @param string         $screenName
-     * @param int            $aggregateId
-     * @param TokenInterface $token
-     * @param string|null    $dateBeforeWhichStatusAreCollected
-     */
     public function __construct(
-        string $screenName,
-        int $aggregateId,
+        string         $screenName,
+        int            $listId,
         TokenInterface $token,
-        ?string $dateBeforeWhichStatusAreCollected = null
+        ?string        $dateBeforeWhichStatusAreCollected = null
     ) {
         $this->screenName = $screenName;
-        $this->aggregateId = $aggregateId;
+        $this->listId = $listId;
         $this->dateBeforeWhichStatusAreCollected = $dateBeforeWhichStatusAreCollected;
         $this->token = $token;
     }
 
-    /**
-     * @return string
-     */
     public function screenName(): string
     {
         return $this->screenName;
     }
 
-    /**
-     * @return int
-     */
-    public function aggregateId(): int
+    public function listId(): int
     {
-        return $this->aggregateId;
+        return $this->listId;
     }
 
-    /**
-     * @return string|null
-     */
     public function dateBeforeWhichStatusAreCollected(): ?string
     {
         return $this->dateBeforeWhichStatusAreCollected;
     }
 
-    /**
-     * @return TokenInterface
-     */
     public function token(): TokenInterface
     {
         return $this->token;

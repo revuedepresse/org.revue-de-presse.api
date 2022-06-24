@@ -3,21 +3,21 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\HttpClientInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
+use App\Twitter\Infrastructure\Http\AccessToken\TokenChangeInterface;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
@@ -34,8 +34,8 @@ use function sprintf;
 
 class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface
 {
-    use ApiLimitModeratorTrait;
-    use OwnershipBatchCollectedEventRepositoryTrait;
+    use RateLimitComplianceTrait;
+    use ListBatchCollectedEventRepositoryTrait;
     use OwnershipAccessorTrait;
     use PublishersListProcessorTrait;
     use TokenChangeTrait;
@@ -43,18 +43,18 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
     private LoggerInterface $logger;
 
-    private ApiAccessorInterface $accessor;
+    private HttpClientInterface $accessor;
 
     private Closure $writer;
 
     private PublicationStrategyInterface $strategy;
 
     public function __construct(
-        ApiAccessorInterface $accessor,
+        HttpClientInterface              $accessor,
         PublishersListProcessorInterface $publishersListProcessor,
-        TokenChangeInterface $tokenChange,
-        LoggerInterface $logger,
-        TranslatorInterface $translator
+        TokenChangeInterface             $tokenChange,
+        LoggerInterface                  $logger,
+        TranslatorInterface              $translator
     ) {
         $this->accessor                 = $accessor;
         $this->publishersListProcessor = $publishersListProcessor;
@@ -311,7 +311,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 $token->getFrozenUntil()->getTimezone()
             );
 
-            $this->moderator->waitFor(
+            $this->rateLimitCompliance->waitFor(
                 $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
                 ['{{ token }}' => $token->firstIdentifierCharacters()]
             );

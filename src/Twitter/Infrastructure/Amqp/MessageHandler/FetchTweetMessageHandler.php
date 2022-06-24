@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
+use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
-use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -35,7 +35,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
 
     public TokenRepositoryInterface $tokenRepository;
 
-    protected TweetCuratorInterface $collector;
+    protected TweetCuratorInterface $curator;
 
     /**
      * @param FetchTweetInterface $message
@@ -55,7 +55,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
         }
 
         $options = [
-            $message::PUBLISHERS_LIST_ID => $message->aggregateId(),
+            $message::TWITTER_LIST_ID => $message->listId(),
             $message::BEFORE             => $message->dateBeforeWhichStatusAreCollected(),
             'count'                      => 200,
             'oauth'                      => $options[TokenInterface::FIELD_TOKEN],
@@ -63,7 +63,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
         ];
 
         try {
-            $success = $this->collector->curateTweets(
+            $success = $this->curator->curateTweets(
                 $options,
                 greedy: true
             );
@@ -77,7 +77,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
                 );
             }
         } catch (UnavailableResourceException $unavailableResource) {
-            $userNotFound = $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_USER_NOT_FOUND;
+            $userNotFound = $unavailableResource->getCode() === ApiErrorCodeAwareInterface::ERROR_USER_NOT_FOUND;
             if ($userNotFound) {
                 $this->memberRepository->declareUserAsNotFoundByUsername($options['screen_name']);
             }
@@ -88,8 +88,8 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
                 || \in_array(
                     $unavailableResource->getCode(),
                     [
-                        TwitterErrorAwareInterface::ERROR_NOT_FOUND,
-                        TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
+                        ApiErrorCodeAwareInterface::ERROR_NOT_FOUND,
+                        ApiErrorCodeAwareInterface::ERROR_SUSPENDED_USER
                     ],
                     true
                 )
@@ -124,17 +124,17 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     {
         $oauthToken = $this->extractOAuthToken($message);
 
-        $this->collector->setupAccessor($oauthToken);
+        $this->curator->setupAccessor($oauthToken);
 
         return $oauthToken;
     }
 
     /**
-     * @param TweetCuratorInterface $collector
+     * @param TweetCuratorInterface $curator
      */
-    public function setCurator(TweetCuratorInterface $collector)
+    public function setCurator(TweetCuratorInterface $curator)
     {
-        $this->collector = $collector;
+        $this->curator = $curator;
     }
 
     private function extractOAuthToken(FetchTweetInterface $message): array

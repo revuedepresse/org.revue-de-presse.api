@@ -4,26 +4,23 @@ namespace App\Conversation\Consumer;
 
 use App\Conversation\ConversationAwareTrait;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Infrastructure\Repository\MemberRepository;
-use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
-use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\PublishersList\TwitterListAwareTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 
 class ConversationStatusConsumer
 {
-    use AggregateAwareTrait;
-    use AmqpMessageAwareTrait;
+    use TwitterListAwareTrait;
     use ConversationAwareTrait;
     use LoggerTrait;
 
@@ -33,30 +30,29 @@ class ConversationStatusConsumer
 
     public PublishersListRepository $aggregateRepository;
 
-    protected MemberRepository $userRepository;
+    protected MemberRepositoryInterface $memberRepository;
 
-    /**
-     * @param EntityRepository $userRepository
-     */
-    public function setUserRepository(EntityRepository $userRepository)
+    public function setMemberRepository(MemberRepositoryInterface $memberRepository): self
     {
-        $this->userRepository = $userRepository;
+        $this->memberRepository = $memberRepository;
+
+        return $this;
     }
 
     /**
-     * @param AmqpMessage $message
-     *
-     * @return bool|mixed
-     * @throws MappingException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      */
-    public function execute(AmqpMessage $message)
+    public function execute()
     {
         try {
-            $options = $this->parseMessage($message);
+            // FIXME
+            $options = [
+                'status_id' => '1',
+                'screen_name' => 'johndoe',
+            ];
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
@@ -143,10 +139,6 @@ class ConversationStatusConsumer
     }
 
     /**
-     * @param NotFoundMemberException $notFoundMemberException
-     * @param array                   $options
-     *
-     * @return array
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
@@ -167,10 +159,6 @@ class ConversationStatusConsumer
         return array($aggregate, $status);
     }
 
-    /**
-     * @param $options
-     * @return bool
-     */
     private function handleStatusNotFoundException($options): bool
     {
         $errorMessage = sprintf("Could not find status with id '%s'", $options['status_id']);
@@ -179,10 +167,6 @@ class ConversationStatusConsumer
         return true;
     }
 
-    /**
-     * @param $options
-     * @return bool
-     */
     private function handleProtectedStatusException($options): bool
     {
         $errorMessage = sprintf("Could not collect protected status with id '%s'", $options['status_id']);
@@ -191,25 +175,18 @@ class ConversationStatusConsumer
         return true;
     }
 
-    /**
-     * @param Status $status
-     *
-     * @return Member
-     * @throws OptimisticLockException
-     * @throws \Doctrine\ORM\Exception\ORMException
-     */
     private function ensureStatusAuthorExists(Status $status): Member
     {
-        $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof MemberInterface) {
             $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
-            $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->twitterId()]);
+            $existingMember = $this->memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
 
             if ($existingMember) {
                 return $existingMember;
             }
 
-            $this->userRepository->saveMember($member);
+            $this->memberRepository->saveMember($member);
         }
 
         return $member;

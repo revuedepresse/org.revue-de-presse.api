@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Message;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 
 interface FetchTweetInterface
 {
-    public const BEFORE = 'before';
-    public const PUBLISHERS_LIST_ID = 'aggregate_id';
-    public const SCREEN_NAME         = 'screen_name';
+    public const BEFORE          = 'before';
+    public const TWITTER_LIST_ID = 'twitter_list_id';
+    public const SCREEN_NAME     = 'screen_name';
 
-    public function aggregateId(): int;
+    public function listId(): int;
 
     public function dateBeforeWhichStatusAreCollected(): ?string;
 

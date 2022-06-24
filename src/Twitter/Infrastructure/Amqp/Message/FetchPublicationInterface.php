@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Message;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\Entity\Aggregate;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 
 interface FetchPublicationInterface

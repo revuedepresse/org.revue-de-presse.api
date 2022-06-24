@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\Whisperer;
+use App\Twitter\Infrastructure\Http\Entity\Whisperer;
 
 /**
  * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)

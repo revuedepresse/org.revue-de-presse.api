@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Entity\Legacy;
 
-use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use App\Twitter\Infrastructure\Serialization\JsonEncodingAwareInterface;
@@ -234,7 +234,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     /**
      * @ORM\ManyToMany(
-     *      targetEntity="\App\Twitter\Infrastructure\Api\Entity\Token",
+     *      targetEntity="\App\Twitter\Infrastructure\Http\Entity\Token",
      *      inversedBy="users",
      *      fetch="EAGER",
      *      cascade={"persist"},

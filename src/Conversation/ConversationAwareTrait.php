@@ -7,7 +7,7 @@ use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Domain\Publication\Repository\PublicationInterface;
@@ -16,7 +16,7 @@ use function json_decode;
 
 trait ConversationAwareTrait
 {
-    use StatusAccessorTrait;
+    use TweetAwareHttpClientTrait;
     use StatusRepositoryTrait;
 
     /**

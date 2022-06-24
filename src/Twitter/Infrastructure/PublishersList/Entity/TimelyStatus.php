@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\PublishersList\Entity;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;

@@ -3,12 +3,12 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository;
 
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\FriendsBatchAwareHttpClientBuilder;
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Api\Selector\FriendsListSelector;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FriendsListAccessorBuilder;
+use App\Twitter\Infrastructure\Http\Selector\FriendsListSelector;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -18,10 +18,7 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
 {
     use ProphecyTrait;
 
-    /**
-     * @return ListCollectedEventRepositoryInterface
-     */
-    public static function build(): ListCollectedEventRepositoryInterface
+    public static function build(): PaginatedBatchCollectedEventRepositoryInterface
     {
         $testCase = new self();
         $prophecy = $testCase->prophesize(FriendsListCollectedEventRepository::class);
@@ -38,10 +35,10 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
             });
 
         $prophecy->aggregatedLists(
-            Argument::type(ListAccessorInterface::class),
+            Argument::type(CursorAwareHttpClientInterface::class),
             Argument::type('string')
         )->will(function ($arguments) {
-            $friendsListAccessor = FriendsListAccessorBuilder::build();
+            $friendsListAccessor = FriendsBatchAwareHttpClientBuilder::build();
 
             return $friendsListAccessor->getListAtCursor(
                 new FriendsListSelector($arguments[1])

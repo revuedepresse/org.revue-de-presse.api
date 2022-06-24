@@ -8,7 +8,7 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * @package App\Twitter\Infrastructure\Api\Entity
+ * @package App\Twitter\Infrastructure\Http\Entity
  */
 interface StatusInterface
 {

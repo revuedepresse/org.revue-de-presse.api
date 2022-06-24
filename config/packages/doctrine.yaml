@@ -133,8 +133,8 @@ doctrine:
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
-                        prefix:     'App\Twitter\Infrastructure\Api\Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Http/Entity'
+                        prefix:     'App\Twitter\Infrastructure\Http\Entity'
                         type:       annotation
                     Member:
                         alias:      'Member'
@@ -150,7 +150,7 @@ doctrine:
                         type:       annotation
                     MediaShareholders:
                         alias:      'FrenchMediaShareholders'
-                        dir:        '%kernel.project_dir%/config/model/press-media'
+                        dir:        '%kernel.project_dir%/config/model/french-media-shareholders'
                         is_bundle:  false
                         prefix:     App\FrenchMediaShareholders\Entity
                         type:       xml

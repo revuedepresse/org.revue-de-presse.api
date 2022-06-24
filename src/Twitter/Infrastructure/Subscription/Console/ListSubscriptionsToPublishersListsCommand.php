@@ -4,9 +4,9 @@ declare (strict_types=1);
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
-use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
+use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\Table;
@@ -23,11 +23,11 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
 
     private LoggerInterface $logger;
 
-    private OwnershipBatchCollectedEventRepository $repository;
+    private ListsBatchCollectedEventRepository $repository;
 
     public function __construct(
         $name,
-        OwnershipBatchCollectedEventRepositoryInterface $repository,
+        ListsBatchCollectedEventRepositoryInterface $repository,
         LoggerInterface $logger
     ) {
         $this->repository = $repository;

@@ -13,21 +13,21 @@ use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
+use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,16 +38,16 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 {
     public const COMMAND_NAME = 'app:synchronize-list';
 
-    use OwnershipBatchCollectedEventRepositoryTrait;
+    use ListBatchCollectedEventRepositoryTrait;
     use PublishersListCollectedEventRepositoryTrait;
 
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
     private const OPTION_LIST_RESTRICTION = 'list-restriction';
 
-    private ApiAccessorInterface $accessor;
+    private HttpClientInterface $httpClient;
 
-    private OwnershipAccessorInterface $ownershipAccessor;
+    private ListAwareHttpClientInterface $listAwareHttpClient;
 
     public ?string $listRestriction = null;
 
@@ -62,17 +62,17 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     private LoggerInterface $logger;
 
     public function __construct(
-        string $name,
-        ApiAccessorInterface $accessor,
-        OwnershipAccessorInterface $ownershipAccessor,
-        PublishersListSubscriptionRepositoryInterface $publishersListSubscriptionRepository,
-        MemberPublishersListSubscriptionRepositoryInterface  $memberPublishersListSubscriptionRepository,
-        NetworkRepositoryInterface $networkRepository,
-        MemberRepositoryInterface $memberRepository,
-        LoggerInterface $logger
+        string                                              $name,
+        HttpClientInterface                                 $httpClient,
+        ListAwareHttpClientInterface                        $listAwareHttpClient,
+        PublishersListSubscriptionRepositoryInterface       $publishersListSubscriptionRepository,
+        MemberPublishersListSubscriptionRepositoryInterface $memberPublishersListSubscriptionRepository,
+        NetworkRepositoryInterface                          $networkRepository,
+        MemberRepositoryInterface                           $memberRepository,
+        LoggerInterface                                     $logger
     ) {
-        $this->accessor = $accessor;
-        $this->ownershipAccessor = $ownershipAccessor;
+        $this->httpClient = $httpClient;
+        $this->listAwareHttpClient = $listAwareHttpClient;
 
         $this->memberRepository = $memberRepository;
         $this->memberPublishersListSubscriptionRepository = $memberPublishersListSubscriptionRepository;
@@ -112,7 +112,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         parent::execute($input, $output);
 
         $memberName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
-        $member     = $this->accessor->ensureMemberHavingNameExists($memberName);
+        $member     = $this->httpClient->ensureMemberHavingNameExists($memberName);
 
         $correlationId = CorrelationId::generate();
 
@@ -121,7 +121,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         do {
             $eventRepository   = $this->ownershipBatchCollectedEventRepository;
             $listSubscriptions = $eventRepository->collectedOwnershipBatch(
-                $this->ownershipAccessor,
+                $this->listAwareHttpClient,
                 new MemberOwnershipsBatchSelector(
                     $member->twitterScreenName(),
                     (string) $nextPage,
@@ -145,10 +145,6 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
-     * @param array                                                    $membersIndexedByTwitterId
-     *
-     * @return MemberInterface|object|null
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -197,7 +193,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 
                 $eventRepository = $this->publishersListCollectedEventRepository;
                 $memberPublishersList = $eventRepository->collectedPublishersList(
-                    $this->accessor,
+                    $this->httpClient,
                     [
                         $eventRepository::OPTION_PUBLISHERS_LIST_ID => $memberAggregateSubscription->listId(),
                         $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $memberAggregateSubscription->listName()

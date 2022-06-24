@@ -23,6 +23,7 @@ start() {
         SYMFONY_ENV=prod \
         TIME_LIMIT=600
 
+    configure_blackfire_client
     php bin/console cache:clear --verbose
 
     local asdf_dir

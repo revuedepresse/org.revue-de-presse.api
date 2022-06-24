@@ -17,7 +17,6 @@ COPY --chown=${WORKER_UID}:${WORKER_GID} ./_scripts/entrypoint-process-manager.s
 COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 RUN         /bin/bash -c 'source /scripts/install-shared-requirements.sh'
-
 RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.sh'
 
 USER        ${WORKER_UID}:${WORKER_GID}

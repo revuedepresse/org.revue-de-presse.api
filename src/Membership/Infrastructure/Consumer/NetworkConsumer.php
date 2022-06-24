@@ -2,37 +2,22 @@
 
 namespace App\Membership\Infrastructure\Consumer;
 
-use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
-use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
 
-class NetworkConsumer implements ConsumerInterface
+class NetworkConsumer
 {
-    use AmqpMessageAwareTrait;
+    public LoggerInterface $logger;
 
-    /**
-     * @var LoggerInterface
-     */
-    public $logger;
+    public NetworkRepository $networkRepository;
 
-    /**
-     * @var NetworkRepository
-     */
-    public $networkRepository;
-
-    /**
-     * @param AMQPMessage $message
-     *
-     * @return bool
-     */
-    public function execute(AMQPMessage $message): bool
+    public function execute(): bool
     {
         try {
-            $members = $this->parseMessage($message);
+            // FIXME
+            $members = [];
             $this->networkRepository->saveNetwork($members);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
             return false;

@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\FollowersBatchAwareHttpClientBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -29,7 +29,7 @@ class ListMemberSubscribeesCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $this->command = $application->find('app:list-member-subscribees');
-        $this->command->setAccessor(FollowersListAccessorBuilder::build());
+        $this->command->setAccessor(FollowersBatchAwareHttpClientBuilder::build());
         $this->command->setRepository(FollowersListCollectedEventRepositoryBuilder::build());
 
         $this->commandTester = new CommandTester($command);

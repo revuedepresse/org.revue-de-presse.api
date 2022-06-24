@@ -10,7 +10,7 @@ use App\Membership\Infrastructure\Entity\ExceptionalMember;
 use App\Membership\Infrastructure\Entity\NotFoundMember;
 use App\Membership\Infrastructure\Entity\ProtectedMember;
 use App\Membership\Infrastructure\Entity\SuspendedMember;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -26,19 +26,15 @@ class NetworkRepository implements NetworkRepositoryInterface
 
     public MemberSubscriptionRepository $memberSubscriptionRepository;
 
-    public \App\Membership\Infrastructure\Repository\MemberRepository $memberRepository;
+    public MemberRepository $memberRepository;
 
     public EntityManager $entityManager;
 
-    public ApiAccessorInterface $accessor;
+    public HttpClientInterface $accessor;
 
     public LoggerInterface $logger;
 
     /**
-     * @param MemberInterface $member
-     * @param array           $subscriptions
-     *
-     * @return bool
      * @throws DBALException
      */
     private function saveMemberSubscriptions(
@@ -139,9 +135,6 @@ class NetworkRepository implements NetworkRepositoryInterface
     }
 
     /**
-     * @param string $memberId
-     *
-     * @return MemberInterface|object|null
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -158,10 +151,7 @@ class NetworkRepository implements NetworkRepositoryInterface
         );
     }
 
-    /**
-     * @param $members
-     */
-    public function saveNetwork($members)
+    public function saveNetwork(array $members)
     {
         array_walk(
             $members,

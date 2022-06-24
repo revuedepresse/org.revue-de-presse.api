@@ -7,7 +7,7 @@ use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Entity\MemberSubscription;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
 use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class AggregateSubscriptionRepository extends ServiceEntityRepository implements PublishersListSubscriptionRepositoryInterface
 {
-    public ApiAccessorInterface $accessor;
+    public HttpClientInterface $accessor;
 
     public MemberAggregateSubscriptionRepository $memberAggregateSubscriptionRepository;
 

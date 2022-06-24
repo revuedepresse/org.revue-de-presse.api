@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Repository\Status;
 
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;

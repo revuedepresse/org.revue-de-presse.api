@@ -3,7 +3,7 @@
 namespace App\Membership\Infrastructure\Entity;
 
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Selectable;
 

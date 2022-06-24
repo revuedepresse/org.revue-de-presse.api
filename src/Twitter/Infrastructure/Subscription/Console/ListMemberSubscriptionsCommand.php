@@ -3,10 +3,9 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\DependencyInjection\MissingDependency;
-use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
 use stdClass;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,18 +15,16 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 {
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    public ListAccessorInterface $accessor;
-    /**
-     * @var ListCollectedEventRepositoryInterface
-     */
-    private ListCollectedEventRepositoryInterface $repository;
+    public CursorAwareHttpClientInterface $accessor;
 
-    public function setAccessor(ListAccessorInterface $accessor): void
+    private PaginatedBatchCollectedEventRepositoryInterface $repository;
+
+    public function setAccessor(CursorAwareHttpClientInterface $accessor): void
     {
         $this->accessor = $accessor;
     }
 
-    public function setRepository(ListCollectedEventRepositoryInterface $repository): void
+    public function setRepository(PaginatedBatchCollectedEventRepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -45,8 +42,6 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->guardAgainstMissingDependency();
-
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $friendsList = $this->repository->aggregatedLists(
             $this->accessor,
@@ -63,30 +58,6 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         );
 
         return self::SUCCESS;
-    }
-
-    /**
-     * @throws MissingDependency
-     */
-    private function guardAgainstMissingDependency(): void
-    {
-        if (!($this->accessor instanceof ListAccessorInterface)) {
-            throw new MissingDependency(
-                sprintf(
-                    'Dependency of type "%s" is missing',
-                    ListAccessorInterface::class
-                )
-            );
-        }
-
-        if (!($this->repository instanceof ListCollectedEventRepositoryInterface)) {
-            throw new MissingDependency(
-                sprintf(
-                    'Dependency of type "%s" is missing',
-                    ListCollectedEventRepositoryInterface::class
-                )
-            );
-        }
     }
 
     private function format(array $friendAsArray): string

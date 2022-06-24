@@ -5,8 +5,8 @@ namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Membership\Domain\Compliance\Compliance;
 use App\Membership\Domain\Exception\MembershipException;
-use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
@@ -16,14 +16,14 @@ use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
-use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\TwitterListAwareTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use function sprintf;
 
 class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 {
-    use AggregateAwareTrait;
+    use TwitterListAwareTrait;
     use MemberProfileAccessorTrait;
 
     /**
@@ -42,10 +42,10 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
     private PublishersListRepositoryInterface $aggregateRepository;
 
     public function __construct(
-        MessageBusInterface $dispatcher,
-        MemberProfileAccessorInterface $memberProfileAccessor,
-        PublishersListRepositoryInterface $aggregateRepository,
-        LoggerInterface $logger
+        MessageBusInterface                   $dispatcher,
+        MemberProfileAwareHttpClientInterface $memberProfileAccessor,
+        PublishersListRepositoryInterface     $aggregateRepository,
+        LoggerInterface                       $logger
     ) {
         $this->dispatcher                 = $dispatcher;
         $this->aggregateRepository        = $aggregateRepository;
@@ -119,7 +119,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         Compliance::skipProtectedMember($member, $memberIdentity);
         Compliance::skipSuspendedMember($member, $memberIdentity);
 
-        $FetchMemberStatus = FetchTweet::identifyMember(
+        $fetchTweetAmqpMessage = FetchTweet::identifyMember(
             $this->aggregateRepository->byName(
                 $member->twitterScreenName(),
                 $list->name(),
@@ -130,6 +130,6 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             $ruleset->tweetCreationDateFilter()
         );
 
-        $this->dispatcher->dispatch($FetchMemberStatus);
+        $this->dispatcher->dispatch($fetchTweetAmqpMessage);
     }
 }

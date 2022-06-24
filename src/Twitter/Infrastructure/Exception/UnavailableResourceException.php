@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
+use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
-use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -20,7 +20,7 @@ use function sprintf;
  * @package App\Twitter\Infrastructure\Exception
  * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
-class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface, TwitterApiEndpointsAwareInterface
+class UnavailableResourceException extends Exception implements ApiErrorCodeAwareInterface, ApiEndpointsAwareInterface
 {
 
     /**
@@ -59,7 +59,7 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
      * @param string         $endpoint
      * @param callable       $onApiLimitExceeded
      *
-     * @throws ApiRateLimitingException
+     * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
@@ -124,7 +124,7 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
                 $onApiLimitExceeded($endpoint);
             }
 
-            throw new ApiRateLimitingException(
+            throw new ApiAccessRateLimitException(
                 $error->message,
                 $error->code
             );

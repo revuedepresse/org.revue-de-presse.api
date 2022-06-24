@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Entity\Token;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Entity\Token;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
-use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher;
-use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
-use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Infrastructure\Api\Selector\AuthenticatedSelector;
+use App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets;
+use App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient;
+use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
+use App\Twitter\Infrastructure\Http\Selector\AuthenticatedSelector;
 use App\Twitter\Infrastructure\Curation\CurationRuleset;
 use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
@@ -20,7 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 /**
  * @group fetch_tweets_message_dispatcher
  */
-class FetchTweetsMessageDispatcherTest extends KernelTestCase
+class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
 {
     use ProphecyTrait;
 
@@ -33,13 +33,13 @@ class FetchTweetsMessageDispatcherTest extends KernelTestCase
     {
         self::$kernel = self::bootKernel();
 
-        /** @var FetchTweetsMessageDispatcher $dispatcher */
-        $dispatcher = static::getContainer()->get('test.'.FetchTweetsMessageDispatcher::class);
+        /** @var DispatchAmqpMessagesToFetchTweets $dispatcher */
+        $dispatcher = static::getContainer()->get('test.'.DispatchAmqpMessagesToFetchTweets::class);
 
         $calls = 0;
 
-        /** @var OwnershipAccessor $ownershipAccessor */
-        $ownershipAccessor = $this->prophesize(OwnershipAccessor::class);
+        /** @var ListAwareHttpClient $ownershipAccessor */
+        $ownershipAccessor = $this->prophesize(ListAwareHttpClient::class);
         $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
             Argument::type(AuthenticatedSelector::class),
             Argument::cetera()

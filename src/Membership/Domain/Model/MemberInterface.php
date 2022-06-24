@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use Doctrine\Common\Collections\Selectable;
 use Symfony\Component\Security\Core\User\UserInterface;
 

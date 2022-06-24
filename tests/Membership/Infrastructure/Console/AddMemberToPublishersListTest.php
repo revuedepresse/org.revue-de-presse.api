@@ -3,13 +3,10 @@ declare (strict_types=1);
 
 namespace App\Tests\Membership\Infrastructure\Console;
 
-use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
-use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -47,9 +44,9 @@ class AddMemberToPublishersListTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_adds_a_member_to_a_publishers_list(): void
+    public function it_adds_a_member_to_a_twitter_list(): void
     {
-        $targetPublishersList = OwnershipAccessorBuilder::LIST_NAME;
+        $targetPublishersList = ListAwareHttpClientBuilder::LIST_NAME;
         $memberScreenName = 'johndoe';
 
         // Act

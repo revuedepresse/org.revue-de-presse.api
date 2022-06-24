@@ -1,25 +1,31 @@
-x-volumes: &app-volume
+x-shared: &app-shared
+  env_file:
+    - '../../.env.local'
   volumes:
     - '../../:/var/www/worker.example.org'
 
 services:
 
-#  amqp:
-#    volumes:
+  amqp:
+    env_file:
+      - '../../.env.local'
+    volumes:
 
   app:
-    <<: *app-volume
+    <<: &shared-config
 
-#  database:
-#    ports:
+  database:
+    env_file:
+      - '../../.env.local'
+#     ports:
 #      - "127.0.0.1:5434:5432"
 #    volumes:
 
   process-manager:
-    <<: *app-volume
+    <<: *app-shared
 
   worker:
-    <<: *app-volume
+    <<: *app-shared
 
 networks:
   default:

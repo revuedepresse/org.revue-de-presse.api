@@ -8,7 +8,7 @@ use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\HttpClientBuilder;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -19,7 +19,7 @@ use Throwable;
 
 class NetworkRepositoryBuilder extends TestCase
 {
-    public static function build(\App\Membership\Domain\Repository\MemberRepositoryInterface $repository, LoggerInterface $logger)
+    public static function build(MemberRepositoryInterface $repository, LoggerInterface $logger)
     {
         $testCase = new class() extends TestCase {
             use ProphecyTrait;
@@ -57,12 +57,12 @@ class NetworkRepositoryBuilder extends TestCase
      * @param \App\Membership\Domain\Repository\MemberRepositoryInterface $repository
      * @return MemberInterface
      */
-    private static function ensureMembersExistsInDatabase(\App\Membership\Domain\Repository\MemberRepositoryInterface $repository): MemberInterface
+    private static function ensureMembersExistsInDatabase(MemberRepositoryInterface $repository): MemberInterface
     {
-        $twitterId = ApiAccessorBuilder::PUBLISHERS_LIST_MEMBER_TWITTER_ID;
+        $twitterId = HttpClientBuilder::PUBLISHERS_LIST_MEMBER_TWITTER_ID;
 
         $member = MemberBuilder::build(
-            ApiAccessorBuilder::PUBLISHERS_LIST_MEMBER_SCREEN_NAME,
+            HttpClientBuilder::PUBLISHERS_LIST_MEMBER_SCREEN_NAME,
             $twitterId
         );
         $existingMember = $repository->findOneBy(['twitterID' => $twitterId]);

@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Conversation\ConversationAwareTrait;
-use App\Twitter\Domain\Api\SearchParamsInterface;
+use App\Twitter\Domain\Http\SearchParamsInterface;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;

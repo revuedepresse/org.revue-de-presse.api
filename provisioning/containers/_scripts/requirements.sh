@@ -28,6 +28,15 @@ function clear_package_management_system_cache() {
     rm -rf /var/lib/apt/lists/*
 }
 
+function configure_blackfire_client() {
+    \cat '/scripts/configuration-files/blackfire.ini.dist' \
+    | sed -E 's#__CLIENT_ID__#'"${BLACKFIRE_CLIENT_ID}"'#g' \
+    | sed -E 's#__CLIENT_TOKEN__#'"${BLACKFIRE_CLIENT_TOKEN}"'#g' \
+    > "${HOME}/.blackfire.ini"
+
+    chown "$WORKER_UID.${WORKER_GID}" "${HOME}/.blackfire.ini"
+}
+
 function create_log_files_when_non_existing() {
     prefix="${1}"
     local prefix="${1}"
@@ -61,6 +70,16 @@ function create_log_files_when_non_existing() {
         printf '%s "%s".%s' 'Created file located at' "/var/www/${WORKER}/var/log/${prefix}.error.log" $'\n'
 
     fi
+}
+
+function install_blackfire() {
+    wget -q -O - https://packages.blackfire.io/gpg.key | \
+    dd of=/usr/share/keyrings/blackfire-archive-keyring.asc
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | \
+    tee /etc/apt/sources.list.d/blackfire.list
+
+    apt update
+    apt install blackfire blackfire-php --assume-yes
 }
 
 function install_dockerize() {
@@ -209,6 +228,9 @@ function install_shared_system_packages() {
         tini \
         unzip \
         wget
+
+    # Install blackfire profiling agent
+    install_blackfire
 }
 
 function install_worker_system_packages() {

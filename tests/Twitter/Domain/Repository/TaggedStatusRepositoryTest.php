@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Domain\Repository;
 
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

@@ -19,11 +19,11 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@logger'
         calls:
-            - [ 'setApiAccessor',               [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface' ] ]
+            - [ 'setHttpClient',               [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setPublicationPersistence',    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',              [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
             - [ 'setTaggedStatusRepository',    [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
         public: true

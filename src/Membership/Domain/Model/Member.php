@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use function mt_rand;
 use function sha1;
 use function uniqid;

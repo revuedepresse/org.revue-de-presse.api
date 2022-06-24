@@ -290,11 +290,19 @@ function run_unit_tests() {
 
     if [ -z ${DEBUG} ];
     then
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
+        bin/phpunit -c ./phpunit.xml.dist \
+        --process-isolation \
+        --stop-on-failure \
+        --stop-on-error
+
         return
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
+    bin/phpunit -c ./phpunit.xml.dist \
+    --debug \
+    --stop-on-failure \
+    --stop-on-error \
+    --verbose
 }
 
 function get_project_name() {

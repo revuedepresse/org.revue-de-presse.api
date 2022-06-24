@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http;
 
-use App\Twitter\Domain\Api\SearchParamsInterface;
+use App\Twitter\Domain\Http\SearchParamsInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class SearchParams implements SearchParamsInterface

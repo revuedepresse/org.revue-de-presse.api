@@ -2,7 +2,7 @@
 
 namespace App\Membership\Infrastructure\Console;
 
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use Symfony\Component\Console\Input\InputInterface;

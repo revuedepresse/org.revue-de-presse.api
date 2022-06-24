@@ -4,20 +4,20 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Membership\Domain\Exception\MembershipException;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
+use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Twitter\Infrastructure\Api\Exception\CanNotReplaceAccessTokenException;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
+use App\Twitter\Infrastructure\Http\Exception\CanNotReplaceAccessTokenException;
+use App\Twitter\Infrastructure\Http\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -34,9 +34,9 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     use TranslatorTrait;
 
     /**
-     * @var ApiAccessorInterface
+     * @var HttpClientInterface
      */
-    private ApiAccessorInterface $accessor;
+    private HttpClientInterface $accessor;
 
     /**
      * @var LoggerInterface
@@ -44,9 +44,9 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     private LoggerInterface $logger;
 
     public function __construct(
-        ApiAccessorInterface $accessor,
+        HttpClientInterface $accessor,
         TranslatorInterface $translator,
-        LoggerInterface $logger
+        LoggerInterface     $logger
     ) {
         $this->accessor = $accessor;
         $this->translator = $translator;

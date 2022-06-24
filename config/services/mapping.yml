@@ -5,8 +5,8 @@ services:
     mapping.refresh_status:
         class: 'App\Twitter\Infrastructure\Publication\Mapping\RefreshStatusMapping'
         arguments:
-            - '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
         calls:
-            - [ 'setLogger', [ '@monolog.logger.twitter_api'  ] ]
-            - [ 'setPublicationPersistence', [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
-            - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'  ] ]
+            - [ 'setLogger',                    [ '@monolog.logger.twitter_api'  ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'  ] ]

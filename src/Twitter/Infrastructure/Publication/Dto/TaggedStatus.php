@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Publication\Dto;
 
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Inflector\InflectorFactory;

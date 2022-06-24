@@ -6,9 +6,9 @@ namespace App\Twitter\Infrastructure\Subscription\Console;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
+use App\Twitter\Infrastructure\Http\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
@@ -27,20 +27,20 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
 
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    private ListCollectedEventRepositoryInterface $subscriptionsRepository;
+    private PaginatedBatchCollectedEventRepositoryInterface $subscriptionsRepository;
 
-    private ListCollectedEventRepositoryInterface $subscribeesRepository;
+    private PaginatedBatchCollectedEventRepositoryInterface $subscribeesRepository;
 
     private FriendshipMutatorInterface $mutator;
 
     private NetworkRepositoryInterface $networkRepository;
 
-    public function setSubscriptionsRepository(ListCollectedEventRepositoryInterface $repository): void
+    public function setSubscriptionsRepository(PaginatedBatchCollectedEventRepositoryInterface $repository): void
     {
         $this->subscriptionsRepository = $repository;
     }
 
-    public function setSubscribeesRepository(ListCollectedEventRepositoryInterface $repository): void
+    public function setSubscribeesRepository(PaginatedBatchCollectedEventRepositoryInterface $repository): void
     {
         $this->subscribeesRepository = $repository;
     }

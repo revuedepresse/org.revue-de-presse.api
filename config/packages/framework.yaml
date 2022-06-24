@@ -13,7 +13,7 @@ framework:
                     - doctrine_ping_connection
 
         transports:
-            publications:
+            tweets:
                 dsn:            '%env(MESSENGER_TRANSPORT_DSN_PUBLICATIONS)%'
                 options:
                     persistent: true
@@ -25,7 +25,7 @@ framework:
 
         routing:
             # Route your messages to the transports
-            'App\Twitter\Infrastructure\Amqp\Message\FetchTweet': publications
+            'App\Twitter\Infrastructure\Amqp\Message\FetchTweet': tweets
 
     router:
         enabled:    false

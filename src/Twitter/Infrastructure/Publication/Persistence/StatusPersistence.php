@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
@@ -21,7 +21,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
+use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;
@@ -37,7 +37,7 @@ use function is_array;
 
 class StatusPersistence implements StatusPersistenceInterface
 {
-    use ApiAccessorTrait;
+    use HttpClientTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
     use PublishersListRepositoryTrait;
@@ -262,7 +262,7 @@ class StatusPersistence implements StatusPersistenceInterface
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
-            new AccessToken($this->apiAccessor->getAccessToken()),
+            new AccessToken($this->apiClient->getAccessToken()),
             $twitterList
         );
     }

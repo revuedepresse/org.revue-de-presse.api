@@ -9,7 +9,7 @@ use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;

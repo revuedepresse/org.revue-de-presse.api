@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
@@ -310,7 +310,7 @@ class StatusPersistenceTest extends KernelTestCase
     private function removeUnarchivedStatus(): void
     {
         $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
-        $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Api\Entity\Status');
+        $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Http\Entity\Status');
         $status = $statusRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
         if ($status instanceof StatusInterface) {
             $entityManager->remove($status);

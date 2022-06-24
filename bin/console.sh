@@ -6,7 +6,7 @@ function consume_fetch_publication_messages {
 
     if [ -z "${command_suffix}" ];
     then
-      command_suffix='publications'
+      command_suffix='tweets'
     fi
 
     local namespace
@@ -64,7 +64,13 @@ function consume_fetch_publication_messages {
     trap stop_workers SIGINT SIGTERM
 
     local script
-    script="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
+    script="$(cat <<-COMMAND
+				${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} \
+				--memory-limit ${MEMORY_LIMIT} \
+				--limit ${MESSAGES} \
+				${command_suffix}
+COMMAND
+)"
 
     echo 'About to run command: '
     echo "${script}"
@@ -190,7 +196,7 @@ function get_project_name() {
 
 function get_rabbitmq_virtual_host() {
     local virtual_host
-    virtual_host="$(cat <(cat '.env.local' | grep "PUBLICATIONS='amqp" | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    virtual_host="$(cat <(cat '.env.local' | \grep 'RABBITMQ_DEFAULT_VHOST' | tr -d "'" | sed -E 's#(.+=)##g'))"
 
     echo "${virtual_host}"
 }

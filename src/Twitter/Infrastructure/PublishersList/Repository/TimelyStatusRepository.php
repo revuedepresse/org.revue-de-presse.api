@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\PublishersList\Repository;
 
 use App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Http\SearchParams;

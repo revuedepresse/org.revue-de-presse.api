@@ -6,11 +6,11 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
-use App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface;
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
+use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use LogicException;
@@ -32,37 +32,37 @@ class AddMemberToPublishersListCommand extends AbstractCommand
 
     public const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    private MembersListAccessorInterface $membersListAccessor;
+    private LoggerInterface $logger;
 
-    private OwnershipAccessorInterface $ownershipAccessor;
+    private AggregateSubscriptionRepository $listSubscriptionRepository;
 
-    private PublishersListRepositoryInterface $publishersListRepository;
+    private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
-    private AggregateSubscriptionRepository $aggregateSubscriptionRepository;
+    private ListAwareHttpClientInterface $listAwareHttpClient;
 
     private MemberRepositoryInterface $memberRepository;
 
-    private StatusAccessorInterface $statusAccessor;
+    private PublishersListRepositoryInterface $publishersListRepository;
 
-    private LoggerInterface $logger;
+    private TweetAwareHttpClientInterface $tweetAwareHttpClient;
 
     public function __construct(
-        string $name,
-        AggregateSubscriptionRepository $aggregateSubscriptionRepository,
-        MemberRepositoryInterface $memberRepository,
-        PublishersListRepositoryInterface $publishersListRepository,
-        MembersListAccessorInterface $membersListAccessor,
-        OwnershipAccessorInterface $ownershipAccessor,
-        StatusAccessorInterface $statusAccessor,
-        LoggerInterface $logger
+        string                               $name,
+        AggregateSubscriptionRepository      $aggregateSubscriptionRepository,
+        MemberRepositoryInterface            $memberRepository,
+        PublishersListRepositoryInterface    $publishersListRepository,
+        MembersBatchAwareHttpClientInterface $membersListAccessor,
+        ListAwareHttpClientInterface         $ownershipAccessor,
+        TweetAwareHttpClientInterface        $statusAccessor,
+        LoggerInterface                      $logger
     ) {
-        $this->aggregateSubscriptionRepository = $aggregateSubscriptionRepository;
+        $this->listSubscriptionRepository = $aggregateSubscriptionRepository;
         $this->memberRepository = $memberRepository;
         $this->publishersListRepository = $publishersListRepository;
 
-        $this->membersListAccessor = $membersListAccessor;
-        $this->ownershipAccessor = $ownershipAccessor;
-        $this->statusAccessor = $statusAccessor;
+        $this->membersBatchHttpClient = $membersListAccessor;
+        $this->listAwareHttpClient = $ownershipAccessor;
+        $this->tweetAwareHttpClient = $statusAccessor;
 
         $this->logger = $logger;
 
@@ -124,7 +124,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
     private function findListToWhichMembersShouldBeAddedTo(): PublishersList
     {
         $screenName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
-        $ownershipsLists = $this->ownershipAccessor->getMemberOwnerships(
+        $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
             new MemberOwnershipsBatchSelector($screenName)
         );
 
@@ -140,7 +140,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
                 }
             );
 
-            $ownershipsLists = $this->ownershipAccessor->getMemberOwnerships(
+            $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
                 new MemberOwnershipsBatchSelector($screenName, $ownershipsLists->nextPage())
             );
         }
@@ -155,7 +155,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
     private function addMembersToList(PublishersList $targetList): void {
         $memberIds = $this->getListOfMembers();
 
-        $this->membersListAccessor->addMembersToList($memberIds, $targetList->id());
+        $this->membersBatchHttpClient->addMembersToList($memberIds, $targetList->id());
         $members = $this->ensureMembersExist($memberIds);
 
         array_walk(
@@ -182,7 +182,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
                 }
 
                 if (!($member instanceof MemberInterface)) {
-                    $member = $this->statusAccessor->ensureMemberHavingNameExists($memberIdentifier);
+                    $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberIdentifier);
                 }
 
                 return $member;
@@ -197,7 +197,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
             $this->input->getOption(self::OPTION_LIST_NAME)) {
 
             try {
-                $subscriptions = $this->aggregateSubscriptionRepository->findSubscriptionsByAggregateName(
+                $subscriptions = $this->listSubscriptionRepository->findSubscriptionsByAggregateName(
                     $this->input->getOption(self::OPTION_LIST_NAME)
                 );
             } catch (\Exception $exception) {

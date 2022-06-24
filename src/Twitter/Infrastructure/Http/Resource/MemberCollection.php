@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Resource;
 
-use App\Twitter\Infrastructure\Operation\Collection\StrictCollectionInterface;
+use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 
-class MemberCollection implements StrictCollectionInterface
+class MemberCollection implements MemberCollectionInterface
 {
     private array $members;
 

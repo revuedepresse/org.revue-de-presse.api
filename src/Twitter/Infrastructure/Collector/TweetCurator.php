@@ -5,28 +5,23 @@ namespace App\Twitter\Infrastructure\Collector;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Twitter\Infrastructure\Api\Entity\FreezableToken;
-use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Collector\Exception\SkipCollectException;
 use App\Twitter\Infrastructure\Curation\CurationSelectors;
-use App\Twitter\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
-    Api\ApiLimitModeratorTrait,
-    Api\StatusAccessorTrait,
-    Collection\InterruptibleCuratorTrait,
-    Collection\MemberProfileCollectedEventRepositoryTrait,
-    Collection\PublicationBatchCollectedEventRepositoryTrait,
+use App\Twitter\Infrastructure\DependencyInjection\{
+    Curation\Curator\InterruptibleCuratorTrait,
+    Curation\Events\MemberProfileCollectedEventRepositoryTrait,
+    Curation\Events\TweetBatchCollectedEventRepositoryTrait,
+    Http\HttpClientTrait,
+    Http\RateLimitComplianceTrait,
+    Http\TweetAwareHttpClientTrait,
     LoggerTrait,
     Membership\WhispererIdentificationTrait,
     Membership\WhispererRepositoryTrait,
@@ -43,6 +38,12 @@ use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
+use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
+use App\Twitter\Infrastructure\Http\Entity\Token;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -58,18 +59,18 @@ use function count;
 
 class TweetCurator implements TweetCuratorInterface
 {
-    use ApiAccessorTrait;
-    use ApiLimitModeratorTrait;
+    use HttpClientTrait;
+    use RateLimitComplianceTrait;
     use LoggerTrait;
     use InterruptibleCuratorTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
-    use PublicationBatchCollectedEventRepositoryTrait;
+    use TweetBatchCollectedEventRepositoryTrait;
     use PublishersListRepositoryTrait;
     use PublicationPersistenceTrait;
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
-    use StatusAccessorTrait;
+    use TweetAwareHttpClientTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
@@ -83,7 +84,7 @@ class TweetCurator implements TweetCuratorInterface
     private CurationSelectorsInterface $selectors;
 
     /**
-     * @throws ApiRateLimitingException
+     * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws NoResultException
@@ -271,8 +272,8 @@ class TweetCurator implements TweetCuratorInterface
         if ($this->selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchTweetInterface::BEFORE]);
         }
-        if (array_key_exists(FetchTweetInterface::PUBLISHERS_LIST_ID, $options)) {
-            unset($options[FetchTweetInterface::PUBLISHERS_LIST_ID]);
+        if (array_key_exists(FetchTweetInterface::TWITTER_LIST_ID, $options)) {
+            unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
         }
 
         return $options;
@@ -289,7 +290,7 @@ class TweetCurator implements TweetCuratorInterface
         $token->setAccessToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
         $token->setAccessTokenSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
 
-        $this->apiAccessor->fromToken($token);
+        $this->apiClient->fromToken($token);
 
         /** @var Token token */
         $token = $this->tokenRepository->findOneBy(
@@ -300,8 +301,8 @@ class TweetCurator implements TweetCuratorInterface
             $token = $this->tokenRepository->findFirstUnfrozenToken();
         }
 
-        $this->apiAccessor->setConsumerKey($token->consumerKey);
-        $this->apiAccessor->setConsumerSecret($token->consumerSecret);
+        $this->apiClient->setConsumerKey($token->consumerKey);
+        $this->apiClient->setConsumerSecret($token->consumerSecret);
 
         return $this;
     }
@@ -340,25 +341,25 @@ class TweetCurator implements TweetCuratorInterface
     {
         $availableApi = false;
 
-        if (!$this->apiAccessor->isApiLimitReached()) {
+        if (!$this->apiClient->isApiLimitReached()) {
             return true;
         }
 
         try {
-            if (!$this->apiAccessor->isApiRateLimitReached('/statuses/user_timeline')) {
+            if (!$this->apiClient->isApiRateLimitReached('/statuses/user_timeline')) {
                 $availableApi = true;
             }
         } catch (Exception $exception) {
             $this->twitterApiLogger->info('[error message] Testing for API availability: ' . $exception->getMessage());
             $this->twitterApiLogger->info('[error code] ' . (int) $exception->getCode());
 
-            if ($exception->getCode() === $this->apiAccessor->getEmptyReplyErrorCode()) {
+            if ($exception->getCode() === $this->apiClient->getEmptyReplyErrorCode()) {
                 $availableApi = true;
             } else {
                 $this->tokenRepository->freezeToken(
                     FreezableToken::fromAccessToken(
-                        $this->apiAccessor->accessToken(),
-                        $this->apiAccessor->consumerKey()
+                        $this->apiClient->accessToken(),
+                        $this->apiClient->consumerKey()
                     )
                 );
             }
@@ -386,7 +387,7 @@ class TweetCurator implements TweetCuratorInterface
     {
         $availableApi = false;
 
-        $token = $this->tokenRepository->findByUserToken($this->apiAccessor->userToken);
+        $token = $this->tokenRepository->findByUserToken($this->apiClient->userToken);
 
         if ($token->isNotFrozen()) {
             $availableApi = $this->isApiAvailable();
@@ -505,9 +506,9 @@ class TweetCurator implements TweetCuratorInterface
         $options  = $this->declareOptionsToCollectStatuses($options);
 
         try {
-            $statuses = $this->publicationBatchCollectedEventRepository
+            $statuses = $this->TweetsBatchCollectedEventRepository
                 ->collectedPublicationBatch($selectors, $options);
-        } catch (ApiRateLimitingException $e) {
+        } catch (ApiAccessRateLimitException $e) {
             if ($this->isTwitterApiAvailable()) {
                 return $this->saveStatusesMatchingCriteria($options, $selectors);
             }
@@ -516,7 +517,7 @@ class TweetCurator implements TweetCuratorInterface
         if ($statuses instanceof stdClass && isset($statuses->error)) {
             throw new ProtectedAccountException(
                 $statuses->error,
-                $this->apiAccessor::ERROR_PROTECTED_ACCOUNT
+                $this->apiClient::ERROR_PROTECTED_ACCOUNT
             );
         }
 
@@ -564,7 +565,7 @@ class TweetCurator implements TweetCuratorInterface
         $eventRepository = $this->memberProfileCollectedEventRepository;
 
         return $eventRepository->collectedMemberProfile(
-            $this->apiAccessor,
+            $this->apiClient,
             [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
     }
@@ -691,7 +692,7 @@ class TweetCurator implements TweetCuratorInterface
                 $shouldDeclareMaximumStatusId
             );
         } catch (NotFoundMemberException $exception) {
-            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+            $this->apiClient->ensureMemberHavingNameExists($exception->screenName);
 
             try {
                 $this->declareExtremumIdForMember(
@@ -699,7 +700,7 @@ class TweetCurator implements TweetCuratorInterface
                     $shouldDeclareMaximumStatusId
                 );
             } catch (NotFoundMemberException $exception) {
-                $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+                $this->apiClient->ensureMemberHavingNameExists($exception->screenName);
                 $this->declareExtremumIdForMember(
                     $statuses,
                     $shouldDeclareMaximumStatusId
@@ -736,7 +737,7 @@ class TweetCurator implements TweetCuratorInterface
      * @param $discoverPublicationsWithMaxId
      *
      * @return bool
-     * @throws ApiRateLimitingException
+     * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws NoResultException
@@ -778,7 +779,7 @@ class TweetCurator implements TweetCuratorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchTweetInterface::PUBLISHERS_LIST_ID] = $this->selectors->publishersListId();
+                $options[FetchTweetInterface::TWITTER_LIST_ID] = $this->selectors->publishersListId();
                 $options[FetchTweetInterface::BEFORE]              =
                     $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
 
@@ -793,14 +794,14 @@ class TweetCurator implements TweetCuratorInterface
                     $discoverPublicationWithMinId
                     && $this->selectors->dateBeforeWhichPublicationsAreToBeCollected() === null
                 ) {
-                    unset($options[FetchTweetInterface::PUBLISHERS_LIST_ID]);
+                    unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
 
                     $options = $this->statusAccessor->updateExtremum(
                         $this->selectors,
                         $options,
                         $discoverPublicationsWithMaxId = false
                     );
-                    $options = $this->apiAccessor->guessMaxId(
+                    $options = $this->apiClient->guessMaxId(
                         $options,
                         $this->selectors->shouldLookUpPublicationsWithMinId(
                             $this->statusRepository,
