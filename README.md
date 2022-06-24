@@ -57,7 +57,7 @@ communities, organizations and projects (in lexicographic order):
  - [Symfony](https://symfony.com/)
  - [Ubuntu](https://ubuntu.com/)
 
-### Logos
+### Some of their logos
 
 [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
 
