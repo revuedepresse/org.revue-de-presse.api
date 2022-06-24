@@ -26,7 +26,7 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
-use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance;
@@ -187,7 +187,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -219,7 +219,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
                 if (
                     $this->propagateNotFoundStatuses
-                    && ($exception instanceof NotFoundStatusException)
+                    && ($exception instanceof TweetNotFoundException)
                 ) {
                     throw $exception;
                 }
@@ -282,7 +282,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -353,7 +353,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -375,7 +375,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -449,7 +449,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -695,7 +695,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -946,7 +946,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -972,7 +972,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -1081,7 +1081,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws ReadOnlyApplicationException
@@ -1132,7 +1132,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
         try {
             return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
-        } catch (NotFoundStatusException $exception) {
+        } catch (TweetNotFoundException $exception) {
             $this->tweetAwareHttpClient->declareStatusNotFoundByIdentifier($identifier);
 
             throw $exception;
@@ -1240,7 +1240,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws ReadOnlyApplicationException
@@ -1276,7 +1276,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -1299,7 +1299,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      */
     protected function checkApiLimit()
     {
@@ -1315,7 +1315,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             );
             $this->twitterApiLogger->info($message);
 
-            throw new NotFoundStatusException($message, self::ERROR_NOT_FOUND);
+            throw new TweetNotFoundException($message, self::ERROR_NOT_FOUND);
         }
 
         usleep(500000);
@@ -1766,7 +1766,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException

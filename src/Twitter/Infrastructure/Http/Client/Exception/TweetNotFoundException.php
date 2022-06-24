@@ -5,9 +5,6 @@ namespace App\Twitter\Infrastructure\Http\Client\Exception;
 
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 
-/**
- * @package App\Twitter\Infrastructure\Http\Client\Exception
- */
-class NotFoundStatusException extends UnavailableResourceException
+class TweetNotFoundException extends UnavailableResourceException
 {
 }

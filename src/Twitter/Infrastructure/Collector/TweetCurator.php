@@ -39,7 +39,7 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
-use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
@@ -90,7 +90,7 @@ class TweetCurator implements TweetCuratorInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
@@ -222,7 +222,7 @@ class TweetCurator implements TweetCuratorInterface
             $this->statusRepository->updateLastStatusPublicationDate(
                 $options[FetchTweetInterface::SCREEN_NAME]
             );
-        } catch (NotFoundStatusException $exception) {
+        } catch (TweetNotFoundException $exception) {
             $this->logger->info($exception->getMessage());
         }
     }
@@ -743,7 +743,7 @@ class TweetCurator implements TweetCuratorInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException

@@ -10,7 +10,7 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
-use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\PublishersList\TwitterListAwareTrait;
@@ -83,7 +83,7 @@ class ConversationStatusConsumer
             $aggregate = $this->aggregateRepository->byName($member->twitterScreenName(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
             [$aggregate, $status] = $this->handleMemberNotFoundException($notFoundMemberException, $options);
-        } catch (NotFoundStatusException $exception) {
+        } catch (TweetNotFoundException $exception) {
             $this->handleStatusNotFoundException($options);
         } catch (UnavailableResourceException $exception) {
             $this->handleProtectedStatusException($options);
@@ -93,7 +93,7 @@ class ConversationStatusConsumer
             return false;
         } finally {
             if (!isset($status) && (
-                $exception instanceof NotFoundStatusException ||
+                $exception instanceof TweetNotFoundException ||
                 $exception instanceof UnavailableResourceException
             )) {
                 return true;
@@ -112,7 +112,7 @@ class ConversationStatusConsumer
 
             try {
                 $this->extractStatusProperties([$statusProperties], $includeRepliedToStatuses = true);
-            } catch (NotFoundStatusException $notFoundMemberException) {
+            } catch (TweetNotFoundException $notFoundMemberException) {
                 return $this->handleStatusNotFoundException($options);
             } catch (UnavailableResourceException $exception) {
                 $this->handleProtectedStatusException($options);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
-use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
@@ -58,7 +58,7 @@ class RefreshStatusMapping implements MappingAwareInterface
     public function apply(Status $status): Status {
         try {
             $apiDocument = $this->httpClient->showStatus($status->getStatusId());
-        } catch (NotFoundStatusException $exception) {
+        } catch (TweetNotFoundException $exception) {
             return $status;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());

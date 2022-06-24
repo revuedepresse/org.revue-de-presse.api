@@ -11,7 +11,7 @@ use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Exception as DBALException;
@@ -89,7 +89,7 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function tweetSharedByMemberHavingScreenName(string $screenName, $orderBy = null): StatusInterface
@@ -119,7 +119,7 @@ class StatusRepository extends ArchivedStatusRepository
                 throw new NoResultException();
             }
         } catch (NoResultException $exception) {
-            throw new NotFoundStatusException(sprintf(
+            throw new TweetNotFoundException(sprintf(
                 'No status was found for member with screen name "%s"',
                 $screenName
             ), $exception->getCode(), $exception);
@@ -129,7 +129,7 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\NotFoundStatusException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
      * @throws \Doctrine\ORM\Exception\ORMException
      * @throws \Doctrine\ORM\NoResultException
@@ -142,7 +142,11 @@ class StatusRepository extends ArchivedStatusRepository
         $member = $this->memberRepository->memberHavingScreenName($screenName);
 
         if ($member->totalTweets() !== 0) {
-            $status = $this->tweetSharedByMemberHavingScreenName($screenName, ['createdAt' => 'DESC']);
+            try {
+                $status = $this->tweetSharedByMemberHavingScreenName($screenName, ['createdAt' => 'DESC']);
+            } catch (TweetNotFoundException) {
+                return $member->totalTweets();
+            }
 
             $decodedStatusDocument = json_decode(
                 $status->getApiDocument(),
@@ -177,7 +181,7 @@ class StatusRepository extends ArchivedStatusRepository
      *
      * @return MemberInterface
      * @throws DBALException
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      */
     public function updateLastStatusPublicationDate($screenName): MemberInterface
     {
@@ -442,7 +446,7 @@ QUERY;
     /**
      * @param string $screenName
      * @return Status
-     * @throws NotFoundStatusException
+     * @throws TweetNotFoundException
      * @throws DBALException
      */
     private function getLastKnownStatusFor(string $screenName): StatusInterface {
@@ -454,7 +458,7 @@ QUERY;
         }
 
         if (!$lastStatus instanceof StatusInterface) {
-            throw new NotFoundStatusException(sprintf(
+            throw new TweetNotFoundException(sprintf(
                 'No status has been collected for member with screen name "%s"',
                 $screenName
             ));
