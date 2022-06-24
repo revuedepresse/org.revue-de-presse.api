@@ -52,9 +52,10 @@ communities, organizations and projects (in lexicographic order):
  - [Debian](https://www.debian.org/)
  - [Docker](docker.com)
  - [Doctrine](https://www.doctrine-project.org/)
- - [PHP](https://www.php.net/)
  - [GitHub](https://github.com/)
+ - [PHP](https://www.php.net/)
  - [Symfony](https://symfony.com/)
+ - [Ubuntu](https://ubuntu.com/)
 
 ### Logos
 
