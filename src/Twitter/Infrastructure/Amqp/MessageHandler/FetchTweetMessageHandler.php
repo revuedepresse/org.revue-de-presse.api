@@ -56,10 +56,10 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
 
         $options = [
             $message::TWITTER_LIST_ID => $message->listId(),
-            $message::BEFORE             => $message->dateBeforeWhichStatusAreCollected(),
-            'count'                      => 200,
-            'oauth'                      => $options[TokenInterface::FIELD_TOKEN],
-            $message::SCREEN_NAME        => $message->screenName(),
+            $message::BEFORE          => $message->dateBeforeWhichStatusAreCollected(),
+            'count'                   => 200,
+            'oauth'                   => $options[TokenInterface::FIELD_TOKEN],
+            $message::SCREEN_NAME     => $message->screenName(),
         ];
 
         try {

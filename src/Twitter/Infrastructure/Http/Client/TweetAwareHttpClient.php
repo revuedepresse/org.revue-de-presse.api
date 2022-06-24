@@ -117,15 +117,15 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             return $status;
         }
 
-        $this->apiClient->shouldRaiseExceptionOnApiLimit = true;
-        $status = $this->apiClient->showStatus($statusId);
+        $this->httpClient->shouldRaiseExceptionOnApiLimit = true;
+        $status = $this->httpClient->showStatus($statusId);
 
         $this->entityManager->clear();
 
         try {
             $this->publicationPersistence->persistStatusPublications(
                 [$status],
-                new AccessToken($this->apiClient->userToken)
+                new AccessToken($this->httpClient->userToken)
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
             $this->logger->info($notFoundMemberException->getMessage());
@@ -197,7 +197,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $eventRepository = $this->memberProfileCollectedEventRepository;
 
         return $eventRepository->collectedMemberProfile(
-            $this->apiClient,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
     }
@@ -297,7 +297,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             unset($options['max_id']);
         }
 
-        $statuses = $this->TweetsBatchCollectedEventRepository
+        $statuses = $this->tweetsBatchCollectedEventRepository
             ->collectedPublicationBatch(
                 $selectors,
                 $options

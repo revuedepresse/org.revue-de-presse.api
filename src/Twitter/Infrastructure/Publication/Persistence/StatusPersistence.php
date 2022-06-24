@@ -262,7 +262,7 @@ class StatusPersistence implements StatusPersistenceInterface
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
-            new AccessToken($this->apiClient->getAccessToken()),
+            new AccessToken($this->httpClient->getAccessToken()),
             $twitterList
         );
     }

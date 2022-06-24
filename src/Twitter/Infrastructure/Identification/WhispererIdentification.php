@@ -36,7 +36,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
 
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $member = $eventRepository->collectedMemberProfile(
-            $this->apiClient,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
 

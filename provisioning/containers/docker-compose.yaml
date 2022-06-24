@@ -1,6 +1,6 @@
 version: '3.8'
 
-#name: 'wildcard'
+name: 'wildcard'
 
 x-vol: &shared-volumes
   volumes:

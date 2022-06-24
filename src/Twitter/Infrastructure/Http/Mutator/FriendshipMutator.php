@@ -27,7 +27,7 @@ class FriendshipMutator implements FriendshipMutatorInterface
     ): CollectionInterface {
         return $memberCollection->map(function(MemberIdentity $identity) use ($subscriber) {
             try {
-                $this->apiClient->contactEndpoint(
+                $this->httpClient->contactEndpoint(
                     $this->getDestroyFriendshipEndpointForMemberHavingId($identity->id())
                 );
 
@@ -48,7 +48,7 @@ class FriendshipMutator implements FriendshipMutatorInterface
     private function getDestroyFriendshipEndpoint(string $screenName): string
     {
         return strtr(
-            $this->apiClient->getApiBaseUrl() . '/friendships/destroy.json?screen_name={{ screen_name }}',
+            $this->httpClient->getApiBaseUrl() . '/friendships/destroy.json?screen_name={{ screen_name }}',
             ['{{ screen_name }}' => $screenName]
         );
     }
@@ -56,7 +56,7 @@ class FriendshipMutator implements FriendshipMutatorInterface
     private function getDestroyFriendshipEndpointForMemberHavingId(string $id): string
     {
         return strtr(
-            $this->apiClient->getApiBaseUrl() . '/friendships/destroy.json?user_id={{ user_id }}',
+            $this->httpClient->getApiBaseUrl() . '/friendships/destroy.json?user_id={{ user_id }}',
             ['{{ user_id }}' => $id]
         );
     }

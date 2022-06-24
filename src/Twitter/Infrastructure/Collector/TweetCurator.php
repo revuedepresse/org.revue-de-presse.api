@@ -290,7 +290,7 @@ class TweetCurator implements TweetCuratorInterface
         $token->setAccessToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
         $token->setAccessTokenSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
 
-        $this->apiClient->fromToken($token);
+        $this->httpClient->fromToken($token);
 
         /** @var Token token */
         $token = $this->tokenRepository->findOneBy(
@@ -301,8 +301,8 @@ class TweetCurator implements TweetCuratorInterface
             $token = $this->tokenRepository->findFirstUnfrozenToken();
         }
 
-        $this->apiClient->setConsumerKey($token->consumerKey);
-        $this->apiClient->setConsumerSecret($token->consumerSecret);
+        $this->httpClient->setConsumerKey($token->consumerKey);
+        $this->httpClient->setConsumerSecret($token->consumerSecret);
 
         return $this;
     }
@@ -341,25 +341,25 @@ class TweetCurator implements TweetCuratorInterface
     {
         $availableApi = false;
 
-        if (!$this->apiClient->isApiLimitReached()) {
+        if (!$this->httpClient->isApiLimitReached()) {
             return true;
         }
 
         try {
-            if (!$this->apiClient->isApiRateLimitReached('/statuses/user_timeline')) {
+            if (!$this->httpClient->isApiRateLimitReached('/statuses/user_timeline')) {
                 $availableApi = true;
             }
         } catch (Exception $exception) {
             $this->twitterApiLogger->info('[error message] Testing for API availability: ' . $exception->getMessage());
             $this->twitterApiLogger->info('[error code] ' . (int) $exception->getCode());
 
-            if ($exception->getCode() === $this->apiClient->getEmptyReplyErrorCode()) {
+            if ($exception->getCode() === $this->httpClient->getEmptyReplyErrorCode()) {
                 $availableApi = true;
             } else {
                 $this->tokenRepository->freezeToken(
                     FreezableToken::fromAccessToken(
-                        $this->apiClient->accessToken(),
-                        $this->apiClient->consumerKey()
+                        $this->httpClient->accessToken(),
+                        $this->httpClient->consumerKey()
                     )
                 );
             }
@@ -387,7 +387,7 @@ class TweetCurator implements TweetCuratorInterface
     {
         $availableApi = false;
 
-        $token = $this->tokenRepository->findByUserToken($this->apiClient->userToken);
+        $token = $this->tokenRepository->findByUserToken($this->httpClient->userToken);
 
         if ($token->isNotFrozen()) {
             $availableApi = $this->isApiAvailable();
@@ -506,7 +506,7 @@ class TweetCurator implements TweetCuratorInterface
         $options  = $this->declareOptionsToCollectStatuses($options);
 
         try {
-            $statuses = $this->TweetsBatchCollectedEventRepository
+            $statuses = $this->tweetsBatchCollectedEventRepository
                 ->collectedPublicationBatch($selectors, $options);
         } catch (ApiAccessRateLimitException $e) {
             if ($this->isTwitterApiAvailable()) {
@@ -517,7 +517,7 @@ class TweetCurator implements TweetCuratorInterface
         if ($statuses instanceof stdClass && isset($statuses->error)) {
             throw new ProtectedAccountException(
                 $statuses->error,
-                $this->apiClient::ERROR_PROTECTED_ACCOUNT
+                $this->httpClient::ERROR_PROTECTED_ACCOUNT
             );
         }
 
@@ -565,7 +565,7 @@ class TweetCurator implements TweetCuratorInterface
         $eventRepository = $this->memberProfileCollectedEventRepository;
 
         return $eventRepository->collectedMemberProfile(
-            $this->apiClient,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
     }
@@ -692,7 +692,7 @@ class TweetCurator implements TweetCuratorInterface
                 $shouldDeclareMaximumStatusId
             );
         } catch (NotFoundMemberException $exception) {
-            $this->apiClient->ensureMemberHavingNameExists($exception->screenName);
+            $this->httpClient->ensureMemberHavingNameExists($exception->screenName);
 
             try {
                 $this->declareExtremumIdForMember(
@@ -700,7 +700,7 @@ class TweetCurator implements TweetCuratorInterface
                     $shouldDeclareMaximumStatusId
                 );
             } catch (NotFoundMemberException $exception) {
-                $this->apiClient->ensureMemberHavingNameExists($exception->screenName);
+                $this->httpClient->ensureMemberHavingNameExists($exception->screenName);
                 $this->declareExtremumIdForMember(
                     $statuses,
                     $shouldDeclareMaximumStatusId
@@ -801,7 +801,7 @@ class TweetCurator implements TweetCuratorInterface
                         $options,
                         $discoverPublicationsWithMaxId = false
                     );
-                    $options = $this->apiClient->guessMaxId(
+                    $options = $this->httpClient->guessMaxId(
                         $options,
                         $this->selectors->shouldLookUpPublicationsWithMinId(
                             $this->statusRepository,

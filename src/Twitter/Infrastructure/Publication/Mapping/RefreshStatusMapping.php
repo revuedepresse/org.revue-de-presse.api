@@ -24,7 +24,7 @@ class RefreshStatusMapping implements MappingAwareInterface
 
     public function __construct(HttpClientInterface $accessor)
     {
-        $this->apiClient = $accessor;
+        $this->httpClient = $accessor;
     }
 
     /**
@@ -40,14 +40,14 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     protected function setupAccessor($oauthTokens)
     {
-        $this->apiClient->propagateNotFoundStatuses = true;
+        $this->httpClient->propagateNotFoundStatuses = true;
 
-        $this->apiClient->setAccessToken($oauthTokens['token']);
-        $this->apiClient->setAccessTokenSecret($oauthTokens['secret']);
+        $this->httpClient->setAccessToken($oauthTokens['token']);
+        $this->httpClient->setAccessTokenSecret($oauthTokens['secret']);
 
         if (array_key_exists('consumer_token', $oauthTokens)) {
-            $this->apiClient->setConsumerKey($oauthTokens['consumer_token']);
-            $this->apiClient->setConsumerSecret($oauthTokens['consumer_secret']);
+            $this->httpClient->setConsumerKey($oauthTokens['consumer_token']);
+            $this->httpClient->setConsumerSecret($oauthTokens['consumer_secret']);
         }
     }
 
@@ -57,7 +57,7 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     public function apply(Status $status): Status {
         try {
-            $apiDocument = $this->apiClient->showStatus($status->getStatusId());
+            $apiDocument = $this->httpClient->showStatus($status->getStatusId());
         } catch (NotFoundStatusException $exception) {
             return $status;
         } catch (\Exception $exception) {
@@ -81,7 +81,7 @@ class RefreshStatusMapping implements MappingAwareInterface
                 $this->logger
             );
         } catch (NotFoundMemberException $exception) {
-            $this->apiClient->ensureMemberHavingNameExists($exception->screenName);
+            $this->httpClient->ensureMemberHavingNameExists($exception->screenName);
             $this->publicationPersistence->persistStatusPublication(
                 [$apiDocument],
                 $status->getIdentifier(),

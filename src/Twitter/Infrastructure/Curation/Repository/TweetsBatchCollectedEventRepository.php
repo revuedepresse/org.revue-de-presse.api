@@ -25,7 +25,7 @@ class TweetsBatchCollectedEventRepository extends ServiceEntityRepository implem
         array                      $options
     ) {
         $event    = $this->startCollectOfPublicationBatch($selectors);
-        $statuses = $this->apiClient->fetchStatuses($options);
+        $statuses = $this->httpClient->fetchStatuses($options);
         $this->finishCollectOfPublicationBatch(
             $event,
             json_encode(

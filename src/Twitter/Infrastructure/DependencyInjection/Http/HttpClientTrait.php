@@ -7,11 +7,11 @@ use App\Twitter\Domain\Http\Client\HttpClientInterface;
 
 trait HttpClientTrait
 {
-    protected HttpClientInterface $apiClient;
+    protected HttpClientInterface $httpClient;
 
     public function setHttpClient(HttpClientInterface $apiClient): self
     {
-        $this->apiClient = $apiClient;
+        $this->httpClient = $apiClient;
 
         return $this;
     }

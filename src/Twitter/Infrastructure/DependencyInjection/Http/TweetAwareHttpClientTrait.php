@@ -7,11 +7,11 @@ use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 
 trait TweetAwareHttpClientTrait
 {
-    private TweetAwareHttpClientInterface $statusAccessor;
+    private TweetAwareHttpClientInterface $tweetAwareHttpClient;
 
     public function setTweetAwareHttpClient(TweetAwareHttpClientInterface $statusAccessor): self
     {
-        $this->statusAccessor = $statusAccessor;
+        $this->tweetAwareHttpClient = $statusAccessor;
 
         return $this;
     }

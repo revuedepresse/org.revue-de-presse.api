@@ -155,7 +155,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         if (
             !array_key_exists(FetchTweetInterface::SCREEN_NAME, $options)
             || $options[FetchTweetInterface::SCREEN_NAME] === null
-            || $this->apiClient->skipCuratingTweetsForMemberHavingScreenName(
+            || $this->httpClient->skipCuratingTweetsForMemberHavingScreenName(
                 $options[FetchTweetInterface::SCREEN_NAME]
             )
         ) {
@@ -356,7 +356,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $whisperer->member = $eventRepository->collectedMemberProfile(
-            $this->apiClient,
+            $this->httpClient,
             [$eventRepository::OPTION_SCREEN_NAME => $options[FetchTweetInterface::SCREEN_NAME]]
         );
         $whispers          = (int) $whisperer->member->statuses_count;

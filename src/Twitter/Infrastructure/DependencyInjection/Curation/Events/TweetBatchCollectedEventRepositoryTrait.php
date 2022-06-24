@@ -12,7 +12,7 @@ trait TweetBatchCollectedEventRepositoryTrait
     public function setPublicationBatchCollectedEventRepository(
         TweetsBatchCollectedEventRepositoryInterface $publicationBatchCollectedEventRepository
     ): self {
-        $this->TweetsBatchCollectedEventRepository = $publicationBatchCollectedEventRepository;
+        $this->tweetsBatchCollectedEventRepository = $publicationBatchCollectedEventRepository;
 
         return $this;
     }
