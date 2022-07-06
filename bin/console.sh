@@ -177,7 +177,7 @@ function get_project_dir {
 
 function get_project_name() {
     local project_name
-    project_name='wildcard'
+    project_name='revue-de-presse'
 
     if [ -n "${PROJECT_NAME}" ]; then
         project_name="${PROJECT_NAME}"
