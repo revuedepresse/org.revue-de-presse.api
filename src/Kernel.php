@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
-use App\Twitter\Infrastructure\Amqp\Command\DispatchFetchTweetsMessages;
-use App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand;
+use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
+use App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages;
+use App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
 /**
@@ -25,6 +25,10 @@ class Kernel extends BaseKernel implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
+        if ($container->getParameter('kernel.environment') === 'test') {
+            return;
+        }
+
         $taggedServiceIds = $container->findTaggedServiceIds('console.command');
 
         array_walk(
@@ -32,10 +36,11 @@ class Kernel extends BaseKernel implements CompilerPassInterface
             function ($_, $id) use ($container) {
                 $definition = $container->findDefinition($id);
 
+
                 if (!in_array(
                     $id,
                     [
-                        AddMemberToPublishersListCommand::class,
+                        AddMembersBatchToListCommand::class,
                         AuthorizeApplicationCommand::class,
                         DispatchFetchTweetsMessages::class,
                         ImportMemberPublishersListsCommand::class

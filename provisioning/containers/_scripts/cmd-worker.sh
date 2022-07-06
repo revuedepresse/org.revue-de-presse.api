@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+source '/scripts/requirements.sh'
+
 function start() {
     php -i >> /dev/null 2>&1
 

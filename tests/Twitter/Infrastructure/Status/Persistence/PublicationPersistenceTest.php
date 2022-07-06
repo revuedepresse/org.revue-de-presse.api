@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
@@ -96,7 +96,7 @@ class PublicationPersistenceTest extends KernelTestCase
             $normalizedStatus->toArray()
         );
         self::assertInstanceOf(
-            TaggedStatus::class,
+            TaggedTweet::class,
             $normalizedStatus->first()
         );
     }

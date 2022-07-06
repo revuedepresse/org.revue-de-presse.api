@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Domain\Repository;
 
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * @package App\Tests\Twitter\Domain\Repository
  * @group tagged_status
  */
-class TaggedStatusRepositoryTest extends KernelTestCase
+class TaggedTweetRepositoryTest extends KernelTestCase
 {
     /**
      * @test
@@ -24,7 +24,7 @@ class TaggedStatusRepositoryTest extends KernelTestCase
     {
         self::$kernel = self::bootKernel();
 
-        $repository = new TaggedStatusRepository(
+        $repository = new TaggedTweetRepository(
             static::getContainer()->get('doctrine.orm.entity_manager'),
             new NullLogger()
         );
@@ -48,7 +48,7 @@ class TaggedStatusRepositoryTest extends KernelTestCase
             $aggregate
         );
 
-        self::assertInstanceOf(Status::class, $status);
+        self::assertInstanceOf(Tweet::class, $status);
         self::assertTrue($status->getIndexed());
 
         self::assertEquals($props['name'], $status->getName());

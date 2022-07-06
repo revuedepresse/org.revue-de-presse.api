@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Entity;
 
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Domain\Publication\TweetInterface;
 use Ramsey\Uuid\UuidInterface;
 
 class NotFoundStatus
@@ -16,20 +16,20 @@ class NotFoundStatus
     private UuidInterface $id;
 
     /**
-     * @var Status
+     * @var Tweet
      */
-    private ?Status $status = null;
+    private ?Tweet $status = null;
 
     /**
-     * @var ArchivedStatus
+     * @var ArchivedTweet
      */
-    private ?ArchivedStatus $archivedStatus = null;
+    private ?ArchivedTweet $archivedStatus = null;
 
     /**
      * @param $status
      * @param $archivedStatus
      */
-    public function __construct(Status $status = null, ArchivedStatus $archivedStatus = null)
+    public function __construct(Tweet $status = null, ArchivedTweet $archivedStatus = null)
     {
         $this->archivedStatus = $archivedStatus;
         $this->status = $status;
@@ -44,7 +44,7 @@ class NotFoundStatus
     }
 
     /**
-     * @return StatusInterface
+     * @return TweetInterface
      */
     public function getStatus()
     {

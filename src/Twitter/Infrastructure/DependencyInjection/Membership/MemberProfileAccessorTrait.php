@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Membership;
 
-use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
+use App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface;
 
 trait MemberProfileAccessorTrait
 {
-    private MemberProfileAccessorInterface $memberProfileAccessor;
+    private MemberProfileAwareHttpClientInterface $memberProfileAccessor;
 
     /**
-     * @param MemberProfileAccessorInterface $memberProfileAccessor
+     * @param MemberProfileAwareHttpClientInterface $memberProfileAccessor
      *
      * @return $this
      */
     public function setMemberProfileAccessor(
-        MemberProfileAccessorInterface $memberProfileAccessor
+        MemberProfileAwareHttpClientInterface $memberProfileAccessor
     ): self {
         $this->memberProfileAccessor = $memberProfileAccessor;
 

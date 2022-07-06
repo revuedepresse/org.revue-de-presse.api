@@ -3,12 +3,12 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Mutator\FriendshipMutatorBuilder;
+use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Mutator\FriendshipMutatorBuilder;
+use App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;

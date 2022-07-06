@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use Assert\Assert;
 use function array_key_exists;
 use const INF;
@@ -16,18 +17,18 @@ class CurationSelectors implements CurationSelectorsInterface
     {
         $selectors = new self();
 
-        if (array_key_exists('aggregate_id', $options) && $options['aggregate_id']) {
+        if (array_key_exists(FetchAuthoredTweetInterface::TWITTER_LIST_ID, $options) && $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]) {
             $selectors->optInToCollectStatusForPublishersListOfId(
-                $options['aggregate_id']
+                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]
             );
         }
 
-        if (array_key_exists('before', $options) && $options['before']) {
-            $selectors->optInToCollectStatusPublishedBefore($options['before']);
+        if (array_key_exists(FetchAuthoredTweetInterface::BEFORE, $options) && $options[FetchAuthoredTweetInterface::BEFORE]) {
+            $selectors->optInToCollectStatusPublishedBefore($options[FetchAuthoredTweetInterface::BEFORE]);
         }
 
-        if (array_key_exists('screen_name', $options) && $options['screen_name']) {
-            $selectors->selectTweetsByMemberScreenName($options['screen_name']);
+        if (array_key_exists(FetchAuthoredTweetInterface::SCREEN_NAME, $options) && $options[FetchAuthoredTweetInterface::SCREEN_NAME]) {
+            $selectors->selectTweetsByMemberScreenName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
         }
 
         return $selectors;
@@ -39,12 +40,12 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private string $memberSelectorByScreenName;
 
-    private $maxStatusId;
+    private $maxTweetId;
 
-    private $minStatusId;
+    private $minTweetId;
 
     public function shouldLookUpPublicationsWithMinId(
-        StatusRepositoryInterface $statusRepository,
+        TweetRepositoryInterface  $tweetRepository,
         MemberRepositoryInterface $memberRepository
     ): bool {
         $minPublicationId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
@@ -55,7 +56,7 @@ class CurationSelectors implements CurationSelectorsInterface
             return true;
         }
 
-        return $statusRepository->countHowManyStatusesFor($this->screenName())
+        return $tweetRepository->countHowManyStatusesFor($this->screenName())
             > self::MAX_AVAILABLE_TWEETS_PER_USER;
     }
 
@@ -66,20 +67,20 @@ class CurationSelectors implements CurationSelectorsInterface
 
     public function maxStatusId()
     {
-        if ($this->maxStatusId === null) {
+        if ($this->maxTweetId === null) {
             return INF;
         }
 
-        return $this->maxStatusId;
+        return $this->maxTweetId;
     }
 
     public function minStatusId()
     {
-        if ($this->minStatusId === null) {
+        if ($this->minTweetId === null) {
             return -INF;
         }
 
-        return $this->minStatusId;
+        return $this->minTweetId;
     }
 
     public function oneOfTheOptionsIsActive(): bool
@@ -115,16 +116,16 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this;
     }
 
-    public function optInToCollectStatusWhichIdIsLessThan($maxStatusId): CurationSelectorsInterface
+    public function optInToCollectStatusWhichIdIsLessThan($maxTweetId): CurationSelectorsInterface
     {
-        $this->maxStatusId = $maxStatusId;
+        $this->maxTweetId = $maxTweetId;
 
         return $this;
     }
 
-    public function optInToCollectStatusWhichIdIsGreaterThan($minStatusId): CurationSelectorsInterface
+    public function optInToCollectStatusWhichIdIsGreaterThan($minTweetId): CurationSelectorsInterface
     {
-        $this->minStatusId = $minStatusId;
+        $this->minTweetId = $minTweetId;
 
         return $this;
     }

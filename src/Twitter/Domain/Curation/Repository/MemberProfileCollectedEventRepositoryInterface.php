@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Repository;
 
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
 
 interface MemberProfileCollectedEventRepositoryInterface
 {
     public const OPTION_SCREEN_NAME = 'screen_name';
 
     public function collectedMemberProfile(
-        ApiAccessorInterface $accessor,
-        array $options
+        HttpClientInterface $accessor,
+        array               $options
     );
 }

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+source '/scripts/requirements.sh'
+
 function install_php_libraries() {
     mkdir --parents "${COMPOSER_HOME}"
 
@@ -86,11 +88,12 @@ function set_file_permissions() {
 
     find "${project_dir}" \
         -maxdepth 2 \
+        -type d \
         -executable \
         -readable \
-        -path "${project_dir}"'/var' \
-        -type d \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+w "${file_path}"' \; && \
+        -regex '.+/var.+' \
+        -not -path "${project_dir}"'/var/log' \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
 
     find "${project_dir}" \
@@ -175,6 +178,7 @@ function install_app_requirements() {
     fi
 
     remove_binaries_vendors "${project_dir}"
+    configure_blackfire_client
     install_php_libraries
     remove_distributed_version_control_system_files_git "${project_dir}"
     set_file_permissions "${project_dir}"

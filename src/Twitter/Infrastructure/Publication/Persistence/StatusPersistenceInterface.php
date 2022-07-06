@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 interface StatusPersistenceInterface
@@ -14,13 +14,13 @@ interface StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        PublishersList $aggregate = null
+        PublishersList $twitterList = null
     ): array;
 
     public function unarchiveStatus(
-        StatusInterface $status,
+        TweetInterface         $status,
         EntityManagerInterface $entityManager
-    ): StatusInterface;
+    ): TweetInterface;
 
     public function savePublicationsForScreenName(
         array $statuses,

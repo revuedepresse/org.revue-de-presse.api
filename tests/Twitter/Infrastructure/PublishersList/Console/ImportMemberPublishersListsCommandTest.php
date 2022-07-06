@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\PublishersList\Console;
 
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\HttpClientBuilder;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,7 +50,7 @@ class ImportMemberPublishersListsCommandTest extends KernelTestCase
         // Arrange
 
         $this->commandTester->execute([
-            'screen_name' => 'dev_obs'
+            'screen-name' => 'dev_obs'
         ]);
 
         self::assertEquals(

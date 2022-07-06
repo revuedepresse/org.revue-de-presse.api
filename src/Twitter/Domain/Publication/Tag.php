@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Http\Entity\Aggregate;
 
 class Tag
 {

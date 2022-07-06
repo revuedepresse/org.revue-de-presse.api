@@ -6,7 +6,7 @@
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent"
-            repository-class="App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository"
+            repository-class="App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository"
             table="ownership_batch_collected_event">
 
         <indexes>

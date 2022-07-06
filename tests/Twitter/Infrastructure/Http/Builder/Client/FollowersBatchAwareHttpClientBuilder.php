@@ -1,0 +1,65 @@
+<?php
+declare (strict_types=1);
+
+namespace App\Tests\Twitter\Infrastructure\Http\Builder\Client;
+
+use App\Twitter\Infrastructure\Http\Client\FollowersBatchAwareHttpClient;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophet;
+use Psr\Log\NullLogger;
+
+class FollowersBatchAwareHttpClientBuilder extends TestCase
+{
+    use ProphecyTrait;
+
+    private $prophet;
+
+    public function __construct()
+    {
+        $this->prophet = $this->getProphet();
+    }
+
+    public function prophet(): Prophet
+    {
+        return $this->prophet;
+    }
+
+    /**
+     * @return CursorAwareHttpClientInterface
+     */
+    public static function build(): CursorAwareHttpClientInterface
+    {
+        $testCase = new self();
+
+        /** @var HttpClientInterface $apiAccessor */
+        $apiAccessor = $testCase->prophet()->prophesize(HttpClientInterface::class);
+        $apiAccessor->getApiBaseUrl()->willReturn('https://twitter.api');
+        $apiAccessor->contactEndpoint(Argument::any())
+            ->will(function ($arguments) {
+                $endpoint = $arguments[0];
+
+                if (strpos($endpoint, 'cursor=-1') !== false) {
+                    $resourcePath = '../../../../../Resources/FollowersList-1-2.b64';
+                } else if (strpos($endpoint, 'cursor=1645049967345751374') !== false) {
+                    $resourcePath = '../../../../../Resources/FollowersList-2-2.b64';
+                } else {
+                    return [];
+                }
+
+                return unserialize(
+                    base64_decode(
+                        file_get_contents(__DIR__ . '/' .$resourcePath)
+                    )
+                );
+            });
+
+        return new FollowersBatchAwareHttpClient(
+            $apiAccessor->reveal(),
+            new NullLogger()
+        );
+    }
+}

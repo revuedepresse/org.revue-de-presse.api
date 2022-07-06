@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Membership\Infrastructure\Entity\MemberInList"
+            repository-class="App\Membership\Infrastructure\Repository\EditListMembers"
+            table="aggregate_subscription">
+
+        <indexes>
+            <index name="subscription_idx" columns="member_aggregate_subscription_id,subscription_id"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint
+                name="aggregate_subscription_unique"
+                columns="member_aggregate_subscription_id,subscription_id"
+             />
+        </unique-constraints>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <many-to-one
+            field="list"
+            target-entity="App\Subscription\Infrastructure\Entity\ListSubscription"
+        >
+            <join-column
+                name="member_aggregate_subscription_id"
+                referenced-column-name="id"
+            />
+        </many-to-one>
+
+        <many-to-one
+            target-entity="App\Membership\Infrastructure\Entity\Legacy\Member"
+            field="memberInList"
+        >
+            <join-column
+                name="subscription_id"
+                referenced-column-name="usr_id"
+            />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

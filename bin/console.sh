@@ -6,7 +6,7 @@ function consume_fetch_publication_messages {
 
     if [ -z "${command_suffix}" ];
     then
-      command_suffix='publications'
+      command_suffix='tweets'
     fi
 
     local namespace
@@ -64,7 +64,13 @@ function consume_fetch_publication_messages {
     trap stop_workers SIGINT SIGTERM
 
     local script
-    script="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
+    script="$(cat <<-COMMAND
+				${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} \
+				--memory-limit ${MEMORY_LIMIT} \
+				--limit ${MESSAGES} \
+				${command_suffix}
+COMMAND
+)"
 
     echo 'About to run command: '
     echo "${script}"
@@ -171,7 +177,7 @@ function get_project_dir {
 
 function get_project_name() {
     local project_name
-    project_name='revue-de-presse.org'
+    project_name='revue-de-presse'
 
     if [ -n "${PROJECT_NAME}" ]; then
         project_name="${PROJECT_NAME}"
@@ -190,16 +196,17 @@ function get_project_name() {
 
 function get_rabbitmq_virtual_host() {
     local virtual_host
-    virtual_host="$(cat <(cat '.env.local' | grep "PUBLICATIONS='amqp" | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    virtual_host="$(cat <(cat '.env.local' | \grep 'RABBITMQ_DEFAULT_VHOST' | tr -d "'" | sed -E 's#(.+=)##g'))"
 
     echo "${virtual_host}"
 }
 
 function get_symfony_environment() {
     local symfony_env='dev'
-    if [ -n "${SYMFONY_ENV}" ];
+
+    if [ -n "${APP_ENV}" ];
     then
-        symfony_env="${SYMFONY_ENV}"
+        symfony_env="${APP_ENV}"
     fi
 
     echo 'APP_ENV='"${symfony_env}"
@@ -362,7 +369,7 @@ function run_php_script() {
     then
         printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
         printf '%s%s' 'example:' $'\n' 1>&2
-        printf '%s%s' 'export PROJECT_NAME="revue-de-presse.org"' '\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="worker.revue-de-presse.org"' '\n' 1>&2
 
         return 1
     fi

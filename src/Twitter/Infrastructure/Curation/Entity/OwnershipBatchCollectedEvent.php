@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Entity;
 
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Curation\Entity\JsonSerializableInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
@@ -115,7 +115,7 @@ class OwnershipBatchCollectedEvent implements JsonSerializableInterface
         $decodedSerializedEvent = json_decode($serializedSubject, true, 512, JSON_THROW_ON_ERROR);
 
         return new self(
-            new MemberOwnershipsBatchSelector(
+            new ListsBatchSelector(
                 $decodedSerializedEvent['screen_name'],
                 $decodedSerializedEvent['cursor'],
                 CorrelationId::fromString($decodedSerializedEvent['correlation_id'])

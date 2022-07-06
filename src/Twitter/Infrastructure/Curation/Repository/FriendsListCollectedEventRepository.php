@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Resource\ResourceList;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\Http\Resource\FriendsList;
+use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Http\Selector\FriendsListSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Api\Resource\FriendsList;
-use App\Twitter\Domain\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Api\Selector\FriendsListSelector;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
@@ -26,13 +26,13 @@ use function json_encode;
  * @method FriendsListCollectedEvent[]    findAll()
  * @method FriendsListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FriendsListCollectedEventRepository extends ServiceEntityRepository implements ListCollectedEventRepositoryInterface
+class FriendsListCollectedEventRepository extends ServiceEntityRepository implements PaginatedBatchCollectedEventRepositoryInterface
 {
     use LoggerTrait;
 
     public function aggregatedLists(
-        ListAccessorInterface $accessor,
-        string $screenName
+        CursorAwareHttpClientInterface $accessor,
+        string                         $screenName
     ): ResourceList {
         $correlationId = CorrelationId::generate();
 
@@ -70,8 +70,8 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
     }
 
     public function collectedList(
-        ListAccessorInterface $accessor,
-        ListSelectorInterface $selector
+        CursorAwareHttpClientInterface $accessor,
+        ListSelectorInterface          $selector
     ): ResourceList {
         return $accessor->getListAtCursor(
             $selector,

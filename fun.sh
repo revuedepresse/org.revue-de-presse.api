@@ -126,14 +126,14 @@ function dispatch_amqp_messages() {
         up \
         --detach \
         --no-recreate \
-        app
+        worker
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
-        -T app \
+        --env WORKER_WORKDIR="${WORKER}" \
+        -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
 
@@ -268,7 +268,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
+        --env WORKER_WORKDIR="${WORKER}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
@@ -281,11 +281,19 @@ function run_unit_tests() {
 
     if [ -z ${DEBUG} ];
     then
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
+        bin/phpunit -c ./phpunit.xml.dist \
+        --process-isolation \
+        --stop-on-failure \
+        --stop-on-error
+
         return
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
+    bin/phpunit -c ./phpunit.xml.dist \
+    --debug \
+    --stop-on-failure \
+    --stop-on-error \
+    --verbose
 }
 
 function get_project_name() {

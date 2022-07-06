@@ -13,7 +13,7 @@ class StatusCollection implements StrictCollectionInterface
 
     private function __construct(array $status = [])
     {
-        $this->status = array_map(fn(StatusInterface $status) => $status, $status);
+        $this->status = array_map(fn(TweetInterface $status) => $status, $status);
     }
 
     /**
@@ -65,7 +65,7 @@ class StatusCollection implements StrictCollectionInterface
         return $this->status;
     }
 
-    public function first(): ?StatusInterface
+    public function first(): ?TweetInterface
     {
         if ($this->isEmpty()) {
             return null;

@@ -1,0 +1,74 @@
+services:
+    App\Twitter\Infrastructure\Http\Repository\TokenTypeRepository:
+        class: App\Twitter\Infrastructure\Http\Repository\TokenTypeRepository
+        arguments:
+            - '@doctrine'
+            - 'App\Twitter\Infrastructure\Http\Entity\TokenType'
+        calls:
+            - [ 'setLogger', [ '@monolog.logger.doctrine' ]]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    App\Twitter\Domain\Http\Repository\TokenTypeRepositoryInterface: '@App\Twitter\Infrastructure\Http\Repository\TokenTypeRepository'
+
+    App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository'
+
+    App\Twitter\Domain\Http\Security\Authorization\AuthorizeAccessInterface:
+        '@App\Twitter\Infrastructure\Http\Security\Authorization\AuthorizeAccess'
+
+    App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface:
+        '@App\Twitter\Infrastructure\Http\Client\MembersBatchAwareHttpClient'
+
+    App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface:
+        '@App\Twitter\Infrastructure\Http\Client\MemberProfileAwareHttpClient'
+
+    App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface:
+        '@App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient'
+
+    App\Twitter\Infrastructure\Http\AccessToken\TokenChange:
+        class: 'App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
+        arguments:
+            - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+            - '@logger'
+
+    App\Twitter\Infrastructure\Http\Security\Authorization\AuthorizeAccess:
+        class: 'App\Twitter\Infrastructure\Http\Security\Authorization\AuthorizeAccess'
+        arguments:
+            - '%app.twitter_api.consumer_key%'
+            - '%app.twitter_api.consumer_secret%'
+
+    App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand:
+        class: 'App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand'
+        arguments:
+            - !php/const 'App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand::COMMAND_NAME'
+            - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+            - '@App\Twitter\Domain\Http\Security\Authorization\AuthorizeAccessInterface'
+            - '@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'
+            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
+            - '@logger'
+        tags:
+            - { name: 'console.command' }
+
+    App\Twitter\Infrastructure\Http\Client\MemberProfileAwareHttpClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\MemberProfileAwareHttpClient'
+        arguments:
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+            - '@user_manager'
+            - '@App\Twitter\Infrastructure\Http\UnavailableResourceHandler'
+        calls:
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
+
+    App\Twitter\Infrastructure\Http\Client\MembersBatchAwareHttpClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\MembersBatchAwareHttpClient'
+        arguments:
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+
+    App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient'
+        arguments:
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+            - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+            - '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
+            - '@logger'
+        calls:
+            - [ 'setListsBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository'] ]

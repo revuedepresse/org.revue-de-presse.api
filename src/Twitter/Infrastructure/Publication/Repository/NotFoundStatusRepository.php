@@ -1,26 +1,23 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Domain\Publication\TweetInterface;
 
 class NotFoundStatusRepository extends ServiceEntityRepository
 {
-    /**
-     * @param StatusInterface $status
-     * @return NotFoundStatus
-     */
-    public function markStatusAsNotFound(StatusInterface $status)
+    public function markStatusAsNotFound(TweetInterface $status): NotFoundStatus
     {
-        if ($status instanceof ArchivedStatus) {
+        if ($status instanceof ArchivedTweet) {
             return new NotFoundStatus(null, $status);
         }
 
-        if ($status instanceof Status) {
+        if ($status instanceof Tweet) {
             return new NotFoundStatus($status);
         }
 

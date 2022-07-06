@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Curation\Entity;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use Predis\Configuration\Option\Aggregate;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 
 class Keyword
 {
@@ -21,7 +21,7 @@ class Keyword
     private $keyword;
 
     /**
-     * @var StatusInterface
+     * @var TweetInterface
      */
     private $status;
 

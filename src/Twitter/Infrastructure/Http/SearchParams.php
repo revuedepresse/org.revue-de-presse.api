@@ -3,19 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http;
 
-use App\NewsReview\Domain\Repository\SearchParamsInterface;
+use App\Twitter\Domain\Http\SearchParamsInterface;
 use Symfony\Component\HttpFoundation\Request;
-use function array_key_exists;
-use function array_keys;
-use function array_values;
-use function array_walk;
-use function boolval;
-use function in_array;
-use function intval;
-use function is_array;
-use function serialize;
-use function sha1;
-use function trim;
 
 class SearchParams implements SearchParamsInterface
 {

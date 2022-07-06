@@ -1,4 +1,4 @@
-# revue-de-presse.org worker
+# Revue-de-presse worker
 
 ![api.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
@@ -40,7 +40,6 @@ GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.
 
-
 ## Acknowledgment
 
 We're grateful towards all amazing contributors involved in the following  
@@ -60,5 +59,3 @@ communities, organizations and projects (in lexicographic order):
 ### Some of their logos
 
 [![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
-
-
