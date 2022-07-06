@@ -1,4 +1,4 @@
-name: worker.revue-de-presse.org
+name: worker
 
 on: [push, pull_request]
 

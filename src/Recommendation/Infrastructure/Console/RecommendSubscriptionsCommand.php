@@ -66,7 +66,7 @@ class RecommendSubscriptionsCommand extends Command
         );
     }
 
-    private function reduceMemberVector(string $initialVector)
+    private function reduceMemberVector(array $initialVector)
     {
         $positions = array_values(explode(',', $initialVector));
         $positions = array_map('intval', $positions);

@@ -1,11 +1,11 @@
 FROM php:8.1-cli-bullseye
 
-ENV _WORKER='worker'
+ENV WORKER_WORKSPACE='worker'
 
 ARG WORKER_UID=1000
 ARG WORKER_GID=101
 
-ARG WORKER="${_WORKER}"
+ARG WORKER="${WORKER_WORKSPACE}"
 
 HEALTHCHECK CMD /bin/bash -c "test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0"
 

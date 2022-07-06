@@ -3,11 +3,11 @@ imports:
     - { resource: services/console.yml }
     - { resource: services/curation.yml }
     - { resource: services/mapping.yml }
-    - { resource: services/membership.yml }
     - { resource: services/member_subscribee.yml }
     - { resource: services/member_subscription.yml }
-    - { resource: services/repository.yml }
+    - { resource: services/membership.yml }
     - { resource: services/persistence.yml }
+    - { resource: services/repository.yml }
     - { resource: services/twitter_api.yml }
 
 services:
@@ -191,11 +191,11 @@ services:
         arguments:
             - '@?logger'
 
-    App\Twitter\Infrastructure\Collector\TweetCurator:
-        class: 'App\Twitter\Infrastructure\Collector\TweetCurator'
+    App\Twitter\Infrastructure\Curation\TweetCurator:
+        class: 'App\Twitter\Infrastructure\Curation\TweetCurator'
         calls:
-            - [ 'setHttpClient',                               [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
-            - [ 'setInterruptibleCurator',                      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCurator' ] ]
+            - [ 'setHttpClient',                                [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
+            - [ 'setInterruptibleCurator',                      [ '@App\Twitter\Infrastructure\Curation\InterruptibleCurator' ] ]
             - [ 'setLogger',                                    [ '@monolog.logger.twitter_api' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]

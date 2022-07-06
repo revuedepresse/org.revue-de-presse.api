@@ -12,7 +12,7 @@ SHELL:=/bin/bash
 
 .PHONY: start-database stop-database test
 
-WORKER ?= 'worker.revue-de-presse.org'
+WORKER ?= 'worker.example.org'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
 help: doc
