@@ -119,7 +119,7 @@ doctrine:
                 url: '%env(resolve:DATABASE_URL)%'
                 logging: false
         types:
-            uuid:  Ramsey\Uuid\Doctrine\UuidType
+            uuid:            Ramsey\Uuid\Doctrine\UuidType
             correlation_id:  App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdType
     orm:
         default_entity_manager:         default

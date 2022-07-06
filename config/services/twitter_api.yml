@@ -2,7 +2,7 @@ services:
     App\Twitter\Infrastructure\Http\Repository\TokenTypeRepository:
         class: App\Twitter\Infrastructure\Http\Repository\TokenTypeRepository
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@doctrine'
             - 'App\Twitter\Infrastructure\Http\Entity\TokenType'
         calls:
             - [ 'setLogger', [ '@monolog.logger.doctrine' ]]

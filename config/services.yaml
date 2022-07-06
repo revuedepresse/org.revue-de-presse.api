@@ -38,7 +38,7 @@ services:
     App\Twitter\Infrastructure\Http\Repository\TweetRepository:
         class: 'App\Twitter\Infrastructure\Http\Repository\TweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@doctrine'
             - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
@@ -60,7 +60,7 @@ services:
     App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository:
         class: 'App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@doctrine'
             - 'App\Twitter\Infrastructure\Http\Entity\ArchivedTweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
@@ -77,7 +77,7 @@ services:
     app.twitter.repository.read.status:
         class: 'App\Twitter\Infrastructure\Http\Repository\TweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@doctrine'
             - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
