@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
+use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -29,7 +30,7 @@ class FriendsListCollectedEvent implements ListCollectedEvent
     private ?DateTimeInterface $endedAt;
 
     public function __construct(
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
@@ -50,7 +51,7 @@ class FriendsListCollectedEvent implements ListCollectedEvent
         return $this->id;
     }
 
-    public function correlationId(): UuidInterface
+    public function correlationId(): CorrelationIdInterface
     {
         return $this->correlationId;
     }
