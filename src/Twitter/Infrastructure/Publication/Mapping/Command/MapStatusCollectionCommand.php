@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Mapping\Command;
 
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Mapping\RefreshStatusMapping;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,7 +37,7 @@ class MapStatusCollectionCommand extends Command
      */
     private $output;
 
-    public StatusRepositoryInterface $statusRepository;
+    public TweetRepositoryInterface $statusRepository;
 
     /**
      * @var RefreshStatusMapping
@@ -92,9 +93,7 @@ class MapStatusCollectionCommand extends Command
     }
 
     /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int
+     * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -106,8 +105,8 @@ class MapStatusCollectionCommand extends Command
 
         $statusCollection = $this->statusRepository->queryPublicationCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
-            new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
-            new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
+            new DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
+            new DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
         );
 
         $mappedStatuses = $this->statusRepository->mapStatusCollectionToService(
@@ -120,10 +119,7 @@ class MapStatusCollectionCommand extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * @return array
-     */
-    protected function getTokensFromInput()
+    protected function getTokensFromInput(): array
     {
         $token = $this->oauthToken;
         if ($this->input->hasOption(self::OPTION_OAUTH_TOKEN) &&

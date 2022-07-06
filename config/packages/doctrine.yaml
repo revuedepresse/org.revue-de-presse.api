@@ -119,62 +119,141 @@ doctrine:
                 url: '%env(resolve:DATABASE_URL)%'
                 logging: false
         types:
-            uuid:  Ramsey\Uuid\Doctrine\UuidType
+            uuid:            Ramsey\Uuid\Doctrine\UuidType
             correlation_id:  App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdType
     orm:
-        auto_generate_proxy_classes: true
+        default_entity_manager:         default
+        auto_generate_proxy_classes:    true
         entity_managers:
             default:
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                auto_mapping: false
-                connection: default
-                dql: "%doctrine_extensions_dql%"
+                naming_strategy:        doctrine.orm.naming_strategy.underscore_number_aware
+                auto_mapping:           false
+                connection:             default
+                dql:                    "%doctrine_extensions_dql%"
                 mappings:
+
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
-                        prefix:     'App\Twitter\Infrastructure\Api\Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Http/Entity'
+                        prefix:     'App\Twitter\Infrastructure\Http\Entity'
                         type:       annotation
-                    Member:
-                        alias:      'Member'
-                        dir:        '%kernel.project_dir%/config/model/member'
+
+                    FollowersListCollectedEvent:
+                        alias:      'FollowersListCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Membership\Infrastructure\Entity
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
-                    Membership:
-                        alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Infrastructure/Entity/Legacy'
+
+                    FriendsListCollectedEvent:
+                        alias:      'FriendsListCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Membership\Infrastructure\Entity\Legacy
-                        type:       annotation
-                    PressMedia:
-                        alias:      'PressMedia'
-                        dir:        '%kernel.project_dir%/config/model/press-media'
-                        is_bundle:  false
-                        prefix:     App\PressMedia\Entity
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
-                    Popularity:
-                        alias:      'Popularity'
-                        dir:        '%kernel.project_dir%/config/model/popularity'
+
+                    MemberProfileCollectedEvent:
+                        alias:      'MemberProfileCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Twitter\Infrastructure\PublicationPopularity\Entity
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
-                    Publication:
-                        alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Publication/Entity'
+
+                    NotFoundStatus:
+                        alias:      'NotFoundStatus'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Twitter\Infrastructure\Publication\Entity
-                        type:       annotation
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
+                        type:       xml
+
+                    OwnershipBatchCollectedEvent:
+                        alias:      'OwnershipBatchCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/curation'
+                        is_bundle:  false
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
+                        type:       xml
+
                     PublicationBatchCollectedEvent:
                         alias:      'PublicationBatchCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
                         prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
-                    PublishersList:
-                        alias:      'PublishersList'
+
+                    Media:
+                        alias:      'Media'
+                        dir:        '%kernel.project_dir%/config/model/french-media-shareholders'
+                        is_bundle:  false
+                        prefix:     App\FrenchMediaShareholders\Entity
+                        type:       xml
+
+                    Owner:
+                        alias:      'Owner'
+                        dir:        '%kernel.project_dir%/config/model/french-media-shareholders'
+                        is_bundle:  false
+                        prefix:     App\FrenchMediaShareholders\Entity
+                        type:       xml
+
+                    Ownership:
+                        alias:      'Ownership'
+                        dir:        '%kernel.project_dir%/config/model/french-media-shareholders'
+                        is_bundle:  false
+                        prefix:     App\FrenchMediaShareholders\Entity
+                        type:       xml
+
+                    Member:
+                        alias:      'Member'
+                        dir:        '%kernel.project_dir%/config/model/member'
+                        is_bundle:  false
+                        prefix:     App\Membership\Infrastructure\Entity
+                        type:       xml
+
+                    Membership:
+                        alias:      'Membership'
+                        dir:        '%kernel.project_dir%/src/Membership/Infrastructure/Entity/Legacy'
+                        is_bundle:  false
+                        prefix:     App\Membership\Infrastructure\Entity\Legacy
+                        type:       annotation
+
+                    MemberInList:
+                        alias:      'MemberInList'
+                        dir:        '%kernel.project_dir%/config/model/member'
+                        is_bundle:  false
+                        prefix:     App\Membership\Infrastructure\Entity
+                        type:       xml
+
+                    MemberSubscription:
+                        alias:      'MemberSubscription'
+                        dir:        '%kernel.project_dir%/config/model/member'
+                        is_bundle:  false
+                        prefix:     App\Membership\Infrastructure\Entity
+                        type:       xml
+
+                    Popularity:
+                        alias:      'Popularity'
+                        dir:        '%kernel.project_dir%/config/model/popularity'
+                        is_bundle:  false
+                        prefix:     App\Twitter\Infrastructure\PublicationPopularity\Entity
+                        type:       xml
+
+                    Publication:
+                        alias:      'Publication'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Publication/Entity'
+                        is_bundle:  false
+                        prefix:     App\Twitter\Infrastructure\Publication\Entity
+                        type:       annotation
+
+                    TimelyStatus:
+                        alias:      'TimelyStatus'
                         dir:        '%kernel.project_dir%/config/model/publication-list'
                         is_bundle:  false
                         prefix:     App\Twitter\Infrastructure\PublishersList\Entity
+                        type:       xml
+
+                    ListSubscription:
+                        alias:      'ListSubscription'
+                        dir:        '%kernel.project_dir%/config/model/subscription'
+                        is_bundle:  false
+                        prefix:     App\Subscription\Infrastructure\Entity
                         type:       xml

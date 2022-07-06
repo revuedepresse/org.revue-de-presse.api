@@ -15,48 +15,31 @@ trait ExceptionalUserInterfaceTrait
     {
     }
 
-    /**
-     * Get password
-     *
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword(): string
     {
         return '';
     }
 
-    /**
-     * @return array
-     */
-    public function getRoles()
+    public function getRoles(): array
     {
         return [];
     }
 
-    /**
-     * @return string
-     */
-    public function getSalt()
+    public function getSalt(): string
     {
         return '';
     }
 
-    /**
-     * @return string
-     */
     public function getUrl(): ?string
     {
         return '';
     }
 
-    /**
-     * @param \Exception $exception
-     *
-     * @return \Exception
-     */
-    public function setException(\Exception $exception)
+    public function setException(\Exception $exception): \Exception
     {
-        return $this->exception = $exception;
+        $this->exception = $exception;
+
+        return $this->exception;
     }
 
     public function setUsername(string $username): MemberInterface
@@ -64,7 +47,8 @@ trait ExceptionalUserInterfaceTrait
         return $this;
     }
 
-    public function setEmail(string $email): MemberInterface {
+    public function setEmail(string $email): MemberInterface
+    {
         return $this;
     }
 }

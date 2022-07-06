@@ -3,7 +3,7 @@
 namespace App\Membership\Infrastructure\Entity;
 
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Selectable;
 
@@ -66,6 +66,10 @@ trait MemberTrait
     public function getUserIdentifier(): string
     {
         return $this->twitterId();
+    }
+
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface {
+        return $this;
     }
 
     /**
@@ -144,12 +148,22 @@ trait MemberTrait
         return $this->description;
     }
 
-    public function totalStatus(): int
+    public function totalLikes(): int
     {
         return 0;
     }
 
-    public function setTotalStatus($totalStatus): MemberInterface
+    public function setTotalLikes(int $totalLikes): MemberInterface
+    {
+        return $this;
+    }
+
+    public function totalTweets(): int
+    {
+        return 0;
+    }
+
+    public function setTotalTweets($totalTweets): MemberInterface
     {
         return $this;
     }

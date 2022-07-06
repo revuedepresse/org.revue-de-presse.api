@@ -14,7 +14,7 @@
         </id>
         <one-to-one
                 field="status"
-                target-entity="App\Twitter\Infrastructure\Api\Entity\Status">
+                target-entity="App\Twitter\Infrastructure\Http\Entity\Tweet">
             <join-column
                 name="status_id"
                 referenced-column-name="ust_id"
@@ -22,7 +22,7 @@
         </one-to-one>
         <one-to-one
                 field="archivedStatus"
-                target-entity="App\Twitter\Infrastructure\Api\Entity\ArchivedStatus">
+                target-entity="App\Twitter\Infrastructure\Http\Entity\ArchivedTweet">
             <join-column
                 name="archived_status_id"
                 referenced-column-name="ust_id"

@@ -23,9 +23,9 @@ interface CurationSelectorsInterface
 
     public function selectTweetsByMemberScreenName(string $screenName): self;
 
-    public function optInToCollectStatusWhichIdIsGreaterThan($minId): self;
+    public function optInToCollectStatusWhichIdIsGreaterThan($minTweetId): self;
 
-    public function optInToCollectStatusWhichIdIsLessThan($maxId): self;
+    public function optInToCollectStatusWhichIdIsLessThan($maxTweetId): self;
 
     public function optInToCollectStatusPublishedBefore(string $date): self;
 

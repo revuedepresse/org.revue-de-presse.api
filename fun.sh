@@ -126,14 +126,14 @@ function dispatch_amqp_messages() {
         up \
         --detach \
         --no-recreate \
-        app
+        worker
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
-        -T app \
+        --env WORKER_WORKDIR="${WORKER}" \
+        -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
 
@@ -142,6 +142,15 @@ function guard_against_missing_variables() {
     then
 
         printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'worker name e.g. worker.example.com' 'WORKER' $'\n'
+
+        exit 1
+
+    fi
+
+    if [ "${WORKER}" = 'worker.revue-de-presse.org' ];
+    then
+
+        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'WORKER' 'worker.revue-de-presse.org' $'\n'
 
         exit 1
 
@@ -268,7 +277,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
+        --env WORKER_WORKDIR="${WORKER}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
@@ -281,11 +290,19 @@ function run_unit_tests() {
 
     if [ -z ${DEBUG} ];
     then
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
+        bin/phpunit -c ./phpunit.xml.dist \
+        --process-isolation \
+        --stop-on-failure \
+        --stop-on-error
+
         return
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
+    bin/phpunit -c ./phpunit.xml.dist \
+    --debug \
+    --stop-on-failure \
+    --stop-on-error \
+    --verbose
 }
 
 function get_project_name() {

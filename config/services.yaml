@@ -1,15 +1,14 @@
 imports:
-    - { resource: services/api.yml }
-    - { resource: services/curation.yml }
+    - { resource: services/_parameters.yml }
     - { resource: services/console.yml }
+    - { resource: services/curation.yml }
     - { resource: services/mapping.yml }
     - { resource: services/membership.yml }
     - { resource: services/member_subscribee.yml }
     - { resource: services/member_subscription.yml }
-    - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
-    - { resource: services/worker.yml }
+    - { resource: services/twitter_api.yml }
 
 services:
     # default configuration for services in *this* file
@@ -23,14 +22,8 @@ services:
     #        resource: '../src/*'
     #        exclude: '../src/{Controler,DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Twitter/Infrastructure/PublishersList/Controller/.*.php'
-        tags: ['controller.service_arguments']
-
-    App\Twitter\Infrastructure\Log\StatusLogger:
-        class: 'App\Twitter\Infrastructure\Log\StatusLogger'
+    App\Twitter\Infrastructure\Log\TweetCurationLogger:
+        class: 'App\Twitter\Infrastructure\Log\TweetCurationLogger'
         arguments:
             - '@App\Twitter\Infrastructure\Translation\Translator'
             - '@monolog.logger.twitter_api'
@@ -39,71 +32,83 @@ services:
         public: true
         class: 'App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter'
         calls:
-            - [ 'setStatusAccessor',   [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setTweetAwareHttpClient',   [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
 
-    App\Twitter\Infrastructure\Api\Repository\StatusRepository:
-        class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+    App\Twitter\Infrastructure\Http\Repository\TweetRepository:
+        class: 'App\Twitter\Infrastructure\Http\Repository\TweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - '@doctrine'
+            - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
-            - [ 'setStatusLogger',           [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setStatusPersistence',      [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
+            - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:                '@logger'
-            archivedStatusRepository: '@App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
+            archivedStatusRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
             connection:               '@doctrine.dbal.default_connection'
             registry:                 '@doctrine'
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+    App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface: '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'
 
-    App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository:
-        class: 'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
+    App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository:
+        class: 'App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.archived_status.class%'
+            - '@doctrine'
+            - 'App\Twitter\Infrastructure\Http\Entity\ArchivedTweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
-            - [ 'setStatusLogger',           [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setStatusPersistence',      [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
+            - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:              '@logger'
             connection:             '@doctrine.dbal.default_connection'
             registry:               '@doctrine'
 
-    weaving_the_web_twitter.repository.read.status:
-        class: 'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+    app.twitter.repository.read.status:
+        class: 'App\Twitter\Infrastructure\Http\Repository\TweetRepository'
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - '@doctrine'
+            - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
-            - [ 'setOauthTokens',            [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
-            - [ 'setStatusLogger',           [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
+            - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
+            - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.twitter_api'
             connection:             '@doctrine.dbal.default_connection'
 
+    App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'
+        arguments:
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+            - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
+            - '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
+            - '@logger'
+            - '@App\Twitter\Infrastructure\Translation\Translator'
+        calls:
+            - [ 'setRateLimitCompliance',                    [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
+            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface' ] ]
+            - [ 'setListsBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository' ] ]
+
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
         class: 'App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
         arguments:
             - '@messenger.default_bus'
-            - '@App\Twitter\Infrastructure\Api\Accessor\MemberProfileAccessor'
-            - '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
+            - '@App\Twitter\Infrastructure\Http\Client\MemberProfileAwareHttpClient'
+            - '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
             - '@logger'
 
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor:
@@ -111,83 +116,68 @@ services:
         calls:
             - [ 'setMemberIdentityProcessor',                 [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
             - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
-            - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository'] ]
-            - [ 'setTokenChange',                             [ '@App\Twitter\Infrastructure\Api\AccessToken\TokenChange'] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository'] ]
+            - [ 'setTokenChange',                             [ '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'] ]
         arguments:
-            - '@App\Twitter\Infrastructure\Api\Accessor'
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Infrastructure\Translation\Translator'
             - '@logger'
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsMessageDispatcher'
-        arguments:
-            - '@App\Twitter\Infrastructure\Api\Accessor'
-            - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
-            - '@App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
-            - '@logger'
-            - '@App\Twitter\Infrastructure\Translation\Translator'
-        calls:
-            - [ 'setModerator',                              [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface' ] ]
-            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
-
-    App\Twitter\Infrastructure\Api\UnavailableResourceHandler:
-        class: 'App\Twitter\Infrastructure\Api\UnavailableResourceHandler'
+    App\Twitter\Infrastructure\Http\UnavailableResourceHandler:
+        class: 'App\Twitter\Infrastructure\Http\UnavailableResourceHandler'
         arguments:
             - '@user_manager'
             - '@logger'
 
-    App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository:
-        class: 'App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository'
+    App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository:
+        class: 'App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository'
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'
         calls:
-            - [ 'setStatusRepository', [ '@App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface' ] ]
+            - [ 'setStatusRepository', [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
 
-    App\Twitter\Infrastructure\Api\Accessor:
-        class: 'App\Twitter\Infrastructure\Api\Accessor'
+    App\Twitter\Infrastructure\Http\Client\HttpClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\HttpClient'
         arguments:
-            - '%twitter_api.consumer_key%'
-            - '%twitter_api.consumer_secret%'
-            - '%weaving_the_web_twitter.oauth_token.default%'
-            - '%weaving_the_web_twitter.oauth_secret.default%'
-            - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
+            - '%app.twitter_api.consumer_key%'
+            - '%app.twitter_api.consumer_secret%'
+            - '%app.twitter.oauth_token.default%'
+            - '%app.twitter.oauth_secret.default%'
+            - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
             - '@monolog.logger.twitter_api'
         properties:
-            environment:          '%kernel.environment%'
-            twitterApiLogger:     '@monolog.logger.twitter_api'
-            statusAccessor:       '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
+            environment:            '%kernel.environment%'
+            tweetAwareHttpClient:   '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
+            twitterApiLogger:       '@monolog.logger.twitter_api'
         calls:
-            - [ 'setConsumerKey', [ '%twitter_api.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%twitter_api.consumer_secret%' ] ]
+            - [ 'setConsumerKey', [ '%app.twitter_api.consumer_key%' ] ]
+            - [ 'setConsumerSecret', [ '%app.twitter_api.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
-            - [ 'setModerator', [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setRateLimitCompliance', [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setTranslator', [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
-            - [ 'setAccessToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
-            - [ 'setAccessTokenSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
+            - [ 'setAccessToken', [ '%app.twitter.oauth_token.default%' ] ]
+            - [ 'setAccessTokenSecret', [ '%app.twitter.oauth_secret.default%' ] ]
 
-    App\Twitter\Domain\Api\Accessor\ApiAccessorInterface:
-        '@App\Twitter\Infrastructure\Api\Accessor'
+    App\Twitter\Domain\Http\Client\HttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\HttpClient'
 
-    App\Twitter\Infrastructure\Api\Accessor\StatusAccessor:
-        class: 'App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
+    App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
         properties:
-            archivedStatusRepository:   '@App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
+            archivedStatusRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
             entityManager:              '@doctrine.orm.entity_manager'
             notFoundStatusRepository:   '@repository.not_found_status'
         calls:
-            - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setHttpClient',                               [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
             - [ 'setLogger',                                    [ '@logger' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
-            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
         public: true
 
-    App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
-        '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
+    App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
 
     app.event_subscriber.console:
         class: 'App\Twitter\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
@@ -196,65 +186,36 @@ services:
         tags:
             - { name: 'kernel.event_subscriber' }
 
-    App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator:
-        class: 'App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator'
+    App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance:
+        class: 'App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance'
         arguments:
             - '@?logger'
 
-    App\Twitter\Infrastructure\Collector\PublicationCollector:
-        class: 'App\Twitter\Infrastructure\Collector\PublicationCollector'
+    App\Twitter\Infrastructure\Collector\TweetCurator:
+        class: 'App\Twitter\Infrastructure\Collector\TweetCurator'
         calls:
-            - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-            - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider' ] ]
+            - [ 'setHttpClient',                               [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
+            - [ 'setInterruptibleCurator',                      [ '@App\Twitter\Infrastructure\Collector\InterruptibleCurator' ] ]
             - [ 'setLogger',                                    [ '@monolog.logger.twitter_api' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
-            - [ 'setModerator',                                 [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository' ] ]
-            - [ 'setPublishersListRepository',                  [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
+            - [ 'setRateLimitCompliance',                       [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
+            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
+            - [ 'setPublishersListRepository',                  [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusLogger',                              [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusAccessor',                            [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setTweetCurationLogger',                       [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
+            - [ 'setTweetAwareHttpClient',                      [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setStatusPersistence',                         [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                           [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]
+            - [ 'setTokenRepository',                           [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setTranslator',                                [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',                   [ '@App\Twitter\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                       [ '@repository.whisperer' ] ]
         properties:
-            twitterApiLogger:       '@monolog.logger.twitter_api'
+            twitterApiLogger:                                   '@monolog.logger.twitter_api'
 
     App\Twitter\Infrastructure\Translation\Translator:
         class: 'App\Twitter\Infrastructure\Translation\Translator'
         arguments:
             - '@translator'
             - '@logger'
-
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
-parameters:
-    monolog_channels:
-        - 'deprecation' # Deprecations are logged in the dedicated "deprecation" channel when it exists
-        - 'twitter_api'
-        - 'development'
-        - 'membership'
-
-    weaving_the_web_twitter.api_host:                             'api.twitter.com'
-
-    twitter_api.consumer_key:                                     '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
-    twitter_api.consumer_secret:                                  '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
-
-    weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
-    weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
-
-    weaving_the_web_twitter.entity.archived_status.class:         'App\Twitter\Infrastructure\Api\Entity\ArchivedStatus'
-    weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
-
-    repository.publishers_list.class:                            '%weaving_the_web_api.repository.publishers_list.class%'
-
-    weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
-
-    publishers_list_default:                                      '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'

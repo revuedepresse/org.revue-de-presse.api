@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\PublicationPopularity\Entity;
 
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 
 class StatusPopularity
 {
@@ -13,7 +13,7 @@ class StatusPopularity
     private $id;
 
     /**
-     * @var StatusInterface
+     * @var TweetInterface
      */
     private $status;
 

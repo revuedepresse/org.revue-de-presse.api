@@ -6,14 +6,14 @@ namespace App\Twitter\Infrastructure\Curation\Repository;
 
 use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
-use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Api\Resource\FollowersList;
-use App\Twitter\Domain\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
+use App\Twitter\Infrastructure\Http\Resource\FollowersList;
+use App\Twitter\Domain\Http\Resource\ResourceList;
+use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
@@ -25,13 +25,13 @@ use function json_encode;
  * @method FollowersListCollectedEvent[]    findAll()
  * @method FollowersListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FollowersListCollectedEventRepository extends ServiceEntityRepository implements ListCollectedEventRepositoryInterface
+class FollowersListCollectedEventRepository extends ServiceEntityRepository implements PaginatedBatchCollectedEventRepositoryInterface
 {
     use LoggerTrait;
 
     public function aggregatedLists(
-        ListAccessorInterface $accessor,
-        string $screenName
+        CursorAwareHttpClientInterface $accessor,
+        string                         $screenName
     ): ResourceList {
         $correlationId = CorrelationId::generate();
 
@@ -69,8 +69,8 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
     }
 
     public function collectedList(
-        ListAccessorInterface $accessor,
-        ListSelectorInterface $selector
+        CursorAwareHttpClientInterface $accessor,
+        ListSelectorInterface          $selector
     ): ResourceList {
         return $accessor->getListAtCursor(
             $selector,

@@ -1,0 +1,6 @@
+[blackfire]
+client-id=__CLIENT_ID__
+client-token=__CLIENT_TOKEN__
+ca-cert=
+endpoint=https://blackfire.io
+timeout=15s

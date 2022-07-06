@@ -3,12 +3,13 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\FollowersBatchAwareHttpClientBuilder;
+use App\Twitter\Domain\Curation\Repository\PaginatedBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
-use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
+use App\Twitter\Domain\Http\Client\CursorAwareHttpClientInterface;
+use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -17,10 +18,7 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
 {
     use ProphecyTrait;
 
-    /**
-     * @return ListCollectedEventRepositoryInterface
-     */
-    public static function build(): ListCollectedEventRepositoryInterface
+    public static function build(): PaginatedBatchCollectedEventRepositoryInterface
     {
         $testCase = new self();
         $prophecy = $testCase->prophesize(FollowersListCollectedEventRepository::class);
@@ -37,12 +35,12 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
             });
 
         $prophecy->aggregatedLists(
-            Argument::type(ListAccessorInterface::class),
+            Argument::type(CursorAwareHttpClientInterface::class),
             Argument::type('string')
         )->will(function ($arguments) {
-            $followersListAccessor = FollowersListAccessorBuilder::build();
+            $FollowersBatchAwareHttpClient = FollowersBatchAwareHttpClientBuilder::build();
 
-            return $followersListAccessor->getListAtCursor(
+            return $FollowersBatchAwareHttpClient->getListAtCursor(
                 new FollowersListSelector($arguments[1])
             );
         });

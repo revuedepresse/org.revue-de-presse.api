@@ -6,9 +6,9 @@ namespace App\Conversation;
 use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Domain\Publication\Repository\PublicationInterface;
 use function array_key_exists;
@@ -16,8 +16,8 @@ use function json_decode;
 
 trait ConversationAwareTrait
 {
-    use StatusAccessorTrait;
-    use StatusRepositoryTrait;
+    use TweetAwareHttpClientTrait;
+    use TweetRepositoryTrait;
 
     /**
      * @param array $status
@@ -121,12 +121,12 @@ trait ConversationAwareTrait
             $updatedStatus['in_conversation']               = true;
 
             try {
-                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                $repliedToStatus = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                     $updatedStatus['id_of_status_replied_to']
                 );
             } catch (NotFoundMemberException $notFoundMemberException) {
-                $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
-                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                $this->tweetAwareHttpClient->ensureMemberHavingNameExists($notFoundMemberException->screenName);
+                $repliedToStatus = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                     $updatedStatus['id_of_status_replied_to']
                 );
             }
@@ -151,7 +151,7 @@ trait ConversationAwareTrait
     ): array {
         return array_map(
             function ($status) use ($includeRepliedToStatuses) {
-                if ($status instanceof StatusInterface) {
+                if ($status instanceof TweetInterface) {
                     $status = [
                         'screen_name'       => $status->getScreenName(),
                         'status_id'         => $status->getStatusId(),
@@ -284,7 +284,7 @@ trait ConversationAwareTrait
     private function findStatusOrFetchItByIdentifier($statusId, $shouldRefreshStatus = false)
     {
         if ($shouldRefreshStatus) {
-            return $this->statusAccessor->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
+            return $this->tweetAwareHttpClient->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
         }
 
         return $this->statusRepository->findStatusIdentifiedBy($statusId);

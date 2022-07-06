@@ -3,9 +3,9 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder;
-use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
+use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -21,7 +21,7 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
 
     private CommandTester $commandTester;
 
-    private OwnershipBatchCollectedEventRepositoryInterface $repository;
+    private ListsBatchCollectedEventRepositoryInterface $repository;
 
     private EntityManagerInterface $entityManager;
 
@@ -34,7 +34,7 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
 
         $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
-        $this->repository = static::getContainer()->get('test.'.OwnershipBatchCollectedEventRepositoryInterface::class);
+        $this->repository = static::getContainer()->get('test.'.ListsBatchCollectedEventRepositoryInterface::class);
 
         $application = new Application($kernel);
 
@@ -69,9 +69,9 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
         // Arrange
 
         $screenName = 'thierrymarianne';
-        $this->repository->collectedOwnershipBatch(
-            OwnershipAccessorBuilder::willReturnSomeOwnership(),
-            new MemberOwnershipsBatchSelector($screenName)
+        $this->repository->collectedListsBatch(
+            ListAwareHttpClientBuilder::willReturnSomeOwnership(),
+            new ListsBatchSelector($screenName)
         );
 
         // Act

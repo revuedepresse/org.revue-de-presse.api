@@ -3,22 +3,21 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\TwitterMemberInterface;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Entity\ExceptionalMember;
-use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\NotFoundMember;
 use App\Membership\Infrastructure\Entity\ProtectedMember;
 use App\Membership\Infrastructure\Entity\SuspendedMember;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Psr\Log\LoggerInterface;
 
 class NetworkRepository implements NetworkRepositoryInterface
@@ -31,15 +30,11 @@ class NetworkRepository implements NetworkRepositoryInterface
 
     public EntityManager $entityManager;
 
-    public ApiAccessorInterface $accessor;
+    public HttpClientInterface $accessor;
 
     public LoggerInterface $logger;
 
     /**
-     * @param MemberInterface $member
-     * @param array           $subscriptions
-     *
-     * @return bool
      * @throws DBALException
      */
     private function saveMemberSubscriptions(
@@ -140,9 +135,6 @@ class NetworkRepository implements NetworkRepositoryInterface
     }
 
     /**
-     * @param string $memberId
-     *
-     * @return MemberInterface|object|null
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -159,10 +151,7 @@ class NetworkRepository implements NetworkRepositoryInterface
         );
     }
 
-    /**
-     * @param $members
-     */
-    public function saveNetwork($members)
+    public function saveNetwork(array $members)
     {
         array_walk(
             $members,

@@ -3,11 +3,10 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Curation\Repository;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder;
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
-use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
+use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
+use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -15,8 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
 {
-    private OwnershipBatchCollectedEventRepository $subjectUnderTest;
-    private OwnershipAccessorInterface $accessor;
+    private ListsBatchCollectedEventRepository $subjectUnderTest;
+    private ListAwareHttpClientInterface       $accessor;
 
     protected function setUp(): void
     {
@@ -24,8 +23,8 @@ class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
 
         $kernel = static::bootKernel();
 
-        $this->subjectUnderTest = static::getContainer()->get('test.'.OwnershipBatchCollectedEventRepository::class);
-        $this->accessor = OwnershipAccessorBuilder::build();
+        $this->subjectUnderTest = static::getContainer()->get('test.'.ListsBatchCollectedEventRepository::class);
+        $this->accessor = ListAwareHttpClientBuilder::build();
     }
 
     /**
@@ -33,9 +32,9 @@ class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_collects_a_batch_of_ownership(): void
     {
-        $batch = $this->subjectUnderTest->collectedOwnershipBatch(
+        $batch = $this->subjectUnderTest->collectedListsBatch(
             $this->accessor,
-            new MemberOwnershipsBatchSelector('dummy_screen_name')
+            new ListsBatchSelector('dummy_screen_name')
         );
 
         self::assertTrue($batch->isEmpty(), 'It collects an empty batch of ownerships');

@@ -16,8 +16,6 @@ interface PublishersListRepositoryInterface
 {
     public function allPublishersLists(Request $request): array;
 
-    public function publicPublishersList(): array;
-
     public function byName(
         string $screenName,
         string $listName,

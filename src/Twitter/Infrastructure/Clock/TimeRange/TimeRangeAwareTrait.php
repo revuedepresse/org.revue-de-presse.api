@@ -3,33 +3,23 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Clock\TimeRange;
 
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use DateTime;
 use Exception;
 
 trait TimeRangeAwareTrait
 {
-    /**
-     * @return TimeRangeAwareInterface
-     * @throws Exception
-     */
     public function updateTimeRange(): TimeRangeAwareInterface
     {
-        /** @var Status $status */
+        /** @var Tweet $status */
         $status = $this->status;
         $statusPublicationDate = $status->getCreatedAt();
 
         $this->timeRange = $this->mapDateToTimeRange($statusPublicationDate);
 
-        /** @var TimeRangeAwareInterface $this */
         return $this;
     }
 
-    /**
-     * @param DateTime $statusPublicationDate
-     * @return int
-     * @throws Exception
-     */
     public function mapDateToTimeRange(DateTime $statusPublicationDate)
     {
         $now = new DateTime('now', new \DateTimeZone('UTC'));

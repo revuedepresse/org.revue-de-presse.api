@@ -5,8 +5,8 @@ namespace App\Twitter\Infrastructure\PublishersList\Entity;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Domain\Publication\TweetInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
@@ -14,55 +14,32 @@ class TimelyStatus implements TimeRangeAwareInterface
 {
     use TimeRangeAwareTrait;
 
-    private UuidInterface $id;
-
-    /**
-     * @var Status
-     */
-    private StatusInterface $status;
-
-    private PublishersList $aggregate;
-
-    /**
-     * @var DateTimeInterface
-     */
+    private UuidInterface     $id;
+    private string            $memberName;
     private DateTimeInterface $publicationDateTime;
-
-    /**
-     * @var string
-     */
-    private string $aggregateName;
-
-    /**
-     * @var int
-     */
-    private int $timeRange;
-
-    /**
-     * @var string
-     */
-    private string $memberName;
+    private TweetInterface    $status;
+    private PublishersList    $twitterList;
+    private int               $timeRange;
+    private string            $twitterListName;
 
     public function __construct(
-        StatusInterface $status,
-        PublishersList $aggregate,
+        TweetInterface     $status,
+        PublishersList     $twitterList,
         \DateTimeInterface $publicationDateTime
     ) {
-
-        $this->status = $status;
-        $this->aggregate = $aggregate;
-        $this->publicationDateTime = $publicationDateTime;
-
-        $this->aggregateName = $this->aggregate->name();
         $this->memberName = $status->getScreenName();
+        $this->publicationDateTime = $publicationDateTime;
+        $this->status = $status;
+        $this->twitterList = $twitterList;
+        $this->twitterListName = $this->twitterList->name();
 
         $this->updateTimeRange();
     }
 
-    public function updateAggregate(PublishersList $aggregate)
+    public function tagAsBelongingToTwitterList(PublishersList $twitterList)
     {
-        $this->aggregate = $aggregate;
-        $this->aggregateName = $aggregate->name();
+        $this->twitterList = $twitterList;
+        $this->twitterListName = $twitterList->name();
 
         $this->updateTimeRange();
     }

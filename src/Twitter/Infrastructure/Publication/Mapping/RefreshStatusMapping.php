@@ -3,34 +3,31 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
-use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface
 {
-    use ApiAccessorTrait;
+    use HttpClientTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
 
     private array $oauthTokens;
 
-    public function __construct(ApiAccessorInterface $accessor)
+    public function __construct(HttpClientInterface $accessor)
     {
-        $this->apiAccessor = $accessor;
+        $this->httpClient = $accessor;
     }
 
-    /**
-     * @param $oauthTokens
-     */
-    public function setOAuthTokens($oauthTokens) {
+    public function setOAuthTokens(array $oauthTokens) {
         $this->oauthTokens = $oauthTokens;
         $this->setupAccessor($oauthTokens);
     }
@@ -40,25 +37,25 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     protected function setupAccessor($oauthTokens)
     {
-        $this->apiAccessor->propagateNotFoundStatuses = true;
+        $this->httpClient->propagateNotFoundStatuses = true;
 
-        $this->apiAccessor->setAccessToken($oauthTokens['token']);
-        $this->apiAccessor->setAccessTokenSecret($oauthTokens['secret']);
+        $this->httpClient->setAccessToken($oauthTokens['token']);
+        $this->httpClient->setAccessTokenSecret($oauthTokens['secret']);
 
         if (array_key_exists('consumer_token', $oauthTokens)) {
-            $this->apiAccessor->setConsumerKey($oauthTokens['consumer_token']);
-            $this->apiAccessor->setConsumerSecret($oauthTokens['consumer_secret']);
+            $this->httpClient->setConsumerKey($oauthTokens['consumer_token']);
+            $this->httpClient->setConsumerSecret($oauthTokens['consumer_secret']);
         }
     }
 
     /**
-     * @param Status $status
-     * @return Status
+     * @param Tweet $status
+     * @return Tweet
      */
-    public function apply(Status $status): Status {
+    public function apply(Tweet $status): Tweet {
         try {
-            $apiDocument = $this->apiAccessor->showStatus($status->getStatusId());
-        } catch (NotFoundStatusException $exception) {
+            $apiDocument = $this->httpClient->showStatus($status->getStatusId());
+        } catch (TweetNotFoundException $exception) {
             return $status;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
@@ -81,7 +78,7 @@ class RefreshStatusMapping implements MappingAwareInterface
                 $this->logger
             );
         } catch (NotFoundMemberException $exception) {
-            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+            $this->httpClient->ensureMemberHavingNameExists($exception->screenName);
             $this->publicationPersistence->persistStatusPublication(
                 [$apiDocument],
                 $status->getIdentifier(),

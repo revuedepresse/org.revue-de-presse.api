@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Membership\Builder\Repository;
 
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -100,7 +100,7 @@ class MemberRepositoryBuilder
         return $this;
     }
 
-    public function build(): MemberRepositoryInterface
+    public function build(): \App\Membership\Domain\Repository\MemberRepositoryInterface
     {
         return $this->prophecy->reveal();
     }

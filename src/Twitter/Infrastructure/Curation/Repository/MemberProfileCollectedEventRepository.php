@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Infrastructure\Curation\Entity\MemberProfileCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\MemberProfileCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Infrastructure\Curation\Entity\MemberProfileCollectedEvent;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use stdClass;
 use Throwable;
@@ -16,11 +16,11 @@ use const JSON_THROW_ON_ERROR;
 class MemberProfileCollectedEventRepository extends ServiceEntityRepository implements MemberProfileCollectedEventRepositoryInterface
 {
     use LoggerTrait;
-    use ApiAccessorTrait;
+    use HttpClientTrait;
 
     public function collectedMemberProfile(
-        ApiAccessorInterface $accessor,
-        array $options
+        HttpClientInterface $accessor,
+        array               $options
     ): stdClass {
         $screenName = $options[self::OPTION_SCREEN_NAME];
 

@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\PublishersList\Repository;
 
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 
 class TimelyStatusRepository extends ServiceEntityRepository implements TimelyStatusRepositoryInterface
@@ -22,20 +21,13 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
     use ConversationAwareTrait;
 
-    /**
     use PaginationAwareTrait;
 
-    /**
-     * @var PublishersListRepository
-     */
     public PublishersListRepository $aggregateRepository;
 
     /**
-     * @param array $properties
-     *
-     * @return TimelyStatus|TimeRangeAwareInterface
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function fromArray(array $properties)
     {
@@ -48,36 +40,33 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             return $timelyStatus->updateTimeRange();
         }
 
-        $aggregate = $this->aggregateRepository->findOneBy([
-            'id' => $properties['aggregate_id'],
+        $twitterList = $this->aggregateRepository->findOneBy([
+            'id' => $properties[FetchAuthoredTweetInterface::TWITTER_LIST_ID],
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->aggregateRepository->findOneBy([
+        if (!($twitterList instanceof PublishersList)) {
+            $twitterList = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($aggregate instanceof PublishersList)) {
-                $aggregate = $this->aggregateRepository->make(
+            if (!($twitterList instanceof PublishersList)) {
+                $twitterList = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
                 );
-                $this->aggregateRepository->save($aggregate);
+                $this->aggregateRepository->save($twitterList);
             }
         }
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $twitterList,
             $status->getCreatedAt()
         );
     }
 
-    /**
-     * @return \Doctrine\ORM\QueryBuilder
-     */
     public function selectStatuses()
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
@@ -101,9 +90,9 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         return $queryBuilder;
     }
 
-    public function fromAggregatedStatus(
-        StatusInterface $status,
-        PublishersList $aggregate = null
+    public function fromTweetInList(
+        TweetInterface $status,
+        PublishersList $list = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status
@@ -115,21 +104,14 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $list,
             $status->getCreatedAt()
         );
     }
 
-    /**
-     * @param TimelyStatus $timelyStatus
-     *
-     * @return TimelyStatus
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function saveTimelyStatus(
         TimelyStatus $timelyStatus
-    ) {
+    ): TimelyStatus {
         $this->getEntityManager()->persist($timelyStatus);
         $this->getEntityManager()->flush();
 
@@ -137,8 +119,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param $searchParams
-     * @return int
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
@@ -147,8 +127,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param SearchParams $searchParams
-     * @return array
      * @throws \Exception
      */
     public function findStatuses(SearchParams $searchParams): array
@@ -185,8 +163,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
      * @throws \Exception
      */
     private function applyCriteria(
@@ -196,7 +172,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         $queryBuilder->select('s.apiDocument as original_document');
         $queryBuilder->addSelect('t.memberName as screen_name');
         $queryBuilder->addSelect('t.memberName as screenName');
-        $queryBuilder->addSelect('t.aggregateName as aggregateName');
+        $queryBuilder->addSelect('t.twitterListName as twitterListName');
         $queryBuilder->addSelect('a.id as aggregateId');
         $queryBuilder->addSelect('s.id as id');
         $queryBuilder->addSelect('s.statusId as twitterId');
@@ -222,10 +198,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getUniqueIdentifier()
+    public function getUniqueIdentifier(): string
     {
         return 's.id';
     }

@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection;
 
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
+use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 
 trait OwnershipAccessorTrait
 {
-    private OwnershipAccessorInterface $ownershipAccessor;
+    private ListAwareHttpClientInterface $ownershipAccessor;
 
-    public function setOwnershipAccessor(OwnershipAccessorInterface $ownershipAccessor): self
+    public function setOwnershipAccessor(ListAwareHttpClientInterface $ownershipAccessor): self
     {
         $this->ownershipAccessor = $ownershipAccessor;
 

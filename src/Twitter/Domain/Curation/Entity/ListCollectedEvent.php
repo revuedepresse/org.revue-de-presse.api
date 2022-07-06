@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Curation\Entity;
 
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 

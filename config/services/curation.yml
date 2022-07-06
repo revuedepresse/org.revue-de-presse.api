@@ -1,25 +1,30 @@
 services:
 
-    App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider:
-        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider'
+    App\Twitter\Infrastructure\Collector\InterruptibleCurator:
+        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCurator'
         calls:
-            - [ 'setApiAccessor',                           [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]
+            - [ 'setHttpClient',                            [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
-            - [ 'setModerator',                             [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setPublishersListRepository',             [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
-            - [ 'setStatusAccessor',                        [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
+            - [ 'setRateLimitCompliance',                   [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
+            - [ 'setPublishersListRepository',              [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
+            - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]
+            - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
 
-    App\NewsReview\Infrastructure\Repository\PublishersListRepository:
-        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRepository'
-        arguments:
-            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
-
-    App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
-        '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+    App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler'
+        calls:
+            - [ 'setCurator',           [ '@App\Twitter\Infrastructure\Collector\TweetCurator' ] ]
+            - [ 'setLogger',            [ '@monolog.logger.twitter_api' ] ]
+            - [ 'setMemberRepository',  [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
+        properties:
+            tokenRepository:            '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+        tags:
+            -
+                name:       'messenger.message_handler'
+                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet'

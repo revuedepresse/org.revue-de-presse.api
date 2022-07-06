@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use Doctrine\Common\Collections\Selectable;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -29,9 +29,9 @@ interface MemberInterface extends UserInterface
 
     public function twitterScreenName(): ?string;
 
-    /**
-     * @deprecated
-     */
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface;
+
+    /** @deprecated */
     public function setFullName(string $fullName): MemberInterface;
 
     public function getFullName(): string;
@@ -63,9 +63,13 @@ interface MemberInterface extends UserInterface
 
     public function getUrl(): ?string;
 
-    public function totalStatus(): int;
+    public function totalLikes(): int;
 
-    public function setTotalStatus($totalStatus): MemberInterface;
+    public function setTotalLikes(int $totalLikes): MemberInterface;
+
+    public function totalTweets(): int;
+
+    public function setTotalTweets($totalTweets): MemberInterface;
 
     public function getMinStatusId(): int;
 

@@ -5,10 +5,10 @@ namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Twitter\Infrastructure\Publication\Entity\Publication;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
@@ -87,7 +87,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
      */
     private function findLastBatchOfArchivedStatus(): CollectionInterface
     {
-        $classMetadata = $this->entityManager->getClassMetadata(ArchivedStatus::class);
+        $classMetadata = $this->entityManager->getClassMetadata(ArchivedTweet::class);
         $entityRepository = new EntityRepository($this->entityManager, $classMetadata);
 
         $status = $entityRepository->findBy(
@@ -104,7 +104,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
      */
     private function findLastBatchOfStatus(): CollectionInterface
     {
-        $classMetadata = $this->entityManager->getClassMetadata(Status::class);
+        $classMetadata = $this->entityManager->getClassMetadata(Tweet::class);
         $entityRepository = new EntityRepository($this->entityManager, $classMetadata);
 
         $queryBuilder = $entityRepository->createQueryBuilder('s')
@@ -168,7 +168,7 @@ QUERY
 
         while ($archivedStatus->count() > 0) {
             $ids = $archivedStatus->map(
-                function (StatusInterface $status) {
+                function (TweetInterface $status) {
                     return $status->getId();
                 }
             );
@@ -194,7 +194,7 @@ QUERY
 
         while ($statuses->count() > 0) {
             $ids = $statuses->map(
-                function (StatusInterface $status) {
+                function (TweetInterface $status) {
                     return $status->getId();
                 }
             );
@@ -222,7 +222,7 @@ QUERY
             a.name as aggregateName
         ");
         $queryBuilder->innerJoin(
-            Status::class,
+            Tweet::class,
             's',
             Join::WITH,
             self::TABLE_ALIAS.'.documentId = s.statusId'

@@ -5,29 +5,29 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\PublishersList\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
-use App\Membership\Domain\Repository\MemberPublishersListSubscriptionRepositoryInterface;
+use App\Membership\Domain\Repository\EditListMembersInterface;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
-use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
-use App\Membership\Infrastructure\Entity\AggregateSubscription;
-use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
+use App\Membership\Infrastructure\Entity\MemberInList;
+use App\Membership\Infrastructure\Repository\EditListMembers;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\PublishersList;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface;
+use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
+use App\Twitter\Infrastructure\Http\Resource\PublishersList;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,52 +36,82 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ImportMemberPublishersListsCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'app:synchronize-list';
-
-    use OwnershipBatchCollectedEventRepositoryTrait;
+    use ListBatchCollectedEventRepositoryTrait;
     use PublishersListCollectedEventRepositoryTrait;
 
-    private const ARGUMENT_SCREEN_NAME = 'screen_name';
+    private HttpClientInterface $httpClient;
 
-    private const OPTION_LIST_RESTRICTION = 'list-restriction';
+    private ListAwareHttpClientInterface $listAwareHttpClient;
 
-    private ApiAccessorInterface $accessor;
-
-    private OwnershipAccessorInterface $ownershipAccessor;
-
-    public ?string $listRestriction = null;
-
-    private AggregateSubscriptionRepository $publishersListSubscriptionRepository;
-
-    private MemberAggregateSubscriptionRepository $memberPublishersListSubscriptionRepository;
-
-    private NetworkRepository $networkRepository;
-
-    private MemberRepository $memberRepository;
+    private EditListMembers $listRepository;
 
     private LoggerInterface $logger;
 
+    private ListSubscriptionRepositoryInterface $listSubscriptionRepository;
+
+    private MemberRepository $memberRepository;
+
+    private NetworkRepository $networkRepository;
+
+    private const ARGUMENT_SCREEN_NAME = 'screen-name';
+
+    private const OPTION_SINGLE_LIST_FILTER = 'single-list-filter';
+
+    public const COMMAND_NAME = 'app:synchronize-member-lists';
+
+    public ?string $singleListFilter = null;
+
     public function __construct(
-        string $name,
-        ApiAccessorInterface $accessor,
-        OwnershipAccessorInterface $ownershipAccessor,
-        PublishersListSubscriptionRepositoryInterface $publishersListSubscriptionRepository,
-        MemberPublishersListSubscriptionRepositoryInterface  $memberPublishersListSubscriptionRepository,
-        NetworkRepositoryInterface $networkRepository,
-        MemberRepositoryInterface $memberRepository,
-        LoggerInterface $logger
+        string                              $name,
+        HttpClientInterface                 $httpClient,
+        ListAwareHttpClientInterface        $listAwareHttpClient,
+        EditListMembersInterface            $publishersListSubscriptionRepository,
+        ListSubscriptionRepositoryInterface $memberPublishersListSubscriptionRepository,
+        NetworkRepositoryInterface          $networkRepository,
+        MemberRepositoryInterface           $memberRepository,
+        LoggerInterface                     $logger
     ) {
-        $this->accessor = $accessor;
-        $this->ownershipAccessor = $ownershipAccessor;
+        $this->httpClient = $httpClient;
+        $this->listAwareHttpClient = $listAwareHttpClient;
 
         $this->memberRepository = $memberRepository;
-        $this->memberPublishersListSubscriptionRepository = $memberPublishersListSubscriptionRepository;
+        $this->listSubscriptionRepository = $memberPublishersListSubscriptionRepository;
         $this->networkRepository = $networkRepository;
-        $this->publishersListSubscriptionRepository = $publishersListSubscriptionRepository;
+        $this->listRepository = $publishersListSubscriptionRepository;
 
         $this->logger = $logger;
 
         parent::__construct($name);
+    }
+
+    public function mayApplySingleListFilter(): void
+    {
+        try {
+            $this->singleListFilter = $this->input->getOption(self::OPTION_SINGLE_LIST_FILTER);
+        } catch (InvalidArgumentException) {
+            // do nothing
+        }
+    }
+
+    /**
+     * @param \App\Twitter\Infrastructure\Http\Resource\PublishersList $list
+     * @return bool
+     */
+    function isListFilteredOut(PublishersList $list): bool
+    {
+        if (!$this->isSingleListFilterActive()) {
+            return false;
+        }
+
+        return $list->name() !== $this->singleListFilter;
+    }
+
+    /**
+     * @return bool
+     */
+    function isSingleListFilterActive(): bool
+    {
+        return $this->singleListFilter !== null;
     }
 
     protected function configure()
@@ -93,7 +123,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                  'The screen name of a Twitter member'
              )
              ->addOption(
-                 self::OPTION_LIST_RESTRICTION,
+                 self::OPTION_SINGLE_LIST_FILTER,
                  'r',
                  InputOption::VALUE_OPTIONAL,
                  'Restrict list import to single list'
@@ -101,42 +131,54 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
              ->setDescription('Import Twitter list');
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return int|null|void
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $correlationId = CorrelationId::generate();
+
         parent::execute($input, $output);
 
-        $memberName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
-        $member     = $this->accessor->ensureMemberHavingNameExists($memberName);
+        $this->mayApplySingleListFilter();
 
-        $correlationId = CorrelationId::generate();
+        $memberName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
+
+        $member     = $this->httpClient->ensureMemberHavingNameExists($memberName);
 
         $nextPage = -1;
 
         do {
-            $eventRepository   = $this->ownershipBatchCollectedEventRepository;
-            $listSubscriptions = $eventRepository->collectedOwnershipBatch(
-                $this->ownershipAccessor,
-                new MemberOwnershipsBatchSelector(
+            $listsBatch = $this->listsBatchCollectedEventRepository->collectedListsBatch(
+                $this->listAwareHttpClient,
+                new ListsBatchSelector(
                     $member->twitterScreenName(),
                     (string) $nextPage,
                     $correlationId
                 )
             );
 
-            $this->traverseSubscriptions($listSubscriptions->toArray(), $member);
+            try {
+                $this->traverseListsBatch($listsBatch->toArray(), $member);
+            } catch (\Exception $e) {
+                $this->logger->error(
+                    $e->getMessage(),
+                    ['exception' => $e->getTrace()]
+                );
 
-            $nextPage = $listSubscriptions->nextPage();
-        } while ($listSubscriptions->isNotEmpty());
+                $this->output->writeln(
+                    sprintf(
+                        'Could not save all lists for member having screen name "%s"',
+                        $memberName
+                    )
+                );
+
+                return self::FAILURE;
+            }
+
+            $nextPage = $listsBatch->nextPage();
+        } while ($listsBatch->isNotEmpty());
 
         $this->output->writeln(
             sprintf(
-                'All list subscriptions have be saved for member with name "%s"',
+                'All lists have be saved for member having screen name "%s"',
                 $memberName
             )
         );
@@ -145,10 +187,6 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
-     * @param array          $membersIndexedByTwitterId
-     *
-     * @return MemberInterface|object|null
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -166,48 +204,43 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         return $membersIndexedByTwitterId[$memberIdentity->id()];
     }
 
-    private function traverseSubscriptions(array $subscriptions, MemberInterface $member): void
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
+    private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
     {
+        $listsBatch = array_filter(
+            $listsBatch,
+            fn ($list) => !$this->isListFilteredOut($list)
+        );
+
         array_walk(
-            $subscriptions,
+            $listsBatch,
             function (PublishersList $list) use ($member) {
-                $memberAggregateSubscription = $this->memberPublishersListSubscriptionRepository
-                    ->make(
-                        $member,
-                        $list->toArray()
-                    );
+                $listSubscription = $this->listSubscriptionRepository
+                    ->make($member, $list->toArray());
 
                 $this->output->writeln(sprintf(
                     'About to collect members of Twitter list "%s"',
-                    $memberAggregateSubscription->listName()
+                    $listSubscription->listName()
                 ));
 
-                if (
-                    $this->input->hasOption(self::OPTION_LIST_RESTRICTION)
-                    && $this->input->getOption(
-                        self::OPTION_LIST_RESTRICTION
-                    )
-                ) {
-                    $this->listRestriction = $this->input->getOption(self::OPTION_LIST_RESTRICTION);
-                }
-
-                if ($this->listRestriction !== null && ($list->name() !== $this->listRestriction)) {
-                    return;
-                }
-
                 $eventRepository = $this->publishersListCollectedEventRepository;
-                $memberPublishersList = $eventRepository->collectedPublishersList(
-                    $this->accessor,
+                $memberPublishersList = $eventRepository->collectedListOwnedByMember(
+                    $this->httpClient,
                     [
-                        $eventRepository::OPTION_PUBLISHERS_LIST_ID => $memberAggregateSubscription->listId(),
-                        $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $memberAggregateSubscription->listName()
+                        $eventRepository::OPTION_PUBLISHERS_LIST_ID => $listSubscription->listId(),
+                        $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $listSubscription->listName()
                     ]
                 );
 
                 $ids = array_map(
-                    function (MemberIdentity $memberIdentity) {
-                        return $memberIdentity->id();
-                    },
+                    fn (MemberIdentity $memberIdentity) => $memberIdentity->id(),
                     $memberPublishersList->toArray()
                 );
 
@@ -226,76 +259,69 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                     }
                 );
 
-                $memberAggregateSubscriptions = [];
+                $listsOwnedByMember = [];
 
                 try {
-                    $memberAggregateSubscriptions = $this->publishersListSubscriptionRepository
-                        ->createQueryBuilder('aggs')
-                        ->andWhere(
-                            'aggs.memberAggregateSubscription = :member_aggregate_subscription'
-                        )
-                        ->setParameter(
-                            'member_aggregate_subscription',
-                            $memberAggregateSubscription
-                        )
-                        ->andWhere(
-                            'aggs.subscription in (:members)'
-                        )
-                        ->setParameter(
-                            'members',
-                            $members
-                        )
+                    $listsOwnedByMember = $this->listRepository
+                        ->createQueryBuilder('member_in_list')
+                        ->andWhere('member_in_list.list = :subscription')
+                        ->setParameter('subscription', $listSubscription)
+                        ->andWhere('member_in_list.memberInList in (:membersAddedToList)')
+                        ->setParameter('membersAddedToList', $members)
                         ->getQuery()
                         ->getResult();
                 } catch (\Exception $exception) {
-                    $this->logger->critical($exception->getMessage());
+                    $this->logger->critical(
+                        sprintf(
+                            'Could not process list %s',
+                            $listSubscription->listName()
+                        ),
+                        [
+                            'exception' => $exception->getMessage(),
+                            'trace' => $exception->getTrace()
+                        ]
+                    );
                 }
 
-                $indexedMemberAggregateSubscriptions = [];
-                $indexedMemberAggregateSubscriptions = array_reduce(
-                    $memberAggregateSubscriptions,
+                $indexedListSubscriptions = [];
+                $indexedListSubscriptions = array_reduce(
+                    $listsOwnedByMember,
                     function (
-                        $indexedMemberAggregateSubscriptions,
-                        AggregateSubscription $aggregateSubscription)
-                    {
+                        array             $indexedListSubscriptions,
+                        MemberInList $listOwnedByMember
+                    ) {
                         $index = sprintf(
                             '%s-%d',
-                            $aggregateSubscription
-                                ->getMemberAggregateSubscription()
-                                ->getId(),
-                            $aggregateSubscription
-                                ->subscription
-                                ->getId()
+                            $listOwnedByMember->getList()->getId(),
+                            $listOwnedByMember->memberInList->getId()
                         );
-                        $indexedMemberAggregateSubscriptions[$index] = $aggregateSubscription;
 
-                        return $indexedMemberAggregateSubscriptions;
+                        $indexedListSubscriptions[$index] = $listOwnedByMember;
+
+                        return $indexedListSubscriptions;
                     },
-                    $indexedMemberAggregateSubscriptions
+                    $indexedListSubscriptions
                 );
 
                 $publishersLists = $memberPublishersList->toArray();
+
                 array_walk(
                     $publishersLists,
                     function (
                         MemberIdentity $memberIdentity
                     ) use (
-                        $memberAggregateSubscription,
+                        $listSubscription,
                         $membersIndexedByTwitterId,
-                        $indexedMemberAggregateSubscriptions
+                        $indexedListSubscriptions
                     ) {
                         $member = $this->getMemberByTwitterId(
                             $memberIdentity,
                             $membersIndexedByTwitterId
                         );
 
-                        if (!($member instanceof MemberInterface)) {
-                            return;
-                        }
-
-                        $index = sprintf('%s-%d', $memberAggregateSubscription->getId(), $member->getId());
-                        if (!\array_key_exists($index, $indexedMemberAggregateSubscriptions)) {
-                            $this->publishersListSubscriptionRepository->make($memberAggregateSubscription, $member);
+                        $index = sprintf('%s-%d', $listSubscription->getId(), $member->getId());
+                        if (!\array_key_exists($index, $indexedListSubscriptions)) {
+                            $this->listRepository->make($listSubscription, $member);
                         }
                     }
                 );
