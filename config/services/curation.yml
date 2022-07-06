@@ -1,7 +1,7 @@
 services:
 
-    App\Twitter\Infrastructure\Collector\InterruptibleCurator:
-        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCurator'
+    App\Twitter\Infrastructure\Curation\InterruptibleCurator:
+        class: 'App\Twitter\Infrastructure\Curation\InterruptibleCurator'
         calls:
             - [ 'setHttpClient',                            [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
@@ -19,7 +19,7 @@ services:
     App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler:
         class: 'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchTweetMessageHandler'
         calls:
-            - [ 'setCurator',           [ '@App\Twitter\Infrastructure\Collector\TweetCurator' ] ]
+            - [ 'setCurator',           [ '@App\Twitter\Infrastructure\Curation\TweetCurator' ] ]
             - [ 'setLogger',            [ '@monolog.logger.twitter_api' ] ]
             - [ 'setMemberRepository',  [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
         properties:

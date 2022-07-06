@@ -1,5 +1,5 @@
 {
-    "name": "revuedepresse/worker",
+    "name": "snapshots/worker",
     "license": "GPL-3.0-or-later",
     "description": "A worker collecting publications from online social network via Twitter API.",
     "autoload": {

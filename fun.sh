@@ -132,7 +132,7 @@ function dispatch_amqp_messages() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env WORKER_WORKDIR="${WORKER}" \
+        --env WORKER_WORKSPACE="${WORKER}" \
         -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
@@ -142,6 +142,15 @@ function guard_against_missing_variables() {
     then
 
         printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'worker name e.g. worker.example.com' 'WORKER' $'\n'
+
+        exit 1
+
+    fi
+
+    if [ "${WORKER}" = 'worker.example.org' ];
+    then
+
+        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'WORKER' 'worker.example.org' $'\n'
 
         exit 1
 
@@ -268,7 +277,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env WORKER_WORKDIR="${WORKER}" \
+        --env WORKER_WORKSPACE="${WORKER}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'

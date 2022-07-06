@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Collector;
+namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
@@ -12,8 +12,8 @@ use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
-use App\Twitter\Infrastructure\Collector\Exception\SkipCollectException;
+use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
+use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
 use App\Twitter\Infrastructure\Curation\CurationSelectors;
 use App\Twitter\Infrastructure\DependencyInjection\{
     Curation\Curator\InterruptibleCuratorTrait,
