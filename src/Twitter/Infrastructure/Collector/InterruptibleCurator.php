@@ -208,10 +208,12 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         if ($this->memberRepository->hasBeenUpdatedBetween7HoursAgoAndNow(
             $this->selectors->screenName()
         )) {
-            $this->logger->info(sprintf(
-                'Publications have been recently collected for %s',
-                $this->selectors->screenName()
-            ));
+            $this->logger->info(
+                sprintf(
+                    'Tweets have been curated for "%s".',
+                    $this->selectors->screenName()
+                )
+            );
 
             return true;
         }
