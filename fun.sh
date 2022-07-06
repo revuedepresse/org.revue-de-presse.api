@@ -146,15 +146,6 @@ function guard_against_missing_variables() {
         exit 1
 
     fi
-
-    if [ "${WORKER}" = 'worker.revue-de-presse.org' ];
-    then
-
-        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'WORKER' 'worker.revue-de-presse.org' $'\n'
-
-        exit 1
-
-    fi
 }
 
 function remove_running_container_and_image_in_debug_mode() {
