@@ -1,4 +1,4 @@
-name: worker.snapshots.fr
+name: worker
 
 on: [push, pull_request]
 

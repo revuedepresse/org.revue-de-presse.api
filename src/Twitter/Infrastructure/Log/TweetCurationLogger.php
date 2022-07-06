@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Infrastructure\Collector\TweetCurator;
+use App\Twitter\Infrastructure\Curation\TweetCurator;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;

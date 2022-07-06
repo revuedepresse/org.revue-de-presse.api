@@ -131,7 +131,7 @@ class Whisperer
     public function setExpectedWhispers($whispers)
     {
         $this->expectedWhispers = $whispers;
-        
+
         return $this;
     }
 
@@ -142,7 +142,7 @@ class Whisperer
     {
         return $this->expectedWhispers;
     }
-    
+
     /**
      * @var \DateTime
      *

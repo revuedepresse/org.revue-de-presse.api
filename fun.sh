@@ -132,7 +132,7 @@ function dispatch_amqp_messages() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
+        --env WORKER_WORKSPACE="${WORKER}" \
         -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
@@ -277,7 +277,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env _WORKER="${WORKER}" \
+        --env WORKER_WORKSPACE="${WORKER}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'

@@ -2,14 +2,12 @@
 
 ![api.snapshots.fr continuous integration](https://github.com/thierrymarianne/api.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
 
-Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
-
+Worker collecting tweets from Twitter [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
 
 ## Installation
 
-The shell scripts written for bash   
-have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
+The shell scripts written for bash have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
 
 ### Requirements
 
@@ -37,3 +35,19 @@ make help
 GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.
+
+## Acknowledgment
+
+We're grateful towards all amazing contributors involved in the following  
+communities, organizations and projects (in lexicographic order):
+
+- [Blackfire](https://blackfire.io)
+- [Composer](http://getcomposer.org/)
+- [Datadog](https://datadoghq.eu/)
+- [Debian](https://www.debian.org/)
+- [Docker](docker.com)
+- [Doctrine](https://www.doctrine-project.org/)
+- [GitHub](https://github.com/)
+- [PHP](https://www.php.net/)
+- [Symfony](https://symfony.com/)
+- [Ubuntu](https://ubuntu.com/)

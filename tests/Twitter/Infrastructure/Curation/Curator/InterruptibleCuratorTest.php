@@ -8,7 +8,7 @@ use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Curation\Curator\InterruptibleCuratorInterface;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Throttling\RateLimitComplianceInterface;
-use App\Twitter\Infrastructure\Collector\InterruptibleCurator;
+use App\Twitter\Infrastructure\Curation\InterruptibleCurator;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

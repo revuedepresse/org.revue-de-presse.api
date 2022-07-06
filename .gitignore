@@ -1,6 +1,7 @@
 /.env*
 /.env.local.php
 /.env.*.local
+.phpunit.result.cache
 !/\.env*\.dist
 auth.json
 bin/behat
@@ -21,9 +22,8 @@ composer.phar
 /config/secrets/prod/prod.decrypt.private.php
 /node_modules*
 /phpunit.xml
-.phpunit.result.cache
-provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/containers/docker-compose.override*.yaml
 provisioning/volumes/amqp*
 provisioning/volumes/database*
 vendor*
+
