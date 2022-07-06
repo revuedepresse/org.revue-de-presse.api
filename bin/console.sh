@@ -369,7 +369,7 @@ function run_php_script() {
     then
         printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
         printf '%s%s' 'example:' $'\n' 1>&2
-        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="worker.revue-de-presse.org"' '\n' 1>&2
 
         return 1
     fi
