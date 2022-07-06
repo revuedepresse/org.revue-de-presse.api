@@ -5,7 +5,6 @@ namespace App\Tests\Twitter\Infrastructure\Curation\Repository;
 
 use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
-use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
 use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
