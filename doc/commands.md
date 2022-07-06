@@ -32,7 +32,7 @@ make list-amqp-queues
 
 ```shell
 # Customize the WORKER variable value assignment
-WORKER='worker.example.org' \
+WORKER='worker.revue-de-presse.org' \
 make start
 ```
 
