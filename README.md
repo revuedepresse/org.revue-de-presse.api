@@ -1,9 +1,12 @@
-# snapshots.fr worker
+# Revue-de-presse worker
 
-![api.snapshots.fr continuous integration](https://github.com/thierrymarianne/api.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
+![api.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
-Worker collecting tweets from Twitter [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
-This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
+Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
+
+API serving daily short lists (10 items) of top news in France sorted by popularity.
+
+See [revue-de-presse.org](https://revue-de-presse.org).
 
 ## Installation
 
@@ -12,7 +15,7 @@ The shell scripts written for bash have been tested with Ubuntu 22.04 (`Jammy Je
 ### Requirements
 
 Install [git](https://git-scm.com/downloads).
-> Git is a free and open source distributed version control system designed 
+> Git is a free and open source distributed version control system designed
 > to handle everything from small to very large projects with speed and efficiency.
 
 Install [Docker Docker Engine](https://docs.docker.com/engine/install/).
@@ -51,3 +54,7 @@ communities, organizations and projects (in lexicographic order):
 - [PHP](https://www.php.net/)
 - [Symfony](https://symfony.com/)
 - [Ubuntu](https://ubuntu.com/)
+
+### Some of their logos
+
+[![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
