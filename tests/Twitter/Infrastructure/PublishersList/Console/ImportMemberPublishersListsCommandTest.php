@@ -50,7 +50,7 @@ class ImportMemberPublishersListsCommandTest extends KernelTestCase
         // Arrange
 
         $this->commandTester->execute([
-            'screen_name' => 'dev_obs'
+            'screen-name' => 'dev_obs'
         ]);
 
         self::assertEquals(

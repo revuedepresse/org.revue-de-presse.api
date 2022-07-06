@@ -8,15 +8,15 @@ use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Curation\Entity\NullStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\TweetBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -28,10 +28,10 @@ use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Twitter\Infrastructure\Http\Repository\ArchivedStatusRepository;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -48,11 +48,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use PublicationPersistenceTrait;
     use LoggerTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
 
-    public ArchivedStatusRepository $archivedStatusRepository;
+    public ArchivedTweetRepository $archivedStatusRepository;
 
     public EntityManagerInterface $entityManager;
 
@@ -70,11 +70,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         }
 
         $existingRecord = false;
-        if ($status instanceof Status) {
+        if ($status instanceof Tweet) {
             $existingRecord = $this->notFoundStatusRepository->findOneBy(['status' => $status]) !== null;
         }
 
-        if ($status instanceof ArchivedStatus) {
+        if ($status instanceof ArchivedTweet) {
             $existingRecord = $this->notFoundStatusRepository->findOneBy(['archivedStatus' => $status]) !== null;
         }
 
@@ -97,7 +97,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      * @param bool   $skipExistingStatus
      * @param bool   $extractProperties
      *
-     * @return StatusInterface|TaggedStatus|NullStatus|array|null
+     * @return TweetInterface|TaggedStatus|NullStatus|array|null
      * @throws Exception
      */
     public function refreshStatusByIdentifier(
@@ -205,7 +205,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     /**
      * @param string $identifier
      *
-     * @return StatusInterface|NullStatus|array
+     * @return TweetInterface|NullStatus|array
      * @throws Exception
      */
     private function findStatusIdentifiedBy(string $identifier)
@@ -308,7 +308,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             count($statuses) > 0
             && $this->statusRepository->findOneBy(
                 ['statusId' => $statuses[0]->id]
-            ) instanceof StatusInterface
+            ) instanceof TweetInterface
         ) {
             $discoverMoreRecentStatuses = true;
         }
@@ -368,7 +368,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                     'Extremum (%s%s) retrieved for "%s": #%s',
                     $logPrefix,
                     $option,
-                    $options[FetchTweetInterface::SCREEN_NAME],
+                    $options[FetchAuthoredTweetInterface::SCREEN_NAME],
                     $options[$option]
                 )
             );
@@ -384,7 +384,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             sprintf(
                 '[No %s retrieved for "%s"] ',
                 $logPrefix . 'extremum',
-                $options[FetchTweetInterface::SCREEN_NAME]
+                $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             )
         );
 
@@ -412,14 +412,14 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     ): array {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->statusRepository->findNextExtremum(
-                $options[FetchTweetInterface::SCREEN_NAME],
+                $options[FetchAuthoredTweetInterface::SCREEN_NAME],
                 $findingDirection,
                 $selectors->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
         return $this->statusRepository->findLocalMaximum(
-            $options[FetchTweetInterface::SCREEN_NAME],
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
@@ -480,10 +480,10 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                                    $options
     ) {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
-            unset($options[FetchTweetInterface::BEFORE]);
+            unset($options[FetchAuthoredTweetInterface::BEFORE]);
         }
-        if (array_key_exists(FetchTweetInterface::TWITTER_LIST_ID, $options)) {
-            unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
+        if (array_key_exists(FetchAuthoredTweetInterface::TWITTER_LIST_ID, $options)) {
+            unset($options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]);
         }
 
         return $options;

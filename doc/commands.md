@@ -53,5 +53,5 @@ docker exec -ti $(docker ps -a| \grep --fixed-strings "${PROJECT_NAME}_worker" |
 # In worker container
 LIST_NAME='w3cstaff' \
 USERNAME='w3c' \
-php ./bin/console app:synchronize-list --list-restriction="${LIST_NAME}" "${USERNAME}"
+php ./bin/console app:synchronize-member-lists --single-list-filter="${LIST_NAME}" "${USERNAME}"
 ```

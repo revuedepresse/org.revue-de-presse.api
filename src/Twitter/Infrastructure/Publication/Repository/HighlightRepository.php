@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Conversation\ConversationAwareTrait;
+use App\Subscription\Infrastructure\Repository\ListSubscriptionRepository;
 use App\Twitter\Domain\Http\SearchParamsInterface;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Http\SearchParams;
-use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
@@ -120,12 +120,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
     }
 
-    /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     *
-     * @return $this
-     */
     private function applyConstraintAboutEnclosingAggregate(
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
@@ -140,10 +134,10 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
             $queryBuilder->innerJoin(
                 PublishersListRepository::TABLE_ALIAS.'.memberAggregateSubscription',
-                MemberAggregateSubscriptionRepository::TABLE_ALIAS,
+                ListSubscriptionRepository::TABLE_ALIAS,
                 Join::WITH,
                 implode([
-                    MemberAggregateSubscriptionRepository::TABLE_ALIAS,
+                    ListSubscriptionRepository::TABLE_ALIAS,
                     '.',
                     'id in (:aggregate_ids)'
                 ])

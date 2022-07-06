@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Clock\TimeRange;
 
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use DateTime;
 use Exception;
 
@@ -11,7 +11,7 @@ trait TimeRangeAwareTrait
 {
     public function updateTimeRange(): TimeRangeAwareInterface
     {
-        /** @var Status $status */
+        /** @var Tweet $status */
         $status = $this->status;
         $statusPublicationDate = $status->getCreatedAt();
 

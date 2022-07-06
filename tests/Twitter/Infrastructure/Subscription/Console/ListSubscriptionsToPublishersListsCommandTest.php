@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
 use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -69,9 +69,9 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
         // Arrange
 
         $screenName = 'thierrymarianne';
-        $this->repository->collectedOwnershipBatch(
+        $this->repository->collectedListsBatch(
             ListAwareHttpClientBuilder::willReturnSomeOwnership(),
-            new MemberOwnershipsBatchSelector($screenName)
+            new ListsBatchSelector($screenName)
         );
 
         // Act

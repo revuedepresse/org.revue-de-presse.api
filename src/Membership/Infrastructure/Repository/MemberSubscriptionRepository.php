@@ -27,7 +27,8 @@ use const JSON_ERROR_NONE;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
 
-class MemberSubscriptionRepository extends ServiceEntityRepository implements MemberSubscriptionRepositoryInterface
+class MemberSubscriptionRepository extends ServiceEntityRepository
+    implements MemberSubscriptionRepositoryInterface
 {
     private const SORT_BY_ASCENDING_MEMBER_ID  = 'ORDER BY u.usr_id ASC';
     private const SORT_BY_DESCENDING_MEMBER_ID = 'ORDER BY u.usr_id DESC';
@@ -35,9 +36,6 @@ class MemberSubscriptionRepository extends ServiceEntityRepository implements Me
     public MemberRepositoryInterface $memberRepository;
 
     /**
-     * @param MemberInterface $member
-     *
-     * @return bool
      * @throws \Exception
      */
     public function cancelAllSubscriptionsFor(MemberInterface $member): bool
@@ -258,12 +256,6 @@ QUERY
 QUERY;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param MemberInterface $subscription
-     *
-     * @return MemberSubscription
-     */
     public function saveMemberSubscription(
         MemberInterface $member,
         MemberInterface $subscription
@@ -321,12 +313,9 @@ QUERY
     }
 
     /**
-     * @param MemberInterface                       $member
-     * @param PaginationParams|null                 $paginationParams
-     * @param PublishersListIdentityInterface|null $publishersListIdentity
-     *
-     * @return array
-     * @throws \Exception
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \JsonException
      */
     public function selectMemberSubscriptions(
         MemberInterface $member,
@@ -336,9 +325,7 @@ QUERY
         $queryTemplate = $this->queryMemberSubscriptions(
             $publishersListIdentity,
             $paginationParams,
-            $selection = '',
-            $group = '',
-            $sort = self::SORT_BY_DESCENDING_MEMBER_ID
+            sort: self::SORT_BY_DESCENDING_MEMBER_ID
         );
 
         $connection = $this->getEntityManager()->getConnection();
@@ -368,12 +355,11 @@ QUERY
 
         return array_map(
             function (array $row) {
-                $row['aggregates'] = json_decode($row['aggregates'], $asArray = true);
-
-                $lastJsonError = json_last_error();
-                if ($lastJsonError !== JSON_ERROR_NONE) {
-                    throw new JsonException($lastJsonError);
-                }
+                $row['aggregates'] = json_decode(
+                    $row['aggregates'],
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                );
 
                 return $row;
             },

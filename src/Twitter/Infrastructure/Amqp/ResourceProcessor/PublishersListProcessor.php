@@ -68,7 +68,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     ): int {
         if ($ruleset->isCurationByListActive($list)) {
             $eventRepository = $this->publishersListCollectedEventRepository;
-            $memberCollection = $eventRepository->collectedPublishersList(
+            $memberCollection = $eventRepository->collectedListOwnedByMember(
                 $this->accessor,
                 [
                     $eventRepository::OPTION_PUBLISHERS_LIST_ID => $list->id(),

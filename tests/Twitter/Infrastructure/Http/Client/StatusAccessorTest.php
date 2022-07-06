@@ -5,8 +5,8 @@ namespace App\Tests\Twitter\Infrastructure\Http\Client\Client;
 
 use App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient;
 use App\Twitter\Infrastructure\Curation\CurationSelectors;
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -40,8 +40,8 @@ class StatusAccessorTest extends KernelTestCase
     {
         $selectors = CurationSelectors::fromArray(
             [
-                FetchTweetInterface::BEFORE       => '2010-01-01',
-                FetchTweetInterface::TWITTER_LIST_ID => 1
+                FetchAuthoredTweetInterface::BEFORE       => '2010-01-01',
+                FetchAuthoredTweetInterface::TWITTER_LIST_ID => 1
             ]
         );
 
@@ -51,7 +51,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $selectors,
             [
-                FetchTweetInterface::SCREEN_NAME => 'pierrec'
+                FetchAuthoredTweetInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );
@@ -69,7 +69,7 @@ class StatusAccessorTest extends KernelTestCase
     {
         $selectors = CurationSelectors::fromArray(
             [
-                FetchTweetInterface::TWITTER_LIST_ID => 1
+                FetchAuthoredTweetInterface::TWITTER_LIST_ID => 1
             ]
         );
 
@@ -79,7 +79,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $selectors,
             [
-                FetchTweetInterface::SCREEN_NAME => 'pierrec'
+                FetchAuthoredTweetInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );
@@ -94,7 +94,7 @@ class StatusAccessorTest extends KernelTestCase
     private function prophesizeStatusRepositoryForAscendingOrderFinding(): ObjectProphecy
     {
         $statusRepository = $this->prophesize(
-            StatusRepositoryInterface::class
+            TweetRepositoryInterface::class
         );
         $statusRepository->findNextExtremum(
             'pierrec',
@@ -111,7 +111,7 @@ class StatusAccessorTest extends KernelTestCase
     private function prophesizeStatusRepositoryForDescendingOrderFinding(): ObjectProphecy
     {
         $statusRepository = $this->prophesize(
-            StatusRepositoryInterface::class
+            TweetRepositoryInterface::class
         );
         $statusRepository->findLocalMaximum(
             'pierrec',

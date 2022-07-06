@@ -24,7 +24,7 @@ use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Http\Selector\AuthenticatedSelector;
-use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
@@ -193,12 +193,12 @@ class DispatchAmqpMessagesToFetchTweets implements DispatchAmqpMessagesToFetchTw
     ): OwnershipCollectionInterface {
         $previousCursor = -1;
 
-        $eventRepository = $this->ownershipBatchCollectedEventRepository;
+        $eventRepository = $this->listsBatchCollectedEventRepository;
 
         if ($this->ruleset->isSingleListFilterActive()) {
-            return $eventRepository->collectedOwnershipBatch(
+            return $eventRepository->collectedListsBatch(
                 $this->ownershipAccessor,
-                new MemberOwnershipsBatchSelector(
+                new ListsBatchSelector(
                     $this->ruleset->whoseListSubscriptionsAreCurated(),
                     (string) $ownerships->nextPage(),
                     $this->correlationId()
@@ -210,9 +210,9 @@ class DispatchAmqpMessagesToFetchTweets implements DispatchAmqpMessagesToFetchTw
             $ownerships,
             $this->ruleset->singleListFilter()
         )) {
-            $ownerships = $eventRepository->collectedOwnershipBatch(
+            $ownerships = $eventRepository->collectedListsBatch(
                 $this->ownershipAccessor,
-                new MemberOwnershipsBatchSelector(
+                new ListsBatchSelector(
                     $this->ruleset->whoseListSubscriptionsAreCurated(),
                     (string) $ownerships->nextPage(),
                     $this->correlationId()

@@ -2,10 +2,10 @@
 
 namespace App\Twitter\Infrastructure\Curation\Entity;
 
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use DateTime;
 
 class Highlight
@@ -18,7 +18,7 @@ class Highlight
     private $publicationDateTime;
 
     /**
-     * @var Status
+     * @var Tweet
      */
     private $status;
 
@@ -59,8 +59,8 @@ class Highlight
 
     public function __construct(
         MemberInterface $member,
-        StatusInterface $status,
-        DateTime $publicationDateTime
+        TweetInterface  $status,
+        DateTime        $publicationDateTime
     ) {
         $this->publicationDateTime = $publicationDateTime;
         $this->member = $member;

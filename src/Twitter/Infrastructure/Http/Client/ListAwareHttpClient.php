@@ -15,7 +15,7 @@ use App\Twitter\Infrastructure\Http\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
-use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use Psr\Log\LoggerInterface;
 
 class ListAwareHttpClient implements ListAwareHttpClientInterface
@@ -89,7 +89,7 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
 
         $correlationId = $selector->correlationId();
 
-        $eventRepository = $this->ownershipBatchCollectedEventRepository;
+        $eventRepository = $this->listsBatchCollectedEventRepository;
 
         $nextPage = -1;
 
@@ -105,9 +105,9 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
                     $nextPage = $memberOwnership->ownershipCollection()->nextPage();
                 }
 
-                $ownershipCollection = $eventRepository->collectedOwnershipBatch(
+                $ownershipCollection = $eventRepository->collectedListsBatch(
                     $this,
-                    new MemberOwnershipsBatchSelector(
+                    new ListsBatchSelector(
                         $selector->screenName(),
                         (string) $nextPage,
                         $correlationId

@@ -7,7 +7,7 @@ use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
@@ -55,7 +55,7 @@ class PublicationPersistence implements PublicationPersistenceInterface
         $statusCollection = new Collection(
             $result[$statusPersistence::PROPERTY_STATUS]->toArray()
         );
-        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
+        $statusCollection->map(fn(TweetInterface $status) => $status->markAsPublished());
 
         // Make publications
         $statusCollection = StatusToArray::fromStatusCollection($statusCollection);

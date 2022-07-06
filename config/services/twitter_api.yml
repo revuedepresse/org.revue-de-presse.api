@@ -71,4 +71,4 @@ services:
             - '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
             - '@logger'
         calls:
-            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository'] ]
+            - [ 'setListsBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository'] ]

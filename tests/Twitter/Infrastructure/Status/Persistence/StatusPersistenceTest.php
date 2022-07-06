@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Domain\Publication\Repository\TaggedTweetRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistenceInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
@@ -119,32 +119,32 @@ class StatusPersistenceTest extends KernelTestCase
             $normalizedStatus['normalized_status']
         );
 
-        $taggedStatus = $normalizedStatus['normalized_status']->first();
+        $taggedTweet = $normalizedStatus['normalized_status']->first();
         self::assertInstanceOf(
-            TaggedStatus::class,
+            TaggedTweet::class,
             $normalizedStatus['normalized_status']->first()
         );
 
-        /** @var TaggedStatus $taggedStatus */
+        /** @var TaggedTweet $taggedTweet */
         self::assertEquals(
             $statusProperties['user']->screen_name,
-            $taggedStatus->screenName()
+            $taggedTweet->screenName()
         );
         self::assertEquals(
             $statusProperties['user']->name,
-            $taggedStatus->name()
+            $taggedTweet->name()
         );
         self::assertEquals(
             $statusProperties['user']->profile_image_url,
-            $taggedStatus->avatarUrl()
+            $taggedTweet->avatarUrl()
         );
         self::assertEquals(
             $statusProperties['full_text'],
-            $taggedStatus->text()
+            $taggedTweet->text()
         );
         self::assertEquals(
             $createdAt,
-            $taggedStatus->publishedAt()
+            $taggedTweet->publishedAt()
         );
 
         self::assertInstanceOf(
@@ -159,7 +159,7 @@ class StatusPersistenceTest extends KernelTestCase
             $normalizedStatus['status']->first()
         );
         self::assertInstanceOf(
-            Status::class,
+            Tweet::class,
             $normalizedStatus['status']->first()
         );
     }
@@ -175,9 +175,9 @@ class StatusPersistenceTest extends KernelTestCase
 
         $createdAt = $this->makePublicationDate();
 
-        $taggedStatusRepository = $this->prophesize(TaggedStatusRepositoryInterface::class);
+        $TaggedTweetRepository = $this->prophesize(TaggedTweetRepositoryInterface::class);
 
-        $archivedStatus = (new ArchivedStatus())
+        $archivedStatus = (new ArchivedTweet())
             ->setUserAvatar('https://gravatar.com/bobmarley')
             ->setName('Bob Marley')
             ->setScreenName('bobm')
@@ -190,13 +190,13 @@ class StatusPersistenceTest extends KernelTestCase
             ->setCreatedAt($createdAt)
             ->setUpdatedAt($createdAt);
 
-        /** @var TaggedStatusRepositoryInterface|ObjectProphecy $taggedStatusRepository */
-        $taggedStatusRepository->convertPropsToStatus(
+        /** @var TaggedTweetRepositoryInterface|ObjectProphecy $TaggedTweetRepository */
+        $TaggedTweetRepository->convertPropsToStatus(
             Argument::type('array'),
             Argument::cetera()
         )->willReturn($archivedStatus);
 
-        $this->statusPersistence->setTaggedStatusRepository($taggedStatusRepository->reveal());
+        $this->statusPersistence->setTaggedTweetRepository($TaggedTweetRepository->reveal());
 
         $statusProperties = $this->makeStatusProperties($createdAt);
         $allStatuses = [(object) $statusProperties];
@@ -224,7 +224,7 @@ class StatusPersistenceTest extends KernelTestCase
 
         $unarchivedStatus = $normalizedStatus['status']->first();
         self::assertInstanceOf(
-            Status::class,
+            Tweet::class,
             $unarchivedStatus
         );
         self::assertEquals(
@@ -310,9 +310,9 @@ class StatusPersistenceTest extends KernelTestCase
     private function removeUnarchivedStatus(): void
     {
         $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
-        $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Http\Entity\Status');
+        $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Http\Entity\Tweet');
         $status = $statusRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
-        if ($status instanceof StatusInterface) {
+        if ($status instanceof TweetInterface) {
             $entityManager->remove($status);
             $entityManager->flush();
         }

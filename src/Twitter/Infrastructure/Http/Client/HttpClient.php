@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Http\Client;
 use Abraham\TwitterOAuth\TwitterOAuth as BaseTwitterApiClient;
 use Abraham\TwitterOAuth\TwitterOAuthException;
 use App\Membership\Domain\Model\MemberInterface;
-use App\Membership\Infrastructure\Entity\AggregateSubscription;
+use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
@@ -738,20 +738,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         return $this->fetchContentWithRetries($endpoint, $fetchContent);
     }
 
-    /**
-     * @param array $criteria
-     *
-     * @return bool
-     */
-    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
-    {
-        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
-            return false;
-        }
-
-        return $criteria[self::INTENT_TO_FETCH_LIKES];
-    }
-
     public function isApiLimitReached()
     {
         return $this->apiLimitReached;
@@ -1268,9 +1254,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param AggregateSubscription $subscription
-     *
-     * @return stdClass
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -1285,14 +1268,14 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function subscribeToMemberTimeline(AggregateSubscription $subscription)
+    public function followMember(MemberInList $member): array|stdClass|null
     {
         $endpoint = $this->getCreateFriendshipsEndpoint();
 
         return $this->contactEndpoint(
             str_replace(
                 '{{ screen_name }}',
-                $subscription->subscription->twitterScreenName(),
+                $member->memberInList->twitterScreenName(),
                 $endpoint
             )
         );
@@ -1317,8 +1300,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
             throw new TweetNotFoundException($message, self::ERROR_NOT_FOUND);
         }
-
-        usleep(500000);
 
         if ($lastHttpCode >= 400 && $lastHttpCode !== 404) {
             $this->twitterApiLogger->notice(

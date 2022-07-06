@@ -8,8 +8,8 @@ use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
@@ -23,12 +23,9 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     use LoggerTrait;
     use MemberRepositoryTrait;
 
-    /**
-     * @return iterable
-     */
     public static function getHandledMessages(): iterable
     {
-        yield FetchTweet::class => [
+        yield FetchAuthoredTweet::class => [
             'from_transport' => 'publications'
         ];
     }
@@ -38,11 +35,10 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     protected TweetCuratorInterface $curator;
 
     /**
-     * @param FetchTweetInterface $message
-     *
-     * @return bool
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function __invoke(FetchTweetInterface $message): bool
+    public function __invoke(FetchAuthoredTweetInterface $message): bool
     {
         $success = false;
 
@@ -70,9 +66,9 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
             if (!$success) {
                 $this->logger->info(
                     sprintf(
-                        'Re-queuing message for %s in aggregate %d',
-                        $options['screen_name'],
-                        $options['aggregate_id']
+                        'Re-queuing message for %s in list %d',
+                        $options[FetchAuthoredTweetInterface::SCREEN_NAME],
+                        $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]
                     )
                 );
             }
@@ -115,12 +111,9 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param FetchTweetInterface $message
-     *
-     * @return array
      * @throws Exception
      */
-    public function processMessage(FetchTweetInterface $message): array
+    public function processMessage(FetchAuthoredTweetInterface $message): array
     {
         $oauthToken = $this->extractOAuthToken($message);
 
@@ -129,15 +122,12 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
         return $oauthToken;
     }
 
-    /**
-     * @param TweetCuratorInterface $curator
-     */
     public function setCurator(TweetCuratorInterface $curator)
     {
         $this->curator = $curator;
     }
 
-    private function extractOAuthToken(FetchTweetInterface $message): array
+    private function extractOAuthToken(FetchAuthoredTweetInterface $message): array
     {
         $token = $message->token();
 

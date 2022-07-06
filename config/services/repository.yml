@@ -101,8 +101,7 @@ services:
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublishersListDispatcher',  [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
-            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
         tags:
@@ -137,20 +136,20 @@ services:
     App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface:
         '@App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository'
 
-    App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository:
-        class: 'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
+    App\Membership\Infrastructure\Repository\EditListMembers:
+        class: 'App\Membership\Infrastructure\Repository\EditListMembers'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Infrastructure\Entity\AggregateSubscription'
+            - 'App\Membership\Infrastructure\Entity\MemberInList'
         properties:
             accessor: '@App\Twitter\Domain\Http\Client\HttpClientInterface'
-            logger:                                 '@logger'
-            memberAggregateSubscriptionRepository:  '@App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
-            memberSubscriptionRepository:           '@repository.member_subscription'
-            networkRepository:                      '@App\Membership\Infrastructure\Repository\NetworkRepository'
+            logger:                           '@logger'
+            memberListSubscriptionRepository: '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
+            memberSubscriptionRepository:     '@repository.member_subscription'
+            networkRepository:                '@App\Membership\Infrastructure\Repository\NetworkRepository'
 
-    App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface:
-        '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
+    App\Membership\Domain\Repository\EditListMembersInterface:
+        '@App\Membership\Infrastructure\Repository\EditListMembers'
 
     repository.owner:
         class: 'App\FrenchMediaShareholders\Repository\OwnerRepository'
@@ -172,13 +171,16 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository:
-        class: 'App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+    App\Subscription\Infrastructure\Repository\ListSubscriptionRepository:
+        class: 'App\Subscription\Infrastructure\Repository\ListSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription'
+            - 'App\Subscription\Infrastructure\Entity\ListSubscription'
         tags:
             - { name: 'doctrine.repository_service' }
+
+    App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface:
+        '@App\Subscription\Infrastructure\Repository\ListSubscriptionRepository'
 
     repository.keyword:
         class: 'App\Twitter\Infrastructure\Publication\Repository\KeywordRepository'
@@ -194,7 +196,7 @@ services:
         calls:
             - [ 'setLogger',            [ '@logger' ] ]
             - [ 'setTweetAwareHttpClient',    [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
+            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
         properties:
             twitterList:                '%publishers_list_default%'
 
@@ -211,7 +213,7 @@ services:
             - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
             - [ 'setTweetAwareHttpClient',    [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
+            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
         class: 'App\Membership\Infrastructure\Repository\NetworkRepository'

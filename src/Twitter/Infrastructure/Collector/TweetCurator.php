@@ -11,7 +11,7 @@ use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Collector\Exception\SkipCollectException;
 use App\Twitter\Infrastructure\Curation\CurationSelectors;
@@ -27,9 +27,9 @@ use App\Twitter\Infrastructure\DependencyInjection\{
     Membership\WhispererRepositoryTrait,
     Publication\PublicationPersistenceTrait,
     Publication\PublishersListRepositoryTrait,
-    Status\StatusLoggerTrait,
+    Status\TweetCurationLoggerTrait,
     Status\StatusPersistenceTrait,
-    Status\StatusRepositoryTrait,
+    Status\TweetRepositoryTrait,
     TokenRepositoryTrait};
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
@@ -68,10 +68,10 @@ class TweetCurator implements TweetCuratorInterface
     use TweetBatchCollectedEventRepositoryTrait;
     use PublishersListRepositoryTrait;
     use PublicationPersistenceTrait;
-    use StatusLoggerTrait;
+    use TweetCurationLoggerTrait;
     use StatusPersistenceTrait;
     use TweetAwareHttpClientTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
     use WhispererIdentificationTrait;
@@ -220,10 +220,10 @@ class TweetCurator implements TweetCuratorInterface
     {
         try {
             $this->statusRepository->updateLastStatusPublicationDate(
-                $options[FetchTweetInterface::SCREEN_NAME]
+                $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             );
         } catch (TweetNotFoundException $exception) {
-            $this->logger->info($exception->getMessage());
+            $this->logger->info($exception->getMessage(), ['trace' => $exception->getTrace()]);
         }
     }
 
@@ -270,10 +270,10 @@ class TweetCurator implements TweetCuratorInterface
         $options
     ) {
         if ($this->selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
-            unset($options[FetchTweetInterface::BEFORE]);
+            unset($options[FetchAuthoredTweetInterface::BEFORE]);
         }
-        if (array_key_exists(FetchTweetInterface::TWITTER_LIST_ID, $options)) {
-            unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
+        if (array_key_exists(FetchAuthoredTweetInterface::TWITTER_LIST_ID, $options)) {
+            unset($options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]);
         }
 
         return $options;
@@ -451,21 +451,21 @@ class TweetCurator implements TweetCuratorInterface
     protected function remainingStatuses($options): bool
     {
         $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor(
-            $options[FetchTweetInterface::SCREEN_NAME]
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
         $existingStatus        = $this->translator->trans(
             'logs.info.status_existing',
             [
                 'count'        => $serializedStatusCount,
                 'total_status' => $serializedStatusCount,
-                'member'       => $options[FetchTweetInterface::SCREEN_NAME],
+                'member'       => $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             ],
             'logs'
         );
         $this->logger->info($existingStatus);
 
         $memberProfile = $this->collectMemberProfile(
-            $options[FetchTweetInterface::SCREEN_NAME]
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
         if (!isset($memberProfile->statuses_count)) {
             $memberProfile->statuses_count = 0;
@@ -481,7 +481,7 @@ class TweetCurator implements TweetCuratorInterface
         $discoveredStatus = $this->translator->trans(
             'logs.info.status_discovered',
             [
-                'member'       => $options[FetchTweetInterface::SCREEN_NAME],
+                'member'       => $options[FetchAuthoredTweetInterface::SCREEN_NAME],
                 'count'        => $statusesCount,
                 'total_status' => $statusesCount,
             ],
@@ -528,7 +528,7 @@ class TweetCurator implements TweetCuratorInterface
             $this->safelyDeclareExtremum(
                 $statuses,
                 $lookingBetweenLastPublicationAndNow,
-                $options[FetchTweetInterface::SCREEN_NAME]
+                $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             );
         }
 
@@ -546,14 +546,14 @@ class TweetCurator implements TweetCuratorInterface
 
         $lastCollectionBatchSize = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
-            $options[FetchTweetInterface::SCREEN_NAME],
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors
         );
 
         $this->whispererIdentification->identifyWhisperer(
             $selectors,
             $options,
-            $options[FetchTweetInterface::SCREEN_NAME],
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             (int) $lastCollectionBatchSize
         );
 
@@ -650,7 +650,7 @@ class TweetCurator implements TweetCuratorInterface
     private function getExtremeStatusesIdsFor($options): array
     {
         return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-            $options[FetchTweetInterface::SCREEN_NAME]
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
     }
 
@@ -756,7 +756,7 @@ class TweetCurator implements TweetCuratorInterface
     {
         $success = true;
 
-        $this->collectStatusLogger->logIntentionWithRegardsToAggregate(
+        $this->collectStatusLogger->logIntentionWithRegardToList(
             $options,
             $this->selectors
         );
@@ -779,9 +779,8 @@ class TweetCurator implements TweetCuratorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchTweetInterface::TWITTER_LIST_ID] = $this->selectors->publishersListId();
-                $options[FetchTweetInterface::BEFORE]              =
-                    $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
+                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID] = $this->selectors->publishersListId();
+                $options[FetchAuthoredTweetInterface::BEFORE] = $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
 
                 $success = $this->curateTweets(
                     $options,
@@ -794,7 +793,7 @@ class TweetCurator implements TweetCuratorInterface
                     $discoverPublicationWithMinId
                     && $this->selectors->dateBeforeWhichPublicationsAreToBeCollected() === null
                 ) {
-                    unset($options[FetchTweetInterface::TWITTER_LIST_ID]);
+                    unset($options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]);
 
                     $options = $this->tweetAwareHttpClient->updateExtremum(
                         $this->selectors,

@@ -7,7 +7,7 @@ use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuil
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
-use App\Twitter\Infrastructure\Http\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -33,9 +33,9 @@ class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_collects_a_batch_of_ownership(): void
     {
-        $batch = $this->subjectUnderTest->collectedOwnershipBatch(
+        $batch = $this->subjectUnderTest->collectedListsBatch(
             $this->accessor,
-            new MemberOwnershipsBatchSelector('dummy_screen_name')
+            new ListsBatchSelector('dummy_screen_name')
         );
 
         self::assertTrue($batch->isEmpty(), 'It collects an empty batch of ownerships');

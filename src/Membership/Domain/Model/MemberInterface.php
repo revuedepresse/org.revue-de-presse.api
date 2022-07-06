@@ -31,9 +31,7 @@ interface MemberInterface extends UserInterface
 
     public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface;
 
-    /**
-     * @deprecated
-     */
+    /** @deprecated */
     public function setFullName(string $fullName): MemberInterface;
 
     public function getFullName(): string;

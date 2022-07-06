@@ -51,8 +51,8 @@ services:
             - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@logger'
 
-    test.App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand:
-        '@App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand'
+    test.App\Membership\Infrastructure\Console\AddMembersBatchToListCommand:
+        '@App\Membership\Infrastructure\Console\AddMembersBatchToListCommand'
 
     test.App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
         '@App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'

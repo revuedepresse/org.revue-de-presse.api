@@ -167,10 +167,10 @@ function install_process_manager() {
 
     fi
 
+    export ASDF_DIR="${asdf_dir}"
+
     git config --global advice.detachedHead false
     git clone https://github.com/asdf-vm/asdf.git --branch v0.10.0 "${asdf_dir}"
-
-    export ASDF_DIR="${asdf_dir}"
 
     echo 'export ASDF_DIR='"${asdf_dir}"        >> "${HOME}/.bashrc"
     echo '. ${ASDF_DIR}/asdf.sh'                >> "${HOME}/.bashrc"
@@ -187,6 +187,8 @@ function install_process_manager() {
     npm config set cache "${asdf_dir}/../npm" --global
     npm install pm2
     ./node_modules/.bin/pm2 install pm2-logrotate
+
+    echo '' > ./.pm2-installed
 }
 
 function install_process_manager_packages() {

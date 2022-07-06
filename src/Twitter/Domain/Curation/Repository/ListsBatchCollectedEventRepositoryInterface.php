@@ -13,7 +13,7 @@ interface ListsBatchCollectedEventRepositoryInterface
     public const OPTION_SCREEN_NAME = 'screen_name';
     public const OPTION_NEXT_PAGE = 'next_page';
 
-    public function collectedOwnershipBatch(
+    public function collectedListsBatch(
         ListAwareHttpClientInterface $accessor,
         ListSelectorInterface        $selector
     ): OwnershipCollectionInterface;

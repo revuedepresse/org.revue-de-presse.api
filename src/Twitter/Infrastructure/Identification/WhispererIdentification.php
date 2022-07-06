@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Identification;
 
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Http\Entity\Whisperer;
 
@@ -19,8 +19,8 @@ class WhispererIdentification implements WhispererIdentificationInterface
     use HttpClientTrait;
     use LoggerTrait;
     use MemberProfileCollectedEventRepositoryTrait;
-    use StatusLoggerTrait;
-    use StatusRepositoryTrait;
+    use TweetCurationLoggerTrait;
+    use TweetRepositoryTrait;
     use TranslatorTrait;
     use WhispererRepositoryTrait;
 
@@ -82,7 +82,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         array                      $options,
         ?int                       $lastCollectionBatchSize
     ) {
-        $selectors->selectTweetsByMemberScreenName($options[FetchTweetInterface::SCREEN_NAME]);
+        $selectors->selectTweetsByMemberScreenName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';

@@ -1,14 +1,18 @@
 parameters:
     command.map_status_collection.class:                                        'App\Twitter\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
     command.select_status_collection.class:                                     'App\Twitter\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
-    command.import_network.class:                                               'App\Membership\Infrastructure\Console\ImportNetworkCommand'
 
     app.amqp_message_consumer.conversation_status.class:                        'App\Conversation\Consumer\ConversationStatusConsumer'
-    app.amqp_message_dispatcher.produce_conversation_messages_command.class:    'App\Conversation\Amqp\MessageBus\DispatchAmqpMessagesToFetchThreadedTweetsCommand'
-    app.amqp_message_dispatcher.produce_member_messages_command.class:          'App\Conversation\Amqp\MessageBus\DispatchAmqpMessagesToFetchMemberProfilesCommand'
-    app.amqp_message_consumer.network.class:                                    'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
 services:
+    App\Membership\Infrastructure\Console\AddSingleMemberToListCommand:
+        class: 'App\Membership\Infrastructure\Console\AddSingleMemberToListCommand'
+        properties:
+            EditListMembers: '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
+            logger:                     '@logger'
+        tags:
+            - { name: 'console.command' }
+
     App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
         tags:
@@ -38,24 +42,6 @@ services:
             - { name: 'console.command' }
         public: true
 
-    App\Twitter\Infrastructure\Amqp\Console\FetchMemberSubscriptionTimelineMessageDispatcher:
-        class: 'App\Twitter\Infrastructure\Amqp\Console\FetchMemberSubscriptionTimelineMessageDispatcher'
-        calls:
-            - [ 'setAggregateRepository',                   [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'] ]
-            - [ 'setDefaultSecret',                         [ '%app.twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',                          [ '%app.twitter.oauth_token.default%'] ]
-            - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setHttpClient',                            [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
-            - [ 'setLogger',                                [ '@logger'] ]
-            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'] ]
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
-            - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository'] ]
-            - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
-            - [ 'setTranslator',                            [ '@translator'] ]
-        tags:
-            - { name: 'console.command' }
-        public: true
-
     App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
         class: 'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
         calls:
@@ -76,28 +62,14 @@ services:
     command.select_status_collection:
         class: "%command.select_status_collection.class%"
         properties:
-            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'
-        tags:
-            - { name: 'console.command' }
-
-    command.import_network:
-        class: "%command.import_network.class%"
-        properties:
-            networkRepository: '@App\Membership\Infrastructure\Repository\NetworkRepository'
-            #
-            #
-            # TODO
-            # Replace rabbimq bundle messager producer with
-            # symfony component message dispatcher
-            #
-            # producer:          '@old_sound_rabbit_mq.app.amqp_message_dispatcher.network_producer'
+            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'
         tags:
             - { name: 'console.command' }
 
     command.map_status_collection:
         class: "%command.map_status_collection.class%"
         properties:
-            statusRepository:       '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'
+            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'
             refreshStatusMapping:   '@mapping.refresh_status'
             oauthToken:             "%app.twitter.oauth_token.default%"
             oauthSecret:            "%app.twitter.oauth_secret.default%"
@@ -111,37 +83,14 @@ services:
         tags:
             - { name: 'console.command' }
 
-    command.subscribe_to_member_timelines:
-        class: 'App\Membership\Infrastructure\Console\SubscribeToMemberTimelinesCommand'
-        properties:
-            accessor: '@App\Twitter\Domain\Http\Client\HttpClientInterface'
-            aggregateSubscriptionRepository: '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
-            logger:                          '@logger'
-        tags:
-            - { name: 'console.command' }
-
     app.amqp_message_consumer.conversation_status:
         class: "%app.amqp_message_consumer.conversation_status.class%"
         calls:
             - [ 'setLogger',                [ '@monolog.logger.twitter_api'] ]
             - [ 'setTweetAwareHttpClient',  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setStatusRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setMemberRepository',      [ '@user_manager'] ]
         properties:
             aggregateRepository:        '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
             entityManager:              '@doctrine.orm.entity_manager'
 
-    app.amqp_message_dispatcher.conversation_status:
-        class: "%app.amqp_message_dispatcher.produce_conversation_messages_command.class%"
-        properties:
-            filesystem:      '@filesystem'
-            statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
-        tags:
-            - { name: 'console.command' }
-
-    app.amqp_message_dispatcher.member_status:
-        class: "%app.amqp_message_dispatcher.produce_member_messages_command.class%"
-        properties:
-            statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
-        tags:
-            - { name: 'console.command' }

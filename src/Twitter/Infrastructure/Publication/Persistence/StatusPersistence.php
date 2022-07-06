@@ -5,20 +5,20 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
@@ -41,9 +41,9 @@ class StatusPersistence implements StatusPersistenceInterface
     use LoggerTrait;
     use PublicationPersistenceTrait;
     use PublishersListRepositoryTrait;
-    use StatusLoggerTrait;
-    use StatusRepositoryTrait;
-    use TaggedStatusRepositoryTrait;
+    use TweetCurationLoggerTrait;
+    use TweetRepositoryTrait;
+    use TaggedTweetRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
     public const PROPERTY_NORMALIZED_STATUS = 'normalized_status';
@@ -87,12 +87,12 @@ class StatusPersistence implements StatusPersistenceInterface
 
         $statusCollection = StatusCollection::fromArray([]);
 
-        /** @var TaggedStatus $taggedStatus */
-        foreach ($propertiesCollection->toArray() as $key => $taggedStatus) {
+        /** @var TaggedTweet $taggedTweet */
+        foreach ($propertiesCollection->toArray() as $key => $taggedTweet) {
             try {
                 $statusCollection = $this->persistStatus(
                     $statusCollection,
-                    $taggedStatus,
+                    $taggedTweet,
                     $twitterList
                 );
             } catch (ORMException $exception) {
@@ -107,7 +107,7 @@ class StatusPersistence implements StatusPersistenceInterface
         $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
 
         $firstStatus = $statusCollection->first();
-        $screenName  = $firstStatus instanceof StatusInterface ?
+        $screenName  = $firstStatus instanceof TweetInterface ?
             $firstStatus->getScreenName() :
             null;
 
@@ -133,7 +133,7 @@ class StatusPersistence implements StatusPersistenceInterface
         }
     }
 
-    private function logStatusToBeInserted(StatusInterface $status): void
+    private function logStatusToBeInserted(TweetInterface $status): void
     {
         if ($status->getId() === null) {
             $this->collectStatusLogger->logStatus($status);
@@ -142,11 +142,11 @@ class StatusPersistence implements StatusPersistenceInterface
 
     private function persistStatus(
         CollectionInterface $statuses,
-        TaggedStatus $taggedStatus,
+        TaggedTweet $taggedTweet,
         ?PublishersList $twitterList
     ): CollectionInterface {
-        $extract = $taggedStatus->toLegacyProps();
-        $status  = $this->taggedStatusRepository
+        $extract = $taggedTweet->toLegacyProps();
+        $status  = $this->TaggedTweetRepository
             ->convertPropsToStatus($extract, $twitterList);
 
         $this->logStatusToBeInserted($status);
@@ -163,10 +163,10 @@ class StatusPersistence implements StatusPersistenceInterface
 
     private function persistTimelyStatus(
         ?PublishersList $twitterList,
-        StatusInterface $status
+        TweetInterface $status
     ): void {
         if ($twitterList instanceof PublishersList) {
-            $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
+            $timelyStatus = $this->timelyStatusRepository->fromTweetInList(
                 $status,
                 $twitterList
             );
@@ -174,7 +174,7 @@ class StatusPersistence implements StatusPersistenceInterface
         }
     }
 
-    private function refreshUpdatedAt(StatusInterface $status): void
+    private function refreshUpdatedAt(TweetInterface $status): void
     {
         if ($status->getId()) {
             try {
@@ -197,21 +197,21 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     /**
-     * @param StatusInterface        $status
+     * @param TweetInterface         $status
      * @param EntityManagerInterface $entityManager
      *
-     * @return Status
+     * @return Tweet
      */
     public function unarchiveStatus(
-        StatusInterface $status,
+        TweetInterface         $status,
         EntityManagerInterface $entityManager
-    ): StatusInterface {
-        if (!($status instanceof ArchivedStatus)) {
+    ): TweetInterface {
+        if (!($status instanceof ArchivedTweet)) {
             return $status;
         }
 
         $archivedStatus = $status;
-        $status         = Status::fromArchivedStatus($archivedStatus);
+        $status         = Tweet::fromArchivedStatus($archivedStatus);
 
         $entityManager->remove($archivedStatus);
 

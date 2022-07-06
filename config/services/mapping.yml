@@ -9,4 +9,4 @@ services:
         calls:
             - [ 'setLogger',                    [ '@monolog.logger.twitter_api'  ] ]
             - [ 'setPublicationPersistence',    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
-            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'  ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'  ] ]

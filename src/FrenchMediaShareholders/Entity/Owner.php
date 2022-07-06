@@ -47,7 +47,7 @@ class Owner
      * @param Media $media
      * @return Ownership
      */
-    public function hasRelationshipWithRegardsToMedia(
+    public function hasRelationshipWithRegardToMedia(
         Media $media,
         float $shares = null,
         string $ownershipLevel = null

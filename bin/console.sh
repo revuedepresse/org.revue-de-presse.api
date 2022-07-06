@@ -203,9 +203,10 @@ function get_rabbitmq_virtual_host() {
 
 function get_symfony_environment() {
     local symfony_env='dev'
-    if [ -n "${SYMFONY_ENV}" ];
+
+    if [ -n "${APP_ENV}" ];
     then
-        symfony_env="${SYMFONY_ENV}"
+        symfony_env="${APP_ENV}"
     fi
 
     echo 'APP_ENV='"${symfony_env}"

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Adapter;
 
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use function hash;
 
@@ -13,7 +13,7 @@ class StatusToArray
         CollectionInterface $statusCollection
     ): CollectionInterface {
         return $statusCollection->map(
-            function (StatusInterface $status) {
+            function (TweetInterface $status) {
                 return [
                     'legacy_id' => $status->getId(),
                     'hash' => hash('sha256', $status->getScreenName().'|'.$status->getStatusId()),

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
+use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
 use App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages;
 use App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
@@ -40,7 +40,7 @@ class Kernel extends BaseKernel implements CompilerPassInterface
                 if (!in_array(
                     $id,
                     [
-                        AddMemberToPublishersListCommand::class,
+                        AddMembersBatchToListCommand::class,
                         AuthorizeApplicationCommand::class,
                         DispatchFetchTweetsMessages::class,
                         ImportMemberPublishersListsCommand::class

@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Curation\Repository;
 
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
-use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
+use App\Twitter\Domain\Curation\Exception\ListsBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -28,12 +28,13 @@ class ListsBatchCollectedEventRepository extends ServiceEntityRepository impleme
 {
     use LoggerTrait;
 
-    public function collectedOwnershipBatch(
+    public function collectedListsBatch(
         ListAwareHttpClientInterface $accessor,
         ListSelectorInterface        $selector
     ): OwnershipCollectionInterface {
         $event               = $this->startCollectOfOwnershipBatch($selector);
         $ownershipCollection = $accessor->getMemberOwnerships($selector);
+
         $this->finishCollectOfOwnershipBatch(
             $event,
             json_encode(
@@ -172,6 +173,6 @@ QUERY
             return OwnershipCollection::fromArray($mergedLists);
         }
 
-        OwnershipBatchNotFoundException::throws($screenName);
+        ListsBatchNotFoundException::throws($screenName);
     }
 }

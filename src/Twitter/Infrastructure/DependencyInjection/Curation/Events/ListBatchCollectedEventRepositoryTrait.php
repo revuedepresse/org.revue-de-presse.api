@@ -7,12 +7,12 @@ use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInt
 
 trait ListBatchCollectedEventRepositoryTrait
 {
-    private ListsBatchCollectedEventRepositoryInterface $ownershipBatchCollectedEventRepository;
+    private ListsBatchCollectedEventRepositoryInterface $listsBatchCollectedEventRepository;
 
-    public function setOwnershipBatchCollectedEventRepository(
-        ListsBatchCollectedEventRepositoryInterface $ownershipBatchCollectedEventRepository
+    public function setListsBatchCollectedEventRepository(
+        ListsBatchCollectedEventRepositoryInterface $listsBatchCollectedEventRepository
     ): self {
-        $this->ownershipBatchCollectedEventRepository = $ownershipBatchCollectedEventRepository;
+        $this->listsBatchCollectedEventRepository = $listsBatchCollectedEventRepository;
 
         return $this;
     }

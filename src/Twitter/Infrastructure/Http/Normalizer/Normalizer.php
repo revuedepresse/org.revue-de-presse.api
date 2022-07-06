@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Normalizer;
 
-use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Closure;
@@ -19,16 +19,12 @@ use const JSON_THROW_ON_ERROR;
 class Normalizer implements NormalizerInterface
 {
     /**
-     * @param stdClass     $properties
-     * @param Closure|null $onFinish
-     *
-     * @return TaggedStatus
      * @throws Exception
      */
     public static function normalizeStatusProperties(
         stdClass $properties,
         Closure $onFinish = null
-    ): TaggedStatus {
+    ): TaggedTweet {
         $text = $properties->full_text ?? $properties->text;
 
         $normalizedProperties = $onFinish(
@@ -46,7 +42,7 @@ class Normalizer implements NormalizerInterface
             ]
         );
 
-        return TaggedStatus::fromLegacyProps($normalizedProperties);
+        return TaggedTweet::fromLegacyProps($normalizedProperties);
     }
 
     /**

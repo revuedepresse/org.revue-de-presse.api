@@ -1,9 +1,9 @@
 services:
-    App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand:
-        class: 'App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand'
+    App\Membership\Infrastructure\Console\AddMembersBatchToListCommand:
+        class: 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand'
         arguments:
-            - !php/const 'App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand::COMMAND_NAME'
-            - '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
+            - !php/const 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand::COMMAND_NAME'
+            - '@App\Membership\Domain\Repository\EditListMembersInterface'
             - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
             - '@App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface'
@@ -59,13 +59,13 @@ services:
             - !php/const 'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand::COMMAND_NAME'
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface'
-            - '@App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface'
-            - '@App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+            - '@App\Membership\Domain\Repository\EditListMembersInterface'
+            - '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
             - '@App\Membership\Domain\Repository\NetworkRepositoryInterface'
             - '@user_manager'
             - '@logger'
         calls:
-            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository' ] ]
+            - [ 'setListsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository' ] ]
             - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }

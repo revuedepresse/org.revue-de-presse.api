@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Membership\Infrastructure\Console;
 
-use App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand;
+use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
 use App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
@@ -19,7 +19,7 @@ class AddMemberToPublishersListTest extends KernelTestCase
 {
     private EntityManagerInterface $entityManager;
 
-    private AddMemberToPublishersListCommand $command;
+    private AddMembersBatchToListCommand $command;
 
     private CommandTester $commandTester;
 
@@ -27,14 +27,13 @@ class AddMemberToPublishersListTest extends KernelTestCase
     {
         $kernel = static::bootKernel();
 
-        /** @var AddMemberToPublishersListCommand $command */
-        $command = static::getContainer()->get('test.'.AddMemberToPublishersListCommand::class);
+        $command = static::getContainer()->get('test.'.AddMembersBatchToListCommand::class);
 
         $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $application = new Application($kernel);
 
-        $this->command = $application->find(AddMemberToPublishersListCommand::COMMAND_NAME);
+        $this->command = $application->find(AddMembersBatchToListCommand::COMMAND_NAME);
 
         $this->commandTester = new CommandTester($command);
 

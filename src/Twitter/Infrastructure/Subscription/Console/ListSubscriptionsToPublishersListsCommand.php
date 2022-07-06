@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
+use App\Twitter\Domain\Curation\Exception\ListsBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
@@ -61,7 +61,7 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
 
         try {
             $subscriptions = $this->repository->byScreenName($screenName);
-        } catch (OwnershipBatchNotFoundException $e) {
+        } catch (ListsBatchNotFoundException $e) {
             $this->output->writeln(
                 sprintf(
                     'No subscription to a Twitter list can be found for Twitter member having "%s" as screen name.',

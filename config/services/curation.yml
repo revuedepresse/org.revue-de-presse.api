@@ -3,14 +3,14 @@ services:
     App\Twitter\Infrastructure\Collector\InterruptibleCurator:
         class: 'App\Twitter\Infrastructure\Collector\InterruptibleCurator'
         calls:
-            - [ 'setHttpClient',                           [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
+            - [ 'setHttpClient',                            [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
-            - [ 'setRateLimitCompliance',                             [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
-            - [ 'setPublishersListRepository',             [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
-            - [ 'setTweetAwareHttpClient',                        [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
+            - [ 'setRateLimitCompliance',                   [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
+            - [ 'setPublishersListRepository',              [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
+            - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
@@ -27,4 +27,4 @@ services:
         tags:
             -
                 name:       'messenger.message_handler'
-                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchTweet'
+                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet'

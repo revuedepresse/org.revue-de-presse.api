@@ -2,7 +2,8 @@
 
 namespace App\Twitter\Infrastructure\Publication\Command;
 
-use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,20 +18,9 @@ class QueryPublicationCollectionCommand extends Command
 
     const OPTION_LATEST_DATE = 'latest-date';
 
-    /**
-     * @var InputInterface
-     */
-    private $input;
+    private InputInterface $input;
 
-    /**
-     * @var OutputInterface
-     */
-    private $output;
-
-    /**
-     * @var StatusRepositoryInterface
-     */
-    public $statusRepository;
+    public TweetRepositoryInterface $statusRepository;
 
     public function configure()
     {
@@ -55,31 +45,22 @@ class QueryPublicationCollectionCommand extends Command
         ;
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int
-     */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
-        $this->output = $output;
+        $output1 = $output;
 
         $statusCollection = $this->statusRepository->queryPublicationCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
-            new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
-            new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
+            new DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
+            new DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
         );
 
-        $this->output->writeln($this->getSuccessMessage($statusCollection));
+        $output1->writeln($this->getSuccessMessage($statusCollection));
 
         return self::SUCCESS;
     }
 
-    /**
-     * @param ArrayCollection $statusCollection
-     * @return string
-     */
     private function getSuccessMessage(ArrayCollection $statusCollection): string
     {
         return sprintf(

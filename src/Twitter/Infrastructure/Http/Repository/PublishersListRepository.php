@@ -8,10 +8,9 @@ use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList as PublishersListResource;
@@ -44,10 +43,9 @@ use function array_sum;
 class PublishersListRepository extends ResourceRepository implements CapableOfDeletionInterface,
     PublishersListRepositoryInterface
 {
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
     use LoggerTrait;
     use PaginationAwareTrait;
-    use PublishersListDispatcherTrait;
     use TimelyStatusRepositoryTrait;
     use TokenRepositoryTrait;
 
@@ -56,10 +54,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     private const PREFIX_MEMBER_AGGREGATE = 'user :: ';
 
     /**
-     * @param MemberInterface $member
-     * @param stdClass        $list
-     *
-     * @return PublishersListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -257,130 +251,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return new PublishersList($screenName, $listName);
     }
 
-    /**
-     * @param array $aggregateIds
-     *
-     * @return int
-     */
-    public function publishStatusesForAggregates(array $aggregateIds): int
-    {
-        $query        = <<<QUERY
-            SELECT id, screen_name
-            FROM publishers_list
-            WHERE screen_name IS NOT NULL
-            AND name in (
-                SELECT name 
-                FROM publishers_list
-                WHERE id in (:ids)
-            )
-QUERY;
-        $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = $this->castIds($aggregateIds);
-
-        try {
-            $statement = $connection->executeQuery(
-                strtr(
-                    $query,
-                    [
-                        ':ids' => implode(',', $aggregateIds)
-                    ]
-                )
-            );
-            $records   = $statement->fetchAllAssociative();
-        } catch (Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-            $records = [];
-        }
-
-        $aggregateIds = array_map(
-            function ($record) {
-                return $record['id'];
-            },
-            $records
-        );
-        $aggregates   = $this->findBy(['id' => $aggregateIds]);
-
-        $dispatchedMessages = array_map(
-            function (PublishersListInterface $aggregate) {
-                $messageBody['aggregate_id'] = $aggregate->getId();
-                $aggregate->setTotalStatus(0);
-                $aggregate->totalMembers     = 0;
-
-                $this->save($aggregate);
-
-                $token = $this->tokenRepository->findFirstUnfrozenToken();
-                if ($token instanceof TokenInterface) {
-                    $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-                        (new Member())->setTwitterScreenName($aggregate->screenName),
-                        $token
-                    );
-
-                    return 1;
-                }
-
-                return 0;
-            },
-            $aggregates
-        );
-
-        return array_sum($dispatchedMessages);
-    }
-
-    /**
-     * @param string $memberName
-     */
-    public function resetTotalStatusesForAggregateRelatedToScreenName(string $memberName)
-    {
-        $aggregates = $this->findBy(['screenName' => $memberName]);
-        array_walk(
-            $aggregates,
-            function (PublishersListInterface $aggregate) {
-                $aggregate->setTotalStatus(0);
-
-                $this->getEntityManager()->persist($aggregate);
-                $this->getEntityManager()->flush();
-            }
-        );
-    }
-
-    /**
-     * @param array $aggregateIds
-     */
-    public function resetTotalStatusesForAggregates(array $aggregateIds)
-    {
-        $query        = <<<QUERY
-            UPDATE publishers_list a
-            SET total_statuses = 0
-            WHERE id in (:ids)
-QUERY;
-        $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = $this->castIds($aggregateIds);
-        $aggregateIdsParams = implode(
-            ',',
-            $aggregateIds
-        );
-
-        try {
-            $connection->executeQuery(
-                strtr(
-                    $query,
-                    [
-                        ':ids' => $aggregateIdsParams
-                    ]
-                )
-            );
-        } catch (Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-        }
-    }
-
-    /**
-     * @param PublishersListInterface $aggregate
-     *
-     * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function save(PublishersListInterface $aggregate)
     {
         $this->getEntityManager()->persist($aggregate);
@@ -389,38 +259,6 @@ QUERY;
         return $aggregate;
     }
 
-    /**
-     * @return array
-     * @throws DBALException
-     */
-    public function selectAggregatesForWhichNoStatusHasBeenCollected(): array
-    {
-        $selectAggregates = <<<QUERY
-            SELECT 
-            a.id aggregate_id, 
-            screen_name member_screen_name, 
-            `name` aggregate_name,
-            u.usr_twitter_id member_id
-            FROM publishers_list a, weaving_user u
-            WHERE screen_name IS NOT NULL 
-            AND a.screen_name = u.usr_twitter_username
-            AND id NOT IN (
-                SELECT aggregate_id FROM weaving_status_aggregate
-            );
-QUERY;
-
-        $statement = $this->getEntityManager()->getConnection()->executeQuery($selectAggregates);
-
-        return $statement->fetchAllAssociative();
-    }
-
-    /**
-     * @param PublishersListInterface $aggregate
-     *
-     * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function unlockPublishersList(PublishersListInterface $aggregate): PublishersListInterface
     {
         $aggregate->unlock();
@@ -429,13 +267,8 @@ QUERY;
     }
 
     /**
-     * @param array                         $aggregate
-     * @param PublishersListInterface|null $matchingAggregate
-     * @param bool                          $includeRelatedAggregates
-     *
-     * @return array
-     * @throws DBALException
-     * @throws ORMException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function updateTotalStatuses(
         array $aggregate,
@@ -484,10 +317,6 @@ QUERY;
         return $aggregate;
     }
 
-    /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     */
     private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
         $queryBuilder->andWhere('a.name not like :name');
@@ -556,9 +385,9 @@ QUERY;
                     $statuses = $this->statusRepository
                         ->findByAggregate($twitterList);
 
-                    /** @var StatusInterface $status */
+                    /** @var TweetInterface $status */
                     foreach ($statuses as $status) {
-                        /** @var StatusInterface $status */
+                        /** @var TweetInterface $status */
                         $status->removeFrom($twitterList);
                         $status->addToAggregates($firstAggregate);
                     }
@@ -654,29 +483,5 @@ QUERY;
         );
 
         return $statement->fetchAllAssociative();
-    }
-
-    public function publicPublishersList(): array
-    {
-        try {
-            $connection = $this->getEntityManager()->getConnection();
-
-            $findPublicPublishersList = <<<QUERY
-                SELECT DISTINCT name as name, list_id as id
-                FROM 
-                publishers_list l,
-                publishers_list_route r
-                WHERE r.public_id = l.public_id
-                GROUP BY name, list_id
-    QUERY;
-
-            $statement = $connection->executeQuery($findPublicPublishersList);
-
-            return $statement->fetchAllAssociative();
-        } catch (Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
-
-            return [];
-        }
     }
 }

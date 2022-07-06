@@ -20,7 +20,7 @@
 
         <many-to-one
             field="status"
-            target-entity="App\Twitter\Infrastructure\Http\Entity\Status"
+            target-entity="App\Twitter\Infrastructure\Http\Entity\Tweet"
             inversed-by="popularity"
         >
             <join-column

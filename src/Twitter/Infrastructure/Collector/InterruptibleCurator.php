@@ -11,7 +11,7 @@ use App\Twitter\Domain\Curation\Curator\InterruptibleCuratorInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Collector\Exception\SkipCollectException;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
@@ -22,7 +22,7 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -47,7 +47,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     use PublishersListRepositoryTrait;
     use RateLimitComplianceTrait;
     use StatusPersistenceTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
     use TokenRepositoryTrait;
     use TweetAwareHttpClientTrait;
     use WhispererRepositoryTrait;
@@ -150,10 +150,10 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     private function guardAgainstExceptionalMember(array $options): void
     {
         if (
-            !array_key_exists(FetchTweetInterface::SCREEN_NAME, $options)
-            || $options[FetchTweetInterface::SCREEN_NAME] === null
+            !array_key_exists(FetchAuthoredTweetInterface::SCREEN_NAME, $options)
+            || $options[FetchAuthoredTweetInterface::SCREEN_NAME] === null
             || $this->httpClient->skipCuratingTweetsForMemberHavingScreenName(
-                $options[FetchTweetInterface::SCREEN_NAME]
+                $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             )
         ) {
             throw new MembershipException(
@@ -267,7 +267,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 sprintf(
                     'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
                     $statuses[0]->id_str,
-                    $options[FetchTweetInterface::SCREEN_NAME]
+                    $options[FetchAuthoredTweetInterface::SCREEN_NAME]
                 )
             );
             SkippableMessageException::stopMessageConsumption();
@@ -275,7 +275,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
         $savedItems = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
-            $options[FetchTweetInterface::SCREEN_NAME],
+            $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $this->selectors
         );
 
@@ -298,13 +298,13 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchTweetInterface::TWITTER_LIST_ID, $options)) {
+        if (!array_key_exists(FetchAuthoredTweetInterface::TWITTER_LIST_ID, $options)) {
             return null;
         }
 
-        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchTweetInterface::TWITTER_LIST_ID]);
+        $this->selectors->optInToCollectStatusForPublishersListOfId($options[FetchAuthoredTweetInterface::TWITTER_LIST_ID]);
 
-        return $options[FetchTweetInterface::TWITTER_LIST_ID];
+        return $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID];
     }
 
     /**
@@ -331,7 +331,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $this->whispererRepository->saveWhisperer($whisperer);
 
         $this->logger->info(sprintf(
-            'Skipping whisperer "%s"', $options[FetchTweetInterface::SCREEN_NAME]
+            'Skipping whisperer "%s"', $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         ));
     }
 
@@ -345,7 +345,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $options
     ): ?Whisperer {
         $whisperer = $this->whispererRepository->findOneBy(
-            ['name' => $options[FetchTweetInterface::SCREEN_NAME]]
+            ['name' => $options[FetchAuthoredTweetInterface::SCREEN_NAME]]
         );
         if (!$whisperer instanceof Whisperer) {
             SkippableMessageException::continueMessageConsumption();
@@ -354,11 +354,11 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $eventRepository = $this->memberProfileCollectedEventRepository;
         $whisperer->member = $eventRepository->collectedMemberProfile(
             $this->httpClient,
-            [$eventRepository::OPTION_SCREEN_NAME => $options[FetchTweetInterface::SCREEN_NAME]]
+            [$eventRepository::OPTION_SCREEN_NAME => $options[FetchAuthoredTweetInterface::SCREEN_NAME]]
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchTweetInterface::SCREEN_NAME]);
+        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

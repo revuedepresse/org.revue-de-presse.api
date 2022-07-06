@@ -11,7 +11,7 @@ use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\PublishersList\TwitterListAwareTrait;
 use Doctrine\ORM\EntityManagerInterface;
@@ -120,7 +120,7 @@ class ConversationStatusConsumer
         }
 
 
-        return $status instanceof Status;
+        return $status instanceof Tweet;
     }
 
     /**
@@ -175,7 +175,7 @@ class ConversationStatusConsumer
         return true;
     }
 
-    private function ensureStatusAuthorExists(Status $status): Member
+    private function ensureStatusAuthorExists(Tweet $status): Member
     {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof MemberInterface) {

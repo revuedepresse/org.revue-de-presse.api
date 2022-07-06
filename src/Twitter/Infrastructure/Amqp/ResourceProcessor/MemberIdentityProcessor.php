@@ -12,7 +12,7 @@ use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweet;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
@@ -119,7 +119,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         Compliance::skipProtectedMember($member, $memberIdentity);
         Compliance::skipSuspendedMember($member, $memberIdentity);
 
-        $fetchTweetAmqpMessage = FetchTweet::identifyMember(
+        $fetchTweetAmqpMessage = FetchAuthoredTweet::identifyMember(
             $this->aggregateRepository->byName(
                 $member->twitterScreenName(),
                 $list->name(),

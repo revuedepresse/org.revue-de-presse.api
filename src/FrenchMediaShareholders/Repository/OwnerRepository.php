@@ -65,7 +65,7 @@ class OwnerRepository extends ServiceEntityRepository
 
                 /** @var Owner $owner */
                 $owner = $ownerships[$name];
-                $ownership = $owner->hasRelationshipWithRegardsToMedia(
+                $ownership = $owner->hasRelationshipWithRegardToMedia(
                     $mediasCollection[$mediaName],
                     $shares,
                     $ownershipLevel

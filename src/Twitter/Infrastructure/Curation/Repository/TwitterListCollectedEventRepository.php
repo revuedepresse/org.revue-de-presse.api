@@ -23,7 +23,7 @@ class TwitterListCollectedEventRepository extends ServiceEntityRepository implem
     use LoggerTrait;
     use HttpClientTrait;
 
-    public function collectedPublishersList(
+    public function collectedListOwnedByMember(
         HttpClientInterface $accessor,
         array               $options
     ): MemberCollectionInterface {

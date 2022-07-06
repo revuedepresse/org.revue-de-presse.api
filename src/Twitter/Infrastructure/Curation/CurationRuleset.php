@@ -70,8 +70,6 @@ class CurationRuleset implements CurationRulesetInterface, CorrelationIdAwareInt
         MemberInterface $member,
         MemberIdentity $memberIdentity
     ): void {
-        return;
-
         if ($this->shouldIgnoreMemberWhenWhispering($member)) {
             throw new SkippableMemberException(
                 sprintf(

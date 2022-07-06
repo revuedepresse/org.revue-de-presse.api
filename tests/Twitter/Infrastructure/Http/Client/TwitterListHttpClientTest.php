@@ -60,7 +60,7 @@ class ListAwareHttpClientTest extends KernelTestCase
             new NullLogger()
         );
 
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+        $ownershipAccessor->setListsBatchCollectedEventRepository(
             $this->eventRepository
         );
 
@@ -103,7 +103,7 @@ class ListAwareHttpClientTest extends KernelTestCase
             new NullLogger()
         );
 
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+        $ownershipAccessor->setListsBatchCollectedEventRepository(
             $this->eventRepository
         );
 
@@ -151,7 +151,7 @@ class ListAwareHttpClientTest extends KernelTestCase
             new NullLogger()
         );
 
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+        $ownershipAccessor->setListsBatchCollectedEventRepository(
             $this->eventRepository
         );
 

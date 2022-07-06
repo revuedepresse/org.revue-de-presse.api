@@ -6,11 +6,11 @@ namespace App\Twitter\Infrastructure\Publication\Mapping;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface
@@ -18,7 +18,7 @@ class RefreshStatusMapping implements MappingAwareInterface
     use HttpClientTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
 
     private array $oauthTokens;
 
@@ -27,10 +27,7 @@ class RefreshStatusMapping implements MappingAwareInterface
         $this->httpClient = $accessor;
     }
 
-    /**
-     * @param $oauthTokens
-     */
-    public function setOAuthTokens($oauthTokens) {
+    public function setOAuthTokens(array $oauthTokens) {
         $this->oauthTokens = $oauthTokens;
         $this->setupAccessor($oauthTokens);
     }
@@ -52,10 +49,10 @@ class RefreshStatusMapping implements MappingAwareInterface
     }
 
     /**
-     * @param Status $status
-     * @return Status
+     * @param Tweet $status
+     * @return Tweet
      */
-    public function apply(Status $status): Status {
+    public function apply(Tweet $status): Tweet {
         try {
             $apiDocument = $this->httpClient->showStatus($status->getStatusId());
         } catch (TweetNotFoundException $exception) {

@@ -6,9 +6,9 @@ namespace App\Conversation;
 use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
-use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Domain\Publication\Repository\PublicationInterface;
 use function array_key_exists;
@@ -17,7 +17,7 @@ use function json_decode;
 trait ConversationAwareTrait
 {
     use TweetAwareHttpClientTrait;
-    use StatusRepositoryTrait;
+    use TweetRepositoryTrait;
 
     /**
      * @param array $status
@@ -151,7 +151,7 @@ trait ConversationAwareTrait
     ): array {
         return array_map(
             function ($status) use ($includeRepliedToStatuses) {
-                if ($status instanceof StatusInterface) {
+                if ($status instanceof TweetInterface) {
                     $status = [
                         'screen_name'       => $status->getScreenName(),
                         'status_id'         => $status->getStatusId(),

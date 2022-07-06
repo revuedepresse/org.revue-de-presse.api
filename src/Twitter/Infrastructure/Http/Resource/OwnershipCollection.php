@@ -8,9 +8,6 @@ use function count;
 
 class OwnershipCollection implements OwnershipCollectionInterface
 {
-    /**
-     * @var array
-     */
     private array $ownerships;
 
     private int $nextPage;

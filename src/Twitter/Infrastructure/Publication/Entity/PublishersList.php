@@ -187,7 +187,7 @@ class PublishersList implements PublishersListInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Twitter\Infrastructure\Http\Entity\Status", mappedBy="aggregates")
+     * @ORM\ManyToMany(targetEntity="App\Twitter\Infrastructure\Http\Entity\Tweet", mappedBy="aggregates")
      */
     protected Collection $userStreams;
 }

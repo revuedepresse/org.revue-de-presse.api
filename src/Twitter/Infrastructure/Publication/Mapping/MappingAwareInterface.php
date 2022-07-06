@@ -2,13 +2,13 @@
 
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
 
 interface MappingAwareInterface
 {
     /**
-     * @param Status $status
-     * @return Status
+     * @param Tweet $status
+     * @return Tweet
      */
-    public function apply(Status $status): Status;
+    public function apply(Tweet $status): Tweet;
 }
