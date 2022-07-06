@@ -122,13 +122,14 @@ doctrine:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
             correlation_id:  App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdType
     orm:
-        auto_generate_proxy_classes: true
+        default_entity_manager:         default
+        auto_generate_proxy_classes:    true
         entity_managers:
             default:
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                auto_mapping: false
-                connection: default
-                dql: "%doctrine_extensions_dql%"
+                naming_strategy:        doctrine.orm.naming_strategy.underscore_number_aware
+                auto_mapping:           false
+                connection:             default
+                dql:                    "%doctrine_extensions_dql%"
                 mappings:
 
                     Api:
