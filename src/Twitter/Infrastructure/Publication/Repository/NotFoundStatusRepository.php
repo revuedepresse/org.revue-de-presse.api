@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
@@ -10,11 +11,7 @@ use App\Twitter\Domain\Publication\TweetInterface;
 
 class NotFoundStatusRepository extends ServiceEntityRepository
 {
-    /**
-     * @param TweetInterface $status
-     * @return NotFoundStatus
-     */
-    public function markStatusAsNotFound(TweetInterface $status)
+    public function markStatusAsNotFound(TweetInterface $status): NotFoundStatus
     {
         if ($status instanceof ArchivedTweet) {
             return new NotFoundStatus(null, $status);
