@@ -169,13 +169,6 @@ services:
 
     App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
-    app.event_subscriber.console:
-        class: 'App\Twitter\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
-        properties:
-            logger: '@logger'
-        tags:
-            - { name: 'kernel.event_subscriber' }
-
     App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator:
         class:  'App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator'
         arguments:
