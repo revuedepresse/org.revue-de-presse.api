@@ -159,7 +159,7 @@ function clear_cache_warmup() {
         exec \
         --user "${WORKER_UID}:${WORKER_GID}" \
         app \
-        /bin/bash -c '. /scripts/clear-cache.sh'
+        /bin/bash -c '. /scripts/clear-app-cache.sh'
 
     clean ''
 }
