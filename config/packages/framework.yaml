@@ -1,4 +1,6 @@
 framework:
+    cache: ~
+
     session:
         handler_id: null
         cookie_secure: auto
