@@ -1,8 +1,3 @@
-parameters:
-
-    weaving_the_web_api.entity.token.class:         'App\Twitter\Infrastructure\Api\Entity\Token'
-    weaving_the_web_api.entity.whisperer.class:     'App\Twitter\Infrastructure\Api\Entity\Whisperer'
-
 services:
     App\Twitter\Infrastructure\Repository\Membership\MemberRepository:
         class: 'App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
@@ -120,10 +115,10 @@ services:
             - { name: 'doctrine.repository_service' }
 
     repository.access_token:
-        class: '%repository.access_token.class%'
+        class: 'App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_api.entity.token.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Token'
         calls:
             - [ 'setLogger', [ '@logger' ] ]
 
@@ -208,10 +203,10 @@ services:
             logger:           "@logger"
 
     repository.whisperer:
-        class: '%repository.whisperer.class%'
+        class: 'App\Twitter\Infrastructure\Api\Repository\WhispererRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_api.entity.whisperer.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Whisperer'
 
     App\NewsReview\Infrastructure\Repository\PopularPublicationRepository:
         class: 'App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'

@@ -36,7 +36,7 @@ services:
         class:  'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Status'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
@@ -54,7 +54,7 @@ services:
         class:  'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.archived_status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\ArchivedStatus'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
@@ -67,11 +67,11 @@ services:
             connection:             '@doctrine.dbal.default_connection'
             registry:               '@doctrine'
 
-    weaving_the_web_twitter.repository.read.status:
+    twitter.repository.read.status:
         class:  'App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
+            - 'App\Twitter\Infrastructure\Api\Entity\Status'
         calls:
             - [ 'setOauthTokens',            [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
@@ -128,10 +128,10 @@ services:
     App\Twitter\Infrastructure\Api\Accessor:
         class: 'App\Twitter\Infrastructure\Api\Accessor'
         arguments:
-            - '%weaving_the_web_twitter.consumer_key%'
-            - '%weaving_the_web_twitter.consumer_secret%'
-            - '%weaving_the_web_twitter.oauth_token.default%'
-            - '%weaving_the_web_twitter.oauth_secret.default%'
+            - '%twitter.consumer_key%'
+            - '%twitter.consumer_secret%'
+            - '%twitter.oauth_token.default%'
+            - '%twitter.oauth_secret.default%'
             - '@repository.access_token'
             - '@logger'
         properties:
@@ -140,13 +140,13 @@ services:
             statusAccessor:       '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'
         calls:
             - [ 'setClientClass', [ '\Goutte\Client' ] ]
-            - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
+            - [ 'setConsumerKey', [ '%twitter.consumer_key%' ] ]
+            - [ 'setConsumerSecret', [ '%twitter.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setTranslator', [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
-            - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
-            - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
+            - [ 'setUserSecret', [ '%twitter.oauth_secret.default%' ] ]
+            - [ 'setUserToken', [ '%twitter.oauth_token.default%' ] ]
 
     App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor:
         class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'
@@ -200,30 +200,15 @@ parameters:
         - 'development'
         - 'membership'
 
-    redis_cache.class:                                                  'App\Twitter\Infrastructure\Cache\RedisCache'
+    redis_cache.class:                                            'App\Twitter\Infrastructure\Cache\RedisCache'
 
-    weaving_the_web_twitter.api_host:                             'api.twitter.com'
+    twitter.consumer_key:                         '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
+    twitter.consumer_secret:                      '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
 
-    weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
+    twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
+    twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
 
-    weaving_the_web_twitter.client.class:                         '\Goutte\Client'
-
-    weaving_the_web_twitter.consumer_key:                         '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
-    weaving_the_web_twitter.consumer_secret:                      '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
-
-    weaving_the_web_twitter.http_client.class:                    '\GuzzleHttp\Client'
-
-    weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
-    weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
-
-    weaving_the_web_twitter.entity.archived_status.class:         'App\Twitter\Infrastructure\Api\Entity\ArchivedStatus'
-    weaving_the_web_twitter.entity.aggregate.class:               '%weaving_the_web_api.entity.aggregate.class%'
-    weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
-    weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
-
-    repository.publishers_list.class:                            '%weaving_the_web_api.repository.publishers_list.class%'
-
-    weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
+    twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
     allowed.origin:                                               '%env(resolve:ALLOWED_ORIGIN)%'
 
