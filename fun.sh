@@ -78,8 +78,7 @@ function build() {
         --build-arg "WORKER_GID=${WORKER_GID}" \
         app \
         cache \
-        service \
-        worker
+        service
 }
 
 function remove_container_image() {
