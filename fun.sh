@@ -76,6 +76,7 @@ function build() {
         build \
         --build-arg "WORKER_UID=${WORKER_UID}" \
         --build-arg "WORKER_GID=${WORKER_GID}" \
+        --no-cache \
         app \
         cache \
         service
@@ -124,13 +125,13 @@ function remove_running_container_and_image_in_debug_mode() {
 
     if [ -n "${DEBUG}" ];
     then
+
         docker images -a |
             \grep "${project_name}" |
             \grep "${container_name}" |
             awk '{print $3}' |
             xargs -I{} docker rmi {}
 
-        build
     fi
 }
 
