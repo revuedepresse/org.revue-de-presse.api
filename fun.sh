@@ -251,7 +251,7 @@ function stop() {
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER=disabled
 
-    if [ -z ${DEBUG} ];
+    if [ -z "${DEBUG}" ];
     then
         bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
         return
