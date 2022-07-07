@@ -82,6 +82,21 @@ function build() {
 }
 
 function remove_container_image() {
+function get_project_name() {
+    local project_name
+
+    project_name="$(
+        docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        config --format json \
+        | jq '.name' \
+        | tr -d '"'
+    )"
+
+    echo "${project_name}"
+}
+
     local container_name
     container_name="${1}"
 
@@ -98,8 +113,11 @@ function remove_container_image() {
 
     source ./.env.local
 
+    local project_name
+    project_name="$(get_project_name)"
+
     docker ps -a |
-        \grep "${COMPOSE_PROJECT_NAME}" |
+        \grep "${project_name}" |
         \grep "${container_name}" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
@@ -107,7 +125,7 @@ function remove_container_image() {
     if [ -n "${DEBUG}" ];
     then
         docker images -a |
-            \grep "${COMPOSE_PROJECT_NAME}" |
+            \grep "${project_name}" |
             \grep "${container_name}" |
             awk '{print $3}' |
             xargs -I{} docker rmi {}
