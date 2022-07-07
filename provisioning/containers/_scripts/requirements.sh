@@ -114,12 +114,12 @@ function install_service_requirements() {
     mkdir \
         --verbose \
         --parents \
-        /var/www/revue-de-presse.org
+        /var/www/api.revue-de-presse.org
 }
 
 function install_app_requirements() {
     local project_dir
-    project_dir='/var/www/revue-de-presse.org'
+    project_dir='/var/www/api.revue-de-presse.org'
 
     rm -f "${project_dir}/bin/behat"
     rm -f "${project_dir}/bin/doctrine"
@@ -202,7 +202,7 @@ function install_app_requirements() {
     fi
 
     \cat '/templates/www.conf.dist' | \
-    \sed -E 's/__SOCK__/revue-de-presse.org/g' | \
+    \sed -E 's/__SOCK__/api.revue-de-presse.org/g' | \
     \sed -E 's/__UID__/'"${WORKER_UID}"'/g' | \
     \sed -E 's/__GID__/'"${WORKER_GID}"'/g' \
     > "${project_dir}/provisioning/containers/service/templates/www.conf" && \
