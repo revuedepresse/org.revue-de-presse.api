@@ -7,7 +7,6 @@ use App\Twitter\Infrastructure\Http\SearchParams;
 use App\PublishersList\Entity\TimelyStatus;
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -15,15 +14,11 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
-use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use stdClass;
@@ -57,8 +52,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
      * @param stdClass        $list
      *
      * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function addMemberToList(
         MemberInterface $member,
@@ -84,7 +77,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
      * @param SearchParams $searchParams
      *
      * @return int
-     * @throws NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
     {
@@ -154,15 +146,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $aggregates;
     }
 
-    /**
-     * @param string      $screenName
-     * @param string      $listName
-     * @param string|null $listId
-     *
-     * @return PublishersListInterface|object|null
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function getListAggregateByName(
         string $screenName,
         string $listName,
@@ -184,13 +167,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $aggregate;
     }
 
-    /**
-     * @param string $username
-     *
-     * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function getMemberAggregateByUsername(string $username): PublishersListInterface
     {
         $aggregate = $this->make(
@@ -206,9 +182,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
 
     /**
      * @param PublishersListInterface $aggregate
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return void
      */
     public function lockAggregate(PublishersListInterface $aggregate)
     {
@@ -217,14 +191,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         $this->save($aggregate);
     }
 
-    /**
-     * @param string $screenName
-     * @param string $listName
-     *
-     * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function make(string $screenName, string $listName): PublishersListInterface
     {
         $aggregate = $this->findByRemovingDuplicates(
@@ -240,28 +206,9 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     }
 
     /**
-     * @param string $memberName
-     */
-    public function resetTotalStatusesForAggregateRelatedToScreenName(string $memberName)
-    {
-        $aggregates = $this->findBy(['screenName' => $memberName]);
-        array_walk(
-            $aggregates,
-            function (PublishersListInterface $aggregate) {
-                $aggregate->totalStatuses = 0;
-
-                $this->getEntityManager()->persist($aggregate);
-                $this->getEntityManager()->flush();
-            }
-        );
-    }
-
-    /**
      * @param PublishersListInterface $aggregate
      *
      * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function save(PublishersListInterface $aggregate)
     {
@@ -296,13 +243,6 @@ QUERY;
         return $statement->fetchAll();
     }
 
-    /**
-     * @param PublishersListInterface $aggregate
-     *
-     * @return PublishersListInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function unlockPublishersList(PublishersListInterface $aggregate): PublishersListInterface
     {
         $aggregate->unlock();
@@ -310,15 +250,6 @@ QUERY;
         return $this->save($aggregate);
     }
 
-    /**
-     * @param array                         $aggregate
-     * @param PublishersListInterface|null $matchingAggregate
-     * @param bool                          $includeRelatedAggregates
-     *
-     * @return array
-     * @throws DBALException
-     * @throws ORMException
-     */
     public function updateTotalStatuses(
         array $aggregate,
         ?PublishersListInterface $matchingAggregate = null,
@@ -409,12 +340,7 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     * @param string $listName
-     *
-     * @return null|object
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws Exception
      */
     private function findByRemovingDuplicates(
         string $screenName,
@@ -482,14 +408,6 @@ QUERY;
         return $aggregate;
     }
 
-    /**
-     * @param array                         $aggregate
-     * @param PublishersListInterface|null $matchingAggregate
-     *
-     * @return array
-     * @throws DBALException
-     * @throws ORMException
-     */
     private function updateTotalMembers(
         array $aggregate,
         PublishersListInterface $matchingAggregate = null
