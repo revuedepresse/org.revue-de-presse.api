@@ -19,7 +19,7 @@ COPY    --from=composer:2.3 \
 
 USER    ${WORKER_UID}:${WORKER_GID}
 
-VOLUME  ['/scripts', '/var/www/shared', '/var/www/revue-de-presse.org'
+VOLUME  ['/scripts', '/var/www/shared', '/var/www/revue-de-presse.org']
 
 WORKDIR '/var/www/revue-de-presse.org'
 
