@@ -2,35 +2,36 @@
 set -Eeuo pipefail
 
 function clear_cache() {
-    php \
-    ./bin/console cache:clear \
-    --env=prod \
-    --no-debug
+    printf '%s.%s' 'Started clearing caches' $'\n'
 
-    php \
-    ./bin/console cache:warmup \
-    --no-debug \
-    --env=prod
+    local environments
+    environments=( prod )
 
-    php \
-    ./bin/console cache:clear \
-    --no-debug \
-    --env=dev
+    for env in "${environments[@]}"; do
+        php \
+        ./bin/console cache:clear \
+        --no-debug \
+        --env=${env}
 
-    php \
-    ./bin/console cache:warmup \
-    --no-debug \
-    --env=dev
+        php \
+        ./bin/console cache:warmup \
+        --no-debug \
+        --env=${env}
 
-    php \
-    ./bin/console \
-    doctrine:cache:clear-metadata \
-    --env=dev
+        php \
+        ./bin/console \
+        doctrine:cache:clear-metadata \
+        --no-debug \
+        --env=${env}
 
-    php \
-    ./bin/console \
-    doctrine:cache:clear-metadata \
-    --env=prod
+        php \
+        ./bin/console doctrine:mapping:info \
+        --no-debug \
+        --env=${env}
+
+    done
+
+    printf '%s.%s' 'Finished clearing caches' $'\n'
 }
 clear_cache
 
