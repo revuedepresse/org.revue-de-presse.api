@@ -56,9 +56,7 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
-        "behat/behat": "^3.8",
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
-        "friends-of-behat/symfony-extension": "^2.0",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^5.4",
