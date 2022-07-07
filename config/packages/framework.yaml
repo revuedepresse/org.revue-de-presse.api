@@ -10,3 +10,6 @@ framework:
         log: true
 
     secret: '%env(APP_SECRET)%'
+
+    validation:
+        email_validation_mode: html5
