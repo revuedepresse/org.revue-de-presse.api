@@ -63,26 +63,6 @@ class StatusRepository extends ArchivedStatusRepository
         return $status;
     }
 
-    /**
-     * @param MappingAwareInterface $service
-     * @param ArrayCollection       $statuses
-     * @return ArrayCollection
-     */
-    public function mapStatusCollectionToService(
-        MappingAwareInterface $service,
-        ArrayCollection $statuses
-    ) {
-        return $statuses->map(function (Status $status) use ($service) {
-            return $service->apply($status);
-        });
-    }
-
-    /**
-     * @param Status $status
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function save(Status $status): void
     {
         $this->getEntityManager()->persist($status);
