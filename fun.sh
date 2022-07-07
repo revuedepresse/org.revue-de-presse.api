@@ -81,7 +81,6 @@ function build() {
         service
 }
 
-function remove_container_image() {
 function get_project_name() {
     local project_name
 
@@ -97,6 +96,7 @@ function get_project_name() {
     echo "${project_name}"
 }
 
+function remove_running_container_and_image_in_debug_mode() {
     local container_name
     container_name="${1}"
 
@@ -147,7 +147,7 @@ function clean() {
         return 0
     fi
 
-    remove_container_image 'app'
+    remove_running_container_and_image_in_debug_mode 'app'
 }
 
 function clear_cache_warmup() {
@@ -161,7 +161,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
-        remove_container_image 'app'
+        remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
@@ -224,7 +224,7 @@ SCRIPT
 }
 
 function start_database() {
-    remove_container_image 'database'
+    remove_running_container_and_image_in_debug_mode 'database'
 
     local command
     command=$(cat <<-SCRIPT
