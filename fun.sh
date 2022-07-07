@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export COMPOSE_PROJECT_NAME='revue-de-presse-org'
-
 function _set_up_configuration_files() {
     if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
         cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
