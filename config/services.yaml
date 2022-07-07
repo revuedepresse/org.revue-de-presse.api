@@ -4,7 +4,6 @@ imports:
     - { resource: services/membership.yml }
     - { resource: services/member_subscribee.yml }
     - { resource: services/member_subscription.yml }
-    - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
     - { resource: services/security.yml }
