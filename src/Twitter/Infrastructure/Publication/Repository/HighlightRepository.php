@@ -22,8 +22,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
-    public string $aggregate;
-
     public string $adminRouteName;
 
     private const TABLE_ALIAS = 'h';
@@ -101,7 +99,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $this->applyConstraintAboutPublicationDateTime($queryBuilder, $searchParams)
         ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
-        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
         if ($searchParams->hasParam('term')) {
@@ -189,35 +186,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :startDate");
-
-        return $this;
-    }
-
-    /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     * @return HighlightRepository
-     */
-    private function applyConstraintAboutRelatedAggregate(
-        QueryBuilder $queryBuilder,
-        SearchParams $searchParams
-    ): self {
-        if ($this->accessingAdministrativeRoute($searchParams)
-            || $searchParams->hasParam('term')
-        ) {
-            $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
-            $queryBuilder->setParameter('aggregate', $this->aggregate);
-
-            return $this;
-        }
-
-        $aggregates = [$this->aggregate];
-        if ($searchParams->hasParam('aggregate')) {
-            $aggregates = explode(',', $searchParams->getParams()['aggregate']);
-        }
-
-        $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName in (:aggregates)');
-        $queryBuilder->setParameter('aggregates', $aggregates);
 
         return $this;
     }
