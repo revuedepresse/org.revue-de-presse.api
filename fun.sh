@@ -78,7 +78,8 @@ function build() {
         --build-arg "WORKER_GID=${WORKER_GID}" \
         app \
         cache \
-        service
+        service \
+        worker
 }
 
 function get_project_name() {

@@ -4,18 +4,6 @@ name: 'revue-de-presse-org'
 
 services:
 
-    amqp:
-        build:
-            context: .
-            dockerfile: './amqp/Dockerfile'
-        expose:
-            - "5672"
-        restart: always
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../volumes/amqp:/var/lib/rabbitmq'
-
     app:
         build:
             context: .

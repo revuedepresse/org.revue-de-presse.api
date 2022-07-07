@@ -1,0 +1,7 @@
+date.timezone           = 'UTC';
+display_errors          = Off
+display_startup_errors  = Off
+error_reporting         = 'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'
+html_errors             = On
+log_errors              = On
+short_open_tag          = off
