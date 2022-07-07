@@ -37,17 +37,6 @@ services:
         volumes:
             - '../volumes/cache:/data'
 
-    database:
-        build: ./database
-        restart: always
-        ports:
-            - "127.0.0.1:3306:3306"
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../volumes/database:/var/lib/mysql'
-            - './database/templates/database.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
-
     service:
         build:
             context: .
