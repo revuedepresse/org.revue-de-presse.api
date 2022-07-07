@@ -89,13 +89,6 @@ class StatusRepository extends ArchivedStatusRepository
         $this->getEntityManager()->flush();
     }
 
-    public function setOauthTokens($oauthTokens)
-    {
-        $this->oauthTokens = $oauthTokens;
-
-        return $this;
-    }
-
     public function getAlias(): string
     {
         return 'status';

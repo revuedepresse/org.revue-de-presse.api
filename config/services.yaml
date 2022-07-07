@@ -73,7 +73,6 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Api\Entity\Status'
         calls:
-            - [ 'setOauthTokens',            [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
