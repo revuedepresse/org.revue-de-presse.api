@@ -11,7 +11,6 @@ use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
@@ -46,7 +45,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     use StatusRepositoryTrait;
     use LoggerTrait;
     use PaginationAwareTrait;
-    use PublishersListDispatcherTrait;
     use TimelyStatusRepositoryTrait;
     use TokenRepositoryTrait;
 
@@ -239,75 +237,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         }
 
         return new Aggregate($screenName, $listName);
-    }
-
-    /**
-     * @param array $aggregateIds
-     *
-     * @return int
-     */
-    public function publishStatusesForAggregates(array $aggregateIds): int
-    {
-        $query        = <<<QUERY
-            SELECT id, screen_name
-            FROM weaving_aggregate
-            WHERE screen_name IS NOT NULL
-            AND name in (
-                SELECT name 
-                FROM weaving_aggregate
-                WHERE id in (:ids)
-            )
-QUERY;
-        $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = $this->castIds($aggregateIds);
-
-        try {
-            $statement = $connection->executeQuery(
-                strtr(
-                    $query,
-                    [
-                        ':ids' => implode(',', $aggregateIds)
-                    ]
-                )
-            );
-            $records   = $statement->fetchAll();
-        } catch (Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-            $records = [];
-        }
-
-        $aggregateIds = array_map(
-            function ($record) {
-                return $record['id'];
-            },
-            $records
-        );
-        $aggregates   = $this->findBy(['id' => $aggregateIds]);
-
-        $dispatchedMessages = array_map(
-            function (PublishersListInterface $aggregate) {
-                $messageBody['aggregate_id'] = $aggregate->getId();
-                $aggregate->setTotalStatus(0);
-                $aggregate->totalMembers     = 0;
-
-                $this->save($aggregate);
-
-                $token = $this->tokenRepository->findFirstUnfrozenToken();
-                if ($token instanceof TokenInterface) {
-                    $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-                        (new Member())->setScreenName($aggregate->screenName),
-                        $token
-                    );
-
-                    return 1;
-                }
-
-                return 0;
-            },
-            $aggregates
-        );
-
-        return array_sum($dispatchedMessages);
     }
 
     /**

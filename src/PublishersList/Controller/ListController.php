@@ -9,7 +9,6 @@ use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Cache\RedisCache;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
@@ -25,7 +24,6 @@ use Symfony\Component\Routing\RouterInterface;
 class ListController
 {
     use CorsHeadersAwareTrait;
-    use PublishersListDispatcherTrait;
 
     public TokenRepository $tokenRepository;
 

@@ -102,7 +102,6 @@ services:
             - 'App\Twitter\Infrastructure\Api\Entity\Aggregate'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublishersListDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@repository.access_token' ] ]

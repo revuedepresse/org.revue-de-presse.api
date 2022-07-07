@@ -12,8 +12,6 @@ services:
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
-        calls:
-            - [ 'setPublishersListDispatcher', ['@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
             logger:                         '@logger'
             highlightRepository:            '@repository.highlight'
