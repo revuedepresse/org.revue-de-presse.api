@@ -20,11 +20,10 @@ trait ConversationAwareTrait
     use StatusRepositoryTrait;
 
     /**
-     * @param array $status
-     * @param array $decodedDocument
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function updateFromDecodedDocument(
         array $status,
@@ -100,11 +99,10 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @param array $updatedStatus
-     * @param array $decodedDocument
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function extractConversationProperties(
         array $updatedStatus,
@@ -140,10 +138,10 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @param array $statuses
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function extractStatusProperties(
         array $statuses,

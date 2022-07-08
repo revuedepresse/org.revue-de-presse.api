@@ -13,8 +13,6 @@ use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 
 class TimelyStatusRepository extends ServiceEntityRepository implements TimelyStatusRepositoryInterface
@@ -32,11 +30,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     public PublishersListRepository $aggregateRepository;
 
     /**
-     * @param array $properties
-     *
-     * @return TimelyStatus|TimeRangeAwareInterface
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @throws \Exception
      */
     public function fromArray(array $properties)
     {
@@ -76,9 +70,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         );
     }
 
-    /**
-     * @return \Doctrine\ORM\QueryBuilder
-     */
     public function selectStatuses()
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
@@ -103,9 +94,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param StatusInterface $status
-     * @param Aggregate|null  $aggregate
-     * @return TimeRangeAwareInterface
      * @throws \Exception
      */
     public function fromAggregatedStatus(
@@ -127,13 +115,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         );
     }
 
-    /**
-     * @param TimelyStatus $timelyStatus
-     *
-     * @return TimelyStatus
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function saveTimelyStatus(
         TimelyStatus $timelyStatus
     ) {
@@ -154,8 +135,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param SearchParams $searchParams
-     * @return array
      * @throws \Exception
      */
     public function findStatuses(SearchParams $searchParams): array
@@ -191,8 +170,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
      * @throws \Exception
      */
     private function applyCriteria(

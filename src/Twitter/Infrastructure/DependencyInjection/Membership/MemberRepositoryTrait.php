@@ -7,16 +7,8 @@ use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 
 trait MemberRepositoryTrait
 {
-    /**
-     * @var MemberRepositoryInterface
-     */
     protected MemberRepositoryInterface $memberRepository;
 
-    /**
-     * @param MemberRepositoryInterface $memberRepository
-     *
-     * @return $this
-     */
     public function setMemberRepository(MemberRepositoryInterface $memberRepository): self
     {
         $this->memberRepository = $memberRepository;

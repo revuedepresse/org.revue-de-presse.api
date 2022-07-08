@@ -27,9 +27,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     private const TABLE_ALIAS = 'h';
 
     /**
-     * @param SearchParams $searchParams
-     * @return int
-     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
     {

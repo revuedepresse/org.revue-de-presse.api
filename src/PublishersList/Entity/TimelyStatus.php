@@ -15,36 +15,18 @@ class TimelyStatus implements TimeRangeAwareInterface
 {
     use TimeRangeAwareTrait;
 
-    /**
-     * @var string
-     */
     private UuidInterface $id;
 
-    /**
-     * @var Status
-     */
     private StatusInterface $status;
 
     private PublishersListInterface $aggregate;
 
-    /**
-     * @var DateTimeInterface
-     */
     private DateTimeInterface $publicationDateTime;
 
-    /**
-     * @var string
-     */
     private string $aggregateName;
 
-    /**
-     * @var int
-     */
     private int $timeRange;
 
-    /**
-     * @var string
-     */
     private string $memberName;
 
     public function __construct(
