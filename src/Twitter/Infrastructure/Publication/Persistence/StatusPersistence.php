@@ -219,50 +219,6 @@ class StatusPersistence implements StatusPersistenceInterface
         return $status;
     }
 
-    public function savePublicationsForScreenName(
-        array $statuses,
-        string $screenName,
-        CollectionStrategyInterface $collectionStrategy
-    ) {
-        $success = null;
-
-        if (!is_array($statuses) || count($statuses) === 0) {
-            return $success;
-        }
-
-        $publishersList = null;
-        $publishersListId = $collectionStrategy->publishersListId();
-        if ($publishersListId !== null) {
-            /** @var Aggregate $publishersList */
-            $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $publishersListId]
-            );
-        }
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenFetched(
-            $statuses,
-            $screenName
-        );
-
-        $likedBy = null;
-        if ($collectionStrategy->fetchLikes()) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
-        $savedStatuses = $this->saveStatuses(
-            $statuses,
-            $collectionStrategy,
-            $publishersList,
-            $likedBy
-        );
-
-        return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
-            $savedStatuses->count(),
-            $screenName,
-            $collectionStrategy->fetchLikes()
-        );
-    }
-
     /**
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy

@@ -34,51 +34,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
-    /**
-     * @param SearchParams $searchParams
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function findHighlights(SearchParams $searchParams): array
-    {
-        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
-
-        $queryBuilder->select('s.statusId as status_id');
-        $queryBuilder->addSelect('s.id as id');
-        $queryBuilder->addSelect('s.apiDocument as original_document');
-        $queryBuilder->addSelect('s.text');
-        $queryBuilder->addSelect('s.createdAt as publicationDateTime');
-        $queryBuilder->addSelect('s.screenName as screen_name');
-        $queryBuilder->addSelect("s.createdAt as last_update");
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalRetweets, h.totalRetweets)) as total_retweets');
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalFavorites, h.totalFavorites)) as total_favorites');
-
-        $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
-
-        $maxResults = min($searchParams->getPageSize(), 10);
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $maxResults = 100;
-        }
-
-        $queryBuilder->setMaxResults($maxResults);
-
-        $this->applyCriteria($queryBuilder, $searchParams);
-
-        $queryBuilder->groupBy('h.status');
-        $queryBuilder->addOrderBy('total_retweets', 'DESC');
-
-        $results = $queryBuilder->getQuery()->getArrayResult();
-
-        return [
-            'aggregates' => $this->selectDistinctAggregates($searchParams),
-            'statuses' => $this->mapStatuses($searchParams, $results),
-        ];
-    }
-
-    /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     */
     public function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');

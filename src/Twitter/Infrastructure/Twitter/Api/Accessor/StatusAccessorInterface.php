@@ -8,12 +8,6 @@ use App\Membership\Domain\Entity\MemberInterface;
 
 interface StatusAccessorInterface
 {
-    public function updateExtremum(
-        CollectionStrategyInterface $collectionStrategy,
-        array $options,
-        bool $discoverPublicationWithMaxId = true
-    ): array;
-
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface;
 
     public function ensureMemberHavingIdExists(string $id): ?MemberInterface;
