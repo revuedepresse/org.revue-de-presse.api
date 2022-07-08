@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Trends\Domain\Repository\SearchParamsInterface;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Trends\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

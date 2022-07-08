@@ -1,8 +1,8 @@
 <?php
 
-namespace App\PublishersList\Repository;
+namespace App\Trends\Repository;
 
-use App\PublishersList\Entity\SavedSearch;
+use App\Trends\Entity\SavedSearch;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 

@@ -106,9 +106,9 @@ services:
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\Trends\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\PublishersList\Entity\MemberAggregateSubscription'
+            - 'App\Trends\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Twitter\Infrastructure\Publication\Repository\KeywordRepository'
@@ -135,25 +135,25 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\PublishersList\Repository\TimelyStatusRepository'
+        class: 'App\Trends\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\TimelyStatus'
+            - 'App\Trends\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Http\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
 
     repository.saved_search:
-        class: 'App\PublishersList\Repository\SavedSearchRepository'
+        class: 'App\Trends\Repository\SavedSearchRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SavedSearch'
+            - 'App\Trends\Entity\SavedSearch'
 
     repository.search_matching_status:
-        class: 'App\PublishersList\Repository\SearchMatchingStatusRepository'
+        class: 'App\Trends\Repository\SearchMatchingStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SearchMatchingStatus'
+            - 'App\Trends\Entity\SearchMatchingStatus'
         properties:
             statusRepository: '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'
             logger:           "@logger"

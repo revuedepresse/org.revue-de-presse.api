@@ -1,6 +1,6 @@
 <?php
 
-namespace App\PublishersList\Entity;
+namespace App\Trends\Entity;
 
 class SavedSearch
 {

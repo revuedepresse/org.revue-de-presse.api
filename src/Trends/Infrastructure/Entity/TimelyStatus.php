@@ -1,6 +1,6 @@
 <?php
 
-namespace App\PublishersList\Entity;
+namespace App\Trends\Entity;
 
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;

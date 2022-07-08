@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\PublishersList\Controller;
+namespace App\Trends\Controller;
 
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\PublishersList\Controller\Exception\InvalidRequestException;
+use App\Trends\Controller\Exception\InvalidRequestException;
 use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;

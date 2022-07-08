@@ -5,8 +5,8 @@ namespace App\Membership\Infrastructure\Repository;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Ownership\MembersList;
-use App\PublishersList\Entity\TimelyStatus;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Trends\Entity\TimelyStatus;
+use App\Trends\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;

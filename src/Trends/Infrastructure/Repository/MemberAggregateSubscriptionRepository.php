@@ -1,8 +1,8 @@
 <?php
 
-namespace App\PublishersList\Repository;
+namespace App\Trends\Repository;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
+use App\Trends\Entity\MemberAggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;

@@ -172,7 +172,7 @@ doctrine:
                         alias:      'PublishersList'
                         dir:        '%kernel.project_dir%/config/model/publication-list'
                         is_bundle:  false
-                        prefix:     App\PublishersList\Entity
+                        prefix:     App\Trends\Entity
                         type:       xml
                     Publication:
                         alias:      'Publication'

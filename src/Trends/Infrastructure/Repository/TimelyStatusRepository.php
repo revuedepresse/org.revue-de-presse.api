@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\PublishersList\Repository;
+namespace App\Trends\Repository;
 
-use App\PublishersList\Entity\TimelyStatus;
+use App\Trends\Entity\TimelyStatus;
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Membership\Domain\Ownership\MembersList;
 use \App\Membership\Infrastructure\Repository\MembersListRepository;
