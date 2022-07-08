@@ -55,18 +55,6 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository:
-        class: 'App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent'
-        calls:
-            - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-        tags:
-            - { name: 'doctrine.repository_service' }
-
     App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository:
         class: 'App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository'
         arguments:
