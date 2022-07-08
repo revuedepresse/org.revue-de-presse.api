@@ -96,6 +96,8 @@ function guard_against_missing_variables() {
 
         kill -s TERM $service_pid
 
+        return 1
+
     fi
 
     if [ -z "${SERVICE}" ];
@@ -104,6 +106,8 @@ function guard_against_missing_variables() {
         printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'worker name e.g. worker.example.com' 'SERVICE' $'\n'
 
         kill -s TERM $service_pid
+
+        return 1
 
     fi
 
@@ -114,6 +118,8 @@ function guard_against_missing_variables() {
 
         kill -s TERM $service_pid
 
+        return 1
+
     fi
 
     if [ -z "${SERVICE_OWNER_UID}" ];
@@ -123,6 +129,8 @@ function guard_against_missing_variables() {
 
         kill -s TERM $service_pid
 
+        return 1
+
     fi
 
     if [ -z "${SERVICE_OWNER_GID}" ];
@@ -131,6 +139,8 @@ function guard_against_missing_variables() {
         printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
 
         kill -s TERM $service_pid
+
+        return 1
 
     fi
 }
