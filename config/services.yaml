@@ -18,7 +18,7 @@ services:
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
-        resource: '../src/PublishersList/Controller/.*.php'
+        resource: '../src/Trends/Infrastructure/Controller/.*.php'
         tags: ['controller.service_arguments']
 
     App\Twitter\Infrastructure\Log\StatusLogger:
