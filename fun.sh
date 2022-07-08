@@ -216,6 +216,10 @@ function remove_running_container_and_image_in_debug_mode() {
 }
 
 function install() {
+    local SERVICE
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
+
     load_configuration_parameters
 
     clean ''
