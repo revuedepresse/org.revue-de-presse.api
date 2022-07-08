@@ -22,6 +22,6 @@ interface MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublishersList $list
+        PublishersListInterface $list
     ): int;
 }

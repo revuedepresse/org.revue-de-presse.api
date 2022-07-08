@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
@@ -198,10 +198,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
-     * @param string $id
-     *
-     * @return array|StatusInterface|TaggedStatus
-     * @throws Exception
+     * @throws \JsonException
      */
     public function findStatusIdentifiedBy(string $id)
     {

@@ -56,7 +56,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
      * @throws Exception
      */
     public function processPublishersList(
-        PublishersList $list,
+        PublishersListInterface $list,
         TokenInterface $token,
         PublicationStrategyInterface $strategy
     ): int {
@@ -65,8 +65,8 @@ class PublishersListProcessor implements PublishersListProcessorInterface
             $memberCollection = $eventRepository->collectedPublishersList(
                 $this->accessor,
                 [
-                    $eventRepository::OPTION_publishers_list_ID => $list->id(),
-                    $eventRepository::OPTION_publishers_list_NAME => $list->name()
+                    $eventRepository::OPTION_PUBLISHERS_LIST_ID => $list->id(),
+                    $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $list->name()
                 ]
             );
             $memberCollection = $this->addOwnerToListOptionally(
@@ -124,7 +124,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
      */
     private function processMemberOriginatingFromListWithToken(
         MemberCollection $members,
-        PublishersList $list,
+        PublishersListInterface $list,
         TokenInterface $token,
         PublicationStrategyInterface $strategy
     ): int {

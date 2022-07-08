@@ -10,7 +10,7 @@ use App\Twitter\Domain\Resource\PublishersList;
 interface PublishersListProcessorInterface
 {
     public function processPublishersList(
-        PublishersList $list,
+        PublishersListInterface $list,
         TokenInterface $token,
         PublicationStrategyInterface $strategy
     ): int;

@@ -67,7 +67,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublishersList $list
+        PublishersListInterface $list
     ): int {
         try {
             $this->dispatchPublications($memberIdentity, $strategy, $token, $list);
@@ -104,7 +104,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublishersList $list
+        PublishersListInterface $list
     ): void {
         $this->skipUnrestrictedMember($memberIdentity, $strategy);
 

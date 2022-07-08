@@ -2,9 +2,10 @@
 
 namespace App\PublishersList\Entity;
 
+use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTimeInterface;
@@ -24,10 +25,7 @@ class TimelyStatus implements TimeRangeAwareInterface
      */
     private StatusInterface $status;
 
-    /**
-     * @var Aggregate
-     */
-    private Aggregate $aggregate;
+    private PublishersListInterface $aggregate;
 
     /**
      * @var DateTimeInterface
@@ -50,8 +48,8 @@ class TimelyStatus implements TimeRangeAwareInterface
     private string $memberName;
 
     public function __construct(
-        StatusInterface $status,
-        Aggregate $aggregate,
+        StatusInterface    $status,
+        PublishersList     $aggregate,
         \DateTimeInterface $publicationDateTime
     ) {
 
@@ -66,10 +64,9 @@ class TimelyStatus implements TimeRangeAwareInterface
     }
 
     /**
-     * @param Aggregate $aggregate
      * @throws \Exception
      */
-    public function updateAggregate(Aggregate $aggregate)
+    public function updateAggregate(PublishersListInterface $aggregate)
     {
         $this->aggregate = $aggregate;
         $this->aggregateName = $aggregate->getName();

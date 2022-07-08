@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Status;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
@@ -43,14 +43,14 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 
     /**
      * @param array          $properties
-     * @param Aggregate|null $aggregate
+     * @param PublishersList|null $aggregate
      *
      * @return StatusInterface
      * @throws Exception
      */
     public function convertPropsToStatus(
         array $properties,
-        ?Aggregate $aggregate
+        ?PublishersListInterface $aggregate
     ): StatusInterface {
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 

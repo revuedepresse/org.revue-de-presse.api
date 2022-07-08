@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\PublishersList\Repository;
 
 use App\PublishersList\Entity\TimelyStatus;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\StatusInterface;
@@ -53,13 +54,13 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($aggregate instanceof Aggregate)) {
+            if (!($aggregate instanceof PublishersList)) {
                 $aggregate = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
@@ -109,7 +110,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
      */
     public function fromAggregatedStatus(
         StatusInterface $status,
-        Aggregate $aggregate = null
+        PublishersListInterface $aggregate = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
@@ -78,7 +78,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        Aggregate $aggregate = null
+        PublishersListInterface $aggregate = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -144,7 +144,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?Aggregate $aggregate
+        ?PublishersListInterface $aggregate
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
@@ -163,10 +163,10 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?Aggregate $aggregate,
+        ?PublishersListInterface $aggregate,
         StatusInterface $status
     ): void {
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublishersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
                 $aggregate
@@ -266,16 +266,16 @@ class StatusPersistence implements StatusPersistenceInterface
     /**
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy
-     * @param Aggregate|null              $publishersList
+     * @param PublishersList|null              $publishersList
      * @param MemberInterface|null        $likedBy
      *
      * @return CollectionInterface
      */
     private function saveStatuses(
-        array $statuses,
+        array                       $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publishersList = null,
-        MemberInterface $likedBy = null
+        PublishersList              $publishersList = null,
+        MemberInterface             $likedBy = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,

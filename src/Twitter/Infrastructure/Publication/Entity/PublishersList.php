@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Api\Entity;
+namespace App\Twitter\Infrastructure\Publication\Entity;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use DateTime;
@@ -23,7 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class Aggregate implements PublishersListInterface
+class PublishersList implements PublishersListInterface
 {
     /**
      * @var integer

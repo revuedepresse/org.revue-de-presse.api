@@ -3,21 +3,21 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 
 class Tag
 {
     /**
-     * @var Aggregate
+     * @var PublishersList
      */
-    private Aggregate $tag;
+    private PublishersListInterface $tag;
 
-    private function __construct(Aggregate $tag)
+    private function __construct(PublishersListInterface $tag)
     {
         $this->tag = $tag;
     }
 
-    public function fromAggregate(Aggregate $tag): self
+    public function fromAggregate(PublishersListInterface $tag): self
     {
         return new self($tag);
     }
@@ -27,7 +27,7 @@ class Tag
         return $this->tag->getName();
     }
 
-    public function tag(): Aggregate
+    public function tag(): PublishersList
     {
         return $this->tag;
     }

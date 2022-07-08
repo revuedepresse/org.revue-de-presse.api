@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
+use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
@@ -37,10 +38,15 @@ class PublicationPersistence implements PublicationPersistenceInterface
         $this->memberRepository = $memberRepository;
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function persistStatusPublications(
         array $statuses,
         AccessToken $identifier,
-        Aggregate $aggregate = null
+        PublishersListInterface $aggregate = null
     ): CollectionInterface {
         $statusPersistence = $this->statusPersistence;
         $result           = $statusPersistence->persistAllStatuses(

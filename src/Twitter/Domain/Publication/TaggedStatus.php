@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
@@ -281,7 +281,7 @@ class TaggedStatus
      * @param EntityManagerInterface $entityManager
      * @param LoggerInterface        $logger
      *
-     * @param Aggregate|null         $aggregate
+     * @param PublishersList|null         $aggregate
      *
      * @return StatusInterface
      * @throws Exception
@@ -289,7 +289,7 @@ class TaggedStatus
     public function toStatus(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        ?Aggregate $aggregate = null
+        ?PublishersListInterface $aggregate = null
     ): StatusInterface {
         $status = new Status();
 

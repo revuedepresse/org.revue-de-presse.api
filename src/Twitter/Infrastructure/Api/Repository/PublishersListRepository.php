@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Api\Repository;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\PublishersList\Entity\TimelyStatus;
 use App\PublishersList\Repository\PaginationAwareTrait;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -64,7 +64,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             ]
         );
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = $this->make($member->getTwitterUsername(), $list->name);
         }
 
@@ -122,7 +122,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
                 if ($aggregate['totalStatuses'] === 0) {
                     /** @var PublishersListInterface $existingAggregate */
                     $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
-                    if (!($existingAggregate instanceof Aggregate)) {
+                    if (!($existingAggregate instanceof PublishersList)) {
                         return $aggregate;
                     }
                 }
@@ -202,7 +202,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             return $aggregate;
         }
 
-        return new Aggregate($screenName, $listName);
+        return new PublishersList($screenName, $listName);
     }
 
     /**
@@ -353,7 +353,7 @@ QUERY;
             ]
         );
 
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublishersList) {
             $aggregates = $this->findBy(
                 [
                     'screenName' => $screenName,

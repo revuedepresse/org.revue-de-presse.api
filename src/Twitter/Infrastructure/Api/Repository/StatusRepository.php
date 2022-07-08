@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Repository;
 
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
@@ -378,10 +378,10 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublishersListInterface $aggregate
      * @return array
      */
-    public function findByAggregate(Aggregate $aggregate)
+    public function findByAggregate(PublishersListInterface $aggregate)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->join('s.aggregates', 'a');
