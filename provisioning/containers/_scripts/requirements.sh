@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+trap "exit 1" TERM
+export install_requirements_pid=$$
+
 function add_system_user_group() {
     if [ $(cat /etc/group | grep "${SERVICE_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
@@ -138,6 +141,7 @@ function install_app_requirements() {
 
     local APP_SECRET
     local GITHUB_API_TOKEN
+    local SERVICE
     local SERVICE_OWNER_UID
     local SERVICE_OWNER_GID
 
@@ -146,36 +150,45 @@ function install_app_requirements() {
     if [ -z "${APP_SECRET}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'APP_SECRET' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'APP_SECRET' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
 
     fi
 
     if [ -z "${GITHUB_API_TOKEN}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'GITHUB_API_TOKEN' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'GITHUB_API_TOKEN' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
+
+    fi
+
+    if [ -z "${SERVICE}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'SERVICE' $'\n'
+
+        kill -s TERM $install_requirements_pid
 
     fi
 
     if [ -z "${SERVICE_OWNER_UID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'SERVICE_OWNER_UID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'SERVICE_OWNER_UID' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
 
     fi
 
     if [ -z "${SERVICE_OWNER_GID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
 
     fi
 
@@ -202,6 +215,7 @@ function install_app_requirements() {
     fi
 
     \cat '/templates/www.conf.dist' | \
+    \sed -E 's/__SERVICE__/'"${SERVICE}"'/g' | \
     \sed -E 's/__UID__/'"${SERVICE_OWNER_UID}"'/g' | \
     \sed -E 's/__GID__/'"${SERVICE_OWNER_GID}"'/g' \
     > "${project_dir}/provisioning/containers/service/templates/www.conf" && \

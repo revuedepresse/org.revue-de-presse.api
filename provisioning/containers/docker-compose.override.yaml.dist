@@ -1,6 +1,19 @@
 version: '3.8'
 
+services:
+
+  app:
+    volumes:
+      - '../../:/var/www/__SERVICE__/'
+      - '../../../shared/emoji-data/:/var/www/__SERVICE__/public/emoji-data/'
+
+  service:
+    volumes:
+      - '../../:/var/www/__SERVICE__/'
+      - '../../../shared/emoji-data/:/var/www/__SERVICE__/public/emoji-data/'
+
 networks:
-    default:
-        # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
-        name: # external-network-name
+  default:
+    # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
+    name: # external-network-name
+

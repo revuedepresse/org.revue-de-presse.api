@@ -1,7 +1,11 @@
 FROM    php:8.1-cli-bullseye
 
+ENV     SERVICE='api.example.org'
+
 ARG     SERVICE_OWNER_UID=1000
 ARG     SERVICE_OWNER_GID=101
+
+ARG     SERVICE_DIR="${SERVICE}"
 
 COPY    --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
         ./_scripts \
@@ -17,8 +21,8 @@ COPY    --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER    ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
 
-VOLUME  ["/scripts", "/var/www/shared", "/var/www/api.revue-de-presse.org"]
+VOLUME  ["/scripts", "/var/www/shared", "/var/www/${SERVICE_DIR}"]
 
-WORKDIR '/var/www/api.revue-de-presse.org'
+WORKDIR "/var/www/${SERVICE_DIR}"
 
 CMD     ["tail", "-F", "/dev/null"]
