@@ -144,9 +144,7 @@ function load_configuration_parameters() {
         cp --verbose ./.env.local{.dist,}
     fi
 
-    if [ ! -e ./.env ]; then
-        touch ./.env
-    fi
+    export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-'org_example_api'}"
 
     source ./.env.local
 
