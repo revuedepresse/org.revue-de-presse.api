@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: 'revue-de-presse.org'
+name: 'worker_revue-de-presse_org'
 
 x-vol: &shared-volumes
   volumes:

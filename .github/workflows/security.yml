@@ -1,4 +1,4 @@
-name: Repository history scan
+name: scan history
 
 on: [push, pull_request]
 
