@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http;
 
-use App\PublicationPopularity\Domain\Repository\SearchParamsInterface;
+use App\Trends\Domain\Repository\SearchParamsInterface;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 use function array_keys;

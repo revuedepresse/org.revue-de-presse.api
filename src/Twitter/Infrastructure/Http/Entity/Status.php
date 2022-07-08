@@ -142,7 +142,7 @@ class Status implements StatusInterface
     protected Collection $aggregates;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\PublicationPopularity\Domain\Entity\StatusPopularity", mappedBy="status")
+     * @ORM\OneToMany(targetEntity="App\Trends\Domain\Entity\StatusPopularity", mappedBy="status")
      */
     private Collection $popularity;
 

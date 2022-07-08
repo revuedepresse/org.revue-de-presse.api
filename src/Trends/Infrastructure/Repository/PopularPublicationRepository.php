@@ -1,10 +1,10 @@
 <?php
 declare (strict_types=1);
 
-namespace App\PublicationPopularity\Infrastructure\Repository;
+namespace App\Trends\Infrastructure\Repository;
 
-use App\PublicationPopularity\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\PublicationPopularity\Domain\Repository\SearchParamsInterface;
+use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
+use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;

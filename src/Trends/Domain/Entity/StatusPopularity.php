@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\PublicationPopularity\Domain\Entity;
+namespace App\Trends\Domain\Entity;
 
 use App\Twitter\Domain\Publication\StatusInterface;
 

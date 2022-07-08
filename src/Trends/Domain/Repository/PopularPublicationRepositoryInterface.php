@@ -1,6 +1,6 @@
 <?php
 
-namespace App\PublicationPopularity\Domain\Repository;
+namespace App\Trends\Domain\Repository;
 
 interface PopularPublicationRepositoryInterface
 {

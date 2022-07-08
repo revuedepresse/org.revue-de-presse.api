@@ -160,7 +160,7 @@ doctrine:
                         alias:      'Popularity'
                         dir:        '%kernel.project_dir%/config/model/popularity'
                         is_bundle:  false
-                        prefix:     App\PublicationPopularity\Domain\Entity
+                        prefix:     App\Trends\Domain\Entity
                         type:       xml
                     PublicationBatchCollectedEvent:
                         alias:      'PublicationBatchCollectedEvent'
