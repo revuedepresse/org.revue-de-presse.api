@@ -1,4 +1,4 @@
-name: PHP security workflow
+name: check dependencies
 
 on: ["push", "pull_request"]
 
