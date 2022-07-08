@@ -46,8 +46,8 @@
         />
 
         <many-to-one
-            target-entity="App\Membership\Domain\Ownership\MembersList"
             field="list"
+            target-entity="App\Ownership\Domain\Entity\MembersList"
             inversed-by="timelyStatuses">
             <join-column name="aggregate_id" />
         </many-to-one>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trends\Entity;
+namespace App\Trends\Domain\Entity;
 
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;

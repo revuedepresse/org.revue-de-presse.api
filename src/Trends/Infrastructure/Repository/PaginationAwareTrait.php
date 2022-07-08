@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trends\Repository;
+namespace App\Trends\Infrastructure\Repository;
 
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\ORM\NoResultException;

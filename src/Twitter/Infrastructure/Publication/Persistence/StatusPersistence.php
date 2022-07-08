@@ -24,7 +24,7 @@ use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Membership\Domain\Ownership\MembersList;
+use App\Ownership\Domain\Entity\MembersList;
 use Closure;
 use DateTime;
 use DateTimeZone;

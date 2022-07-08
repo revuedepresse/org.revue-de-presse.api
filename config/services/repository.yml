@@ -7,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            membersListRepository: 'App\Twitter\Infrastructure\Http\Repository\MembersListRepository'
+            membersListRepository: 'App\Ownership\Infrastructure\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -55,9 +55,9 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Infrastructure\Http\Repository\MembersListRepository:
+    App\Ownership\Infrastructure\Repository\MembersListRepository:
         public: true
-        class:  'App\Twitter\Infrastructure\Http\Repository\MembersListRepository'
+        class:  'App\Ownership\Infrastructure\Repository\MembersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
@@ -106,9 +106,9 @@ services:
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Trends\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\Trends\Infrastructure\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\Trends\Entity\MemberAggregateSubscription'
+            - 'App\Trends\Domain\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Twitter\Infrastructure\Publication\Repository\KeywordRepository'
@@ -135,25 +135,25 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\Trends\Repository\TimelyStatusRepository'
+        class: 'App\Trends\Infrastructure\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Trends\Entity\TimelyStatus'
+            - 'App\Trends\Domain\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Http\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
 
     repository.saved_search:
-        class: 'App\Trends\Repository\SavedSearchRepository'
+        class: 'App\Trends\Infrastructure\Repository\SavedSearchRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Trends\Entity\SavedSearch'
+            - 'App\Trends\Domain\Entity\SavedSearch'
 
     repository.search_matching_status:
-        class: 'App\Trends\Repository\SearchMatchingStatusRepository'
+        class: 'App\Trends\Infrastructure\Repository\SearchMatchingStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Trends\Entity\SearchMatchingStatus'
+            - 'App\Trends\Domain\Entity\SearchMatchingStatus'
         properties:
             statusRepository: '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'
             logger:           "@logger"

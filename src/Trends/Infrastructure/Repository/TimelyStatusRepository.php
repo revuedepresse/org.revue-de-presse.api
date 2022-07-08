@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Trends\Repository;
+namespace App\Trends\Infrastructure\Repository;
 
-use App\Trends\Entity\TimelyStatus;
+use App\Trends\Domain\Entity\TimelyStatus;
 use App\Twitter\Domain\Publication\MembersListInterface;
-use App\Membership\Domain\Ownership\MembersList;
-use \App\Membership\Infrastructure\Repository\MembersListRepository;
+use App\Ownership\Domain\Entity\MembersList;
+use \App\Ownership\Infrastructure\Repository\MembersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Http\SearchParams;

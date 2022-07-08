@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Trends\Repository;
+namespace App\Trends\Infrastructure\Repository;
 
-use App\Trends\Entity\SavedSearch;
-use App\Trends\Entity\SearchMatchingStatus;
+use App\Trends\Domain\Entity\SavedSearch;
+use App\Trends\Domain\Entity\SearchMatchingStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;

@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Trends\Entity\TimelyStatus"
-            repository-class="App\Trends\Repository\TimelyStatusRepository"
+    <entity name="App\Trends\Domain\Entity\TimelyStatus"
+            repository-class="App\Trends\Infrastructure\Repository\TimelyStatusRepository"
             table="timely_status">
 
         <indexes>
@@ -30,7 +30,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Membership\Domain\Ownership\MembersList"
+            target-entity="App\Ownership\Domain\Entity\MembersList"
             field="list"
             inversed-by="timelyStatuses"
         />

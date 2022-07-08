@@ -120,7 +120,7 @@ class Status implements StatusInterface
 
     /**
      * @ORM\ManyToMany(
-     *     targetEntity="App\Membership\Domain\Ownership\MembersList",
+     *     targetEntity="App\Ownership\Domain\Entity\MembersList",
      *     inversedBy="userStreams",
      *     cascade={"persist"}
      * )

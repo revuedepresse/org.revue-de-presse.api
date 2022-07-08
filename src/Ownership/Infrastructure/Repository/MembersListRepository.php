@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Membership\Infrastructure\Repository;
+namespace App\Ownership\Infrastructure\Repository;
 
 use App\Membership\Domain\Entity\MemberInterface;
-use App\Membership\Domain\Ownership\MembersList;
-use App\Trends\Entity\TimelyStatus;
-use App\Trends\Repository\PaginationAwareTrait;
+use App\Ownership\Domain\Entity\MembersList;
+use App\Trends\Domain\Entity\TimelyStatus;
+use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
@@ -14,6 +14,7 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
+use App\Twitter\Infrastructure\Http\Repository\ResourceRepository;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
 use Doctrine\DBAL\ParameterType;
