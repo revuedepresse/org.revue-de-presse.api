@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Api;
+namespace App\Twitter\Domain\Http;
 
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Twitter\Domain\Resource\MemberCollection;

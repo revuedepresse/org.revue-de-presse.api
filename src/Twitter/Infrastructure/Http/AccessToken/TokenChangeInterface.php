@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http\AccessToken;
 
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 
 interface TokenChangeInterface
 {

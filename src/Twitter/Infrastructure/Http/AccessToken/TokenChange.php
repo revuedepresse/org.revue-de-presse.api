@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Http\Entity\NullToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Psr\Log\LoggerInterface;

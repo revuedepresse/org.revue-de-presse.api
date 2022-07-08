@@ -10,7 +10,7 @@ use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Entity\NotFoundMember;
 use App\Membership\Domain\Entity\ProtectedMember;
 use App\Membership\Domain\Entity\SuspendedMember;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;

@@ -12,7 +12,7 @@ use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\SimpleTokenRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
 use App\Twitter\Infrastructure\Http\Accessor;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;

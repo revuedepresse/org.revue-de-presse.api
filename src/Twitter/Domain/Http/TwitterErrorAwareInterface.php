@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Twitter\Domain\Api;
+namespace App\Twitter\Domain\Http;
 
 /**
  * Interface TwitterErrorAwareInterface

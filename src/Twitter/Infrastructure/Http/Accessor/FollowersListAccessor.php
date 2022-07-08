@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Http\Accessor;
 use App\Twitter\Infrastructure\Http\Resource\FollowersList;
 use App\Twitter\Infrastructure\Http\Resource\ResourceList;
 use App\Twitter\Infrastructure\Http\Selector\ListSelector;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Closure;
 use Psr\Log\LoggerInterface;
 use Throwable;

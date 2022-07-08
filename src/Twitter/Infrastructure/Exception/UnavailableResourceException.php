@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Domain\Http\TwitterErrorAwareInterface;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\ReadOnlyApplicationException;

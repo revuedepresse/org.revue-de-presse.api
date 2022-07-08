@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Entity;
 
 use App\Twitter\Infrastructure\Http\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Prophecy\Argument;
 use Prophecy\Prophet;
 
