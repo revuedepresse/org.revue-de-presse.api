@@ -1,6 +1,26 @@
 version: '3.8'
 
+services:
+
+  app:
+    volumes:
+      - '../../:/var/www/org.example.api/'
+      - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
+
+  service:
+    volumes:
+      - '../../:/var/www/org.example.api/'
+      - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
+
 networks:
-    default:
-        # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
-        name: # external-network-name
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.169.195.0/28
+          gateway: 192.169.195.1
+
+#  default:
+#    # [How to use some pre-existing network?](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
+#    name: # external-network-name
+#    external: true

@@ -1,5 +1,5 @@
 [global]
-error_log                               = /var/www/api.revue-de-presse.org/var/log/php-fpm.error.log
+error_log                               = /var/www/__SERVICE__/var/log/php-fpm.error.log
 
 [api_revue_de_presse_org]
 access.log                              = /proc/self/fd/2
@@ -11,7 +11,7 @@ decorate_workers_output                 = no
 user                                    = __UID__
 group                                   = __GID__
 
-listen                                  = /var/www/api.revue-de-presse.org/var/run/__SOCK__.sock
+listen                                  = /var/www/__SERVICE__/var/run/service.sock
 
 listen.group                            = __GID__
 listen.mode                             = 0660
@@ -24,7 +24,7 @@ php_admin_flag[log_errors]              = on
 
 php_admin_value[error_reporting]        = 'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'
 php_admin_value[memory_limit]           = 64M
-php_admin_value[error_log]              = /var/www/api.revue-de-presse.org/var/log/php.revue-de-presse.org.log
+php_admin_value[error_log]              = /var/www/__SERVICE__/var/log/php.revue-de-presse.org.log
 
 ping.path                               = /ping
 
@@ -36,4 +36,4 @@ pm.max_requests                         = 300
 pm.start_servers                        = 300
 pm.status_path                          = /status
 
-prefix                                  = /var/www/api.revue-de-presse.org/public
+prefix                                  = /var/www/__SERVICE__/public

@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+trap "exit 1" TERM
+export install_requirements_pid=$$
+
 function add_system_user_group() {
-    if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
+    if [ $(cat /etc/group | grep "${SERVICE_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
-            --gid "${WORKER_GID}" \
+            --gid "${SERVICE_OWNER_GID}" \
             service
     fi
 
-    if [ $(cat /etc/passwd | grep "${WORKER_UID}" -c) -eq 0 ]; then
+    if [ $(cat /etc/passwd | grep "${SERVICE_OWNER_UID}" -c) -eq 0 ]; then
         useradd \
             --shell /usr/sbin/nologin \
-            --uid ${WORKER_UID} \
-            --gid ${WORKER_GID} \
+            --uid ${SERVICE_OWNER_UID} \
+            --gid ${SERVICE_OWNER_GID} \
             --no-user-group \
             --no-create-home \
             service
@@ -114,12 +117,12 @@ function install_service_requirements() {
     mkdir \
         --verbose \
         --parents \
-        /var/www/api.revue-de-presse.org
+        "/var/www/${SERVICE}"
 }
 
 function install_app_requirements() {
     local project_dir
-    project_dir='/var/www/api.revue-de-presse.org'
+    project_dir="/var/www/${SERVICE}"
 
     rm -f "${project_dir}/bin/behat"
     rm -f "${project_dir}/bin/doctrine"
@@ -138,44 +141,54 @@ function install_app_requirements() {
 
     local APP_SECRET
     local GITHUB_API_TOKEN
-    local WORKER_UID
-    local WORKER_GID
+    local SERVICE
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
 
     source "${project_dir}/.env.local"
 
     if [ -z "${APP_SECRET}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'APP_SECRET' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'APP_SECRET' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
 
     fi
 
     if [ -z "${GITHUB_API_TOKEN}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'GITHUB_API_TOKEN' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'GITHUB_API_TOKEN' $'\n'
 
-      return 1
-
-    fi
-
-    if [ -z "${WORKER_UID}" ];
-    then
-
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
-
-      return 1
+        kill -s TERM $install_requirements_pid
 
     fi
 
-    if [ -z "${WORKER_GID}" ];
+    if [ -z "${SERVICE}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'SERVICE' $'\n'
 
-      return 1
+        kill -s TERM $install_requirements_pid
+
+    fi
+
+    if [ -z "${SERVICE_OWNER_UID}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'SERVICE_OWNER_UID' $'\n'
+
+        kill -s TERM $install_requirements_pid
+
+    fi
+
+    if [ -z "${SERVICE_OWNER_GID}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
+
+        kill -s TERM $install_requirements_pid
 
     fi
 
@@ -188,7 +201,7 @@ function install_app_requirements() {
         --no-interaction \
         --classmap-authoritative
 
-    chown --verbose -R "${WORKER_UID}:${WORKER_GID}" /scripts
+    chown --verbose -R "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" /scripts
 
     chmod     o-rwx /scripts
     chmod -R ug+rx  /scripts
@@ -202,9 +215,9 @@ function install_app_requirements() {
     fi
 
     \cat '/templates/www.conf.dist' | \
-    \sed -E 's/__SOCK__/api.revue-de-presse.org/g' | \
-    \sed -E 's/__UID__/'"${WORKER_UID}"'/g' | \
-    \sed -E 's/__GID__/'"${WORKER_GID}"'/g' \
+    \sed -E 's/__SERVICE__/'"${SERVICE}"'/g' | \
+    \sed -E 's/__UID__/'"${SERVICE_OWNER_UID}"'/g' | \
+    \sed -E 's/__GID__/'"${SERVICE_OWNER_GID}"'/g' \
     > "${project_dir}/provisioning/containers/service/templates/www.conf" && \
     printf '%s.%s' 'Successfully copied php-fpm template' $'\n'
 
@@ -222,7 +235,7 @@ function install_app_requirements() {
         -executable \
         -readable \
         -type d \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
@@ -239,7 +252,7 @@ function install_app_requirements() {
     find "${project_dir}" \
         -type f \
         -readable \
-        -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
@@ -247,7 +260,7 @@ function install_app_requirements() {
     find "${project_dir}"  \
         -type f \
         -not -path "${project_dir}"'/bin' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
