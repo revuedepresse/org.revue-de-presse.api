@@ -54,7 +54,7 @@ class StatusRepository extends ArchivedStatusRepository
         $status->setIndexed(false);
 
         if (array_key_exists('aggregate', $properties)) {
-            $status->addToAggregates($properties['aggregate']);
+            $status->addToMembersList($properties['aggregate']);
         }
 
         return $status;

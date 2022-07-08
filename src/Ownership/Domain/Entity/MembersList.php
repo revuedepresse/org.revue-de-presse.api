@@ -176,12 +176,12 @@ class MembersList implements MembersListInterface
         $this->name = $listName;
         $this->screenName = $screenName;
         $this->createdAt = new DateTime();
-        $this->userStreams = new ArrayCollection();
+        $this->taggedTweets = new ArrayCollection();
         $this->locked = false;
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="Status", mappedBy="aggregates")
+     * @ORM\ManyToMany(targetEntity="App\Twitter\Infrastructure\Http\Entity\Status", mappedBy="membersList")
      */
-    protected Collection $userStreams;
+    protected Collection $taggedTweets;
 }

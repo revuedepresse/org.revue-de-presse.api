@@ -307,8 +307,8 @@ class StatusLogger implements StatusLoggerInterface
     private function getStatusAggregate(StatusInterface $memberStatus): string
     {
         $aggregateName = 'without aggregate';
-        if (!$memberStatus->getAggregates()->isEmpty()) {
-            $list = $memberStatus->getAggregates()->first();
+        if (!$memberStatus->getMembersList()->isEmpty()) {
+            $list = $memberStatus->getMembersList()->first();
             if ($list instanceof MembersList) {
                 $aggregateName = $list->getName();
             }

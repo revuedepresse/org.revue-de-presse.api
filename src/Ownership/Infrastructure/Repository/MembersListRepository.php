@@ -340,7 +340,7 @@ QUERY;
                     foreach ($statuses as $status) {
                         /** @var StatusInterface $status */
                         $status->removeFrom($list);
-                        $status->addToAggregates($firstAggregate);
+                        $status->addToMembersList($firstAggregate);
                     }
 
                     $timelyStatuses = $this->timelyStatusRepository

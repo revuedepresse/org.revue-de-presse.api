@@ -332,7 +332,7 @@ class TaggedStatus
         $status->setIdentifier($this->token);
 
         if ($list !== null) {
-            $status->addToAggregates($list);
+            $status->addToMembersList($list);
         }
 
         return $status;

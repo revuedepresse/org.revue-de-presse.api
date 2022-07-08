@@ -121,7 +121,7 @@ class Status implements StatusInterface
     /**
      * @ORM\ManyToMany(
      *     targetEntity="App\Ownership\Domain\Entity\MembersList",
-     *     inversedBy="userStreams",
+     *     inversedBy="taggedTweets",
      *     cascade={"persist"}
      * )
      * @ORM\JoinTable(name="weaving_status_aggregate",
@@ -139,7 +139,7 @@ class Status implements StatusInterface
      *      }
      * )
      */
-    protected Collection $aggregates;
+    protected Collection $membersList;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Trends\Domain\Entity\StatusPopularity", mappedBy="status")
@@ -173,9 +173,9 @@ class Status implements StatusInterface
         $status->setScreenName($archivedStatus->getScreenName());
 
         if ($archivedStatus->belongsToAList()) {
-            $archivedStatus->getAggregates()->map(
+            $archivedStatus->getMembersList()->map(
                 function (MembersListInterface $list) use ($status) {
-                    $status->addToAggregates($list);
+                    $status->addToMembersList($list);
                 }
             );
         }

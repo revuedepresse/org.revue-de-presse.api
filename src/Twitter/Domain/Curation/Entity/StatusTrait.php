@@ -9,24 +9,13 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-/**
- * @package App\Twitter\Domain\Curation\Entity
- */
 trait StatusTrait
 {
-    /**
-     * @return int
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @param bool $starred
-     *
-     * @return $this
-     */
     public function setStarred(bool $starred): StatusInterface
     {
         $this->starred = $starred;
@@ -34,19 +23,6 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isStarred(): bool
-    {
-        return $this->starred;
-    }
-
-    /**
-     * @param string $hash
-     *
-     * @return $this
-     */
     public function setHash(string $hash = null): StatusInterface
     {
         $this->hash = $hash;
@@ -54,19 +30,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getHash(): string
     {
         return $this->hash;
     }
 
-    /**
-     * @param string $screenName
-     *
-     * @return $this
-     */
     public function setScreenName(string $screenName): StatusInterface
     {
         $this->screenName = $screenName;
@@ -74,19 +42,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getScreenName(): string
     {
         return $this->screenName;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return self
-     */
     public function setName(string $name): StatusInterface
     {
         $this->name = $name;
@@ -94,19 +54,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $text
-     *
-     * @return $this
-     */
     public function setText($text): StatusInterface
     {
         $this->text = $text;
@@ -114,19 +66,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getText(): string
     {
         return $this->text;
     }
 
-    /**
-     * @param string $userAvatar
-     *
-     * @return $this|StatusInterface
-     */
     public function setUserAvatar(string $userAvatar): StatusInterface
     {
         $this->userAvatar = $userAvatar;
@@ -134,19 +78,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getUserAvatar(): string
     {
         return $this->userAvatar;
     }
 
-    /**
-     * @param string $identifier
-     *
-     * @return $this|StatusInterface
-     */
     public function setIdentifier(string $identifier): StatusInterface
     {
         $this->identifier = $identifier;
@@ -154,19 +90,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
     }
 
-    /**
-     * @param string $statusId
-     *
-     * @return $this
-     */
     public function setStatusId(string $statusId = null): StatusInterface
     {
         $this->statusId = $statusId;
@@ -174,19 +102,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getStatusId(): string
     {
         return $this->statusId;
     }
 
-    /**
-     * @param string $apiDocument
-     *
-     * @return $this
-     */
     public function setApiDocument(string $apiDocument): StatusInterface
     {
         $this->apiDocument = $apiDocument;
@@ -194,19 +114,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return mixed|string|null
-     */
     public function getApiDocument(): string
     {
         return $this->apiDocument;
     }
 
-    /**
-     * @param DateTimeInterface $createdAt
-     *
-     * @return $this
-     */
     public function setCreatedAt(DateTimeInterface $createdAt): StatusInterface
     {
         $this->createdAt = $createdAt;
@@ -214,18 +126,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return DateTimeInterface
-     */
     public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    /**
-     * @param $updatedAt
-     * @return $this
-     */
     public function setUpdatedAt(DateTimeInterface $updatedAt = null): StatusInterface
     {
         $this->updatedAt = $updatedAt;
@@ -233,18 +138,11 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return DateTimeInterface
-     */
     public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    /**
-     * @param $indexed
-     * @return $this
-     */
     public function setIndexed(bool $indexed): StatusInterface
     {
         $this->indexed = $indexed;
@@ -252,9 +150,6 @@ trait StatusTrait
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function getIndexed(): bool
     {
         return $this->indexed;
@@ -262,50 +157,33 @@ trait StatusTrait
 
     public function __construct()
     {
-        $this->aggregates = new ArrayCollection();
+        $this->membersList = new ArrayCollection();
     }
 
-    /**
-     * @return ArrayCollection
-     */
-    public function getAggregates(): Collection
+    public function getMembersList(): Collection
     {
-        return $this->aggregates;
+        return $this->membersList;
     }
 
-    /**
-     * @return bool
-     */
     public function belongsToAList(): bool
     {
-        return !$this->aggregates->isEmpty();
+        return !$this->membersList->isEmpty();
     }
 
-    /**
-     * @param MembersListInterface $list
-     *
-     * @return $this
-     */
     public function removeFrom(MembersListInterface $list): StatusInterface
     {
-        if (!$this->aggregates->contains($list)) {
+        if (!$this->membersList->contains($list)) {
             return $this;
         }
 
-        $this->aggregates->removeElement($list);
+        $this->membersList->removeElement($list);
 
         return $this;
     }
 
-    /**
-     * @param MembersListInterface $list
-     *
-     * @return Collection
-     */
-    public function addToAggregates(MembersListInterface $list): Collection {
-        $this->aggregates->add($list);
+    public function addToMembersList(MembersListInterface $list): Collection {
+        $this->membersList->add($list);
 
-        return $this->aggregates;
+        return $this->membersList;
     }
-
 }

@@ -152,7 +152,7 @@ interface StatusInterface
     /**
      * @return Collection
      */
-    public function getAggregates(): Collection;
+    public function getMembersList(): Collection;
 
     /**
      * @param MembersListInterface $list
@@ -164,7 +164,7 @@ interface StatusInterface
      * @param MembersListInterface $list
      * @return mixed
      */
-    public function addToAggregates(MembersListInterface $list): Collection;
+    public function addToMembersList(MembersListInterface $list): Collection;
 
     /**
      * @return bool
