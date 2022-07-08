@@ -138,39 +138,45 @@ doctrine:
                 connection: default
                 dql: "%doctrine_extensions_dql%"
                 mappings:
+
                     Http:
                         alias:      'Http'
-                        is_bundle:  false
                         dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Http/Entity'
+                        is_bundle:  false
                         prefix:     'App\Twitter\Infrastructure\Http\Entity'
                         type:       annotation
+
                     Membership:
                         alias:      'Membership'
                         dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity\Legacy
+                        prefix:     'App\Membership\Domain\Entity\Legacy'
                         type:       annotation
+
                     MembersList:
                         alias:      'MembersList'
                         dir:        '%kernel.project_dir%/src/Ownership/Domain/Entity'
                         is_bundle:  false
-                        prefix:     App\Ownership\Domain\Entity
+                        prefix:     'App\Ownership\Domain\Entity'
                         type:       annotation
+
                     Publication:
                         alias:      'Publication'
                         dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
                         is_bundle:  false
-                        prefix:     App\Twitter\Domain\Publication\Entity
+                        prefix:     'App\Twitter\Domain\Publication\Entity'
                         type:       annotation
-                    PublicationBatchCollectedEvent:
-                        alias:      'PublicationBatchCollectedEvent'
+
+                    Curation:
+                        alias:      'Curation'
                         dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Twitter\Domain\Curation\Entity
+                        prefix:     'App\Twitter\Domain\Curation\Entity'
                         type:       xml
+
                     Trends:
                         alias:      'Trends'
                         dir:        '%kernel.project_dir%/config/model/trends'
                         is_bundle:  false
-                        prefix:     App\Trends\Domain\Entity
+                        prefix:     'App\Trends\Domain\Entity'
                         type:       xml
