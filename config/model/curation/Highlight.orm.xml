@@ -47,7 +47,7 @@
 
         <many-to-one
             target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
-            field="aggregate"
+            field="list"
             inversed-by="timelyStatuses">
             <join-column name="aggregate_id" />
         </many-to-one>

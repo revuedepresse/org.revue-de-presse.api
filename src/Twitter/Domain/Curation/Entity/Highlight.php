@@ -12,50 +12,23 @@ class Highlight
 {
     private $id;
 
-    /**
-     * @var DateTime
-     */
-    private $publicationDateTime;
+    private \DateTimeInterface $publicationDateTime;
 
-    /**
-     * @var Status
-     */
-    private $status;
+    private StatusInterface $status;
 
-    /**
-     * App\Membership\Domain\Entity\Member
-     */
-    private $member;
+    private MemberInterface $member;
 
-    /**
-     * @var boolean
-     */
-    private $isRetweet;
+    private bool $isRetweet;
 
-    /**
-     * @var PublishersListInterface
-     */
-    private $list;
+    private PublishersListInterface $list;
 
-    /**
-     * @var string
-     */
-    private $aggregateName;
+    private string $aggregateName;
 
-    /**
-     * @var DateTime
-     */
-    private $retweetedStatusPublicationDate;
+    private \DateTimeInterface $retweetedStatusPublicationDate;
 
-    /**
-     * @var int
-     */
-    private $totalRetweets;
+    private int $totalRetweets;
 
-    /**
-     * @var int
-     */
-    private $totalFavorites;
+    private int $totalFavorites;
 
     public function __construct(
         MemberInterface $member,
