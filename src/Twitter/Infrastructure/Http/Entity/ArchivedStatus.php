@@ -19,10 +19,10 @@ use Doctrine\ORM\Mapping as ORM;
  *      },
  *      indexes={
  *          @ORM\Index(name="hash", columns={"ust_hash"}),
- *          @ORM\Index(name="screen_name", columns={"ust_full_name"}),
- *          @ORM\Index(name="status_id", columns={"ust_status_id"}),
- *          @ORM\Index(name="ust_created_at", columns={"ust_created_at"}),
- *          @ORM\Index(name="idx_published", columns={"is_published"})
+ *          @ORM\Index(name="archived_screen_name", columns={"ust_full_name"}),
+ *          @ORM\Index(name="archived_status_id", columns={"ust_status_id"}),
+ *          @ORM\Index(name="archived_ust_created_at", columns={"ust_created_at"}),
+ *          @ORM\Index(name="archived_idx_published", columns={"is_published"})
  *      }
  * )
  */

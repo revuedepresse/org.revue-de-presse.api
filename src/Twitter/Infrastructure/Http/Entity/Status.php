@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
  *      name="weaving_status",
  *      uniqueConstraints={
  *          @ORM\UniqueConstraint(
- *              name="unique_hash", columns={"ust_hash"}),
+ *              name="archived_status_unique_hash", columns={"ust_hash"}),
  *      },
  *      options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},
  *      indexes={

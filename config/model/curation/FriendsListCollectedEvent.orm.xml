@@ -10,8 +10,8 @@
             table="member_friends_list_collected_event">
 
         <indexes>
-            <index name="occurrence_idx" columns="screen_name,at_cursor,occurred_at"/>
-            <index name="correlation_idx" columns="screen_name,correlation_id"/>
+            <index name="friends_list_occurrence_idx" columns="screen_name,at_cursor,occurred_at"/>
+            <index name="friends_list_correlation_idx" columns="screen_name,correlation_id"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">

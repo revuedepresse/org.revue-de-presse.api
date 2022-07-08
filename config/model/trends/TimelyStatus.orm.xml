@@ -10,9 +10,9 @@
             table="timely_status">
 
         <indexes>
-            <index name="publication_idx" columns="publication_date_time"/>
-            <index name="status_idx" columns="status_id,publication_date_time,time_range,aggregate_id,aggregate_name"/>
-            <index name="member_name" columns="member_name"/>
+            <index name="timely_publication_idx" columns="publication_date_time"/>
+            <index name="timely_status_idx" columns="status_id,publication_date_time,time_range,aggregate_id,aggregate_name"/>
+            <index name="timely_status_member_name" columns="member_name"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">

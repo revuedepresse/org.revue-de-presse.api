@@ -10,7 +10,7 @@
             table="member_profile_collected_event">
 
         <indexes>
-            <index name="occurrence_idx" columns="screen_name,occurred_at"/>
+            <index name="member_profile_occurrence_idx" columns="screen_name,occurred_at"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
