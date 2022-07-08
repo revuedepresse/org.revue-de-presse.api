@@ -2,22 +2,17 @@
 
 namespace App\Trends\Infrastructure\Repository;
 
-use App\Trends\Domain\Entity\MemberAggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use App\Trends\Domain\Entity\MemberAggregateSubscription;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use const JSON_THROW_ON_ERROR;
 
-class MemberAggregateSubscriptionRepository extends EntityRepository
+class MemberAggregateSubscriptionRepository extends ServiceEntityRepository
 {
     /**
-     * @param MemberInterface $member
-     * @param array           $list
-     *
-     * @return MemberAggregateSubscription
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
      */
     public function make(
         MemberInterface $member,
@@ -49,13 +44,6 @@ class MemberAggregateSubscriptionRepository extends EntityRepository
         return $this->saveMemberAggregateSubscription($memberAggregateSubscription);
     }
 
-    /**
-     * @param MemberAggregateSubscription $memberAggregateSubscription
-     *
-     * @return MemberAggregateSubscription
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
     public function saveMemberAggregateSubscription(
         MemberAggregateSubscription $memberAggregateSubscription
     ): MemberAggregateSubscription {

@@ -97,17 +97,17 @@ services:
             logger: '@logger'
 
     repository.media:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\PressMedia\Repository\MediaRepository'
         arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\PressMedia\Entity\Media'
         properties:
             logger: '@logger'
 
     repository.member_aggregate_subscription:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Trends\Infrastructure\Repository\MemberAggregateSubscriptionRepository'
         arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Trends\Domain\Entity\MemberAggregateSubscription'
 
     repository.keyword:
