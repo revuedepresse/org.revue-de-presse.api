@@ -1,6 +1,6 @@
 # Revue de presse
 
-:en: [Revue-de-presse.org](https://github.com/revuedepresse) serves press titles curated daily from official French Media Twitter accounts.
+:uk: [Revue-de-presse.org](https://github.com/revuedepresse) serves press titles curated daily from official French Media Twitter accounts.
 
 All development is delivered under free and open-source software licence.
 
