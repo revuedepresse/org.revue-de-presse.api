@@ -1,12 +1,12 @@
 services:
-    controller.healthcheck:
+    App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController:
         public: true
         class: 'App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
 
-    controller.list:
+    App\Trends\Controller\ListController:
         public: true
         class: 'App\Trends\Controller\ListController'
         arguments:
@@ -20,5 +20,3 @@ services:
             router:                         '@router'
             popularPublicationRepository:   '@App\Trends\Infrastructure\Repository\PopularPublicationRepository'
             tokenRepository:                '@repository.access_token'
-
-    App\Trends\Controller\ListController: '@controller.list'
