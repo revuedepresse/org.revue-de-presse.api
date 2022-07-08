@@ -33,7 +33,6 @@ function build() {
         --build-arg "SERVICE_DIR=${SERVICE}" \
         --build-arg "SERVICE_OWNER_UID=${SERVICE_OWNER_UID}" \
         --build-arg "SERVICE_OWNER_GID=${SERVICE_OWNER_GID}" \
-        --no-cache \
         app \
         cache \
         service
@@ -84,8 +83,6 @@ function clear_cache_warmup() {
         --user "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
-
-    clean ''
 }
 
 function get_project_name() {
@@ -222,8 +219,6 @@ function install() {
 
     load_configuration_parameters
 
-    clean ''
-
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
@@ -275,14 +270,13 @@ function set_file_permissions() {
 function start() {
     load_configuration_parameters
 
-    clean ''
-
     local command
     command=$(cat <<-SCRIPT
 docker compose \
       --file=./provisioning/containers/docker-compose.yaml \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
+			--force-recreate \
 			--detach \
 			service
 SCRIPT
