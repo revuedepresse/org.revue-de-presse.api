@@ -4,12 +4,27 @@ set -Eeuo pipefail
 trap "exit 1" TERM
 export service_pid=$$
 
+green() {
+    echo -n "\e[32m"
+}
+
+reset_color() {
+    echo -n $'\033'\[00m
+}
+
 function build() {
     local SERVICE
     local SERVICE_OWNER_UID
     local SERVICE_OWNER_GID
 
     load_configuration_parameters
+
+    printf '%s'           $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_DIR:          ' "$(reset_color)" "${SERVICE}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_UID:    ' "$(reset_color)" "${SERVICE_OWNER_UID}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_GID:    ' "$(reset_color)" "${SERVICE_OWNER_GID}" $'\n'
+    printf '%s'           $'\n'
 
     docker compose \
         --file=./provisioning/containers/docker-compose.yaml \
