@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Clock\TimeRange;
 
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use DateTime;
 use Exception;
 

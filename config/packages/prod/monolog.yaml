@@ -8,7 +8,7 @@ parameters:
         type:     stream
         path:     "%kernel.logs_dir%/%kernel.environment%.json"
         level:    info
-        formatter: monolog.json_formatter
+        formatter: monolog.formatter.json
 
 monolog:
     handlers:

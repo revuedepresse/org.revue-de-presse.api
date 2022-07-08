@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Builder;
 
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use Prophecy\Prophecy\ObjectProphecy;

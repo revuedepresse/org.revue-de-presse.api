@@ -7,7 +7,7 @@ use App\Twitter\Domain\Curation\Entity\MemberProfileCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\MemberProfileCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use stdClass;
 use Throwable;

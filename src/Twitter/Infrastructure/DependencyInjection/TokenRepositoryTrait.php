@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface;
 
 trait TokenRepositoryTrait
 {

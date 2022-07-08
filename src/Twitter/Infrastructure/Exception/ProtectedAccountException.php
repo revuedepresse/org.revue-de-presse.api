@@ -3,7 +3,7 @@
 namespace App\Twitter\Infrastructure\Exception;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  */
 class ProtectedAccountException extends UnavailableResourceException
 {

@@ -25,8 +25,8 @@ provisioning/volumes/database/*
 vendor
 public/graphs
 
-\.env\.*
-!\.env\.*dist
+/\.env*
+!/\.env*\.dist
 
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/

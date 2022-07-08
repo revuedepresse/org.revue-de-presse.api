@@ -8,8 +8,10 @@ log_errors                  = on
 log_errors_max_len          = 1024
 html_errors                 = on
 output_buffering            = on
+short_open_tag              = off
+
 ;xdebug.discover_client_host=yes
-;xdebug.log=/var/www/revue-de-presse.org/var/log/xdebug.log
+;xdebug.log=/var/www/api.revue-de-presse.org/var/log/xdebug.log
 ;xdebug.mode=debug
 ;xdebug.start_with_request=yes
 ;zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so

@@ -18,7 +18,7 @@ class MemberSubscribeeRepository extends ServiceEntityRepository
 
     /**
      * @param ManagerRegistry $managerRegistry
-     * @param string         $aggregate
+     * @param string         $list
      */
     public function __construct(
         ManagerRegistry $managerRegistry,

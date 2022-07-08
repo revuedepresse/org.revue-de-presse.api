@@ -1,14 +1,6 @@
 services:
-    App\Twitter\Infrastructure\Api\AccessToken\TokenChange:
-        class: 'App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
+    App\Twitter\Infrastructure\Http\AccessToken\TokenChange:
+        class: 'App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
         arguments:
             - '@repository.access_token'
-            - '@logger'
-
-    App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor:
-        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
-        arguments:
-            - '@App\Twitter\Infrastructure\Api\Accessor'
-            - '@repository.access_token'
-            - '@App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
             - '@logger'

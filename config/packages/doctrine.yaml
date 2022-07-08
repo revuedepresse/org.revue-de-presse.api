@@ -127,6 +127,7 @@ doctrine:
                 logging: false
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
+
     orm:
         default_entity_manager:         default
         auto_generate_proxy_classes:    true
@@ -136,52 +137,46 @@ doctrine:
                 auto_mapping: false
                 connection: default
                 dql: "%doctrine_extensions_dql%"
-                mappings: &mappings_write
-                    Api:
-                        alias:      'Api'
+                mappings:
+
+                    Http:
+                        alias:      'Http'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Http/Entity'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
-                        prefix:     'App\Twitter\Infrastructure\Api\Entity'
+                        prefix:     'App\Twitter\Infrastructure\Http\Entity'
                         type:       annotation
+
                     Membership:
                         alias:      'Membership'
                         dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity\Legacy
+                        prefix:     'App\Membership\Domain\Entity\Legacy'
                         type:       annotation
-                    PressMedia:
-                        alias:      'PressMedia'
-                        dir:        '%kernel.project_dir%/config/model/press-media'
+
+                    MembersList:
+                        alias:      'MembersList'
+                        dir:        '%kernel.project_dir%/src/Ownership/Domain/Entity'
                         is_bundle:  false
-                        prefix:     App\PressMedia\Entity
-                        type:       xml
-                    Popularity:
-                        alias:      'Popularity'
-                        dir:        '%kernel.project_dir%/config/model/popularity'
-                        is_bundle:  false
-                        prefix:     App\PublicationPopularity\Entity
-                        type:       xml
-                    PublicationBatchCollectedEvent:
-                        alias:      'PublicationBatchCollectedEvent'
-                        dir:        '%kernel.project_dir%/config/model/curation'
-                        is_bundle:  false
-                        prefix:     App\Twitter\Domain\Curation\Entity
-                        type:       xml
-                    PublishersList:
-                        alias:      'PublishersList'
-                        dir:        '%kernel.project_dir%/config/model/publication-list'
-                        is_bundle:  false
-                        prefix:     App\PublishersList\Entity
-                        type:       xml
+                        prefix:     'App\Ownership\Domain\Entity'
+                        type:       annotation
+
                     Publication:
                         alias:      'Publication'
                         dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
                         is_bundle:  false
-                        prefix:     App\Twitter\Domain\Publication\Entity
+                        prefix:     'App\Twitter\Domain\Publication\Entity'
                         type:       annotation
-            write:
-                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                connection: write
-                dql: "%doctrine_extensions_dql%"
-                mappings:
-                    <<: *mappings_write
+
+                    Curation:
+                        alias:      'Curation'
+                        dir:        '%kernel.project_dir%/config/model/curation'
+                        is_bundle:  false
+                        prefix:     'App\Twitter\Domain\Curation\Entity'
+                        type:       xml
+
+                    Trends:
+                        alias:      'Trends'
+                        dir:        '%kernel.project_dir%/config/model/trends'
+                        is_bundle:  false
+                        prefix:     'App\Trends\Domain\Entity'
+                        type:       xml

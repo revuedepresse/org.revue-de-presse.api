@@ -10,7 +10,7 @@
             table="member_profile_collected_event">
 
         <indexes>
-            <index name="occurrence_idx" columns="screen_name,occurred_at"/>
+            <index name="member_profile_occurrence_idx" columns="screen_name,occurred_at"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -19,36 +19,36 @@
         </id>
 
         <field
-            name="screenName"
-            column="screen_name"
-            type="string"
-            length="255"
+                name="screenName"
+                column="screen_name"
+                type="string"
+                length="255"
         />
 
         <field
-            name="payload"
-            column="payload"
-            type="text"
-            nullable="true"
+                name="payload"
+                column="payload"
+                type="text"
+                nullable="true"
         />
 
         <field
-            name="occurredAt"
-            column="occurred_at"
-            type="datetime"
+                name="occurredAt"
+                column="occurred_at"
+                type="datetime"
         />
 
         <field
-            name="startedAt"
-            column="started_at"
-            type="datetime"
+                name="startedAt"
+                column="started_at"
+                type="datetime"
         />
 
         <field
-            name="endedAt"
-            column="ended_at"
-            type="datetime"
-            nullable="true"
+                name="endedAt"
+                column="ended_at"
+                type="datetime"
+                nullable="true"
         />
 
     </entity>

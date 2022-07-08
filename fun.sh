@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export COMPOSE_PROJECT_NAME='revue-de-presse-org'
-
 function _set_up_configuration_files() {
     if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
         cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
@@ -78,13 +76,28 @@ function build() {
         build \
         --build-arg "WORKER_UID=${WORKER_UID}" \
         --build-arg "WORKER_GID=${WORKER_GID}" \
+        --no-cache \
         app \
         cache \
-        service \
-        worker
+        service
 }
 
-function remove_container_image() {
+function get_project_name() {
+    local project_name
+
+    project_name="$(
+        docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        config --format json \
+        | jq '.name' \
+        | tr -d '"'
+    )"
+
+    echo "${project_name}"
+}
+
+function remove_running_container_and_image_in_debug_mode() {
     local container_name
     container_name="${1}"
 
@@ -101,21 +114,24 @@ function remove_container_image() {
 
     source ./.env.local
 
+    local project_name
+    project_name="$(get_project_name)"
+
     docker ps -a |
-        \grep "${COMPOSE_PROJECT_NAME}" |
+        \grep "${project_name}" |
         \grep "${container_name}" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
 
     if [ -n "${DEBUG}" ];
     then
+
         docker images -a |
-            \grep "${COMPOSE_PROJECT_NAME}" |
+            \grep "${project_name}" |
             \grep "${container_name}" |
             awk '{print $3}' |
             xargs -I{} docker rmi {}
 
-        build
     fi
 }
 
@@ -132,7 +148,8 @@ function clean() {
         return 0
     fi
 
-    remove_container_image 'app'
+    remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'service'
 }
 
 function clear_cache_warmup() {
@@ -146,7 +163,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
-        remove_container_image 'app'
+        remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
@@ -162,7 +179,7 @@ function clear_cache_warmup() {
         exec \
         --user "${WORKER_UID}:${WORKER_GID}" \
         app \
-        /bin/bash -c '. /scripts/clear-cache.sh'
+        /bin/bash -c '. /scripts/clear-app-cache.sh'
 
     clean ''
 }
@@ -176,9 +193,9 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         up \
+        --force-recreate \
         --detach \
-        app
-
+        app && \
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
@@ -209,7 +226,7 @@ SCRIPT
 }
 
 function start_database() {
-    remove_container_image 'database'
+    remove_running_container_and_image_in_debug_mode 'database'
 
     local command
     command=$(cat <<-SCRIPT
@@ -236,7 +253,7 @@ function stop() {
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER=disabled
 
-    if [ -z ${DEBUG} ];
+    if [ -z "${DEBUG}" ];
     then
         bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
         return

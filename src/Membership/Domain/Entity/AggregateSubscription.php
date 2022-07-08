@@ -2,7 +2,7 @@
 
 namespace App\Membership\Domain\Entity;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
+use App\Trends\Domain\Entity\MemberAggregateSubscription;
 
 class AggregateSubscription
 {

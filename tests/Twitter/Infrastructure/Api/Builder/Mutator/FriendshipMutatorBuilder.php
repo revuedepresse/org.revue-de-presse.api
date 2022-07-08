@@ -5,8 +5,8 @@ namespace App\Tests\Twitter\Infrastructure\Api\Builder\Mutator;
 
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Http\Mutator\FriendshipMutator;
+use App\Twitter\Infrastructure\Http\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;

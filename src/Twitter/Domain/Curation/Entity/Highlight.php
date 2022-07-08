@@ -2,8 +2,8 @@
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTime;
@@ -12,50 +12,23 @@ class Highlight
 {
     private $id;
 
-    /**
-     * @var DateTime
-     */
-    private $publicationDateTime;
+    private \DateTimeInterface $publicationDateTime;
 
-    /**
-     * @var Status
-     */
-    private $status;
+    private StatusInterface $status;
 
-    /**
-     * App\Membership\Domain\Entity\Member
-     */
-    private $member;
+    private MemberInterface $member;
 
-    /**
-     * @var boolean
-     */
-    private $isRetweet;
+    private bool $isRetweet;
 
-    /**
-     * @var PublishersListInterface
-     */
-    private $aggregate;
+    private MembersListInterface $list;
 
-    /**
-     * @var string
-     */
-    private $aggregateName;
+    private string $aggregateName;
 
-    /**
-     * @var DateTime
-     */
-    private $retweetedStatusPublicationDate;
+    private \DateTimeInterface $retweetedStatusPublicationDate;
 
-    /**
-     * @var int
-     */
-    private $totalRetweets;
+    private int $totalRetweets;
 
-    /**
-     * @var int
-     */
-    private $totalFavorites;
+    private int $totalFavorites;
 
     public function __construct(
         MemberInterface $member,

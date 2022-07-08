@@ -1,8 +1,8 @@
 
 healthcheck:
     path:     '/api/healthcheck'
-    defaults: { _controller: controller.healthcheck::areServicesHealthy }
+    defaults: { _controller: App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController::areServicesHealthy }
 
 highlight:
     path:     '/api/twitter/highlights'
-    defaults: { _controller: controller.list::getHighlights }
+    defaults: { _controller: App\Trends\Controller\ListController::getHighlights }

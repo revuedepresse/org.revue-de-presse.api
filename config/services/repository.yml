@@ -1,8 +1,3 @@
-parameters:
-
-    weaving_the_web_api.entity.token.class:         'App\Twitter\Infrastructure\Api\Entity\Token'
-    weaving_the_web_api.entity.whisperer.class:     'App\Twitter\Infrastructure\Api\Entity\Whisperer'
-
 services:
     App\Twitter\Infrastructure\Repository\Membership\MemberRepository:
         class: 'App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
@@ -12,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            aggregateRepository: '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
+            membersListRepository: 'App\Ownership\Infrastructure\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -25,7 +20,7 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Http\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -56,54 +51,19 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Http\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository:
-        class: 'App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent'
-        calls:
-            - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-        tags:
-            - { name: 'doctrine.repository_service' }
-
-    App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository:
-        class: 'App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Curation\Entity\PublishersListCollectedEvent'
-        calls:
-            - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-        tags:
-            - { name: 'doctrine.repository_service' }
-
-    App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository:
-        class: 'App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Curation\Entity\OwnershipBatchCollectedEvent'
-        calls:
-            - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
-        tags:
-            - { name: 'doctrine.repository_service' }
-
-    App\Twitter\Infrastructure\Api\Repository\PublishersListRepository:
+    App\Ownership\Infrastructure\Repository\MembersListRepository:
         public: true
-        class:  'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
+        class:  'App\Ownership\Infrastructure\Repository\MembersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Infrastructure\Api\Entity\Aggregate'
+            - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublishersListDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
-            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
         tags:
@@ -121,22 +81,12 @@ services:
             - { name: 'doctrine.repository_service' }
 
     repository.access_token:
-        class: '%repository.access_token.class%'
+        class: 'App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_api.entity.token.class%'
+            - 'App\Twitter\Infrastructure\Http\Entity\Token'
         calls:
             - [ 'setLogger', [ '@logger' ] ]
-
-    repository.publishers_list_subscription:
-        class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Domain\Entity\AggregateSubscription'
-        properties:
-            accessor:                               '@App\Twitter\Infrastructure\Api\Accessor'
-            logger:                                 '@logger'
-            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
 
     repository.owner:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -147,18 +97,18 @@ services:
             logger: '@logger'
 
     repository.media:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\PressMedia\Repository\MediaRepository'
         arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\PressMedia\Entity\Media'
         properties:
             logger: '@logger'
 
     repository.member_aggregate_subscription:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\Trends\Infrastructure\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\PublishersList\Entity\MemberAggregateSubscription'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Trends\Domain\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Twitter\Infrastructure\Publication\Repository\KeywordRepository'
@@ -173,10 +123,9 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\Highlight'
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
-            - [ 'setStatusAccessor', [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
-            - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
+            - [ 'setStatusAccessor', [ '@App\Twitter\Infrastructure\Http\Accessor\StatusAccessor'] ]
+            - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
         properties:
-            aggregate:      '%highlight_aggregate_default%'
             adminRouteName: '%admin_route_name%'
 
     repository.not_found_status:
@@ -186,37 +135,37 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\PublishersList\Repository\TimelyStatusRepository'
+        class: 'App\Trends\Infrastructure\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\TimelyStatus'
+            - 'App\Trends\Domain\Entity\TimelyStatus'
         calls:
-            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
+            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Http\Accessor\StatusAccessor'] ]
+            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
 
     repository.saved_search:
-        class: 'App\PublishersList\Repository\SavedSearchRepository'
+        class: 'App\Trends\Infrastructure\Repository\SavedSearchRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SavedSearch'
+            - 'App\Trends\Domain\Entity\SavedSearch'
 
     repository.search_matching_status:
-        class: 'App\PublishersList\Repository\SearchMatchingStatusRepository'
+        class: 'App\Trends\Infrastructure\Repository\SearchMatchingStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SearchMatchingStatus'
+            - 'App\Trends\Domain\Entity\SearchMatchingStatus'
         properties:
-            statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'
             logger:           "@logger"
 
     repository.whisperer:
-        class: '%repository.whisperer.class%'
+        class: 'App\Twitter\Infrastructure\Http\Repository\WhispererRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_api.entity.whisperer.class%'
+            - 'App\Twitter\Infrastructure\Http\Entity\Whisperer'
 
-    App\NewsReview\Infrastructure\Repository\PopularPublicationRepository:
-        class: 'App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+    App\Trends\Infrastructure\Repository\PopularPublicationRepository:
+        class: 'App\Trends\Infrastructure\Repository\PopularPublicationRepository'
         arguments:
             - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             - "%env(resolve:FIREBASE_DATABASE_URI)%"

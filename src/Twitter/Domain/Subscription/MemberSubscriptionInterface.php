@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Subscription;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
+use App\Trends\Domain\Entity\MemberAggregateSubscription;
 
 interface MemberSubscriptionInterface
 {

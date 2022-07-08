@@ -3,54 +3,20 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
-use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
+use App\Twitter\Domain\Http\TwitterErrorAwareInterface;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\ReadOnlyApplicationException;
 use Exception;
-use Psr\Log\LoggerInterface;
 use stdClass;
 use function is_array;
 use function is_object;
-use function sprintf;
 
 /**
  * @package App\Twitter\Infrastructure\Exception
  */
 class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
 {
-
-    /**
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @param LoggerInterface $logger
-     *
-     * @throws ProtectedAccountException
-     * @throws UnavailableResourceException
-     */
-    public static function handleUnavailableMemberException(
-        Exception $exception,
-        LoggerInterface $logger,
-        array $options
-    ): void {
-        $message = self::logUnavailableMemberException(
-            $exception,
-            $logger,
-            $options
-        );
-
-        if ($exception instanceof ProtectedAccountException) {
-            throw $exception;
-        }
-
-        throw new self(
-            $message,
-            $exception->getCode(),
-            $exception
-        );
-    }
 
     /**
      * @param stdClass|array $content
@@ -156,41 +122,5 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
                 (isset($response->errors, $response->errors[0]) &&
                 is_array($response->errors))
                 || isset($response->error));
-    }
-
-    /**
-     * @param LoggerInterface $logger
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @return string
-     */
-    private static function logUnavailableMemberException(
-        Exception $exception,
-        LoggerInterface $logger,
-        array $options
-    ): string {
-        $message = 'Skipping member with screen name "%s", who has not been found';
-
-        if ($exception instanceof SuspendedAccountException) {
-            $message = 'Skipping member with screen name "%s", who has been suspended';
-        }
-
-        if ($exception instanceof ProtectedAccountException) {
-            $message = 'Skipping member with screen name "%s", who is protected';
-            $logger->error(
-                sprintf(
-                    $message,
-                    $options[FetchPublicationInterface::SCREEN_NAME]
-                )
-            );
-
-            return $message;
-        }
-
-        $message = sprintf($message, $options[FetchPublicationInterface::SCREEN_NAME]);
-        $logger->error($message);
-
-        return $message;
     }
 }
