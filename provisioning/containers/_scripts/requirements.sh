@@ -117,12 +117,12 @@ function install_service_requirements() {
     mkdir \
         --verbose \
         --parents \
-        /var/www/api.revue-de-presse.org
+        "/var/www/${SERVICE}"
 }
 
 function install_app_requirements() {
     local project_dir
-    project_dir='/var/www/api.revue-de-presse.org'
+    project_dir="/var/www/${SERVICE}"
 
     rm -f "${project_dir}/bin/behat"
     rm -f "${project_dir}/bin/doctrine"

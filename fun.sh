@@ -111,10 +111,10 @@ function guard_against_missing_variables() {
 
     fi
 
-    if [ "${SERVICE}" = 'api.example.org' ];
+    if [ "${SERVICE}" = 'org.example.api' ];
     then
 
-        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'SERVICE' 'api.example.org' $'\n'
+        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'SERVICE' 'org.example.api' $'\n'
 
         kill -s TERM $service_pid
 
@@ -154,9 +154,10 @@ function load_configuration_parameters() {
         cp --verbose ./.env.local{.dist,}
     fi
 
-    export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-'org_example_api'}"
-
     source ./.env.local
+
+    export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-'org_example_api'}"
+    export SERVICE="${SERVICE:-'org.example.api'}"
 
     guard_against_missing_variables
 }

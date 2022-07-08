@@ -1,6 +1,6 @@
 FROM        php:8.1-fpm-bullseye
 
-ENV         SERVICE='api.example.org'
+ENV         SERVICE='org.example.api'
 
 ARG         SERVICE_OWNER_UID=1000
 ARG         SERVICE_OWNER_GID=101

@@ -3,7 +3,7 @@ SHELL:=/bin/bash
 .PHONY: help build clean install restart start stop
 
 COMPOSE_PROJECT_NAME = ?= 'org_example_api'
-SERVICE ?= 'api.example.org'
+SERVICE ?= 'org.example.api'
 TMP_DIR ?= '/tmp/tmp_${SERVICE}'
 
 help:
