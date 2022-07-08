@@ -230,7 +230,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             screen_name member_screen_name, 
             `name` aggregate_name,
             u.usr_twitter_id member_id
-            FROM weaving_aggregate a, weaving_user u
+            FROM publishers_list a, weaving_user u
             WHERE screen_name IS NOT NULL 
             AND a.screen_name = u.usr_twitter_username
             AND id NOT IN (
@@ -270,8 +270,8 @@ QUERY;
                     FROM weaving_status_aggregate
                     WHERE aggregate_id in (
                       SELECT am.id
-                      FROM weaving_aggregate a
-                      INNER JOIN weaving_aggregate am 
+                      FROM publishers_list a
+                      INNER JOIN publishers_list am 
                       ON ( a.screen_name = am.screen_name AND am.screen_name IS NOT NULL )
                       WHERE a.id = ? 
                     );
@@ -416,11 +416,11 @@ QUERY;
             $query      = <<<QUERY
                 SELECT 
                 COUNT(a.screen_name) as total_members
-                FROM weaving_aggregate a
+                FROM publishers_list a
                 WHERE screen_name IS NOT NULL
                 AND name in (
                     SELECT a.name
-                    FROM weaving_aggregate a
+                    FROM publishers_list a
                     WHERE id = ?
                 )
                 GROUP BY a.screen_name
@@ -450,7 +450,7 @@ QUERY;
             name,
             total_members,
             total_statuses as total_status
-            FROM weaving_aggregate
+            FROM publishers_list
             WHERE screen_name IS NULL
             AND name not like ?
             ORDER BY name

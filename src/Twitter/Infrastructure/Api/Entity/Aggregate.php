@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository")
  * @ORM\Table(
- *     name="weaving_aggregate",
+ *     name="publishers_list",
  *     indexes={
  *         @ORM\Index(
  *             name="name",

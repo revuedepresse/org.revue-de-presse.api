@@ -228,7 +228,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 usr_id as memberId,
                 count(h.id) totalHighlights
                 FROM highlight h,
-                weaving_aggregate a,
+                publishers_list a,
                 weaving_status s,
                 weaving_user m
                 WHERE h.member_id = m.usr_id
