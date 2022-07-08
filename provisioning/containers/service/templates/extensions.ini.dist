@@ -10,6 +10,7 @@ html_errors                 = on
 output_buffering            = on
 short_open_tag              = off
 
+;xdebug.client_host=
 ;xdebug.discover_client_host=yes
 ;xdebug.log=/var/www/api.revue-de-presse.org/var/log/xdebug.log
 ;xdebug.mode=debug
