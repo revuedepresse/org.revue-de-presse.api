@@ -1,7 +1,6 @@
 imports:
     - { resource: services/api.yml }
     - { resource: services/controller.yml }
-    - { resource: services/membership.yml }
     - { resource: services/member_subscribee.yml }
     - { resource: services/member_subscription.yml }
     - { resource: services/repository.yml }
