@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\PublishersList\Repository;
 
 use App\PublishersList\Entity\TimelyStatus;
-use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
+use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Membership\Infrastructure\Entity\MembersList;
+use App\Twitter\Infrastructure\Http\Repository\MembersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Http\SearchParams;
@@ -22,12 +22,12 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     use ConversationAwareTrait;
 
     /**
-    use PaginationAwareTrait;
-
-    /**
-     * @var PublishersListRepository
+    * use PaginationAwareTrait;
+ *
+* /**
+     * @var MembersListRepository
      */
-    public PublishersListRepository $aggregateRepository;
+    public MembersListRepository $aggregateRepository;
 
     /**
      * @throws \Exception
@@ -48,13 +48,13 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($list instanceof PublishersList)) {
+        if (!($list instanceof MembersList)) {
             $list = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($list instanceof PublishersList)) {
+            if (!($list instanceof MembersList)) {
                 $list = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
@@ -98,7 +98,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
      */
     public function fromAggregatedStatus(
         StatusInterface $status,
-        PublishersListInterface $list = null
+        MembersListInterface $list = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status

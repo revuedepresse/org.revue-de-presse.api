@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Status;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
@@ -46,7 +46,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      */
     public function convertPropsToStatus(
         array $properties,
-        ?PublishersListInterface $list
+        ?MembersListInterface $list
     ): StatusInterface {
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 

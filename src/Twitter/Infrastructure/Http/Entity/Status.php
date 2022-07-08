@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Entity;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Curation\Entity\StatusTrait;
 use DateTimeInterface;
@@ -120,7 +120,7 @@ class Status implements StatusInterface
 
     /**
      * @ORM\ManyToMany(
-     *     targetEntity="PublishersList",
+     *     targetEntity="App\Membership\Infrastructure\Entity\MembersList",
      *     inversedBy="userStreams",
      *     cascade={"persist"}
      * )
@@ -174,7 +174,7 @@ class Status implements StatusInterface
 
         if ($archivedStatus->belongsToAList()) {
             $archivedStatus->getAggregates()->map(
-                function (PublishersListInterface $list) use ($status) {
+                function (MembersListInterface $list) use ($status) {
                     $status->addToAggregates($list);
                 }
             );

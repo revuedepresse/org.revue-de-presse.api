@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Repository\Membership;
 
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\MembersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -39,8 +39,8 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     private const TABLE_ALIAS = 'm';
 
-    /** @var PublishersListRepository */
-    public PublishersListRepository $aggregateRepository;
+    /** @var MembersListRepository */
+    public MembersListRepository $aggregateRepository;
 
     use PaginationAwareTrait;
 

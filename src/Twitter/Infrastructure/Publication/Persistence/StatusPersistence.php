@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
@@ -13,7 +13,7 @@ use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\MembersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
@@ -24,7 +24,7 @@ use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Infrastructure\Entity\MembersList;
 use Closure;
 use DateTime;
 use DateTimeZone;
@@ -40,7 +40,7 @@ class StatusPersistence implements StatusPersistenceInterface
     use ApiAccessorTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
-    use PublishersListRepositoryTrait;
+    use MembersListRepositoryTrait;
     use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TaggedStatusRepositoryTrait;
@@ -77,7 +77,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        PublishersListInterface $list = null
+        MembersListInterface $list = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -143,7 +143,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?PublishersListInterface $list
+        ?MembersListInterface $list
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
@@ -162,10 +162,10 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?PublishersListInterface $list,
-        StatusInterface $status
+        ?MembersListInterface $list,
+        StatusInterface       $status
     ): void {
-        if ($list instanceof PublishersList) {
+        if ($list instanceof MembersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
                 $list
@@ -221,7 +221,7 @@ class StatusPersistence implements StatusPersistenceInterface
     /**
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy
-     * @param PublishersList|null              $publishersList
+     * @param MembersList|null              $publishersList
      * @param MemberInterface|null        $likedBy
      *
      * @return CollectionInterface
@@ -229,7 +229,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function saveStatuses(
         array                       $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        PublishersList              $publishersList = null,
+        MembersList                 $publishersList = null,
         MemberInterface             $likedBy = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(

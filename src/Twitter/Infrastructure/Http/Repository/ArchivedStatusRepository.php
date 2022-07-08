@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Repository;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Infrastructure\Entity\MembersList;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;

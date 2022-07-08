@@ -23,7 +23,7 @@ use App\Twitter\Infrastructure\Http\Entity\Token,
     App\Twitter\Infrastructure\Http\Entity\TokenType;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method TokenInterface|null findOneBy(array $criteria, array $orderBy = null)

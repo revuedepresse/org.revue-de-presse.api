@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -282,11 +282,11 @@ trait StatusTrait
     }
 
     /**
-     * @param PublishersListInterface $list
+     * @param MembersListInterface $list
      *
      * @return $this
      */
-    public function removeFrom(PublishersListInterface $list): StatusInterface
+    public function removeFrom(MembersListInterface $list): StatusInterface
     {
         if (!$this->aggregates->contains($list)) {
             return $this;
@@ -298,11 +298,11 @@ trait StatusTrait
     }
 
     /**
-     * @param PublishersListInterface $list
+     * @param MembersListInterface $list
      *
      * @return Collection
      */
-    public function addToAggregates(PublishersListInterface $list): Collection {
+    public function addToAggregates(MembersListInterface $list): Collection {
         $this->aggregates->add($list);
 
         return $this->aggregates;

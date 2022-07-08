@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
@@ -155,16 +155,16 @@ interface StatusInterface
     public function getAggregates(): Collection;
 
     /**
-     * @param PublishersListInterface $list
+     * @param MembersListInterface $list
      * @return self
      */
-    public function removeFrom(PublishersListInterface $list): StatusInterface;
+    public function removeFrom(MembersListInterface $list): StatusInterface;
 
     /**
-     * @param PublishersListInterface $list
+     * @param MembersListInterface $list
      * @return mixed
      */
-    public function addToAggregates(PublishersListInterface $list): Collection;
+    public function addToAggregates(MembersListInterface $list): Collection;
 
     /**
      * @return bool

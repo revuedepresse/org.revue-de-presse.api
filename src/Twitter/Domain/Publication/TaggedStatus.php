@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Infrastructure\Entity\MembersList;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
@@ -280,7 +280,7 @@ class TaggedStatus
     public function toStatus(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        ?PublishersListInterface $list = null
+        ?MembersListInterface $list = null
     ): StatusInterface {
         $status = new Status();
 

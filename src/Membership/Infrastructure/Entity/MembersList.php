@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Publication\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Http\Repository\PublishersListRepository")
+ * @ORM\Entity(repositoryClass="MembersListRepository")
  * @ORM\Table(
  *     name="publishers_list",
  *     indexes={
@@ -23,7 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class PublishersList implements PublishersListInterface
+class MembersList implements MembersListInterface
 {
     /**
      * @var integer

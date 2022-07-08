@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-interface PublishersListInterface
+interface MembersListInterface
 {
     public function totalStatus(): int;
 

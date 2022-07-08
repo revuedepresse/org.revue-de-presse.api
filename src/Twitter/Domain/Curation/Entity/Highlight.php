@@ -3,7 +3,7 @@
 namespace App\Twitter\Domain\Curation\Entity;
 
 use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTime;
@@ -20,7 +20,7 @@ class Highlight
 
     private bool $isRetweet;
 
-    private PublishersListInterface $list;
+    private MembersListInterface $list;
 
     private string $aggregateName;
 

@@ -30,7 +30,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
+            target-entity="App\Membership\Infrastructure\Entity\MembersList"
             field="list"
             inversed-by="timelyStatuses"
         />

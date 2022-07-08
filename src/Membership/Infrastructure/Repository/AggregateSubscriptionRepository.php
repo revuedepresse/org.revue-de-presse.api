@@ -4,7 +4,7 @@ namespace App\Membership\Infrastructure\Repository;
 
 use App\PublishersList\Entity\MemberAggregateSubscription;
 use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Infrastructure\Entity\MembersList;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberSubscription;
 use App\Membership\Domain\Entity\MemberInterface;

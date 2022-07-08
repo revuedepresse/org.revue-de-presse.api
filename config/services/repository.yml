@@ -7,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            aggregateRepository: '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
+            aggregateRepository: '@MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -55,9 +55,9 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Infrastructure\Http\Repository\PublishersListRepository:
+    App\Twitter\Infrastructure\Http\Repository\MembersListRepository:
         public: true
-        class:  'App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
+        class:  'App\Twitter\Infrastructure\Http\Repository\MembersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'

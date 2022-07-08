@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Http\Repository;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
@@ -23,7 +23,7 @@ use function min;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
  * @method Status|null find($id, $lockMode = null, $lockVersion = null)
  * @method Status|null findOneBy(array $criteria, array $orderBy = null)
@@ -374,7 +374,7 @@ class StatusRepository extends ArchivedStatusRepository
         );
     }
 
-    public function findByAggregate(PublishersListInterface $list)
+    public function findByAggregate(MembersListInterface $list)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->join('s.aggregates', 'a');

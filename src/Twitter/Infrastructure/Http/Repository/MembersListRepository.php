@@ -3,39 +3,36 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Repository;
 
-use App\Twitter\Infrastructure\Http\SearchParams;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Entity\MembersList;
 use App\PublishersList\Entity\TimelyStatus;
 use App\PublishersList\Repository\PaginationAwareTrait;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
-use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
-use Doctrine\DBAL\Exception as DBALException;
-use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 use function array_map;
-use function array_sum;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  *
- * @method PublishersListInterface|null find($id, $lockMode = null, $lockVersion = null)
- * @method PublishersListInterface|null findOneBy(array $criteria, array $orderBy = null)
- * @method PublishersListInterface[]    findAll()
- * @method PublishersListInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method MembersListInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method MembersListInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method MembersListInterface[]    findAll()
+ * @method MembersListInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PublishersListRepository extends ResourceRepository implements CapableOfDeletionInterface,
-    PublishersListRepositoryInterface
+class MembersListRepository extends ResourceRepository implements CapableOfDeletionInterface,
+    MembersListRepositoryInterface
 {
     use StatusRepositoryTrait;
     use LoggerTrait;
@@ -50,7 +47,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     public function addMemberToList(
         MemberInterface $member,
         stdClass $list
-    ): PublishersListInterface {
+    ): MembersListInterface {
         $list = $this->findOneBy(
             [
                 'name'       => $list->name,
@@ -58,7 +55,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             ]
         );
 
-        if (!($list instanceof PublishersList)) {
+        if (!($list instanceof MembersList)) {
             $list = $this->make($member->getTwitterUsername(), $list->getName());
         }
 
@@ -114,9 +111,9 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             function (array $list) {
                 $existingAggregate = null;
                 if ($list['totalStatuses'] === 0) {
-                    /** @var PublishersListInterface $existingAggregate */
+                    /** @var MembersListInterface $existingAggregate */
                     $existingAggregate = $this->findOneBy(['id' => $list['id']]);
-                    if (!($existingAggregate instanceof PublishersList)) {
+                    if (!($existingAggregate instanceof MembersList)) {
                         return $list;
                     }
                 }
@@ -161,7 +158,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $list;
     }
 
-    public function getMemberAggregateByUsername(string $username): PublishersListInterface
+    public function getMemberAggregateByUsername(string $username): MembersListInterface
     {
         $list = $this->make(
             $username,
@@ -174,33 +171,33 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $list;
     }
 
-    public function lockAggregate(PublishersListInterface $list)
+    public function lockAggregate(MembersListInterface $list)
     {
         $list->lock();
 
         $this->save($list);
     }
 
-    public function make(string $screenName, string $listName): PublishersListInterface
+    public function make(string $screenName, string $listName): MembersListInterface
     {
         $list = $this->findByRemovingDuplicates(
             $screenName,
             $listName
         );
 
-        if ($list instanceof PublishersListInterface) {
+        if ($list instanceof MembersListInterface) {
             return $list;
         }
 
-        return new PublishersList($screenName, $listName);
+        return new MembersList($screenName, $listName);
     }
 
     /**
-     * @param PublishersListInterface $list
+     * @param MembersListInterface $list
      *
-     * @return PublishersListInterface
+     * @return MembersListInterface
      */
-    public function save(PublishersListInterface $list)
+    public function save(MembersListInterface $list)
     {
         $this->getEntityManager()->persist($list);
         $this->getEntityManager()->flush();
@@ -208,7 +205,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $list;
     }
 
-    public function unlockPublishersList(PublishersListInterface $list): PublishersListInterface
+    public function unlockPublishersList(MembersListInterface $list): MembersListInterface
     {
         $list->unlock();
 
@@ -216,9 +213,9 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     }
 
     public function updateTotalStatuses(
-        array $list,
-        ?PublishersListInterface $matchingAggregate = null,
-        bool $includeRelatedAggregates = true
+        array                 $list,
+        ?MembersListInterface $matchingAggregate = null,
+        bool                  $includeRelatedAggregates = true
     ): array {
         if ($list['totalStatuses'] <= 0) {
             $connection = $this->getEntityManager()->getConnection();
@@ -318,7 +315,7 @@ QUERY;
             ]
         );
 
-        if ($list instanceof PublishersList) {
+        if ($list instanceof MembersList) {
             $aggregates = $this->findBy(
                 [
                     'screenName' => $screenName,
@@ -327,7 +324,7 @@ QUERY;
             );
 
             if (\count($aggregates) > 1) {
-                /** @var PublishersListInterface $firstAggregate */
+                /** @var MembersListInterface $firstAggregate */
                 $firstAggregate = $aggregates[0];
 
                 foreach ($aggregates as $index => $list) {
@@ -375,7 +372,7 @@ QUERY;
 
     private function updateTotalMembers(
         array $list,
-        PublishersListInterface $matchingAggregate = null
+        MembersListInterface $matchingAggregate = null
     ): array {
         if ($list['totalMembers'] === 0) {
             $query      = <<<QUERY
@@ -427,6 +424,6 @@ QUERY;
             [ParameterType::STRING]
         );
 
-        return $statement->fetchAll(FetchMode::ASSOCIATIVE);
+        return $statement->fetchAllAssociative();
     }
 }
