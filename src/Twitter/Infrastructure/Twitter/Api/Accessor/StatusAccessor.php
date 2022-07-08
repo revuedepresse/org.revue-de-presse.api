@@ -92,12 +92,10 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param string $statusId
-     * @param bool   $skipExistingStatus
-     * @param bool   $extractProperties
-     *
-     * @return StatusInterface|TaggedStatus|NullStatus|array|null
-     * @throws Exception
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
      */
     public function refreshStatusByIdentifier(
         ?string $statusId,
@@ -198,10 +196,7 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param string $identifier
-     *
-     * @return StatusInterface|NullStatus|array
-     * @throws Exception
+     * @throws \JsonException
      */
     private function findStatusIdentifiedBy(string $identifier)
     {

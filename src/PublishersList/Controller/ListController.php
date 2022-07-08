@@ -124,6 +124,9 @@ class ListController
         return $totalPages;
     }
 
+    /**
+     * @throws \JsonException
+     */
     private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
             return [];
