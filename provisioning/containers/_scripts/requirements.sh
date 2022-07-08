@@ -243,11 +243,12 @@ function install_app_requirements() {
 
     find "${project_dir}" \
         -maxdepth 2 \
+        -type d \
         -executable \
         -readable \
-        -path "${project_dir}"'/var' \
-        -type d \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+w "${file_path}"' \; && \
+        -regex '.+/var.+' \
+        -not -path "${project_dir}"'/var/log' \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
 
     find "${project_dir}" \
