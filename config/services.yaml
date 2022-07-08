@@ -99,18 +99,6 @@ services:
             - '@App\Twitter\Infrastructure\Translation\Translator'
             - '@logger'
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
-        arguments:
-            - '@App\Twitter\Infrastructure\Api\Accessor'
-            - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
-            - '@App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
-            - '@logger'
-            - '@App\Twitter\Infrastructure\Translation\Translator'
-        calls:
-            - [ 'setModerator',                              [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor' ] ]
-
     App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandler:
         class: 'App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandler'
         arguments:

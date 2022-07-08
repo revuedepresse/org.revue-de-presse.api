@@ -14,8 +14,6 @@ services:
 
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
-    test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
-
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
