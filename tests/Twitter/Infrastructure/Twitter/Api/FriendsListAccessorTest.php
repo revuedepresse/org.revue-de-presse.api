@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Twitter\Api;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
+use App\Twitter\Infrastructure\Http\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Http\Selector\FriendsListSelector;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FriendsListAccessorBuilder;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

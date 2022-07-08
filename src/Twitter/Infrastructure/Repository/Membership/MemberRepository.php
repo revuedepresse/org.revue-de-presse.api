@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Membership;
 
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
+use \App\Ownership\Infrastructure\Repository\MembersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -39,8 +40,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     private const TABLE_ALIAS = 'm';
 
-    /** @var PublishersListRepository */
-    public PublishersListRepository $aggregateRepository;
+    public MembersListRepositoryInterface $membersListRepository;
 
     use PaginationAwareTrait;
 
@@ -743,27 +743,27 @@ QUERY;
             $aggregateProperties = [];
             array_walk(
                 $aggregates,
-                function ($aggregate) use (&$aggregateProperties) {
-                    $aggregate['id']            = (int) $aggregate['id'];
-                    $aggregate['totalStatuses'] = (int) $aggregate['totalStatuses'];
-                    $aggregate['locked']        = (bool) $aggregate['locked'];
+                function ($list) use (&$aggregateProperties) {
+                    $list['id']            = (int) $list['id'];
+                    $list['totalStatuses'] = (int) $list['totalStatuses'];
+                    $list['locked']        = (bool) $list['locked'];
 
-                    if (array_key_exists('unlocked_at', $aggregate)) {
-                        $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
+                    if (array_key_exists('unlocked_at', $list)) {
+                        $list['unlockedAt'] = $list['unlocked_at'];
                     }
 
                     if (
-                        array_key_exists('unlocked_at', $aggregate)
-                        && !is_null($aggregate['unlocked_at'])
+                        array_key_exists('unlocked_at', $list)
+                        && !is_null($list['unlocked_at'])
                     ) {
-                        $aggregate['unlockedAt'] = (new \DateTime(
-                            $aggregate['unlocked_at'],
+                        $list['unlockedAt'] = (new \DateTime(
+                            $list['unlocked_at'],
                             new \DateTimeZone('UTC')
                         )
                         )->getTimestamp();
                     }
 
-                    $aggregateProperties[strtolower($aggregate['screenName'])] = $aggregate;
+                    $aggregateProperties[strtolower($list['screenName'])] = $list;
                 }
             );
 
@@ -823,12 +823,12 @@ QUERY;
             aggregate.locked, 
             aggregate.locked_at AS lockedAt,
             aggregate.unlocked_at AS unlockedAt
-            FROM weaving_aggregate a
-            INNER JOIN weaving_aggregate aggregate
+            FROM publishers_list a
+            INNER JOIN publishers_list aggregate
             ON aggregate.screen_name = a.screen_name AND aggregate.screen_name IS NOT NULL
             WHERE a.name in (
                 SELECT a.name
-                FROM weaving_aggregate a
+                FROM publishers_list a
                 WHERE id = ?
             )
             $keywordCondition
@@ -869,20 +869,20 @@ QUERY;
         $results = $statement->fetchAll();
 
         $results = array_map(
-            function (array $aggregate) {
-                if ((int) $aggregate['totalStatuses'] <= 0) {
-                    $matchingAggregate = $this->aggregateRepository->findOneBy(
-                        ['id' => (int) $aggregate['id']]
+            function (array $list) {
+                if ((int) $list['totalStatuses'] <= 0) {
+                    $matchingAggregate = $this->membersListRepository->findOneBy(
+                        ['id' => (int) $list['id']]
                     );
 
-                    $this->aggregateRepository->updateTotalStatuses(
-                        $aggregate,
+                    $this->membersListRepository->updateTotalStatuses(
+                        $list,
                         $matchingAggregate
                     );
-                    $aggregate['totalStatuses'] = $matchingAggregate->totalStatuses;
+                    $list['totalStatuses'] = $matchingAggregate->totalStatuses;
                 }
 
-                return $aggregate;
+                return $list;
             },
             $results
         );

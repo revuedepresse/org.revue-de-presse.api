@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Http\Selector\ListSelector;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;

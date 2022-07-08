@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Entity
  * @ORM\Table(name="weaving_role")
  *
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  * @package WeavingTheWeb\Bundle\UserBundle\Entity
  */
 class Role implements RoleInterface

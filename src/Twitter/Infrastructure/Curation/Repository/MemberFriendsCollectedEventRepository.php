@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Curation\Repository;
 use App\Twitter\Domain\Curation\Entity\MemberFriendsCollectedEvent;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use stdClass;
 use Throwable;

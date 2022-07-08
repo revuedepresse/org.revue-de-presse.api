@@ -1,32 +1,22 @@
 version: '3.8'
 
-services:
+name: 'api-revue-de-presse-org'
 
-    amqp:
-        build:
-            context: .
-            dockerfile: './amqp/Dockerfile'
-        expose:
-            - "5672"
-        restart: always
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../volumes/amqp:/var/lib/rabbitmq'
+services:
 
     app:
         build:
             context: .
-            dockerfile: './worker/Dockerfile'
+            dockerfile: './app/Dockerfile'
         env_file:
             - '../../.env.local'
         restart: always
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - './service/templates/:/templates/'
-            - '../../:/var/www/revue-de-presse.org/'
+            - '../../:/var/www/api.revue-de-presse.org/'
             - '../../../shared/:/var/www/shared/'
-            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
+            - '../../../shared/emoji-data/:/var/www/api.revue-de-presse.org/public/emoji-data/'
 
     cache:
         image: redis:7-bullseye
@@ -34,17 +24,6 @@ services:
         restart: always
         volumes:
             - '../volumes/cache:/data'
-
-    database:
-        build: ./database
-        restart: always
-        ports:
-            - "127.0.0.1:3306:3306"
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../volumes/database:/var/lib/mysql'
-            - './database/templates/database.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
 
     service:
         build:
@@ -59,20 +38,11 @@ services:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
             - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
-            - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
-            - '../../:/var/www/revue-de-presse.org/'
+            - '../../:/var/www/api.revue-de-presse.org/'
             - '../../../shared/:/var/www/shared/'
-            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
-
-    worker:
-        build:
-            context: .
-            dockerfile: './worker/Dockerfile'
-        depends_on:
-            - amqp
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../../:/var/www/revue-de-presse.org/'
-            - '../../../shared/:/var/www/shared/'
-            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
+            - '../../../shared/emoji-data/:/var/www/api.revue-de-presse.org/public/emoji-data/'
+            - type: bind
+              source: './service/templates/www.conf'
+              target: '/usr/local/etc/php-fpm.d/www.conf'
+              bind:
+                  create_host_path: false

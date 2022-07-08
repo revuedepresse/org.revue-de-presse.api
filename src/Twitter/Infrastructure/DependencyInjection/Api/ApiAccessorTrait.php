@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Api;
 
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 
 trait ApiAccessorTrait
 {

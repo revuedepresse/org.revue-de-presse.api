@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Api;
 
-use App\Twitter\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
+use App\Twitter\Infrastructure\Http\Throttling\ApiLimitModeratorInterface;
 
 trait ApiLimitModeratorTrait
 {

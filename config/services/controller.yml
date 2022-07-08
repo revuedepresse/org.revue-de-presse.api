@@ -1,26 +1,22 @@
 services:
-    controller.healthcheck:
+    App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController:
         public: true
         class: 'App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
 
-    controller.list:
+    App\Trends\Controller\ListController:
         public: true
-        class: 'App\PublishersList\Controller\ListController'
+        class: 'App\Trends\Controller\ListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
-        calls:
-            - [ 'setPublishersListDispatcher', ['@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
             logger:                         '@logger'
             highlightRepository:            '@repository.highlight'
             memberRepository:               '@user_manager'
             redisCache:                     '@app.cache.redis'
             router:                         '@router'
-            popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+            popularPublicationRepository:   '@App\Trends\Infrastructure\Repository\PopularPublicationRepository'
             tokenRepository:                '@repository.access_token'
-
-    App\PublishersList\Controller\ListController: '@controller.list'

@@ -3,45 +3,44 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\MembersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
+use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Ownership\Domain\Entity\MembersList;
 use Closure;
 use DateTime;
 use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
-use function count;
-use function is_array;
 
 class StatusPersistence implements StatusPersistenceInterface
 {
     use ApiAccessorTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
-    use PublishersListRepositoryTrait;
+    use MembersListRepositoryTrait;
     use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TaggedStatusRepositoryTrait;
@@ -78,7 +77,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        Aggregate $aggregate = null
+        MembersListInterface $list = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -94,7 +93,7 @@ class StatusPersistence implements StatusPersistenceInterface
                 $statusCollection = $this->persistStatus(
                     $statusCollection,
                     $taggedStatus,
-                    $aggregate
+                    $list
                 );
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
@@ -144,18 +143,18 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?Aggregate $aggregate
+        ?MembersListInterface $list
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
-            ->convertPropsToStatus($extract, $aggregate);
+            ->convertPropsToStatus($extract, $list);
 
         $this->logStatusToBeInserted($status);
 
         $status = $this->unarchiveStatus($status, $this->entityManager);
         $this->refreshUpdatedAt($status);
 
-        $this->persistTimelyStatus($aggregate, $status);
+        $this->persistTimelyStatus($list, $status);
 
         $this->entityManager->persist($status);
 
@@ -163,13 +162,13 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?Aggregate $aggregate,
-        StatusInterface $status
+        ?MembersListInterface $list,
+        StatusInterface       $status
     ): void {
-        if ($aggregate instanceof Aggregate) {
+        if ($list instanceof MembersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
-                $aggregate
+                $list
             );
             $this->entityManager->persist($timelyStatus);
         }
@@ -219,63 +218,19 @@ class StatusPersistence implements StatusPersistenceInterface
         return $status;
     }
 
-    public function savePublicationsForScreenName(
-        array $statuses,
-        string $screenName,
-        CollectionStrategyInterface $collectionStrategy
-    ) {
-        $success = null;
-
-        if (!is_array($statuses) || count($statuses) === 0) {
-            return $success;
-        }
-
-        $publishersList = null;
-        $publishersListId = $collectionStrategy->publishersListId();
-        if ($publishersListId !== null) {
-            /** @var Aggregate $publishersList */
-            $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $publishersListId]
-            );
-        }
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenFetched(
-            $statuses,
-            $screenName
-        );
-
-        $likedBy = null;
-        if ($collectionStrategy->fetchLikes()) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
-        $savedStatuses = $this->saveStatuses(
-            $statuses,
-            $collectionStrategy,
-            $publishersList,
-            $likedBy
-        );
-
-        return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
-            $savedStatuses->count(),
-            $screenName,
-            $collectionStrategy->fetchLikes()
-        );
-    }
-
     /**
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy
-     * @param Aggregate|null              $publishersList
+     * @param MembersList|null              $publishersList
      * @param MemberInterface|null        $likedBy
      *
      * @return CollectionInterface
      */
     private function saveStatuses(
-        array $statuses,
+        array                       $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publishersList = null,
-        MemberInterface $likedBy = null
+        MembersList                 $publishersList = null,
+        MemberInterface             $likedBy = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,

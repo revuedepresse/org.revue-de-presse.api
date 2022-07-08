@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * @package App\Twitter\Infrastructure\Api\Entity
+ * @package App\Twitter\Infrastructure\Http\Entity
  */
 interface StatusInterface
 {
@@ -152,19 +152,19 @@ interface StatusInterface
     /**
      * @return Collection
      */
-    public function getAggregates(): Collection;
+    public function getMembersList(): Collection;
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param MembersListInterface $list
      * @return self
      */
-    public function removeFrom(PublishersListInterface $aggregate): StatusInterface;
+    public function removeFrom(MembersListInterface $list): StatusInterface;
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param MembersListInterface $list
      * @return mixed
      */
-    public function addToAggregates(PublishersListInterface $aggregate): Collection;
+    public function addToMembersList(MembersListInterface $list): Collection;
 
     /**
      * @return bool

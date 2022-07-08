@@ -3,9 +3,9 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Infrastructure\Http\Accessor\FollowersListAccessor;
+use App\Twitter\Infrastructure\Http\Accessor\ListAccessorInterface;
+use App\Twitter\Domain\Http\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Log\NullLogger;

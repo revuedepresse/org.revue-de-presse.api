@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
-use App\NewsReview\Domain\Repository\SearchParamsInterface;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Trends\Domain\Repository\SearchParamsInterface;
+use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -22,67 +22,18 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
-    public string $aggregate;
-
     public string $adminRouteName;
 
     private const TABLE_ALIAS = 'h';
 
     /**
-     * @param SearchParams $searchParams
-     * @return int
-     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
     {
         return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
-    /**
-     * @param SearchParams $searchParams
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function findHighlights(SearchParams $searchParams): array
-    {
-        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
-
-        $queryBuilder->select('s.statusId as status_id');
-        $queryBuilder->addSelect('s.id as id');
-        $queryBuilder->addSelect('s.apiDocument as original_document');
-        $queryBuilder->addSelect('s.text');
-        $queryBuilder->addSelect('s.createdAt as publicationDateTime');
-        $queryBuilder->addSelect('s.screenName as screen_name');
-        $queryBuilder->addSelect("s.createdAt as last_update");
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalRetweets, h.totalRetweets)) as total_retweets');
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalFavorites, h.totalFavorites)) as total_favorites');
-
-        $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
-
-        $maxResults = min($searchParams->getPageSize(), 10);
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $maxResults = 100;
-        }
-
-        $queryBuilder->setMaxResults($maxResults);
-
-        $this->applyCriteria($queryBuilder, $searchParams);
-
-        $queryBuilder->groupBy('h.status');
-        $queryBuilder->addOrderBy('total_retweets', 'DESC');
-
-        $results = $queryBuilder->getQuery()->getArrayResult();
-
-        return [
-            'aggregates' => $this->selectDistinctAggregates($searchParams),
-            'statuses' => $this->mapStatuses($searchParams, $results),
-        ];
-    }
-
-    /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     */
     public function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
@@ -101,7 +52,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $this->applyConstraintAboutPublicationDateTime($queryBuilder, $searchParams)
         ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
-        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
         if ($searchParams->hasParam('term')) {
@@ -194,35 +144,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     * @return HighlightRepository
-     */
-    private function applyConstraintAboutRelatedAggregate(
-        QueryBuilder $queryBuilder,
-        SearchParams $searchParams
-    ): self {
-        if ($this->accessingAdministrativeRoute($searchParams)
-            || $searchParams->hasParam('term')
-        ) {
-            $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
-            $queryBuilder->setParameter('aggregate', $this->aggregate);
-
-            return $this;
-        }
-
-        $aggregates = [$this->aggregate];
-        if ($searchParams->hasParam('aggregate')) {
-            $aggregates = explode(',', $searchParams->getParams()['aggregate']);
-        }
-
-        $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName in (:aggregates)');
-        $queryBuilder->setParameter('aggregates', $aggregates);
-
-        return $this;
-    }
-
-    /**
      * @param SearchParams $searchParams
      * @return bool
      */
@@ -260,7 +181,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 usr_id as memberId,
                 count(h.id) totalHighlights
                 FROM highlight h,
-                weaving_aggregate a,
+                publishers_list a,
                 weaving_status s,
                 weaving_user m
                 WHERE h.member_id = m.usr_id
@@ -283,7 +204,7 @@ QUERY;
             $statement = $connection->executeQuery(
                 $queryDistinctAggregates,
                 [
-                    $this->aggregate,
+                    $this->list,
                     $searchParams->getParams()['startDate'],
                     $searchParams->getParams()['endDate'],
                     $searchParams->getParams()['startDate'],

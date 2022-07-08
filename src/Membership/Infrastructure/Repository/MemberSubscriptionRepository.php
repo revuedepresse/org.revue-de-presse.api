@@ -159,7 +159,7 @@ QUERY;
         if ($publishersListIdentity) {
             $restrictionByAggregate = sprintf(
                 <<<QUERY
-                AND a.name IN ( SELECT name FROM weaving_aggregate WHERE id = %d)
+                AND a.name IN ( SELECT name FROM publishers_list WHERE id = %d)
 QUERY
                 ,
                 (int) ((string) $publishersListIdentity)
@@ -172,7 +172,7 @@ QUERY
                 <<<QUERY
                 FROM member_subscription ms,
                 weaving_user u
-                {join} weaving_aggregate a
+                {join} publishers_list a
                 ON a.screen_name = u.usr_twitter_username
                 AND a.screen_name IS NOT NULL 
                 WHERE member_id = :member_id 

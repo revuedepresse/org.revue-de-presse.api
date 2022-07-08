@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Ownership\Domain\Entity\MembersList;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Common\Inflector\Inflector;
@@ -277,19 +277,10 @@ class TaggedStatus
         ];
     }
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param LoggerInterface        $logger
-     *
-     * @param Aggregate|null         $aggregate
-     *
-     * @return StatusInterface
-     * @throws Exception
-     */
     public function toStatus(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        ?Aggregate $aggregate = null
+        ?MembersListInterface $list = null
     ): StatusInterface {
         $status = new Status();
 
@@ -340,8 +331,8 @@ class TaggedStatus
         $status->setIndexed(true);
         $status->setIdentifier($this->token);
 
-        if ($aggregate !== null) {
-            $status->addToAggregates($aggregate);
+        if ($list !== null) {
+            $status->addToMembersList($list);
         }
 
         return $status;

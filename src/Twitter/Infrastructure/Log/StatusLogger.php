@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Log;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Ownership\Domain\Entity\MembersList;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -307,10 +307,10 @@ class StatusLogger implements StatusLoggerInterface
     private function getStatusAggregate(StatusInterface $memberStatus): string
     {
         $aggregateName = 'without aggregate';
-        if (!$memberStatus->getAggregates()->isEmpty()) {
-            $aggregate = $memberStatus->getAggregates()->first();
-            if ($aggregate instanceof Aggregate) {
-                $aggregateName = $aggregate->getName();
+        if (!$memberStatus->getMembersList()->isEmpty()) {
+            $list = $memberStatus->getMembersList()->first();
+            if ($list instanceof MembersList) {
+                $aggregateName = $list->getName();
             }
         }
 
