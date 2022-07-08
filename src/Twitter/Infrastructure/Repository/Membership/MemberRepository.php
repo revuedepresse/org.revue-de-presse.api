@@ -5,6 +5,7 @@ namespace App\Twitter\Infrastructure\Repository\Membership;
 
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\Http\Repository\MembersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
@@ -39,8 +40,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     private const TABLE_ALIAS = 'm';
 
-    /** @var MembersListRepository */
-    public MembersListRepository $aggregateRepository;
+    public MembersListRepositoryInterface $membersListRepository;
 
     use PaginationAwareTrait;
 
@@ -871,11 +871,11 @@ QUERY;
         $results = array_map(
             function (array $list) {
                 if ((int) $list['totalStatuses'] <= 0) {
-                    $matchingAggregate = $this->aggregateRepository->findOneBy(
+                    $matchingAggregate = $this->membersListRepository->findOneBy(
                         ['id' => (int) $list['id']]
                     );
 
-                    $this->aggregateRepository->updateTotalStatuses(
+                    $this->membersListRepository->updateTotalStatuses(
                         $list,
                         $matchingAggregate
                     );

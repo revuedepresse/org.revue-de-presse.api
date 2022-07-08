@@ -7,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            aggregateRepository: '@MembersListRepository'
+            membersListRepository: 'App\Twitter\Infrastructure\Http\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
