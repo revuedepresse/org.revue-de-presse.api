@@ -209,7 +209,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      */
     private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder {
         $queryBuilder->andWhere('t.type = :type');
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
         $queryBuilder->setParameter('type', $tokenType);
 
@@ -218,30 +218,6 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $queryBuilder->andWhere('(t.frozenUntil IS NULL or t.frozenUntil < NOW())');
 
         return $queryBuilder->setMaxResults(1);
-    }
-
-    /**
-     * @param $applicationToken
-     * @param $accessToken
-     *
-     * @return Token
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function persistBearerToken($applicationToken, $accessToken)
-    {
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
-
-        $token = new Token();
-        $token->setOauthToken($applicationToken);
-        $token->setOauthTokenSecret($accessToken);
-        $token->setType($tokenType);
-        $token->setCreatedAt(new DateTime());
-
-        $this->save($token);
-
-        return $token;
     }
 
     /**
@@ -262,14 +238,13 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @return mixed|null
      * @throws NonUniqueResultException
      */
     public function findFirstFrozenToken(): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
 
         $queryBuilder->andWhere('t.type = :type');
