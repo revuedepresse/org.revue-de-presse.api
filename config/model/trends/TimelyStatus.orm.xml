@@ -32,8 +32,11 @@
         <many-to-one
             target-entity="App\Ownership\Domain\Entity\MembersList"
             field="list"
-            inversed-by="timelyStatuses"
-        />
+            inversed-by="timelyStatuses">
+            <join-column
+                name="aggregate_id"
+            />
+        </many-to-one>
 
         <field
             name="publicationDateTime"
