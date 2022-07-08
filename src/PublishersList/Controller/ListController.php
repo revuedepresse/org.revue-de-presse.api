@@ -79,13 +79,13 @@ class ListController
     {
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) use ($request) {
+            counter: function (SearchParams $searchParams) use ($request) {
                 return $this->getTotalPages($searchParams, $request);
             },
-            $finder = function (SearchParams $searchParams) {
+            finder: function (SearchParams $searchParams) {
                 return $this->getHighlightsFromSearchParams($searchParams);
             },
-            [
+            params: [
                 'aggregate' => 'string',
                 'endDate' => 'datetime',
                 'includeRetweets' => 'bool',
