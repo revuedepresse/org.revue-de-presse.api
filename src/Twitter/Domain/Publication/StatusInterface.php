@@ -155,16 +155,16 @@ interface StatusInterface
     public function getAggregates(): Collection;
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      * @return self
      */
-    public function removeFrom(PublishersListInterface $aggregate): StatusInterface;
+    public function removeFrom(PublishersListInterface $list): StatusInterface;
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      * @return mixed
      */
-    public function addToAggregates(PublishersListInterface $aggregate): Collection;
+    public function addToAggregates(PublishersListInterface $list): Collection;
 
     /**
      * @return bool

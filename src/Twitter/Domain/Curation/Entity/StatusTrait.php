@@ -282,28 +282,28 @@ trait StatusTrait
     }
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      *
      * @return $this
      */
-    public function removeFrom(PublishersListInterface $aggregate): StatusInterface
+    public function removeFrom(PublishersListInterface $list): StatusInterface
     {
-        if (!$this->aggregates->contains($aggregate)) {
+        if (!$this->aggregates->contains($list)) {
             return $this;
         }
 
-        $this->aggregates->removeElement($aggregate);
+        $this->aggregates->removeElement($list);
 
         return $this;
     }
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      *
      * @return Collection
      */
-    public function addToAggregates(PublishersListInterface $aggregate): Collection {
-        $this->aggregates->add($aggregate);
+    public function addToAggregates(PublishersListInterface $list): Collection {
+        $this->aggregates->add($list);
 
         return $this->aggregates;
     }

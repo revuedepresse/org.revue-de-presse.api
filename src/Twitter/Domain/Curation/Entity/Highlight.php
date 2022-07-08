@@ -35,7 +35,7 @@ class Highlight
     /**
      * @var PublishersListInterface
      */
-    private $aggregate;
+    private $list;
 
     /**
      * @var string

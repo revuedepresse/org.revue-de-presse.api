@@ -204,7 +204,7 @@ QUERY;
             $statement = $connection->executeQuery(
                 $queryDistinctAggregates,
                 [
-                    $this->aggregate,
+                    $this->list,
                     $searchParams->getParams()['startDate'],
                     $searchParams->getParams()['endDate'],
                     $searchParams->getParams()['startDate'],

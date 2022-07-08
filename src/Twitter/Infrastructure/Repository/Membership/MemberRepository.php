@@ -743,27 +743,27 @@ QUERY;
             $aggregateProperties = [];
             array_walk(
                 $aggregates,
-                function ($aggregate) use (&$aggregateProperties) {
-                    $aggregate['id']            = (int) $aggregate['id'];
-                    $aggregate['totalStatuses'] = (int) $aggregate['totalStatuses'];
-                    $aggregate['locked']        = (bool) $aggregate['locked'];
+                function ($list) use (&$aggregateProperties) {
+                    $list['id']            = (int) $list['id'];
+                    $list['totalStatuses'] = (int) $list['totalStatuses'];
+                    $list['locked']        = (bool) $list['locked'];
 
-                    if (array_key_exists('unlocked_at', $aggregate)) {
-                        $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
+                    if (array_key_exists('unlocked_at', $list)) {
+                        $list['unlockedAt'] = $list['unlocked_at'];
                     }
 
                     if (
-                        array_key_exists('unlocked_at', $aggregate)
-                        && !is_null($aggregate['unlocked_at'])
+                        array_key_exists('unlocked_at', $list)
+                        && !is_null($list['unlocked_at'])
                     ) {
-                        $aggregate['unlockedAt'] = (new \DateTime(
-                            $aggregate['unlocked_at'],
+                        $list['unlockedAt'] = (new \DateTime(
+                            $list['unlocked_at'],
                             new \DateTimeZone('UTC')
                         )
                         )->getTimestamp();
                     }
 
-                    $aggregateProperties[strtolower($aggregate['screenName'])] = $aggregate;
+                    $aggregateProperties[strtolower($list['screenName'])] = $list;
                 }
             );
 
@@ -869,20 +869,20 @@ QUERY;
         $results = $statement->fetchAll();
 
         $results = array_map(
-            function (array $aggregate) {
-                if ((int) $aggregate['totalStatuses'] <= 0) {
+            function (array $list) {
+                if ((int) $list['totalStatuses'] <= 0) {
                     $matchingAggregate = $this->aggregateRepository->findOneBy(
-                        ['id' => (int) $aggregate['id']]
+                        ['id' => (int) $list['id']]
                     );
 
                     $this->aggregateRepository->updateTotalStatuses(
-                        $aggregate,
+                        $list,
                         $matchingAggregate
                     );
-                    $aggregate['totalStatuses'] = $matchingAggregate->totalStatuses;
+                    $list['totalStatuses'] = $matchingAggregate->totalStatuses;
                 }
 
-                return $aggregate;
+                return $list;
             },
             $results
         );

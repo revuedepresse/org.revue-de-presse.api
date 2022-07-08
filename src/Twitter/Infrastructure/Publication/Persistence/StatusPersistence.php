@@ -78,7 +78,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        PublishersListInterface $aggregate = null
+        PublishersListInterface $list = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -94,7 +94,7 @@ class StatusPersistence implements StatusPersistenceInterface
                 $statusCollection = $this->persistStatus(
                     $statusCollection,
                     $taggedStatus,
-                    $aggregate
+                    $list
                 );
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
@@ -144,18 +144,18 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?PublishersListInterface $aggregate
+        ?PublishersListInterface $list
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
-            ->convertPropsToStatus($extract, $aggregate);
+            ->convertPropsToStatus($extract, $list);
 
         $this->logStatusToBeInserted($status);
 
         $status = $this->unarchiveStatus($status, $this->entityManager);
         $this->refreshUpdatedAt($status);
 
-        $this->persistTimelyStatus($aggregate, $status);
+        $this->persistTimelyStatus($list, $status);
 
         $this->entityManager->persist($status);
 
@@ -163,13 +163,13 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?PublishersListInterface $aggregate,
+        ?PublishersListInterface $list,
         StatusInterface $status
     ): void {
-        if ($aggregate instanceof PublishersList) {
+        if ($list instanceof PublishersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
-                $aggregate
+                $list
             );
             $this->entityManager->persist($timelyStatus);
         }

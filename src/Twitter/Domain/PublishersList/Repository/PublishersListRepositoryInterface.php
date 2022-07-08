@@ -23,7 +23,7 @@ interface PublishersListRepositoryInterface
     public function unlockPublishersList(PublishersListInterface $publishersList);
 
     public function updateTotalStatuses(
-        array $aggregate,
+        array $list,
         ?PublishersListInterface $matchingAggregate = null,
         bool $includeRelatedAggregates = true
     ): array;

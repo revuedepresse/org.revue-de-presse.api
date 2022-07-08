@@ -16,19 +16,19 @@ trait AggregateAwareTrait
         string $listName,
         string $listId = null
     ) {
-        $aggregate = $this->aggregateRepository->make(
+        $list = $this->aggregateRepository->make(
             $screenName,
             $listName
         );
 
-        $this->entityManager->persist($aggregate);
+        $this->entityManager->persist($list);
 
         if ($listId !== null) {
-            $aggregate->listId = $listId;
+            $list->listId = $listId;
         }
 
         $this->entityManager->flush();
 
-        return $aggregate;
+        return $list;
     }
 }

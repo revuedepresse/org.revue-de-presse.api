@@ -308,9 +308,9 @@ class StatusLogger implements StatusLoggerInterface
     {
         $aggregateName = 'without aggregate';
         if (!$memberStatus->getAggregates()->isEmpty()) {
-            $aggregate = $memberStatus->getAggregates()->first();
-            if ($aggregate instanceof PublishersList) {
-                $aggregateName = $aggregate->getName();
+            $list = $memberStatus->getAggregates()->first();
+            if ($list instanceof PublishersList) {
+                $aggregateName = $list->getName();
             }
         }
 

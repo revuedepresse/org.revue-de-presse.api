@@ -13,7 +13,7 @@ interface StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        PublishersListInterface $aggregate = null
+        PublishersListInterface $list = null
     ): array;
 
     public function unarchiveStatus(

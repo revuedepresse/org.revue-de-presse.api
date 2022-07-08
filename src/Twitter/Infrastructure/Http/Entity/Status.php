@@ -174,8 +174,8 @@ class Status implements StatusInterface
 
         if ($archivedStatus->belongsToAList()) {
             $archivedStatus->getAggregates()->map(
-                function (PublishersListInterface $aggregate) use ($status) {
-                    $status->addToAggregates($aggregate);
+                function (PublishersListInterface $list) use ($status) {
+                    $status->addToAggregates($list);
                 }
             );
         }

@@ -378,15 +378,15 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      * @return array
      */
-    public function findByAggregate(PublishersListInterface $aggregate)
+    public function findByAggregate(PublishersListInterface $list)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->join('s.aggregates', 'a');
         $queryBuilder->andWhere('a.id = :id');
-        $queryBuilder->setParameter('id', $aggregate->getId());
+        $queryBuilder->setParameter('id', $list->getId());
 
         return $queryBuilder->getQuery()->getResult();
     }

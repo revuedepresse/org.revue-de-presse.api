@@ -46,13 +46,13 @@ class PublicationPersistence implements PublicationPersistenceInterface
     public function persistStatusPublications(
         array $statuses,
         AccessToken $identifier,
-        PublishersListInterface $aggregate = null
+        PublishersListInterface $list = null
     ): CollectionInterface {
         $statusPersistence = $this->statusPersistence;
         $result           = $statusPersistence->persistAllStatuses(
             $statuses,
             $identifier,
-            $aggregate
+            $list
         );
         $normalizedStatus = $result[$statusPersistence::PROPERTY_NORMALIZED_STATUS];
         $screenName       = $result[$statusPersistence::PROPERTY_SCREEN_NAME];

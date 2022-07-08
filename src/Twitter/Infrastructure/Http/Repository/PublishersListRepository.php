@@ -57,20 +57,20 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         MemberInterface $member,
         stdClass $list
     ): PublishersListInterface {
-        $aggregate = $this->findOneBy(
+        $list = $this->findOneBy(
             [
                 'name'       => $list->name,
                 'screenName' => $member->getTwitterUsername()
             ]
         );
 
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->make($member->getTwitterUsername(), $list->name);
+        if (!($list instanceof PublishersList)) {
+            $list = $this->make($member->getTwitterUsername(), $list->name);
         }
 
-        $aggregate->listId = $list->id_str;
+        $list->listId = $list->id_str;
 
-        return $this->save($aggregate);
+        return $this->save($list);
     }
 
     /**
@@ -117,22 +117,22 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         $aggregates = $queryBuilder->getQuery()->getArrayResult();
 
         $aggregates = array_map(
-            function (array $aggregate) {
+            function (array $list) {
                 $existingAggregate = null;
-                if ($aggregate['totalStatuses'] === 0) {
+                if ($list['totalStatuses'] === 0) {
                     /** @var PublishersListInterface $existingAggregate */
-                    $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
+                    $existingAggregate = $this->findOneBy(['id' => $list['id']]);
                     if (!($existingAggregate instanceof PublishersList)) {
-                        return $aggregate;
+                        return $list;
                     }
                 }
 
-                $aggregate = $this->updateTotalStatuses(
-                    $aggregate,
+                $list = $this->updateTotalStatuses(
+                    $list,
                     $existingAggregate
                 );
 
-                return $this->updateTotalMembers($aggregate, $existingAggregate);
+                return $this->updateTotalMembers($list, $existingAggregate);
             },
             $aggregates
         );
@@ -151,71 +151,71 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         string $listName,
         string $listId = null
     ) {
-        $aggregate = $this->make(
+        $list = $this->make(
             $screenName,
             $listName
         );
 
-        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->persist($list);
 
         if ($listId !== null) {
-            $aggregate->listId = $listId;
+            $list->listId = $listId;
         }
 
         $this->getEntityManager()->flush();
 
-        return $aggregate;
+        return $list;
     }
 
     public function getMemberAggregateByUsername(string $username): PublishersListInterface
     {
-        $aggregate = $this->make(
+        $list = $this->make(
             $username,
             self::PREFIX_MEMBER_AGGREGATE . $username
         );
 
-        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->persist($list);
         $this->getEntityManager()->flush();
 
-        return $aggregate;
+        return $list;
     }
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      * @return void
      */
-    public function lockAggregate(PublishersListInterface $aggregate)
+    public function lockAggregate(PublishersListInterface $list)
     {
-        $aggregate->lock();
+        $list->lock();
 
-        $this->save($aggregate);
+        $this->save($list);
     }
 
     public function make(string $screenName, string $listName): PublishersListInterface
     {
-        $aggregate = $this->findByRemovingDuplicates(
+        $list = $this->findByRemovingDuplicates(
             $screenName,
             $listName
         );
 
-        if ($aggregate instanceof PublishersListInterface) {
-            return $aggregate;
+        if ($list instanceof PublishersListInterface) {
+            return $list;
         }
 
         return new PublishersList($screenName, $listName);
     }
 
     /**
-     * @param PublishersListInterface $aggregate
+     * @param PublishersListInterface $list
      *
      * @return PublishersListInterface
      */
-    public function save(PublishersListInterface $aggregate)
+    public function save(PublishersListInterface $list)
     {
-        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->persist($list);
         $this->getEntityManager()->flush();
 
-        return $aggregate;
+        return $list;
     }
 
     /**
@@ -243,19 +243,19 @@ QUERY;
         return $statement->fetchAll();
     }
 
-    public function unlockPublishersList(PublishersListInterface $aggregate): PublishersListInterface
+    public function unlockPublishersList(PublishersListInterface $list): PublishersListInterface
     {
-        $aggregate->unlock();
+        $list->unlock();
 
-        return $this->save($aggregate);
+        return $this->save($list);
     }
 
     public function updateTotalStatuses(
-        array $aggregate,
+        array $list,
         ?PublishersListInterface $matchingAggregate = null,
         bool $includeRelatedAggregates = true
     ): array {
-        if ($aggregate['totalStatuses'] <= 0) {
+        if ($list['totalStatuses'] <= 0) {
             $connection = $this->getEntityManager()->getConnection();
 
             $query = <<< QUERY
@@ -280,21 +280,21 @@ QUERY;
 
             $statement = $connection->executeQuery(
                 $query,
-                [$aggregate['id']],
+                [$list['id']],
                 [\PDO::PARAM_INT]
             );
 
-            $aggregate['totalStatuses'] = (int) $statement->fetchAll()[0]['total_status'];
+            $list['totalStatuses'] = (int) $statement->fetchAll()[0]['total_status'];
 
-            $matchingAggregate->setTotalStatus($aggregate['totalStatuses']);
-            if ($aggregate['totalStatuses'] === 0) {
+            $matchingAggregate->setTotalStatus($list['totalStatuses']);
+            if ($list['totalStatuses'] === 0) {
                 $matchingAggregate->setTotalStatus(-1);
             }
 
             $this->getEntityManager()->persist($matchingAggregate);
         }
 
-        return $aggregate;
+        return $list;
     }
 
     /**
@@ -346,14 +346,14 @@ QUERY;
         string $screenName,
         string $listName
     ) {
-        $aggregate = $this->findOneBy(
+        $list = $this->findOneBy(
             [
                 'screenName' => $screenName,
                 'name'       => $listName
             ]
         );
 
-        if ($aggregate instanceof PublishersList) {
+        if ($list instanceof PublishersList) {
             $aggregates = $this->findBy(
                 [
                     'screenName' => $screenName,
@@ -365,23 +365,23 @@ QUERY;
                 /** @var PublishersListInterface $firstAggregate */
                 $firstAggregate = $aggregates[0];
 
-                foreach ($aggregates as $index => $aggregate) {
+                foreach ($aggregates as $index => $list) {
                     if ($index === 0) {
                         continue;
                     }
 
                     $statuses = $this->statusRepository
-                        ->findByAggregate($aggregate);
+                        ->findByAggregate($list);
 
                     /** @var StatusInterface $status */
                     foreach ($statuses as $status) {
                         /** @var StatusInterface $status */
-                        $status->removeFrom($aggregate);
+                        $status->removeFrom($list);
                         $status->addToAggregates($firstAggregate);
                     }
 
                     $timelyStatuses = $this->timelyStatusRepository
-                        ->findBy(['aggregate' => $aggregate]);
+                        ->findBy(['aggregate' => $list]);
 
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
@@ -391,28 +391,28 @@ QUERY;
 
                 $this->getEntityManager()->flush();
 
-                foreach ($aggregates as $index => $aggregate) {
+                foreach ($aggregates as $index => $list) {
                     if ($index === 0) {
                         continue;
                     }
 
-                    $this->getEntityManager()->remove($aggregate);
+                    $this->getEntityManager()->remove($list);
                 }
 
                 $this->getEntityManager()->flush();
 
-                $aggregate = $firstAggregate;
+                $list = $firstAggregate;
             }
         }
 
-        return $aggregate;
+        return $list;
     }
 
     private function updateTotalMembers(
-        array $aggregate,
+        array $list,
         PublishersListInterface $matchingAggregate = null
     ): array {
-        if ($aggregate['totalMembers'] === 0) {
+        if ($list['totalMembers'] === 0) {
             $query      = <<<QUERY
                 SELECT 
                 COUNT(a.screen_name) as total_members
@@ -426,19 +426,19 @@ QUERY;
                 GROUP BY a.screen_name
 QUERY;
             $connection = $this->getEntityManager()->getConnection();
-            $statement  = $connection->executeQuery($query, [$aggregate['id']], [\Pdo::PARAM_INT]);
+            $statement  = $connection->executeQuery($query, [$list['id']], [\Pdo::PARAM_INT]);
 
-            $aggregate['totalMembers'] = (int) $statement->fetchAll([0]['total_members']);
+            $list['totalMembers'] = (int) $statement->fetchAll([0]['total_members']);
 
-            $matchingAggregate->totalMembers = $aggregate['totalMembers'];
-            if ($aggregate['totalMembers'] === 0) {
+            $matchingAggregate->totalMembers = $list['totalMembers'];
+            if ($list['totalMembers'] === 0) {
                 $matchingAggregate->totalMembers = -1;
             }
 
             $this->getEntityManager()->persist($matchingAggregate);
         }
 
-        return $aggregate;
+        return $list;
     }
 
     public function getAllPublishersLists(Request $request = null): array {

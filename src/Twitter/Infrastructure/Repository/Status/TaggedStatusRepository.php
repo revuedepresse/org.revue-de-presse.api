@@ -43,14 +43,14 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 
     /**
      * @param array          $properties
-     * @param PublishersList|null $aggregate
+     * @param PublishersList|null $list
      *
      * @return StatusInterface
      * @throws Exception
      */
     public function convertPropsToStatus(
         array $properties,
-        ?PublishersListInterface $aggregate
+        ?PublishersListInterface $list
     ): StatusInterface {
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 
@@ -61,7 +61,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
         return $taggedStatus->toStatus(
             $this->entityManager,
             $this->logger,
-            $aggregate
+            $list
         );
     }
 

@@ -281,7 +281,7 @@ class TaggedStatus
      * @param EntityManagerInterface $entityManager
      * @param LoggerInterface        $logger
      *
-     * @param PublishersList|null         $aggregate
+     * @param PublishersList|null         $list
      *
      * @return StatusInterface
      * @throws Exception
@@ -289,7 +289,7 @@ class TaggedStatus
     public function toStatus(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        ?PublishersListInterface $aggregate = null
+        ?PublishersListInterface $list = null
     ): StatusInterface {
         $status = new Status();
 
@@ -340,8 +340,8 @@ class TaggedStatus
         $status->setIndexed(true);
         $status->setIdentifier($this->token);
 
-        if ($aggregate !== null) {
-            $status->addToAggregates($aggregate);
+        if ($list !== null) {
+            $status->addToAggregates($list);
         }
 
         return $status;

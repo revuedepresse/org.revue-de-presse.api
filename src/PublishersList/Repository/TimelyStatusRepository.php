@@ -43,29 +43,29 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             return $timelyStatus->updateTimeRange();
         }
 
-        $aggregate = $this->aggregateRepository->findOneBy([
+        $list = $this->aggregateRepository->findOneBy([
             'id' => $properties['aggregate_id'],
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->aggregateRepository->findOneBy([
+        if (!($list instanceof PublishersList)) {
+            $list = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($aggregate instanceof PublishersList)) {
-                $aggregate = $this->aggregateRepository->make(
+            if (!($list instanceof PublishersList)) {
+                $list = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
                 );
-                $this->aggregateRepository->save($aggregate);
+                $this->aggregateRepository->save($list);
             }
         }
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $list,
             $status->getCreatedAt()
         );
     }
@@ -98,7 +98,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
      */
     public function fromAggregatedStatus(
         StatusInterface $status,
-        PublishersListInterface $aggregate = null
+        PublishersListInterface $list = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status
@@ -110,7 +110,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
         return new TimelyStatus(
             $status,
-            $aggregate,
+            $list,
             $status->getCreatedAt()
         );
     }

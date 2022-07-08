@@ -15,6 +15,6 @@ interface PublicationPersistenceInterface
     public function persistStatusPublications(
         array $statuses,
         AccessToken $identifier,
-        PublishersListInterface $aggregate = null
+        PublishersListInterface $list = null
     ): CollectionInterface;
 }

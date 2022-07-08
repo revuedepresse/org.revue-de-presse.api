@@ -19,7 +19,7 @@ class TimelyStatus implements TimeRangeAwareInterface
 
     private StatusInterface $status;
 
-    private PublishersListInterface $aggregate;
+    private PublishersListInterface $list;
 
     private DateTimeInterface $publicationDateTime;
 
@@ -31,15 +31,15 @@ class TimelyStatus implements TimeRangeAwareInterface
 
     public function __construct(
         StatusInterface    $status,
-        PublishersList     $aggregate,
+        PublishersList     $list,
         \DateTimeInterface $publicationDateTime
     ) {
 
         $this->status = $status;
-        $this->aggregate = $aggregate;
+        $this->list = $list;
         $this->publicationDateTime = $publicationDateTime;
 
-        $this->aggregateName = $this->aggregate->getName();
+        $this->aggregateName = $this->list->getName();
         $this->memberName = $status->getScreenName();
 
         $this->updateTimeRange();
@@ -48,10 +48,10 @@ class TimelyStatus implements TimeRangeAwareInterface
     /**
      * @throws \Exception
      */
-    public function updateAggregate(PublishersListInterface $aggregate)
+    public function updateAggregate(PublishersListInterface $list)
     {
-        $this->aggregate = $aggregate;
-        $this->aggregateName = $aggregate->getName();
+        $this->list = $list;
+        $this->aggregateName = $list->getName();
 
         $this->updateTimeRange();
     }
