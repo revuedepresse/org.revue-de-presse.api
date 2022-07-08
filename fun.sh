@@ -47,24 +47,24 @@ function _set_file_permissions() {
 }
 
 function build() {
-    local WORKER_UID
-    local WORKER_GID
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
 
     _set_up_configuration_files
 
-    if [ -z "${WORKER_UID}" ];
+    if [ -z "${SERVICE_OWNER_UID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'SERVICE_OWNER_UID' $'\n'
 
       return 1
 
     fi
 
-    if [ -z "${WORKER_GID}" ];
+    if [ -z "${SERVICE_OWNER_GID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
 
       return 1
 
@@ -74,8 +74,8 @@ function build() {
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
         build \
-        --build-arg "WORKER_UID=${WORKER_UID}" \
-        --build-arg "WORKER_GID=${WORKER_GID}" \
+        --build-arg "SERVICE_OWNER_UID=${SERVICE_OWNER_UID}" \
+        --build-arg "SERVICE_OWNER_GID=${SERVICE_OWNER_GID}" \
         --no-cache \
         app \
         cache \
@@ -153,8 +153,8 @@ function clean() {
 }
 
 function clear_cache_warmup() {
-    local WORKER_UID
-    local WORKER_GID
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
 
     _set_up_configuration_files
 
@@ -177,7 +177,7 @@ function clear_cache_warmup() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --user "${WORKER_UID}:${WORKER_GID}" \
+        --user "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
 
@@ -185,6 +185,9 @@ function clear_cache_warmup() {
 }
 
 function install() {
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
+
     _set_up_configuration_files
 
     clean ''
@@ -208,6 +211,8 @@ function install() {
 }
 
 function start() {
+    guard_against_missing_variables
+
     clean ''
 
     local command
@@ -248,6 +253,8 @@ function stop() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         down
+    remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'service'
 }
 
 function run_php_unit_tests() {
