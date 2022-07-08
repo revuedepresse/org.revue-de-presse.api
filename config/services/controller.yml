@@ -18,7 +18,7 @@ services:
             memberRepository:               '@user_manager'
             redisCache:                     '@app.cache.redis'
             router:                         '@router'
-            popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+            popularPublicationRepository:   '@App\PublicationPopularity\Infrastructure\Repository\PopularPublicationRepository'
             tokenRepository:                '@repository.access_token'
 
     App\PublishersList\Controller\ListController: '@controller.list'

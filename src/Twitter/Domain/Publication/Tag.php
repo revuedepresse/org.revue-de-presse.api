@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Publication;
 
-use App\Membership\Infrastructure\Entity\MembersList;
+use App\Membership\Domain\Ownership\MembersList;
 
 class Tag
 {

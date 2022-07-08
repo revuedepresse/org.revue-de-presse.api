@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Log;
 
-use App\Membership\Infrastructure\Entity\MembersList;
+use App\Membership\Domain\Ownership\MembersList;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;

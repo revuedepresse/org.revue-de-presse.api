@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublicationPopularity\Entity\StatusPopularity"
-            repository-class="App\PublicationPopularity\Repository\StatusPopularityRepository"
+    <entity name="App\PublicationPopularity\Domain\Entity\StatusPopularity"
+            repository-class="App\PublicationPopularity\Infrastructure\Repository\StatusPopularityRepository"
             table="status_popularity">
 
         <indexes>

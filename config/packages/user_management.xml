@@ -9,7 +9,7 @@
             <argument type="service" id="Doctrine\Common\Persistence\ManagerRegistry" />
             <argument type="string">App\Membership\Domain\Entity\Legacy\Member</argument>
             <property
-                name="membersListRepository"
+                name="\App\Membership\Infrastructure\Repository\MembersListRepository"
                 type="service"
                 id="App\Twitter\Infrastructure\Http\Repository\MembersListRepository" />
         </service>

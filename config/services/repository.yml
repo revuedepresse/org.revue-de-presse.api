@@ -88,16 +88,6 @@ services:
         calls:
             - [ 'setLogger', [ '@logger' ] ]
 
-    repository.publishers_list_subscription:
-        class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Domain\Entity\AggregateSubscription'
-        properties:
-            accessor:                               '@App\Twitter\Infrastructure\Http\Accessor'
-            logger:                                 '@logger'
-            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
-
     repository.owner:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\PressMedia\Repository\OwnerRepository'
@@ -174,8 +164,8 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Http\Entity\Whisperer'
 
-    App\NewsReview\Infrastructure\Repository\PopularPublicationRepository:
-        class: 'App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+    App\PublicationPopularity\Infrastructure\Repository\PopularPublicationRepository:
+        class: 'App\PublicationPopularity\Infrastructure\Repository\PopularPublicationRepository'
         arguments:
             - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             - "%env(resolve:FIREBASE_DATABASE_URI)%"

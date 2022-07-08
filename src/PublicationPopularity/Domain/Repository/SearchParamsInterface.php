@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\NewsReview\Domain\Repository;
+namespace App\PublicationPopularity\Domain\Repository;
 
 interface SearchParamsInterface
 {

@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace App\Tests\NewsReview\Infrastructure\Repository;
 
-use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\NewsReview\Domain\Repository\SearchParamsInterface;
+use App\PublicationPopularity\Domain\Repository\PopularPublicationRepositoryInterface;
+use App\PublicationPopularity\Domain\Repository\SearchParamsInterface;
 
 class InMemoryPopularPublicationRepository implements PopularPublicationRepositoryInterface
 {

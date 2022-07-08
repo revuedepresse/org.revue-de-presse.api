@@ -5,7 +5,7 @@ namespace App\PublishersList\Entity;
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Membership\Infrastructure\Entity\MembersList;
+use App\Membership\Domain\Ownership\MembersList;
 use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTimeInterface;

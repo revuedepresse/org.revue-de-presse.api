@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Http\Repository;
+namespace App\Membership\Infrastructure\Repository;
 
 use App\Membership\Domain\Entity\MemberInterface;
-use App\Membership\Infrastructure\Entity\MembersList;
+use App\Membership\Domain\Ownership\MembersList;
 use App\PublishersList\Entity\TimelyStatus;
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\MembersListInterface;

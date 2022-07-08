@@ -120,7 +120,7 @@ class Status implements StatusInterface
 
     /**
      * @ORM\ManyToMany(
-     *     targetEntity="App\Membership\Infrastructure\Entity\MembersList",
+     *     targetEntity="App\Membership\Domain\Ownership\MembersList",
      *     inversedBy="userStreams",
      *     cascade={"persist"}
      * )
@@ -142,7 +142,7 @@ class Status implements StatusInterface
     protected Collection $aggregates;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\PublicationPopularity\Entity\StatusPopularity", mappedBy="status")
+     * @ORM\OneToMany(targetEntity="App\PublicationPopularity\Domain\Entity\StatusPopularity", mappedBy="status")
      */
     private Collection $popularity;
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
-use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
+use App\PublicationPopularity\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
 use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Http\Entity\Token;
