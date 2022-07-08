@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Status;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Exception;
 use Psr\Log\LoggerInterface;
 
 class TaggedStatusRepository implements TaggedStatusRepositoryInterface
@@ -42,11 +41,8 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
     }
 
     /**
-     * @param array          $properties
-     * @param PublishersList|null $list
-     *
-     * @return StatusInterface
-     * @throws Exception
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function convertPropsToStatus(
         array $properties,

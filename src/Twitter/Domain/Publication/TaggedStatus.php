@@ -277,15 +277,6 @@ class TaggedStatus
         ];
     }
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param LoggerInterface        $logger
-     *
-     * @param PublishersList|null         $list
-     *
-     * @return StatusInterface
-     * @throws Exception
-     */
     public function toStatus(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,

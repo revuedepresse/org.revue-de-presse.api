@@ -47,12 +47,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
 
     private const PREFIX_MEMBER_AGGREGATE = 'user :: ';
 
-    /**
-     * @param MemberInterface $member
-     * @param stdClass        $list
-     *
-     * @return PublishersListInterface
-     */
     public function addMemberToList(
         MemberInterface $member,
         stdClass $list
@@ -65,10 +59,10 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         );
 
         if (!($list instanceof PublishersList)) {
-            $list = $this->make($member->getTwitterUsername(), $list->name);
+            $list = $this->make($member->getTwitterUsername(), $list->getName());
         }
 
-        $list->listId = $list->id_str;
+        $list->listId = $list->listId();
 
         return $this->save($list);
     }
@@ -180,10 +174,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $list;
     }
 
-    /**
-     * @param PublishersListInterface $list
-     * @return void
-     */
     public function lockAggregate(PublishersListInterface $list)
     {
         $list->lock();
@@ -216,31 +206,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         $this->getEntityManager()->flush();
 
         return $list;
-    }
-
-    /**
-     * @return array
-     * @throws DBALException
-     */
-    public function selectAggregatesForWhichNoStatusHasBeenCollected(): array
-    {
-        $selectAggregates = <<<QUERY
-            SELECT 
-            a.id aggregate_id, 
-            screen_name member_screen_name, 
-            `name` aggregate_name,
-            u.usr_twitter_id member_id
-            FROM publishers_list a, weaving_user u
-            WHERE screen_name IS NOT NULL 
-            AND a.screen_name = u.usr_twitter_username
-            AND id NOT IN (
-                SELECT aggregate_id FROM weaving_status_aggregate
-            );
-QUERY;
-
-        $statement = $this->getEntityManager()->getConnection()->executeQuery($selectAggregates);
-
-        return $statement->fetchAll();
     }
 
     public function unlockPublishersList(PublishersListInterface $list): PublishersListInterface

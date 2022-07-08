@@ -3,38 +3,37 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
-use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
-use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use Closure;
 use DateTime;
 use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
-use function count;
-use function is_array;
 
 class StatusPersistence implements StatusPersistenceInterface
 {

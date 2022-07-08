@@ -7,9 +7,6 @@ use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 
 class Tag
 {
-    /**
-     * @var PublishersList
-     */
     private PublishersListInterface $tag;
 
     private function __construct(PublishersListInterface $tag)

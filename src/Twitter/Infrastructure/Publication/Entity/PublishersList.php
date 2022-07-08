@@ -77,6 +77,11 @@ class PublishersList implements PublishersListInterface
      */
     public ?string $listId;
 
+    public function listId(): ?string
+    {
+        return $this->listId;
+    }
+
     /**
      * @ORM\Column(name="total_members", type="integer", options={"default": 0})
      */

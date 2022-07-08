@@ -3,21 +3,18 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Repository;
 
-use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\Status;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
+use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use function array_key_exists;
@@ -377,10 +374,6 @@ class StatusRepository extends ArchivedStatusRepository
         );
     }
 
-    /**
-     * @param PublishersListInterface $list
-     * @return array
-     */
     public function findByAggregate(PublishersListInterface $list)
     {
         $queryBuilder = $this->createQueryBuilder('s');
@@ -392,11 +385,9 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param string $screenName
-     * @return array
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
-    private function howManyStatusesForMemberHavingScreenName($screenName): array
+    private function howManyStatusesForMemberHavingScreenName(string $screenName): array
     {
         $connection = $this->getEntityManager()->getConnection();
         $query = <<<QUERY
@@ -411,8 +402,7 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     * @return null|Status
+     * @throws \Doctrine\DBAL\Exception
      */
     private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
     {
@@ -438,9 +428,8 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     * @return Status
-     * @throws NotFoundStatusException
+     * @throws \App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException
+     * @throws \Doctrine\DBAL\Exception
      */
     private function getLastKnownStatusFor(string $screenName): StatusInterface {
         $result = $this->howManyStatusesForMemberHavingScreenName($screenName);

@@ -3,18 +3,17 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use function count;
 
