@@ -1,59 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-function _set_up_configuration_files() {
-    if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
-        cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
-    fi
-
-    if [ ! -e ./.env.local ]; then
-        cp --verbose ./.env.local{.dist,}
-    fi
-
-    if [ ! -e ./.env ]; then
-        touch ./.env
-    fi
-
-    validate_docker_compose_configuration
-
-    source ./.env.local
-}
-
-function _set_file_permissions() {
-    local temporary_directory
-    temporary_directory="${1}"
-
-    if [ -z "${temporary_directory}" ];
-    then
-        printf 'A %s is expected as %s (%s).%s' 'non-empty string' '1st argument' 'temporary directory file path' $'\n'
-
-        return 1;
-    fi
-
-    if [ ! -d "${temporary_directory}" ];
-    then
-        printf 'A %s is expected as %s (%s).%s' 'directory' '1st argument' 'temporary directory file path' $'\n'
-
-        return 1;
-    fi
-
-    docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        run \
-        --rm \
-        --user root \
-        --volume "${temporary_directory}:/tmp/remove-me" \
-        app \
-        /bin/bash -c 'chmod -R ug+w /tmp/remove-me'
-}
-
 function build() {
     local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
 
-    _set_up_configuration_files
+    load_configuration_parameters
 
     if [ -z "${WORKER}" ];
     then
@@ -97,8 +50,9 @@ function build() {
 function dispatch_amqp_messages() {
     local USERNAME
     local LIST_NAME
+    local WORKER
 
-    _set_up_configuration_files
+    load_configuration_parameters
 
     if [ -z "${USERNAME}" ];
     then
@@ -166,7 +120,7 @@ function remove_running_container_and_image_in_debug_mode() {
     local WORKER_OWNER_GID
     local WORKER
 
-    _set_up_configuration_files
+    load_configuration_parameters
 
     local project_name
 
@@ -201,9 +155,9 @@ function clean() {
 
     if [ -n "${temporary_directory}" ];
     then
-        printf 'About to remove "%s".%s' "${temporary_directory}" $'\n'
+        printf 'About to revise file permissions for "%s" before clean up.%s' "${temporary_directory}" $'\n'
 
-        _set_file_permissions "${temporary_directory}"
+        set_file_permissions "${temporary_directory}"
 
         return 0
     fi
@@ -217,7 +171,7 @@ function clear_cache_warmup() {
     local WORKER_OWNER_GID
     local WORKER
 
-    _set_up_configuration_files
+    load_configuration_parameters
 
     local reuse_existing_container
     reuse_existing_container="${1}"
@@ -245,6 +199,10 @@ function clear_cache_warmup() {
     clean ''
 }
 
+function green() {
+    echo -n "\e[32m"
+}
+
 function install() {
     guard_against_missing_variables
 
@@ -252,7 +210,7 @@ function install() {
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
 
-    _set_up_configuration_files
+    load_configuration_parameters
 
     clean ''
 
@@ -274,6 +232,31 @@ function install() {
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
     clear_cache_warmup --reuse-existing-container
+}
+
+function load_configuration_parameters() {
+    if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
+        cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
+    fi
+
+    if [ ! -e ./.env.local ]; then
+        cp --verbose ./.env.local{.dist,}
+    fi
+
+    if [ ! -e ./.env ]; then
+        touch ./.env
+    fi
+
+    validate_docker_compose_configuration
+
+    source ./.env.local
+
+    printf '%s'           $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'WORKER_DIR:           ' "$(reset_color)" "${WORKER}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_UID:     ' "$(reset_color)" "${WORKER_OWNER_UID}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_GID:     ' "$(reset_color)" "${WORKER_OWNER_GID}" $'\n'
+    printf '%s'           $'\n'
 }
 
 function run_unit_tests() {
@@ -346,6 +329,39 @@ function get_worker_shell() {
         | \grep 'worker' \
         | awk '{print $1}'
     )" bash
+}
+
+function reset_color() {
+    echo -n $'\033'\[00m
+}
+
+function set_file_permissions() {
+    local temporary_directory
+    temporary_directory="${1}"
+
+    if [ -z "${temporary_directory}" ];
+    then
+        printf 'A %s is expected as %s (%s).%s' 'non-empty string' '1st argument' 'temporary directory file path' $'\n'
+
+        return 1;
+    fi
+
+    if [ ! -d "${temporary_directory}" ];
+    then
+        printf 'A %s is expected as %s (%s).%s' 'directory' '1st argument' 'temporary directory file path' $'\n'
+
+        return 1;
+    fi
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        run \
+        --rm \
+        --user root \
+        --volume "${temporary_directory}:/tmp/remove-me" \
+        app \
+        /bin/bash -c 'chmod -R ug+w /tmp/remove-me'
 }
 
 function start() {
