@@ -80,13 +80,13 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
             $this->appLogger
         );
 
-        $statusCollection = StatusCollection::fromArray([]);
+        $tweetsCollection = StatusCollection::fromArray([]);
 
         /** @var TaggedTweet $taggedTweet */
         foreach ($propertiesCollection->toArray() as $key => $taggedTweet) {
             try {
-                $statusCollection = $this->persistStatus(
-                    $statusCollection,
+                $tweetsCollection = $this->persistStatus(
+                    $tweetsCollection,
                     $taggedTweet,
                     $twitterList
                 );
@@ -101,7 +101,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
 
         $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
 
-        $firstStatus = $statusCollection->first();
+        $firstStatus = $tweetsCollection->first();
         $screenName  = $firstStatus instanceof TweetInterface ?
             $firstStatus->getScreenName() :
             null;
@@ -109,7 +109,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
         return [
             self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
             self::PROPERTY_SCREEN_NAME       => $screenName,
-            self::PROPERTY_STATUS            => $statusCollection
+            self::PROPERTY_STATUS            => $tweetsCollection
         ];
     }
 
@@ -136,9 +136,9 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
     }
 
     private function persistStatus(
-        CollectionInterface $statuses,
-        TaggedTweet $taggedTweet,
-        ?PublishersList $twitterList
+        CollectionInterface $tweetsCollection,
+        TaggedTweet         $taggedTweet,
+        ?PublishersList     $twitterList
     ): CollectionInterface {
         $extract = $taggedTweet->toLegacyProps();
         $status  = $this->taggedTweetRepository->convertPropsToStatus($extract, $twitterList);
@@ -152,7 +152,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
 
         $this->entityManager->persist($status);
 
-        return $statuses->add($status);
+        return $tweetsCollection->add($status);
     }
 
     private function persistTimelyStatus(
