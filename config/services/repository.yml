@@ -7,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            membersListRepository: 'App\Ownership\Infrastructure\Repository\MembersListRepository'
+            membersListRepository: '@App\Ownership\Infrastructure\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
