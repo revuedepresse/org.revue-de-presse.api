@@ -5,7 +5,7 @@ namespace App\Trends\Infrastructure\Repository;
 
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
-use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
@@ -22,7 +22,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private HighlightRepository $highlightRepository;
 
-    private PublishersListRepositoryInterface $publishersListRepository;
+    private MembersListRepositoryInterface $publishersListRepository;
 
     private string $defaultPublishersList;
 
@@ -31,7 +31,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         string $databaseUri,
         string $defaultPublishersList,
         HighlightRepository $highlightRepository,
-        PublishersListRepositoryInterface $publishersListRepository,
+        MembersListRepositoryInterface $publishersListRepository,
         LoggerInterface $logger
     )
     {
