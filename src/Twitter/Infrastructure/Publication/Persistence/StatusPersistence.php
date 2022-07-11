@@ -146,8 +146,7 @@ class StatusPersistence implements StatusPersistenceInterface
         ?PublishersList $twitterList
     ): CollectionInterface {
         $extract = $taggedTweet->toLegacyProps();
-        $status  = $this->TaggedTweetRepository
-            ->convertPropsToStatus($extract, $twitterList);
+        $status  = $this->taggedTweetRepository->convertPropsToStatus($extract, $twitterList);
 
         $this->logStatusToBeInserted($status);
 

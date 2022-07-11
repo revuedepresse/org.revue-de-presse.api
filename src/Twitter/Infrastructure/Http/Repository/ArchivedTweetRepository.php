@@ -278,7 +278,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             $this->appLogger
         );
 
-        return $this->TaggedTweetRepository->archivedStatusHavingHashExists(
+        return $this->taggedTweetRepository->archivedStatusHavingHashExists(
             $statusesProperties->first()->hash()
         );
     }
@@ -338,7 +338,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             }
 
             if (!($memberStatus instanceof TweetInterface)) {
-                $memberStatus = $this->TaggedTweetRepository
+                $memberStatus = $this->taggedTweetRepository
                     ->convertPropsToStatus($extract, $aggregate);
             }
 
