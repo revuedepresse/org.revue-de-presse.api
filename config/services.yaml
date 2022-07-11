@@ -174,7 +174,7 @@ services:
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
-            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
+            - [ 'setTweetsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
         public: true
 
     App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
@@ -200,7 +200,7 @@ services:
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setRateLimitCompliance',                       [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
-            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
+            - [ 'setTweetsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
             - [ 'setPublishersListRepository',                  [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setTweetCurationLogger',                       [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]

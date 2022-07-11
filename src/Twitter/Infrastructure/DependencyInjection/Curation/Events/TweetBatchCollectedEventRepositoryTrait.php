@@ -7,12 +7,12 @@ use App\Twitter\Domain\Curation\Repository\TweetsBatchCollectedEventRepositoryIn
 
 trait TweetBatchCollectedEventRepositoryTrait
 {
-    private TweetsBatchCollectedEventRepositoryInterface $publicationBatchCollectedEventRepository;
+    private TweetsBatchCollectedEventRepositoryInterface $tweetsBatchCollectedEventRepository;
 
-    public function setPublicationBatchCollectedEventRepository(
-        TweetsBatchCollectedEventRepositoryInterface $publicationBatchCollectedEventRepository
+    public function setTweetsBatchCollectedEventRepository(
+        TweetsBatchCollectedEventRepositoryInterface $tweetsBatchCollectedEventRepository
     ): self {
-        $this->tweetsBatchCollectedEventRepository = $publicationBatchCollectedEventRepository;
+        $this->tweetsBatchCollectedEventRepository = $tweetsBatchCollectedEventRepository;
 
         return $this;
     }
