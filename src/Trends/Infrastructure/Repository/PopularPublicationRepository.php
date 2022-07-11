@@ -22,7 +22,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private HighlightRepository $highlightRepository;
 
-    private MembersListRepositoryInterface $publishersListRepository;
+    private MembersListRepositoryInterface $listRepository;
 
     private string $defaultPublishersList;
 
@@ -40,7 +40,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $this->defaultPublishersList = $defaultPublishersList;
 
         $this->highlightRepository = $highlightRepository;
-        $this->publishersListRepository = $publishersListRepository;
+        $this->listRepository = $publishersListRepository;
         $this->logger = $logger;
     }
 
@@ -58,7 +58,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
-        $publishersList = $this->publishersListRepository->findOneBy(['name' => $this->defaultPublishersList]);
+        $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
 
         if (!($publishersList instanceof PublishersListInterface)) {
             UnknownPublishersListException::throws();
