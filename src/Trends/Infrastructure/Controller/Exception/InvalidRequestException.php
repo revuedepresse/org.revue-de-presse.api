@@ -1,15 +1,12 @@
 <?php
 
-namespace App\Trends\Controller\Exception;
+namespace App\Trends\Infrastructure\Controller\Exception;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class InvalidRequestException extends \Exception
 {
-    /**
-     * @var \Exception
-     */
-    public $jsonResponse;
+    public JsonResponse $jsonResponse;
 
     public static function guardAgainstInvalidRequest(JsonResponse $jsonResponse, $message)
     {

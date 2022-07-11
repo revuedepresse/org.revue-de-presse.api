@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Trends\Controller;
+namespace App\Trends\Infrastructure\Controller;
 
+use App\Trends\Infrastructure\Controller\Exception\InvalidRequestException;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\Trends\Controller\Exception\InvalidRequestException;
+use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
