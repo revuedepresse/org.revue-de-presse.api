@@ -69,7 +69,7 @@ function set_file_permissions() {
         rm --recursive --force --verbose "${project_dir}/.git"
     fi
 
-    chown --verbose -R "${WORKER_UID}:${WORKER_GID}" /scripts
+    chown --verbose -R "${WORKER_OWNER_UID}:${WORKER_OWNER_GID}" /scripts
 
     chmod --verbose     o-rwx /scripts
     chmod --verbose -R ug+rx  /scripts
@@ -81,7 +81,7 @@ function set_file_permissions() {
         -readable \
         -type d \
         -not -path "${project_dir}"'/provisioning/volumes' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
@@ -100,7 +100,7 @@ function set_file_permissions() {
         -type f \
         -readable \
         -not -path "${project_dir}"'/provisioning/volumes' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
@@ -109,7 +109,7 @@ function set_file_permissions() {
         -type f \
         -not -path "${project_dir}"'/bin' \
         -not -path "${project_dir}"'/provisioning/volumes' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
@@ -124,8 +124,8 @@ function remove_distributed_version_control_system_files_git() {
 function install_app_requirements() {
     local APP_SECRET
     local GITHUB_API_TOKEN
-    local WORKER_UID
-    local WORKER_GID
+    local WORKER_OWNER_UID
+    local WORKER_OWNER_GID
 
     if [ -z "${WORKER}" ];
     then
@@ -159,19 +159,19 @@ function install_app_requirements() {
 
     fi
 
-    if [ -z "${WORKER_UID}" ];
+    if [ -z "${WORKER_OWNER_UID}" ];
     then
 
-        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_OWNER_UID' $'\n'
 
         return 1
 
     fi
 
-    if [ -z "${WORKER_GID}" ];
+    if [ -z "${WORKER_OWNER_GID}" ];
     then
 
-        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_OWNER_GID' $'\n'
 
         return 1
 

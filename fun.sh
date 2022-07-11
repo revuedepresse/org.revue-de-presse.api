@@ -50,8 +50,8 @@ function _set_file_permissions() {
 
 function build() {
     local WORKER
-    local WORKER_UID
-    local WORKER_GID
+    local WORKER_OWNER_UID
+    local WORKER_OWNER_GID
 
     _set_up_configuration_files
 
@@ -64,19 +64,19 @@ function build() {
 
     fi
 
-    if [ -z "${WORKER_UID}" ];
+    if [ -z "${WORKER_OWNER_UID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_OWNER_UID' $'\n'
 
       return 1
 
     fi
 
-    if [ -z "${WORKER_GID}" ];
+    if [ -z "${WORKER_OWNER_GID}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_OWNER_GID' $'\n'
 
       return 1
 
@@ -86,8 +86,8 @@ function build() {
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
         build \
-        --build-arg "WORKER_UID=${WORKER_UID}" \
-        --build-arg "WORKER_GID=${WORKER_GID}" \
+        --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
+        --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
         --build-arg "WORKER=${WORKER}" \
         app \
         process-manager \
@@ -132,7 +132,7 @@ function dispatch_amqp_messages() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env WORKER_WORKSPACE="${WORKER}" \
+        --env WORKER="${WORKER}" \
         -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'
 }
@@ -162,8 +162,8 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
-    local WORKER_UID
-    local WORKER_GID
+    local WORKER_OWNER_UID
+    local WORKER_OWNER_GID
     local WORKER
 
     _set_up_configuration_files
@@ -213,8 +213,8 @@ function clean() {
 }
 
 function clear_cache_warmup() {
-    local WORKER_UID
-    local WORKER_GID
+    local WORKER_OWNER_UID
+    local WORKER_OWNER_GID
     local WORKER
 
     _set_up_configuration_files
@@ -238,7 +238,7 @@ function clear_cache_warmup() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --user "${WORKER_UID}:${WORKER_GID}" \
+        --user "${WORKER_OWNER_UID}:${WORKER_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
 
@@ -249,8 +249,8 @@ function install() {
     guard_against_missing_variables
 
     local WORKER
-    local WORKER_UID
-    local WORKER_GID
+    local WORKER_OWNER_UID
+    local WORKER_OWNER_GID
 
     _set_up_configuration_files
 
@@ -268,7 +268,7 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env WORKER_WORKSPACE="${WORKER}" \
+        --env WORKER="${WORKER}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
