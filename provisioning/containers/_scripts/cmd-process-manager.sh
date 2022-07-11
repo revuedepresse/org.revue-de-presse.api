@@ -34,7 +34,7 @@ start() {
     local total_workers
     if [ -z "${TOTAL_WORKERS}" ];
     then
-        total_workers=4
+        total_workers=16
     else
         total_workers=${TOTAL_WORKERS}
     fi
