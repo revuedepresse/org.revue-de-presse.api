@@ -627,8 +627,10 @@ class TweetCurator implements TweetCuratorInterface
 
         if ($publishersList->isLocked()) {
             throw new LockedPublishersListException(
-                'Won\'t process message for already locked aggregate #%d',
-                $publishersList
+                sprintf(
+                'Won\'t process message for already locked aggregate "%s"',
+                    $publishersList->publicId()
+                )
             );
         }
 
