@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\Twitter\Infrastructure\Publication\Entity\Publication;
-use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetPublicationPersistenceLayerInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Formatter\TweetFormatterTrait;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -18,12 +18,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 
-/**
- * App\Twitter\Infrastructure\Curation\Entity
- */
-class PublicationRepository extends ServiceEntityRepository implements PublicationRepositoryInterface
+class TweetPublicationPersistenceLayer extends ServiceEntityRepository implements TweetPublicationPersistenceLayerInterface
 {
-    use PublicationFormatterTrait;
+    use TweetFormatterTrait;
 
     private const TABLE_ALIAS = 'p';
 
@@ -49,7 +46,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
      *
      * @return CollectionInterface
      */
-    public function persistPublications(
+    public function persistTweetsCollection(
         CollectionInterface $collection
     ): CollectionInterface {
         $publications = Collection::fromArray([]);
@@ -173,7 +170,7 @@ QUERY
                 }
             );
 
-            $this->persistPublications(
+            $this->persistTweetsCollection(
                 new Collection(
                     StatusToArray::fromStatusCollection($archivedStatus)->toArray()
                 )
@@ -199,7 +196,7 @@ QUERY
                 }
             );
 
-            $this->persistPublications(
+            $this->persistTweetsCollection(
                 new Collection(
                     StatusToArray::fromStatusCollection($statuses)
                         ->toArray()
@@ -211,7 +208,7 @@ QUERY
         }
     }
 
-    public function getLatestPublications(): CollectionInterface
+    public function getLatestTweets(): CollectionInterface
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
 
@@ -244,6 +241,6 @@ QUERY
             $result
         );
 
-        return $this->publicationFormatter->format(new Collection($result));
+        return $this->tweetFormatter->format(new Collection($result));
     }
 }

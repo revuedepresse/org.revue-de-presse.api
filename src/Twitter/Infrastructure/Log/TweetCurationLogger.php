@@ -158,7 +158,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
 
         $this->logger->info(
             sprintf(
-                'About to save status for "%s" in aggregate #%d',
+                'About to save status for "%s" in members list #%d',
                 $options['screen_name'],
                 $selectors->membersListId()
             )

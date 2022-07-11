@@ -275,7 +275,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             SkippableMessageException::stopMessageConsumption();
         }
 
-        $savedItems = $this->tweetPersistenceLayer->savePublicationsForScreenName(
+        $savedItems = $this->tweetPersistenceLayer->saveTweetsAuthoredByMemberHavingScreenName(
             $statuses,
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $this->selectors

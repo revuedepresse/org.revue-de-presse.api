@@ -212,11 +212,12 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
         return $status;
     }
 
-    public function savePublicationsForScreenName(
+    public function saveTweetsAuthoredByMemberHavingScreenName(
         array $statuses,
         string $screenName,
         CurationSelectorsInterface $selectors
-    ) {
+    ): ?int
+    {
         $success = null;
 
         if (!is_array($statuses) || count($statuses) === 0) {

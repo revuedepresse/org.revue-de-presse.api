@@ -109,14 +109,14 @@ services:
 
     App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface: '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
 
-    App\Twitter\Infrastructure\Publication\Repository\PublicationRepository:
-        class: 'App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
+    App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer:
+        class: 'App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Publication\Entity\Publication'
         calls:
-            - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
-            - [ 'setPublicationFormatter', [ '@App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
+            - [ 'setEntityManager',     [ '@doctrine.orm.entity_manager' ] ]
+            - [ 'setTweetFormatter',    [ '@App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 

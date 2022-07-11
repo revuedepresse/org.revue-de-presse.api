@@ -213,14 +213,12 @@ function install() {
 
     load_configuration_parameters
 
-    clean ''
-
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         up \
         --detach \
-        --no-recreate \
+        --force-recreate \
         app
 
     docker compose \

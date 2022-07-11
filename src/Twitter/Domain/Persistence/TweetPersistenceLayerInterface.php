@@ -22,9 +22,9 @@ interface TweetPersistenceLayerInterface
         EntityManagerInterface $entityManager
     ): TweetInterface;
 
-    public function savePublicationsForScreenName(
+    public function saveTweetsAuthoredByMemberHavingScreenName(
         array $statuses,
         string $screenName,
         CurationSelectorsInterface $selectors
-    );
+    ): ?int;
 }

@@ -42,7 +42,7 @@ services:
             - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
-            - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setTweetPublicationPersistenceLayer',  [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
             - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTweetPersistenceLayer',      [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
             - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
@@ -65,7 +65,7 @@ services:
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPersistenceLayer',       [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
-            - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setTweetPublicationPersistenceLayer',  [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
             - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
@@ -81,7 +81,7 @@ services:
             - 'App\Twitter\Infrastructure\Http\Entity\Tweet'
         calls:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
-            - [ 'setPublicationRepository',  [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setTweetPublicationPersistenceLayer',  [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
             - [ 'setTweetCurationLogger',    [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTaggedTweetRepository',  [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
