@@ -50,29 +50,29 @@ class PersistenceLayer implements PersistenceLayerInterface
             $identifier,
             $twitterList
         );
-        $normalizedStatus = $result[$persistenceLayer::PROPERTY_NORMALIZED_STATUS];
+        $normalizedTweetsCollection = $result[$persistenceLayer::PROPERTY_NORMALIZED_STATUS];
         $screenName       = $result[$persistenceLayer::PROPERTY_SCREEN_NAME];
 
         // Mark status as published
-        $statusCollection = new Collection(
+        $tweetCollection = new Collection(
             $result[$persistenceLayer::PROPERTY_STATUS]->toArray()
         );
-        $statusCollection->map(fn(TweetInterface $status) => $status->markAsPublished());
+        $tweetCollection->map(fn(TweetInterface $status) => $status->markAsPublished());
 
         // Make publications
-        $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
-        $this->publicationRepository->persistTweetsCollection($statusCollection);
+        $tweetCollection = StatusToArray::fromStatusCollection($tweetCollection);
+        $this->publicationRepository->persistTweetsCollection($tweetCollection);
 
         // Commit transaction
         $this->entityManager->flush();
 
-        if (count($normalizedStatus) > 0) {
+        if (count($normalizedTweetsCollection) > 0) {
             $this->memberRepository->incrementTotalStatusesOfMemberWithName(
-                count($normalizedStatus),
+                count($normalizedTweetsCollection),
                 $screenName
             );
         }
 
-        return $normalizedStatus;
+        return $normalizedTweetsCollection;
     }
 }
