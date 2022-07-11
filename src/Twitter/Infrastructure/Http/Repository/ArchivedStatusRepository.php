@@ -39,9 +39,6 @@ use function array_key_exists;
 use function count;
 use const JSON_THROW_ON_ERROR;
 
-/**
- * @package App\Twitter\Infrastructure\Http\Repository
- */
 class ArchivedStatusRepository extends ResourceRepository implements
     ExtremumAwareInterface,
     StatusRepositoryInterface
