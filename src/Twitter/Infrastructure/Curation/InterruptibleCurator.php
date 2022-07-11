@@ -80,6 +80,8 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 $this->logger,
                 $options
             );
+        } catch (SkipCollectException $exception) {
+            throw $exception;
         } catch (BadAuthenticationDataException $exception) {
             $this->logger->error(
                 sprintf(
