@@ -10,6 +10,7 @@ log_errors                  = on
 output_buffering            = on
 security.limit_extensions   = '.php'
 short_open_tag              = off
+;xdebug.client_host           =
 ;xdebug.mode                 = debug
 ;xdebug.start_with_request   = yes
 ;xdebug.log                  = /var/www/org.example.worker/var/log/xdebug.log
