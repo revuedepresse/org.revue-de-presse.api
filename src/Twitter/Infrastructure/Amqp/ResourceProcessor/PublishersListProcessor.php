@@ -18,6 +18,7 @@ use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
 use App\Twitter\Infrastructure\Http\Exception\CanNotReplaceAccessTokenException;
 use App\Twitter\Infrastructure\Http\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -131,7 +132,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     ): int {
         $publishedMessages = 0;
 
-        /** @var \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity */
+        /** @var MemberIdentity $memberIdentity */
         foreach ($members->toArray() as $memberIdentity) {
             try {
                 $publishedMessages += $this->memberIdentityProcessor->process(
