@@ -12,7 +12,7 @@ SHELL:=/bin/bash
 
 .PHONY: start-database stop-database test
 
-COMPOSE_PROJECT_NAME = ?= 'org_example_worker'
+COMPOSE_PROJECT_NAME ?= 'org_example_worker'
 WORKER ?= 'org.example.worker'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
