@@ -128,18 +128,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @throws NotFoundMemberException
-    public function declareMinLikeIdForMemberWithScreenName(string $minLikeId, string $screenName): MemberInterface
-    {
-        $member = $this->ensureMemberExists($screenName);
-
-        if ($member->minLikeId === null || ((int)$minLikeId < (int)$member->minLikeId)) {
-            $member->minLikeId = $minLikeId;
-        }
-
-        return $this->saveMember($member);
-    }
-
-    /**
      */
     public function declareMinStatusIdForMemberWithScreenName(
         string $minStatusId,
@@ -160,18 +148,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @throws NotFoundMemberException
-    public function declareTotalLikesOfMemberWithName(int $totalLikes, string $screenName): MemberInterface
-    {
-        $member = $this->ensureMemberExists($screenName);
-
-        if ($totalLikes > $member->totalLikes) {
-            $member->setTotalLikes($totalLikes);
-            $this->saveMember($member);
-        }
-
-        return $member;
-    }
-
      */
     public function declareTotalStatusesOfMemberWithName(int $totalStatuses, string $screenName): MemberInterface
     {
