@@ -7,7 +7,7 @@ use App\Membership\Domain\Entity\MemberInterface;
 use App\Ownership\Domain\Entity\MembersList;
 use App\Trends\Domain\Entity\TimelyStatus;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

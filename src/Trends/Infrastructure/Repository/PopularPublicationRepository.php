@@ -4,10 +4,10 @@ declare (strict_types=1);
 namespace App\Trends\Infrastructure\Repository;
 
 use App\Ownership\Domain\Exception\UnknownListException;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
-use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
