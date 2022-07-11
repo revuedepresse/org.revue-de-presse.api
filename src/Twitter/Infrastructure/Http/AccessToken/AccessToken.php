@@ -5,9 +5,6 @@ namespace App\Twitter\Infrastructure\Http\AccessToken;
 
 class AccessToken
 {
-    /**
-     * @var string
-     */
     private string $accessToken;
 
     public function __construct(string $accessToken)
