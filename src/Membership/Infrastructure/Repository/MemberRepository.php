@@ -418,6 +418,8 @@ QUERY;
             $member->setTwitterID($twitterId);
         }
 
+        $screenName = strtolower($screenName);
+
         $member->setTwitterScreenName($screenName);
 
         $member->setEnabled(false);

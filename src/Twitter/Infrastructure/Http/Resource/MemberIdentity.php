@@ -33,7 +33,7 @@ class MemberIdentity
 
     public function screenName(): string
     {
-        return $this->screenName;
+        return strtolower($this->screenName);
     }
 
     public function toArray(): array

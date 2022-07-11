@@ -169,7 +169,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     public function setTwitterScreenName(string $twitterScreenName): MemberInterface
     {
-        $this->twitter_username = $twitterScreenName;
+        $this->twitter_username = strtolower($twitterScreenName);
 
         return $this;
     }

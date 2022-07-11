@@ -23,7 +23,7 @@ trait FetchAuthoredTweetTrait
         TokenInterface $token,
         ?string        $dateBeforeWhichStatusAreCollected = null
     ) {
-        $this->screenName = $screenName;
+        $this->screenName = strtolower($screenName);
         $this->listId = $listId;
         $this->dateBeforeWhichStatusAreCollected = $dateBeforeWhichStatusAreCollected;
         $this->token = $token;
