@@ -10,7 +10,7 @@ use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
@@ -40,7 +40,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
 {
     use HttpClientTrait;
     use LoggerTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use PublishersListRepositoryTrait;
     use TweetCurationLoggerTrait;
     use TweetRepositoryTrait;
@@ -254,7 +254,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
         CurationSelectorsInterface $selectors,
         PublishersList $twitterList = null
     ): CollectionInterface {
-        return $this->publicationPersistence->persistTweetsCollection(
+        return $this->persistenceLayer->persistTweetsCollection(
             $statuses,
             new AccessToken($this->httpClient->getAccessToken()),
             $twitterList

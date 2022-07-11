@@ -25,7 +25,7 @@ services:
             - [ 'setHttpClient',               [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
             - [ 'setLogger',                   [ '@logger' ] ]
             - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
-            - [ 'setPublicationPersistence',   [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
+            - [ 'setPersistenceLayer',   [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
             - [ 'setTweetCurationLogger',      [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setStatusRepository',         [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTaggedTweetRepository',    [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]

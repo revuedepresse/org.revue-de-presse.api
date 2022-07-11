@@ -5,18 +5,16 @@ namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
-use App\Twitter\Infrastructure\Curation\CurationSelectors;
-use App\Twitter\Infrastructure\DependencyInjection\{
-    Curation\Curator\InterruptibleCuratorTrait,
+use App\Twitter\Infrastructure\DependencyInjection\{Curation\Curator\InterruptibleCuratorTrait,
     Curation\Events\MemberProfileCollectedEventRepositoryTrait,
     Curation\Events\TweetBatchCollectedEventRepositoryTrait,
     Http\HttpClientTrait,
@@ -25,10 +23,10 @@ use App\Twitter\Infrastructure\DependencyInjection\{
     LoggerTrait,
     Membership\WhispererIdentificationTrait,
     Membership\WhispererRepositoryTrait,
-    Publication\PublicationPersistenceTrait,
+    Persistence\PersistenceLayerTrait,
+    Persistence\TweetPersistenceLayerTrait,
     Publication\PublishersListRepositoryTrait,
     Status\TweetCurationLoggerTrait,
-    Persistence\TweetPersistenceLayerTrait,
     Status\TweetRepositoryTrait,
     TokenRepositoryTrait};
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -39,8 +37,8 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
-use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
@@ -66,8 +64,8 @@ class TweetCurator implements TweetCuratorInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
+    use PersistenceLayerTrait;
     use PublishersListRepositoryTrait;
-    use PublicationPersistenceTrait;
     use TweetCurationLoggerTrait;
     use TweetPersistenceLayerTrait;
     use TweetAwareHttpClientTrait;
