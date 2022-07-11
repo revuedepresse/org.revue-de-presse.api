@@ -46,7 +46,7 @@ class TaggedTweet
         return self::from(
             $properties['hash'],
             $properties['text'],
-            $properties['screen_name'],
+            strtolower($properties['screen_name']),
             $properties['name'],
             $properties['user_avatar'],
             $properties['status_id'],
@@ -113,7 +113,7 @@ class TaggedTweet
     ) {
         $this->hash        = $hash;
         $this->text        = $text;
-        $this->screenName  = $screenName;
+        $this->screenName  = strtolower($screenName);
         $this->name        = $name;
         $this->avatarUrl   = $avatarUrl;
         $this->documentId  = $documentId;
@@ -154,7 +154,7 @@ class TaggedTweet
 
     public function screenName(): string
     {
-        return $this->screenName;
+        return strtolower($this->screenName);
     }
 
     public function setTag(Tag $tag)
@@ -177,7 +177,7 @@ class TaggedTweet
         return [
             'hash'              => $this->hash,
             'text'              => $this->text,
-            'screen_name'       => $this->screenName,
+            'screen_name'       => strtolower($this->screenName),
             'name'              => $this->name,
             'user_avatar'       => $this->avatarUrl,
             'status_id'         => $this->documentId,
