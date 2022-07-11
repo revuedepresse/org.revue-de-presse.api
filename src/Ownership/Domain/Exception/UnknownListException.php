@@ -1,11 +1,11 @@
 <?php
 declare (strict_types=1);
 
-namespace App\NewsReview\Exception;
+namespace App\Ownership\Domain\Exception;
 
 use InvalidArgumentException;
 
-class UnknownPublishersListException extends InvalidArgumentException
+class UnknownListException extends InvalidArgumentException
 {
     public static function throws(): void
     {

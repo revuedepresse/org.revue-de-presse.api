@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace App\Trends\Infrastructure\Repository;
 
+use App\Ownership\Domain\Exception\UnknownListException;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
@@ -62,6 +63,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         if (!($publishersList instanceof PublishersListInterface)) {
             UnknownPublishersListException::throws();
+            UnknownListException::throws();
         }
 
         $path = '/'.implode(
@@ -87,7 +89,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 $searchParams->getParams()['startDate'],
                 $searchParams->getParams()['includeRetweets']
              );
-        } catch (UnknownPublishersListException $exception) {
+        } catch (UnknownListException) {
             return [
                 'aggregates' => [],
                 'statuses' => [],
