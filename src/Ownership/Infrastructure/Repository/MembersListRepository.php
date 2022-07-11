@@ -9,7 +9,7 @@ use App\Trends\Domain\Entity\TimelyStatus;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
