@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Publication\Persistence;
+namespace App\Twitter\Domain\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
@@ -9,11 +9,11 @@ use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-interface StatusPersistenceInterface
+interface TweetPersistenceLayerInterface
 {
-    public function persistAllStatuses(
+    public function persistTweetsCollection(
         array $statuses,
-        AccessToken $accessToken,
+        AccessToken $identifier,
         PublishersList $twitterList = null
     ): array;
 

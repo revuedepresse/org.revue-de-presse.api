@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
+namespace App\Tests\Twitter\Infrastructure\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
@@ -10,8 +10,8 @@ use App\Twitter\Domain\Publication\Repository\TaggedTweetRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
-use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence;
-use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistenceInterface;
+use App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer;
+use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use DateTime;
 use DateTimeInterface;
@@ -33,7 +33,7 @@ class StatusPersistenceTest extends KernelTestCase
 
     private const ARCHIVE_STATUS_HASH = 'b90db10b2ac5a0a399886d677ef0c11200a6f2c5';
 
-    private StatusPersistenceInterface $statusPersistence;
+    private TweetPersistenceLayerInterface $persistenceLayer;
 
     public function setUp(): void
     {
@@ -43,8 +43,8 @@ class StatusPersistenceTest extends KernelTestCase
 
         $this->removeUnarchivedStatus();
 
-        /** @var StatusPersistence $statusPersistence */
-        $this->statusPersistence = static::getContainer()->get(StatusPersistence::class);
+        /** @var TweetPersistenceLayer $statusPersistence */
+        $this->persistenceLayer = static::getContainer()->get(TweetPersistenceLayer::class);
     }
 
     protected function tearDown(): void
@@ -63,12 +63,12 @@ class StatusPersistenceTest extends KernelTestCase
     {
         // Arrange
 
-        /** @var StatusPersistence $statusPersistence */
-        $this->statusPersistence = static::getContainer()->get(StatusPersistence::class);
+        /** @var TweetPersistenceLayer $statusPersistence */
+        $this->persistenceLayer = static::getContainer()->get(TweetPersistenceLayer::class);
 
         // Act
 
-        $normalizedStatus = $this->statusPersistence->persistAllStatuses(
+        $normalizedStatus = $this->persistenceLayer->persistTweetsCollection(
             [],
             new AccessToken('ident-210290dqlpfoamow')
         );
@@ -99,7 +99,7 @@ class StatusPersistenceTest extends KernelTestCase
 
         // Act
 
-        $normalizedStatus = $this->statusPersistence->persistAllStatuses(
+        $normalizedStatus = $this->persistenceLayer->persistTweetsCollection(
             $allStatuses,
             new AccessToken('ident-210290dqlpfoamow')
         );
@@ -196,14 +196,14 @@ class StatusPersistenceTest extends KernelTestCase
             Argument::cetera()
         )->willReturn($archivedStatus);
 
-        $this->statusPersistence->setTaggedTweetRepository($TaggedTweetRepository->reveal());
+        $this->persistenceLayer->setTaggedTweetRepository($TaggedTweetRepository->reveal());
 
         $statusProperties = $this->makeStatusProperties($createdAt);
         $allStatuses = [(object) $statusProperties];
 
         // Act
 
-        $normalizedStatus = $this->statusPersistence->persistAllStatuses(
+        $normalizedStatus = $this->persistenceLayer->persistTweetsCollection(
             $allStatuses,
             new AccessToken('ident-210290dqlpfoamow')
         );
@@ -274,8 +274,6 @@ class StatusPersistenceTest extends KernelTestCase
     }
 
     /**
-     * @param DateTimeInterface $publicationDate
-     * @return array
      * @throws Exception
      */
     private function makeStatusProperties(DateTimeInterface $publicationDate): array
@@ -294,7 +292,6 @@ class StatusPersistenceTest extends KernelTestCase
     }
 
     /**
-     * @return DateTime
      * @throws Exception
      */
     private function makePublicationDate(): DateTime

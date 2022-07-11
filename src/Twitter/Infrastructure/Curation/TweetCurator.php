@@ -69,7 +69,7 @@ class TweetCurator implements TweetCuratorInterface
     use PublishersListRepositoryTrait;
     use PublicationPersistenceTrait;
     use TweetCurationLoggerTrait;
-    use StatusPersistenceTrait;
+    use TweetPersistenceLayerTrait;
     use TweetAwareHttpClientTrait;
     use TweetRepositoryTrait;
     use TokenRepositoryTrait;

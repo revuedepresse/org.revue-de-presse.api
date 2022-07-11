@@ -16,7 +16,7 @@ use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -52,7 +52,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
     use PublicationPersistenceTrait;
     use PublicationRepositoryTrait;
     use TweetCurationLoggerTrait;
-    use StatusPersistenceTrait;
+    use TweetPersistenceLayerTrait;
     use TaggedTweetRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 

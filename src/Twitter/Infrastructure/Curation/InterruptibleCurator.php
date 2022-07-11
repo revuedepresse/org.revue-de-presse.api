@@ -21,7 +21,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrai
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
@@ -46,7 +46,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     use MemberRepositoryTrait;
     use PublishersListRepositoryTrait;
     use RateLimitComplianceTrait;
-    use StatusPersistenceTrait;
+    use TweetPersistenceLayerTrait;
     use TweetRepositoryTrait;
     use TokenRepositoryTrait;
     use TweetAwareHttpClientTrait;

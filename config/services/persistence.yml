@@ -1,18 +1,21 @@
 services:
 
-    App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence:
-        class: 'App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'
+    App\Twitter\Infrastructure\Persistence\PersistenceLayer:
+        class: 'App\Twitter\Infrastructure\Persistence\PersistenceLayer'
         arguments:
-            - '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence'
+            - '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'
             - '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
         calls:
-            - [ 'setStatusPersistence', [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
+            - [ 'setTweetPersistenceLayer', [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
         public: true
 
-    App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence:
-        class: 'App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence'
+    App\Twitter\Domain\Persistence\PersistenceLayerInterface:
+        '@App\Twitter\Infrastructure\Persistence\PersistenceLayer'
+
+    App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer:
+        class: 'App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer'
         arguments:
             - '@repository.timely_status'
             - '@doctrine'
@@ -27,3 +30,6 @@ services:
             - [ 'setStatusRepository',         [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTaggedTweetRepository',    [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
         public: true
+
+    App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface:
+        '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'

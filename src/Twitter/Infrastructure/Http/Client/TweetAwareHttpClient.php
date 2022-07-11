@@ -123,7 +123,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $this->entityManager->clear();
 
         try {
-            $this->publicationPersistence->persistTweets(
+            $this->publicationPersistence->persistTweetsCollection(
                 [$status],
                 new AccessToken($this->httpClient->userToken)
             );

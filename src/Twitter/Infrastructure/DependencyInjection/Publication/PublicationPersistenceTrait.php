@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Publication;
 
-use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
+use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
 
 trait PublicationPersistenceTrait
 {
-    private PublicationPersistenceInterface $publicationPersistence;
+    private TweetPersistenceLayerInterface $publicationPersistence;
 
     /**
-     * @param PublicationPersistenceInterface $publicationPersistence
+     * @param TweetPersistenceLayerInterface $publicationPersistence
      */
-    public function setPublicationPersistence(PublicationPersistenceInterface $publicationPersistence): void
+    public function setPublicationPersistence(TweetPersistenceLayerInterface $publicationPersistence): void
     {
         $this->publicationPersistence = $publicationPersistence;
     }
