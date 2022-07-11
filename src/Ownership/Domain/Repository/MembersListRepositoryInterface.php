@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\PublishersList\Repository;
+namespace App\Ownership\Domain\Repository;
 
 use App\Twitter\Domain\Publication\MembersListInterface;
 use Symfony\Component\HttpFoundation\Request;
