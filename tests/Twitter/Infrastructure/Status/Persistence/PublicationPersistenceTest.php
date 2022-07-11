@@ -63,7 +63,7 @@ class PublicationPersistenceTest extends KernelTestCase
 
         // Act
 
-        $normalizedStatus = $publicationPersistence->persistStatusPublications(
+        $normalizedStatus = $publicationPersistence->persistTweets(
             [
                 (object)[
                     'user' => (object)[

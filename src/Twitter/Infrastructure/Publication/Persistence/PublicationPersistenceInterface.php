@@ -9,7 +9,7 @@ use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 
 interface PublicationPersistenceInterface
 {
-    public function persistStatusPublications(
+    public function persistTweets(
         array $statuses,
         AccessToken $identifier,
         PublishersList $twitterList = null

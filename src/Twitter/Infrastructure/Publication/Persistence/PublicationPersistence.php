@@ -37,7 +37,7 @@ class PublicationPersistence implements PublicationPersistenceInterface
         $this->memberRepository = $memberRepository;
     }
 
-    public function persistStatusPublications(
+    public function persistTweets(
         array $statuses,
         AccessToken $identifier,
         PublishersList $twitterList = null

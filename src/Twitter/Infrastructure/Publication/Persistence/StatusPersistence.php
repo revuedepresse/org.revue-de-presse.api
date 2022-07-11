@@ -260,7 +260,7 @@ class StatusPersistence implements StatusPersistenceInterface
         CurationSelectorsInterface $selectors,
         PublishersList $twitterList = null
     ): CollectionInterface {
-        return $this->publicationPersistence->persistStatusPublications(
+        return $this->publicationPersistence->persistTweets(
             $statuses,
             new AccessToken($this->httpClient->getAccessToken()),
             $twitterList
