@@ -400,6 +400,9 @@ SCRIPT
 }
 
 function start_amqp_broker() {
+    local WORKER
+
+    load_configuration_parameters
     guard_against_missing_variables
 
     local command
