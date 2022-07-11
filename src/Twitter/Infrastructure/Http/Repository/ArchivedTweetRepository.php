@@ -353,7 +353,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             }
 
             if ($memberStatus instanceof ArchivedTweet) {
-                $memberStatus = $this->statusPersistence->unarchiveStatus(
+                $memberStatus = $this->tweetPersistenceLayer->unarchiveStatus(
                     $memberStatus,
                     $entityManager
                 );

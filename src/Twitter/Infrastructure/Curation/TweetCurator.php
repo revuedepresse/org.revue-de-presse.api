@@ -542,7 +542,7 @@ class TweetCurator implements TweetCuratorInterface
             return 0;
         }
 
-        $lastCollectionBatchSize = $this->statusPersistence->savePublicationsForScreenName(
+        $lastCollectionBatchSize = $this->tweetPersistenceLayer->savePublicationsForScreenName(
             $statuses,
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors
