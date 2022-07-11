@@ -7,6 +7,7 @@ use App\Ownership\Domain\Exception\UnknownListException;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
+use App\Twitter\Domain\Publication\MembersListInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
@@ -61,8 +62,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
 
-        if (!($publishersList instanceof PublishersListInterface)) {
-            UnknownPublishersListException::throws();
+        if (!($publishersList instanceof MembersListInterface)) {
             UnknownListException::throws();
         }
 
