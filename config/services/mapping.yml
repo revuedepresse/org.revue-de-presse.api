@@ -8,5 +8,5 @@ services:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
         calls:
             - [ 'setLogger',                    [ '@monolog.logger.twitter_api'  ] ]
-            - [ 'setPublicationPersistence',    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface'  ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'  ] ]

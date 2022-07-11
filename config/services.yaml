@@ -172,7 +172,7 @@ services:
             - [ 'setLogger',                                    [ '@logger' ] ]
             - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
             - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTweetsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
         public: true
@@ -202,7 +202,7 @@ services:
             - [ 'setRateLimitCompliance',                       [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setTweetsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
             - [ 'setPublishersListRepository',                  [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
-            - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
             - [ 'setTweetCurationLogger',                       [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTweetAwareHttpClient',                      [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
             - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
