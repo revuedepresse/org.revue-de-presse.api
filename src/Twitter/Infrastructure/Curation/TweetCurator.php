@@ -28,7 +28,7 @@ use App\Twitter\Infrastructure\DependencyInjection\{
     Publication\PublicationPersistenceTrait,
     Publication\PublishersListRepositoryTrait,
     Status\TweetCurationLoggerTrait,
-    Status\StatusPersistenceTrait,
+    Persistence\TweetPersistenceLayerTrait,
     Status\TweetRepositoryTrait,
     TokenRepositoryTrait};
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
