@@ -4,14 +4,6 @@ set -Eeuo pipefail
 trap "exit 1" TERM
 export service_pid=$$
 
-green() {
-    echo -n "\e[32m"
-}
-
-reset_color() {
-    echo -n $'\033'\[00m
-}
-
 function build() {
     local SERVICE
     local SERVICE_OWNER_UID
@@ -157,6 +149,10 @@ function guard_against_missing_variables() {
     fi
 }
 
+function green() {
+    echo -n "\e[32m"
+}
+
 function load_configuration_parameters() {
     if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
         cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
@@ -210,6 +206,10 @@ function remove_running_container_and_image_in_debug_mode() {
             xargs -I{} docker rmi {}
 
     fi
+}
+
+function reset_color() {
+    echo -n $'\033'\[00m
 }
 
 function install() {
