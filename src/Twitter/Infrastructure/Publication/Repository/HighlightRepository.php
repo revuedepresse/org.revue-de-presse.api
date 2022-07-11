@@ -228,7 +228,7 @@ QUERY;
             return [];
         }
 
-        $aggregates = $statement->fetchAll();
+        $aggregates = $statement->fetchAllAssociative();
 
         return $aggregates;
     }
