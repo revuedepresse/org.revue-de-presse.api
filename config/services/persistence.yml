@@ -4,7 +4,7 @@ services:
         class: 'App\Twitter\Infrastructure\Persistence\PersistenceLayer'
         arguments:
             - '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'
-            - '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
+            - '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
         calls:

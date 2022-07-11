@@ -45,7 +45,7 @@ services:
     App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
         class: 'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setTweetPublicationPersistenceLayer', [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
         tags:
             - { name: 'console.command' }
 

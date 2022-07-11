@@ -8,7 +8,7 @@ use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Persistence\PersistenceLayerInterface;
 use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
-use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetPublicationPersistenceLayerInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
@@ -28,10 +28,10 @@ class PersistenceLayer implements PersistenceLayerInterface
     private EntityManagerInterface $entityManager;
 
     public function __construct(
-        TweetPersistenceLayerInterface $statusPersistence,
-        PublicationRepositoryInterface $publicationRepository,
-        MemberRepositoryInterface $memberRepository,
-        EntityManagerInterface $entityManager
+        TweetPersistenceLayerInterface            $statusPersistence,
+        TweetPublicationPersistenceLayerInterface $publicationRepository,
+        MemberRepositoryInterface                 $memberRepository,
+        EntityManagerInterface                    $entityManager
     ) {
         $this->tweetPersistenceLayer = $statusPersistence;
         $this->publicationRepository = $publicationRepository;
@@ -61,7 +61,7 @@ class PersistenceLayer implements PersistenceLayerInterface
 
         // Make publications
         $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
-        $this->publicationRepository->persistPublications($statusCollection);
+        $this->publicationRepository->persistTweetsCollection($statusCollection);
 
         // Commit transaction
         $this->entityManager->flush();
