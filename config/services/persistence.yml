@@ -32,4 +32,4 @@ services:
         public: true
 
     App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface:
-        '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'
+        '@App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer'
