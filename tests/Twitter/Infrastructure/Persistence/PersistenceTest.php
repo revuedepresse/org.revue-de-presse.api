@@ -5,8 +5,8 @@ namespace App\Tests\Twitter\Infrastructure\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
-use App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer;
-use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
+use App\Twitter\Infrastructure\Persistence\PersistenceLayer;
+use App\Twitter\Domain\Persistence\PersistenceLayerInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
@@ -48,8 +48,8 @@ class PersistenceTest extends KernelTestCase
 
         self::$kernel = self::bootKernel();
 
-        /** @var TweetPersistenceLayerInterface $publicationPersistence */
-        $publicationPersistence = static::getContainer()->get(TweetPersistenceLayer::class);
+        /** @var PersistenceLayerInterface $publicationPersistence */
+        $publicationPersistence = static::getContainer()->get(PersistenceLayer::class);
 
         $member = new Member();
         $member->setTwitterScreenName('mariec');
