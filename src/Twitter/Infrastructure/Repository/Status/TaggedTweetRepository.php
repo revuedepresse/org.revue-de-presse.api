@@ -20,14 +20,8 @@ class TaggedTweetRepository extends ServiceEntityRepository implements TaggedTwe
 {
     use TweetRepositoryTrait;
 
-    /**
-     * @var EntityManagerInterface
-     */
     private EntityManagerInterface $entityManager;
 
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
 
     public function __construct(
@@ -38,6 +32,10 @@ class TaggedTweetRepository extends ServiceEntityRepository implements TaggedTwe
         $this->logger           = $logger;
     }
 
+    /**
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
     public function convertPropsToStatus(
         array $properties,
         ?PublishersList $aggregate
@@ -56,9 +54,6 @@ class TaggedTweetRepository extends ServiceEntityRepository implements TaggedTwe
     }
 
     /**
-     * @param $hash
-     *
-     * @return bool
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -77,9 +72,6 @@ class TaggedTweetRepository extends ServiceEntityRepository implements TaggedTwe
     }
 
     /**
-     * @param $hash
-     *
-     * @return bool
      * @throws NoResultException
      * @throws NonUniqueResultException
      */

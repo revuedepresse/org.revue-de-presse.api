@@ -15,7 +15,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfile
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\TweetBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -46,7 +46,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
 {
     use HttpClientTrait;
     use MemberProfileCollectedEventRepositoryTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use LoggerTrait;
     use TweetRepositoryTrait;
     use MemberRepositoryTrait;
@@ -123,7 +123,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $this->entityManager->clear();
 
         try {
-            $this->publicationPersistence->persistStatusPublications(
+            $this->persistenceLayer->persistTweetsCollection(
                 [$status],
                 new AccessToken($this->httpClient->userToken)
             );

@@ -12,7 +12,8 @@ SHELL:=/bin/bash
 
 .PHONY: start-database stop-database test
 
-WORKER ?= 'worker.revue-de-presse.org'
+COMPOSE_PROJECT_NAME ?= 'org_example_worker'
+WORKER ?= 'org.example.worker'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
 help: doc

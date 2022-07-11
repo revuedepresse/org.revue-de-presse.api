@@ -1,7 +1,5 @@
 version: '3.8'
 
-name: 'worker_revue-de-presse_org'
-
 x-vol: &shared-volumes
   volumes:
     - './_scripts/:/scripts'

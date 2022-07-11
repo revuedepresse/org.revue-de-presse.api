@@ -81,7 +81,7 @@ class TweetRepository extends ArchivedTweetRepository
             $column = key($orderBy);
             reset($orderBy);
 
-            $queryBuilder->select("${tableAlias}.${column}");
+            $queryBuilder->addSelect("${tableAlias}.${column}");
             $queryBuilder->orderBy("${tableAlias}.${column}", $orderBy[$column]);
         }
 
@@ -174,6 +174,7 @@ class TweetRepository extends ArchivedTweetRepository
             );
         }
 
+        $status->setScreenName($taggedTweet->screenName());
         $status->setApiDocument($taggedTweet->document());
         $status->setIdentifier($taggedTweet->token());
         $status->setText($taggedTweet->text());

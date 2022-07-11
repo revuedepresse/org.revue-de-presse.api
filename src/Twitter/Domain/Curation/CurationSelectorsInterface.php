@@ -11,7 +11,7 @@ interface CurationSelectorsInterface
 
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string;
 
-    public function PublishersListId(): ?int;
+    public function membersListId(): ?int;
 
     public function maxStatusId();
 

@@ -8,6 +8,7 @@ use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Curation\TweetCurator;
+use JsonException;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
@@ -32,6 +33,36 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
     ) {
         $this->translator = $translator;
         $this->logger     = $logger;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function extractTweetReach(TweetInterface $memberStatus): array
+    {
+        $decodedApiResponse = json_decode(
+            $memberStatus->getApiDocument(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $favoriteCount = 0;
+        $retweetCount  = 0;
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (array_key_exists('favorite_count', $decodedApiResponse)) {
+                $favoriteCount = $decodedApiResponse['favorite_count'];
+            }
+
+            if (array_key_exists('retweet_count', $decodedApiResponse)) {
+                $retweetCount = $decodedApiResponse['retweet_count'];
+            }
+        }
+
+        return [
+            'favorite_count' => $favoriteCount,
+            'retweet_count'  => $retweetCount
+        ];
     }
 
     public function logHowManyItemsHaveBeenCollected(
@@ -117,7 +148,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
         $options,
         CurationSelectorsInterface $selectors
     ): void {
-        if ($selectors->publishersListId() === null) {
+        if ($selectors->membersListId() === null) {
             $this->logger->info(sprintf(
                 'No aggregate id for "%s"', $options['screen_name']
             ));
@@ -129,14 +160,14 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
             sprintf(
                 'About to save status for "%s" in aggregate #%d',
                 $options['screen_name'],
-                $selectors->publishersListId()
+                $selectors->membersListId()
             )
         );
     }
 
     public function logStatus(TweetInterface $status): void
     {
-        $reach = $this->extractReachOfStatus($status);
+        $reach = $this->extractTweetReach($status);
 
         $favoriteCount = $reach['favorite_count'];
         $retweetCount  = $reach['retweet_count'];
@@ -191,7 +222,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
                 $lastCollectionBatchSize,
                 $subject,
                 $selectors->screenName(),
-                $selectors->publishersListId()
+                $selectors->membersListId()
             )
         );
     }
@@ -226,38 +257,6 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
     public function hitCollectionLimit($statuses): bool
     {
         return $statuses >= (CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
-    }
-
-    /**
-     * @param TweetInterface $memberStatus
-     *
-     * @return array
-     */
-    private function extractReachOfStatus(TweetInterface $memberStatus): array
-    {
-        $decodedApiResponse = json_decode(
-            $memberStatus->getApiDocument(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
-
-        $favoriteCount = 0;
-        $retweetCount  = 0;
-        if (json_last_error() === JSON_ERROR_NONE) {
-            if (array_key_exists('favorite_count', $decodedApiResponse)) {
-                $favoriteCount = $decodedApiResponse['favorite_count'];
-            }
-
-            if (array_key_exists('retweet_count', $decodedApiResponse)) {
-                $retweetCount = $decodedApiResponse['retweet_count'];
-            }
-        }
-
-        return [
-            'favorite_count' => $favoriteCount,
-            'retweet_count'  => $retweetCount
-        ];
     }
 
     /**
@@ -303,5 +302,50 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
         }
 
         return '____';
+    }
+
+    public function emergency(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->emergency($message, $context);
+    }
+
+    public function alert(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->alert($message, $context);
+    }
+
+    public function critical(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->critical($message, $context);
+    }
+
+    public function error(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->error($message, $context);
+    }
+
+    public function warning(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->warning($message, $context);
+    }
+
+    public function notice(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->notice($message, $context);
+    }
+
+    public function info(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->info($message, $context);
+    }
+
+    public function debug(\Stringable|string $message, array $context = [])
+    {
+        $this->logger->debug($message, $context);
+    }
+
+    public function log($level, \Stringable|string $message, array $context = [])
+    {
+        $this->logger->log($level, $message, $context);
     }
 }

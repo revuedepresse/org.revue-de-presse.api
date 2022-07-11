@@ -7,11 +7,11 @@ use App\Twitter\Domain\Publication\Repository\TaggedTweetRepositoryInterface;
 
 trait TaggedTweetRepositoryTrait
 {
-    protected TaggedTweetRepositoryInterface $TaggedTweetRepository;
+    protected TaggedTweetRepositoryInterface $taggedTweetRepository;
 
-    public function setTaggedTweetRepository(TaggedTweetRepositoryInterface $TaggedTweetRepository): self
+    public function setTaggedTweetRepository(TaggedTweetRepositoryInterface $taggedTweetRepository): self
     {
-        $this->TaggedTweetRepository = $TaggedTweetRepository;
+        $this->taggedTweetRepository = $taggedTweetRepository;
 
         return $this;
     }

@@ -5,18 +5,16 @@ namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
-use App\Twitter\Infrastructure\Curation\CurationSelectors;
-use App\Twitter\Infrastructure\DependencyInjection\{
-    Curation\Curator\InterruptibleCuratorTrait,
+use App\Twitter\Infrastructure\DependencyInjection\{Curation\Curator\InterruptibleCuratorTrait,
     Curation\Events\MemberProfileCollectedEventRepositoryTrait,
     Curation\Events\TweetBatchCollectedEventRepositoryTrait,
     Http\HttpClientTrait,
@@ -25,10 +23,10 @@ use App\Twitter\Infrastructure\DependencyInjection\{
     LoggerTrait,
     Membership\WhispererIdentificationTrait,
     Membership\WhispererRepositoryTrait,
-    Publication\PublicationPersistenceTrait,
+    Persistence\PersistenceLayerTrait,
+    Persistence\TweetPersistenceLayerTrait,
     Publication\PublishersListRepositoryTrait,
     Status\TweetCurationLoggerTrait,
-    Status\StatusPersistenceTrait,
     Status\TweetRepositoryTrait,
     TokenRepositoryTrait};
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -39,8 +37,8 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
-use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
@@ -66,10 +64,10 @@ class TweetCurator implements TweetCuratorInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
+    use PersistenceLayerTrait;
     use PublishersListRepositoryTrait;
-    use PublicationPersistenceTrait;
     use TweetCurationLoggerTrait;
-    use StatusPersistenceTrait;
+    use TweetPersistenceLayerTrait;
     use TweetAwareHttpClientTrait;
     use TweetRepositoryTrait;
     use TokenRepositoryTrait;
@@ -544,7 +542,7 @@ class TweetCurator implements TweetCuratorInterface
             return 0;
         }
 
-        $lastCollectionBatchSize = $this->statusPersistence->savePublicationsForScreenName(
+        $lastCollectionBatchSize = $this->tweetPersistenceLayer->savePublicationsForScreenName(
             $statuses,
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors
@@ -618,7 +616,7 @@ class TweetCurator implements TweetCuratorInterface
         }
 
         $publishersList = $this->publishersListRepository->findOneBy(
-            ['id' => $this->selectors->publishersListId()]
+            ['id' => $this->selectors->membersListId()]
         );
 
         if (!$publishersList instanceof PublishersListInterface) {
@@ -627,8 +625,10 @@ class TweetCurator implements TweetCuratorInterface
 
         if ($publishersList->isLocked()) {
             throw new LockedPublishersListException(
-                'Won\'t process message for already locked aggregate #%d',
-                $publishersList
+                sprintf(
+                'Won\'t process message for already locked aggregate "%s"',
+                    $publishersList->publicId()
+                )
             );
         }
 
@@ -659,7 +659,7 @@ class TweetCurator implements TweetCuratorInterface
      */
     private function isCollectingStatusesForAggregate(): bool
     {
-        return $this->selectors->publishersListId() !== null;
+        return $this->selectors->membersListId() !== null;
     }
 
     /**
@@ -779,7 +779,7 @@ class TweetCurator implements TweetCuratorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID] = $this->selectors->publishersListId();
+                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID] = $this->selectors->membersListId();
                 $options[FetchAuthoredTweetInterface::BEFORE] = $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
 
                 $success = $this->curateTweets(
@@ -823,7 +823,7 @@ class TweetCurator implements TweetCuratorInterface
     {
         if ($this->isCollectingStatusesForAggregate()) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->selectors->publishersListId()]
+                ['id' => $this->selectors->membersListId()]
             );
             if ($publishersList instanceof PublishersListInterface) {
                 $this->publishersListRepository->unlockPublishersList($publishersList);

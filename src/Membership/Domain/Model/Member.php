@@ -220,10 +220,6 @@ abstract class Member implements MemberInterface
         return $this;
     }
 
-    /**
-     * @param bool $enabled
-     * @return $this
-     */
     public function setEnabled(bool $enabled): MemberInterface
     {
         $this->enabled = $enabled;
@@ -231,17 +227,11 @@ abstract class Member implements MemberInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return (string) $this->getUsername();
     }
 
-    /**
-     * Removes sensitive data from the user.
-     */
     public function eraseCredentials(): void
     {
         $this->plainPassword = null;

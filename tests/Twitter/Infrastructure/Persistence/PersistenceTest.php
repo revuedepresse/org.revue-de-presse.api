@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Status\Persistence;
+namespace App\Tests\Twitter\Infrastructure\Persistence;
 
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
-use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence;
-use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
+use App\Twitter\Infrastructure\Persistence\PersistenceLayer;
+use App\Twitter\Domain\Persistence\PersistenceLayerInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 /**
  * @group publication
  */
-class PublicationPersistenceTest extends KernelTestCase
+class PersistenceTest extends KernelTestCase
 {
     protected function tearDown(): void
     {
@@ -48,8 +48,8 @@ class PublicationPersistenceTest extends KernelTestCase
 
         self::$kernel = self::bootKernel();
 
-        /** @var PublicationPersistenceInterface $publicationPersistence */
-        $publicationPersistence = static::getContainer()->get(PublicationPersistence::class);
+        /** @var PersistenceLayerInterface $publicationPersistence */
+        $publicationPersistence = static::getContainer()->get(PersistenceLayer::class);
 
         $member = new Member();
         $member->setTwitterScreenName('mariec');
@@ -63,7 +63,7 @@ class PublicationPersistenceTest extends KernelTestCase
 
         // Act
 
-        $normalizedStatus = $publicationPersistence->persistStatusPublications(
+        $normalizedStatus = $publicationPersistence->persistTweetsCollection(
             [
                 (object)[
                     'user' => (object)[

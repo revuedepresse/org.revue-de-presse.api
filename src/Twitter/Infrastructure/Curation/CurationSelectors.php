@@ -85,7 +85,7 @@ class CurationSelectors implements CurationSelectorsInterface
 
     public function oneOfTheOptionsIsActive(): bool
     {
-        return $this->publishersListId()
+        return $this->membersListId()
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
@@ -130,7 +130,7 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this;
     }
 
-    public function PublishersListId(): ?int
+    public function membersListId(): ?int
     {
         return $this->publishersListId;
     }

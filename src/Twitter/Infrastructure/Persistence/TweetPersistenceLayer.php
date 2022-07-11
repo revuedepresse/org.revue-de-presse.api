@@ -1,28 +1,29 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Publication\Persistence;
+namespace App\Twitter\Infrastructure\Persistence;
 
-use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
-use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
-use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
+use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
-use App\Twitter\Domain\Operation\Collection\CollectionInterface;
+use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use Closure;
 use DateTime;
 use DateTimeZone;
@@ -35,11 +36,11 @@ use Psr\Log\LoggerInterface;
 use function count;
 use function is_array;
 
-class StatusPersistence implements StatusPersistenceInterface
+class TweetPersistenceLayer implements TweetPersistenceLayerInterface
 {
     use HttpClientTrait;
     use LoggerTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use PublishersListRepositoryTrait;
     use TweetCurationLoggerTrait;
     use TweetRepositoryTrait;
@@ -52,14 +53,8 @@ class StatusPersistence implements StatusPersistenceInterface
 
     public ManagerRegistry $registry;
 
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $appLogger;
 
-    /**
-     * @var EntityManagerInterface
-     */
     private EntityManagerInterface $entityManager;
 
     public function __construct(
@@ -74,24 +69,24 @@ class StatusPersistence implements StatusPersistenceInterface
         $this->appLogger              = $logger;
     }
 
-    public function persistAllStatuses(
+    public function persistTweetsCollection(
         array $statuses,
-        AccessToken $accessToken,
+        AccessToken $identifier,
         PublishersList $twitterList = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
-            $this->tokenSetter($accessToken),
+            $this->tokenSetter($identifier),
             $this->appLogger
         );
 
-        $statusCollection = StatusCollection::fromArray([]);
+        $tweetsCollection = StatusCollection::fromArray([]);
 
         /** @var TaggedTweet $taggedTweet */
         foreach ($propertiesCollection->toArray() as $key => $taggedTweet) {
             try {
-                $statusCollection = $this->persistStatus(
-                    $statusCollection,
+                $tweetsCollection = $this->persistStatus(
+                    $tweetsCollection,
                     $taggedTweet,
                     $twitterList
                 );
@@ -106,7 +101,7 @@ class StatusPersistence implements StatusPersistenceInterface
 
         $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
 
-        $firstStatus = $statusCollection->first();
+        $firstStatus = $tweetsCollection->first();
         $screenName  = $firstStatus instanceof TweetInterface ?
             $firstStatus->getScreenName() :
             null;
@@ -114,7 +109,7 @@ class StatusPersistence implements StatusPersistenceInterface
         return [
             self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
             self::PROPERTY_SCREEN_NAME       => $screenName,
-            self::PROPERTY_STATUS            => $statusCollection
+            self::PROPERTY_STATUS            => $tweetsCollection
         ];
     }
 
@@ -141,13 +136,12 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistStatus(
-        CollectionInterface $statuses,
-        TaggedTweet $taggedTweet,
-        ?PublishersList $twitterList
+        CollectionInterface $tweetsCollection,
+        TaggedTweet         $taggedTweet,
+        ?PublishersList     $twitterList
     ): CollectionInterface {
         $extract = $taggedTweet->toLegacyProps();
-        $status  = $this->TaggedTweetRepository
-            ->convertPropsToStatus($extract, $twitterList);
+        $status  = $this->taggedTweetRepository->convertPropsToStatus($extract, $twitterList);
 
         $this->logStatusToBeInserted($status);
 
@@ -158,7 +152,7 @@ class StatusPersistence implements StatusPersistenceInterface
 
         $this->entityManager->persist($status);
 
-        return $statuses->add($status);
+        return $tweetsCollection->add($status);
     }
 
     private function persistTimelyStatus(
@@ -230,11 +224,11 @@ class StatusPersistence implements StatusPersistenceInterface
         }
 
         $twitterList = null;
-        $publishersListId = $selectors->publishersListId();
-        if ($publishersListId !== null) {
+        $membersListId = $selectors->membersListId();
+        if ($membersListId !== null) {
             /** @var PublishersList $twitterList */
             $twitterList = $this->publishersListRepository->findOneBy(
-                ['id' => $publishersListId]
+                ['id' => $membersListId]
             );
         }
 
@@ -260,7 +254,7 @@ class StatusPersistence implements StatusPersistenceInterface
         CurationSelectorsInterface $selectors,
         PublishersList $twitterList = null
     ): CollectionInterface {
-        return $this->publicationPersistence->persistStatusPublications(
+        return $this->persistenceLayer->persistTweetsCollection(
             $statuses,
             new AccessToken($this->httpClient->getAccessToken()),
             $twitterList
