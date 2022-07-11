@@ -46,7 +46,7 @@ list-amqp-messages: ## List AMQP messags
 purge-amqp-queue: ## Purge queue
 	@/bin/bash -c 'source ./bin/console.sh && purge_queues'
 
-restart: clear-app-cache stop start ## Restart worker
+restart: clear-app-cache start ## Restart worker
 
 shell-process-manager: ## Get shell in process manager container
 	@/bin/bash -c 'source fun.sh && get_process_manager_shell'

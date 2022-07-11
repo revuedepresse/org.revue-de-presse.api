@@ -366,10 +366,6 @@ function set_file_permissions() {
 function start() {
     guard_against_missing_variables
 
-    clean ''
-
-    remove_running_container_and_image_in_debug_mode 'process-manager'
-
     local command
     command=$(cat <<-SCRIPT
 docker compose \
@@ -377,7 +373,7 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			--no-recreate \
+			--force-recreate \
 			amqp
 SCRIPT
 )
