@@ -12,7 +12,7 @@ class AccessToken
         $this->accessToken = $accessToken;
     }
 
-    public function accessToken()
+    public function accessToken(): string
     {
         return $this->accessToken;
     }

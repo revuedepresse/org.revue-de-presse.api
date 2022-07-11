@@ -66,7 +66,7 @@ class TaggedTweet
         string $document,
         DateTimeInterface $publishedAt,
         string $token
-    ) {
+    ): self {
         return new self(
             $hash,
             $text,
