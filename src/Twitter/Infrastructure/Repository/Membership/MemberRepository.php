@@ -167,27 +167,8 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param int    $totalLikes
-     * @param string $memberName
-     *
-     * @return MemberInterface
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
-    public function declareTotalLikesOfMemberWithName(int $totalLikes, string $memberName): MemberInterface
-    {
-        $member = $this->ensureMemberExists($memberName);
-
-        if ($totalLikes > $member->totalLikes) {
-            $member->totalLikes = $totalLikes;
-
-            $this->saveMember($member);
-        }
-
-        return $member;
-    }
-
     public function declareTotalStatusesOfMemberWithName(int $totalStatuses, string $screenName): MemberInterface
     {
         $member = $this->ensureMemberExists($screenName);
