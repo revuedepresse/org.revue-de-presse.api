@@ -81,7 +81,7 @@ class TweetRepository extends ArchivedTweetRepository
             $column = key($orderBy);
             reset($orderBy);
 
-            $queryBuilder->select("${tableAlias}.${column}");
+            $queryBuilder->addSelect("${tableAlias}.${column}");
             $queryBuilder->orderBy("${tableAlias}.${column}", $orderBy[$column]);
         }
 
