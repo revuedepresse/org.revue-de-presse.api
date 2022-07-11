@@ -117,7 +117,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
         $options,
         CurationSelectorsInterface $selectors
     ): void {
-        if ($selectors->publishersListId() === null) {
+        if ($selectors->membersListId() === null) {
             $this->logger->info(sprintf(
                 'No aggregate id for "%s"', $options['screen_name']
             ));
@@ -129,7 +129,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
             sprintf(
                 'About to save status for "%s" in aggregate #%d',
                 $options['screen_name'],
-                $selectors->publishersListId()
+                $selectors->membersListId()
             )
         );
     }
@@ -191,7 +191,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
                 $lastCollectionBatchSize,
                 $subject,
                 $selectors->screenName(),
-                $selectors->publishersListId()
+                $selectors->membersListId()
             )
         );
     }

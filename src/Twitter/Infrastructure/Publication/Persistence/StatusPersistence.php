@@ -230,7 +230,7 @@ class StatusPersistence implements StatusPersistenceInterface
         }
 
         $twitterList = null;
-        $publishersListId = $selectors->publishersListId();
+        $publishersListId = $selectors->membersListId();
         if ($publishersListId !== null) {
             /** @var PublishersList $twitterList */
             $twitterList = $this->publishersListRepository->findOneBy(

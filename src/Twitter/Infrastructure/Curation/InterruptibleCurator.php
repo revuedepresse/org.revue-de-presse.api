@@ -165,9 +165,9 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     private function guardAgainstLockedPublishersList(): ?PublishersListInterface
     {
         $publishersList = null;
-        if ($this->selectors->publishersListId() !== null) {
+        if ($this->selectors->membersListId() !== null) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->selectors->publishersListId()]
+                ['id' => $this->selectors->membersListId()]
             );
         }
 

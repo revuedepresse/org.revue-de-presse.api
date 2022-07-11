@@ -618,7 +618,7 @@ class TweetCurator implements TweetCuratorInterface
         }
 
         $publishersList = $this->publishersListRepository->findOneBy(
-            ['id' => $this->selectors->publishersListId()]
+            ['id' => $this->selectors->membersListId()]
         );
 
         if (!$publishersList instanceof PublishersListInterface) {
@@ -659,7 +659,7 @@ class TweetCurator implements TweetCuratorInterface
      */
     private function isCollectingStatusesForAggregate(): bool
     {
-        return $this->selectors->publishersListId() !== null;
+        return $this->selectors->membersListId() !== null;
     }
 
     /**
@@ -779,7 +779,7 @@ class TweetCurator implements TweetCuratorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID] = $this->selectors->publishersListId();
+                $options[FetchAuthoredTweetInterface::TWITTER_LIST_ID] = $this->selectors->membersListId();
                 $options[FetchAuthoredTweetInterface::BEFORE] = $this->selectors->dateBeforeWhichPublicationsAreToBeCollected();
 
                 $success = $this->curateTweets(
@@ -823,7 +823,7 @@ class TweetCurator implements TweetCuratorInterface
     {
         if ($this->isCollectingStatusesForAggregate()) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->selectors->publishersListId()]
+                ['id' => $this->selectors->membersListId()]
             );
             if ($publishersList instanceof PublishersListInterface) {
                 $this->publishersListRepository->unlockPublishersList($publishersList);
