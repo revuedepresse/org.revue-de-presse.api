@@ -1,11 +1,11 @@
 FROM php:8.1-cli-bullseye
 
-ENV WORKER_WORKDIR='worker'
+ENV WORKER='org.example.worker'
 
 ARG WORKER_UID=1000
 ARG WORKER_GID=101
 
-ARG WORKER="${WORKER_WORKDIR}"
+ARG WORKER_DIR="${WORKER}"
 
 HEALTHCHECK CMD /bin/bash -c "pgrep node || ( test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0 )"
 
@@ -21,9 +21,9 @@ RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.s
 
 USER        ${WORKER_UID}:${WORKER_GID}
 
-VOLUME      ["/scripts", "/var/www/${WORKER}", "/var/www/shared"]
+VOLUME      ["/scripts", "/var/www/${WORKER_DIR}", "/var/www/shared"]
 
-WORKDIR     "/var/www/${WORKER}"
+WORKDIR     "/var/www/${WORKER_DIR}"
 
 ENTRYPOINT  ["/usr/bin/tini", "--"]
 
