@@ -60,7 +60,7 @@ services:
         class:  'App\Ownership\Infrastructure\Repository\MembersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
+            - 'App\Ownership\Domain\Entity\MembersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
