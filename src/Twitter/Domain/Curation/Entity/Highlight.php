@@ -3,7 +3,7 @@
 namespace App\Twitter\Domain\Curation\Entity;
 
 use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTime;

@@ -3,9 +3,11 @@ declare (strict_types=1);
 
 namespace App\Trends\Infrastructure\Repository;
 
+use App\Ownership\Domain\Exception\UnknownListException;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
-use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
@@ -22,7 +24,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private HighlightRepository $highlightRepository;
 
-    private PublishersListRepositoryInterface $publishersListRepository;
+    private MembersListRepositoryInterface $listRepository;
 
     private string $defaultPublishersList;
 
@@ -31,7 +33,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         string $databaseUri,
         string $defaultPublishersList,
         HighlightRepository $highlightRepository,
-        PublishersListRepositoryInterface $publishersListRepository,
+        MembersListRepositoryInterface $publishersListRepository,
         LoggerInterface $logger
     )
     {
@@ -40,7 +42,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $this->defaultPublishersList = $defaultPublishersList;
 
         $this->highlightRepository = $highlightRepository;
-        $this->publishersListRepository = $publishersListRepository;
+        $this->listRepository = $publishersListRepository;
         $this->logger = $logger;
     }
 
@@ -58,10 +60,10 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
-        $publishersList = $this->publishersListRepository->findOneBy(['name' => $this->defaultPublishersList]);
+        $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
 
-        if (!($publishersList instanceof PublishersListInterface)) {
-            UnknownPublishersListException::throws();
+        if (!($publishersList instanceof MembersListInterface)) {
+            UnknownListException::throws();
         }
 
         $path = '/'.implode(
@@ -87,7 +89,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 $searchParams->getParams()['startDate'],
                 $searchParams->getParams()['includeRetweets']
              );
-        } catch (UnknownPublishersListException $exception) {
+        } catch (UnknownListException) {
             return [
                 'aggregates' => [],
                 'statuses' => [],

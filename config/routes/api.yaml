@@ -5,5 +5,5 @@ healthcheck:
 
 highlight:
     path:       /api/twitter/highlights
-    controller: App\Trends\Infrastructure\Controller\ListController::getHighlights
+    controller: App\Trends\Infrastructure\Controller\TrendsController::getHighlights
     methods:    GET|OPTIONS

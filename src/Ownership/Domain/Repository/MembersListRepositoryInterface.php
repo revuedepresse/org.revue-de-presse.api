@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Ownership\Domain\Repository;
 
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
