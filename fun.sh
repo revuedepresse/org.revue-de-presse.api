@@ -86,9 +86,9 @@ function build() {
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
         build \
+        --build-arg "WORKER_DIR=${WORKER}" \
         --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
         --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
-        --build-arg "WORKER=${WORKER}" \
         app \
         process-manager \
         worker
