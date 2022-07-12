@@ -377,6 +377,8 @@ docker compose \
 SCRIPT
 )
 
+    rm -f ./.pm2-installed
+
     local command
     command=$(cat <<-SCRIPT
 docker compose \
