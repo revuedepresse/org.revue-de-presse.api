@@ -9,8 +9,7 @@
             repository-class="App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository"
             table="status_not_found">
         <id name="id" column="id" type="uuid">
-            <generator strategy="CUSTOM"/>
-            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+            <generator strategy="UUID"/>
         </id>
         <one-to-one
                 field="status"
