@@ -236,6 +236,7 @@ function install_app_requirements() {
         -readable \
         -type d \
         -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
         -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
@@ -255,6 +256,7 @@ function install_app_requirements() {
         -type f \
         -readable \
         -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
         -exec /bin/bash -c 'export file_path="{}" && \chown '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
@@ -264,6 +266,7 @@ function install_app_requirements() {
         -type f \
         -not -path "${project_dir}"'/bin' \
         -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
         -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
