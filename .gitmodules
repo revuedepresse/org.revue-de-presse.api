@@ -1,0 +1,4 @@
+[submodule "public/emoji-data"]
+	path = public/emoji-data
+	url = https://github.com/iamcal/emoji-data.git
+	branch = v14.0.0
