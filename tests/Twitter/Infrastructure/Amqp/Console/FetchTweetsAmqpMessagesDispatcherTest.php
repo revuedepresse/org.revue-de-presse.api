@@ -7,6 +7,7 @@ use App\Tests\Twitter\Infrastructure\Http\Builder\Client\HttpClientBuilder;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -70,13 +71,14 @@ class FetchTweetsAmqpMessagesDispatcherTest extends KernelTestCase
      */
     private function prophesizePublicationMessagerDispatcher()
     {
-        $DispatchAmqpMessagesToFetchTweetsProphecy = $this->prophesize(FetchTweetsAmqpMessagesDispatcherCommand::class);
-        $DispatchAmqpMessagesToFetchTweetsProphecy->dispatchFetchTweetsMessages(
+        /** @var FetchTweetsAmqpMessagesDispatcher $fetchTweetsAmqpMessagesDispatcherProphecy */
+        $fetchTweetsAmqpMessagesDispatcherProphecy = $this->prophesize(FetchTweetsAmqpMessagesDispatcher::class);
+        $fetchTweetsAmqpMessagesDispatcherProphecy->dispatchFetchTweetsMessages(
             Argument::type(CurationRulesetInterface::class),
             Argument::type(TokenInterface::class),
             Argument::cetera()
         );
 
-        return $DispatchAmqpMessagesToFetchTweetsProphecy->reveal();
+        return $fetchTweetsAmqpMessagesDispatcherProphecy->reveal();
     }
 }
