@@ -4,6 +4,8 @@ services:
         autowire: true
         autoconfigure: true
 
+    test.doctrine.dbal.connection: '@Doctrine\DBAL\Connection'
+
     test.event_repository.member_profile_collected:
         '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 

@@ -15,9 +15,6 @@ use Psr\Log\NullLogger;
 
 class FriendsBatchAwareHttpClientBuilder extends TestCase
 {
-    /**
-     * @return CursorAwareHttpClientInterface
-     */
     public static function build(): CursorAwareHttpClientInterface
     {
         $testCase = new class() extends TestCase {
