@@ -504,27 +504,27 @@ class TweetCurator implements TweetCuratorInterface
         $options  = $this->declareOptionsToCollectStatuses($options);
 
         try {
-            $statuses = $this->tweetsBatchCollectedEventRepository
+            $tweetsCollection = $this->tweetsBatchCollectedEventRepository
                 ->collectedPublicationBatch($selectors, $options);
+
+            if ($tweetsCollection instanceof stdClass && isset($tweetsCollection->error)) {
+                throw new ProtectedAccountException(
+                    $tweetsCollection->error,
+                    $this->httpClient::ERROR_PROTECTED_ACCOUNT
+                );
+            }
         } catch (ApiAccessRateLimitException $e) {
             if ($this->isTwitterApiAvailable()) {
                 return $this->saveStatusesMatchingCriteria($options, $selectors);
             }
         }
 
-        if ($statuses instanceof stdClass && isset($statuses->error)) {
-            throw new ProtectedAccountException(
-                $statuses->error,
-                $this->httpClient::ERROR_PROTECTED_ACCOUNT
-            );
-        }
-
         $lookingBetweenLastPublicationAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
 
-        /** @var array $statuses */
-        if (count($statuses) > 0) {
+        /** @var array $tweetsCollection */
+        if (count($tweetsCollection) > 0) {
             $this->safelyDeclareExtremum(
-                $statuses,
+                $tweetsCollection,
                 $lookingBetweenLastPublicationAndNow,
                 $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             );
@@ -534,7 +534,7 @@ class TweetCurator implements TweetCuratorInterface
             $this->guardAgainstNoRemainingPublicationToBeCollected(
                 $options,
                 $lookingBetweenLastPublicationAndNow,
-                $statuses
+                $tweetsCollection
             );
         } catch (NoRemainingPublicationException $exception) {
             $this->logger->info($exception->getMessage());
@@ -543,7 +543,7 @@ class TweetCurator implements TweetCuratorInterface
         }
 
         $lastCollectionBatchSize = $this->tweetPersistenceLayer->saveTweetsAuthoredByMemberHavingScreenName(
-            $statuses,
+            $tweetsCollection,
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors
         );
