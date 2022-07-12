@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Amqp\Console;
 
 use App\Tests\Twitter\Infrastructure\Http\Builder\Client\HttpClientBuilder;
-use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
-use App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages;
-use App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets;
+use App\Twitter\Domain\Http\Model\TokenInterface;
+use App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -19,7 +18,7 @@ use Symfony\Component\Console\Tester\CommandTester;
  * @group command
  * @group dispatch_amqp_messages
  */
-class DispatchFetchTweetsMessagesTest extends KernelTestCase
+class FetchTweetsAmqpMessagesDispatcherTest extends KernelTestCase
 {
     use ProphecyTrait;
 
@@ -53,11 +52,11 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
     protected function setUp(): void
     {
         // Arrange
-
         $kernel = static::bootKernel();
 
-        $command = static::getContainer()->get(DispatchFetchTweetsMessages::class);
-        $command->setDispatchAmqpMessagesToFetchTweets($this->prophesizePublicationMessagerDispatcher());
+        /** @var FetchTweetsAmqpMessagesDispatcherCommand $command */
+        $command = static::getContainer()->get(FetchTweetsAmqpMessagesDispatcherCommand::class);
+        $command->setFetchTweetsAmqpMessagesDispatcher($this->prophesizePublicationMessagerDispatcher());
 
         $application = new Application($kernel);
 
@@ -71,7 +70,7 @@ class DispatchFetchTweetsMessagesTest extends KernelTestCase
      */
     private function prophesizePublicationMessagerDispatcher()
     {
-        $DispatchAmqpMessagesToFetchTweetsProphecy = $this->prophesize(DispatchAmqpMessagesToFetchTweets::class);
+        $DispatchAmqpMessagesToFetchTweetsProphecy = $this->prophesize(FetchTweetsAmqpMessagesDispatcherCommand::class);
         $DispatchAmqpMessagesToFetchTweetsProphecy->dispatchFetchTweetsMessages(
             Argument::type(CurationRulesetInterface::class),
             Argument::type(TokenInterface::class),

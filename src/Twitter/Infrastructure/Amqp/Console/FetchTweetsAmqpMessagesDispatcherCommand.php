@@ -9,7 +9,7 @@ use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\DispatchAmqpMessagesToFetchTweetsTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchTweetsAmqpMessagesDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\InputConverter\InputToCurationRuleset;
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DispatchFetchTweetsMessages extends TwitterListAwareCommand
+class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
 {
     private const ARGUMENT_SCREEN_NAME                  = CurationRulesetInterface::RULE_SCREEN_NAME;
 
@@ -35,7 +35,7 @@ class DispatchFetchTweetsMessages extends TwitterListAwareCommand
     private const OPTION_OAUTH_SECRET                   = 'oauth_secret';
 
     use OwnershipAccessorTrait;
-    use DispatchAmqpMessagesToFetchTweetsTrait;
+    use FetchTweetsAmqpMessagesDispatcherTrait;
     use TranslatorTrait;
 
     private CurationRulesetInterface $ruleset;
@@ -117,7 +117,7 @@ class DispatchFetchTweetsMessages extends TwitterListAwareCommand
         $returnStatus = self::FAILURE;
 
         try {
-            $this->DispatchAmqpMessagesToFetchTweets->dispatchFetchTweetsMessages(
+            $this->FetchTweetsAmqpMessagesDispatcher->dispatchFetchTweetsMessages(
                 InputToCurationRuleset::convertInputToCurationRuleset($input),
                 Token::fromArray($this->getTokensFromInputOrFallback()),
                 function ($message) {

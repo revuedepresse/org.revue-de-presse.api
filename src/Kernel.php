@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
-use App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages;
+use App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand;
 use App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -42,12 +42,12 @@ class Kernel extends BaseKernel implements CompilerPassInterface
                     [
                         AddMembersBatchToListCommand::class,
                         AuthorizeApplicationCommand::class,
-                        DispatchFetchTweetsMessages::class,
+                        FetchTweetsAmqpMessagesDispatcherCommand::class,
                         ImportMemberPublishersListsCommand::class
                     ],
                     true
                 )) {
-                    $definition->addMethodCall('setHidden', [true]);
+//                    $definition->addMethodCall('setHidden', [true]);
                 }
             }
         );

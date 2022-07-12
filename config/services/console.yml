@@ -26,15 +26,15 @@ services:
             - [ 'setSubscribeesRepository',         ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
             - [ 'setSubscriptionsRepository',       ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages:
-        class: 'App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages'
+    App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand:
+        class: 'App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand'
         calls:
             - [ 'setAggregateRepository',               [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                     [ '%app.twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                      [ '%app.twitter.oauth_token.default%'] ]
             - [ 'setHttpClient',                        [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
             - [ 'setTokenRepository',                   [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'] ]
-            - [ 'setDispatchAmqpMessagesToFetchTweets', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'] ]
+            - [ 'setFetchTweetsAmqpMessagesDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'] ]
             - [ 'setTranslator',                        [ '@App\Twitter\Infrastructure\Translation\Translator'] ]
             - [ 'setEntityManager',                     [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                            [ '@logger'] ]
