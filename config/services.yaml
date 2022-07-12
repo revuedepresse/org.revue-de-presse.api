@@ -200,7 +200,7 @@ services:
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setPersistenceLayer',                      [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
-            - [ 'setPersistenceLayer',                [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
+            - [ 'setTweetPersistenceLayer',                 [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
             - [ 'setPublishersListRepository',              [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setRateLimitCompliance',                   [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setTweetsBatchCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
