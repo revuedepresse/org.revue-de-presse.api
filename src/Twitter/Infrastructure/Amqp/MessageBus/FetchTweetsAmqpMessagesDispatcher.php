@@ -39,7 +39,7 @@ use function implode;
 use function in_array;
 use function sprintf;
 
-class DispatchAmqpMessagesToFetchTweets implements DispatchAmqpMessagesToFetchTweetsInterface, CorrelationIdAwareInterface
+class FetchTweetsAmqpMessagesDispatcher implements FetchTweetsAmqpMessagesDispatcherInterface, CorrelationIdAwareInterface
 {
     use RateLimitComplianceTrait;
     use ListBatchCollectedEventRepositoryTrait;

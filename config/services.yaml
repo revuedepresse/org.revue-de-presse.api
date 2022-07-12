@@ -90,8 +90,8 @@ services:
             statusLogger:           '@monolog.logger.twitter_api'
             connection:             '@doctrine.dbal.default_connection'
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'
+    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'

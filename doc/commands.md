@@ -41,7 +41,7 @@ make start
 ```shell
 LIST_NAME='W3C-Groups' \
 USERNAME="w3c" \
-make dispatch-amqp-messages
+make dispatch-fetch-tweets-amqp-messages
 ```
 
 ## How to import a Twitter list in command-line?
