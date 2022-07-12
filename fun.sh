@@ -372,10 +372,12 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			--force-recreate \
+			--no-recreate \
 			amqp
 SCRIPT
 )
+
+    rm -f ./.pm2-installed
 
     local command
     command=$(cat <<-SCRIPT
