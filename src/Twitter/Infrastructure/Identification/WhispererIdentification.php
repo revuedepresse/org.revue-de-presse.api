@@ -91,7 +91,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
         ) {
             return $this->statusRepository->countCollectedStatuses(
                 $memberName,
-                $maxId = INF
+                $maxId = PHP_INT_MAX
             );
         };
 

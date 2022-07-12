@@ -82,7 +82,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
-            $extremumId < INF) {
+            $extremumId < PHP_INT_MAX) {
             $queryBuilder->andWhere('s.statusId <= :maxId');
             $queryBuilder->setParameter('maxId', $extremumId);
         }
@@ -195,10 +195,10 @@ class ArchivedTweetRepository extends ResourceRepository implements
             $this->appLogger->info($exception->getMessage());
 
             if ($direction === self::FINDING_IN_ASCENDING_ORDER) {
-                return [self::EXTREMUM_STATUS_ID => +INF];
+                return [self::EXTREMUM_STATUS_ID => PHP_INT_MAX];
             }
 
-            return [self::EXTREMUM_STATUS_ID => -INF];
+            return [self::EXTREMUM_STATUS_ID => PHP_INT_MIN];
         }
     }
 

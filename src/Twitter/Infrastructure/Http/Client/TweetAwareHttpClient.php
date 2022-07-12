@@ -357,7 +357,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $option = $this->getExtremumOption($discoverPublicationsWithMaxId);
             $shift  = $this->getShiftFromExtremum($discoverPublicationsWithMaxId);
 
-            if ($extremum['statusId'] === '-INF' && $option === 'max_id') {
+            if ($extremum['statusId'] === PHP_INT_MIN && $option === 'max_id') {
                 $extremum['statusId'] = 0;
             }
 

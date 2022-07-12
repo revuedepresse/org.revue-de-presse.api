@@ -9,7 +9,6 @@ use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use Assert\Assert;
 use function array_key_exists;
-use const INF;
 
 class CurationSelectors implements CurationSelectorsInterface
 {

@@ -647,7 +647,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             $options['max_id'] = $options['since_id'] - 2;
             unset($options['since_id']);
         } else {
-            $options['max_id'] = INF;
+            $options['max_id'] = PHP_INT_MAX;
         }
 
         return $options;
