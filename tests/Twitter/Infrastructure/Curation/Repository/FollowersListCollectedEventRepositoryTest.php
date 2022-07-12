@@ -24,6 +24,9 @@ class FollowersListCollectedEventRepositoryTest extends KernelTestCase
         self::$kernel = self::bootKernel();
         $this->repository = static::getContainer()->get('test.'.FollowersListCollectedEventRepository::class);
 
+        static::getContainer()->get('test.doctrine.dbal.connection')
+            ->executeQuery( 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
+
         $this->truncateEventStore();
     }
 
