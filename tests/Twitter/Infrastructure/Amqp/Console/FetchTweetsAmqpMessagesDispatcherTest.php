@@ -66,9 +66,6 @@ class FetchTweetsAmqpMessagesDispatcherTest extends KernelTestCase
         $this->commandTester = new CommandTester($command);
     }
 
-    /**
-     * @return object
-     */
     private function prophesizePublicationMessagerDispatcher()
     {
         /** @var FetchTweetsAmqpMessagesDispatcher $fetchTweetsAmqpMessagesDispatcherProphecy */
