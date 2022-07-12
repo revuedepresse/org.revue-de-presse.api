@@ -73,7 +73,7 @@ class TweetCurationLogger implements TweetCurationLoggerInterface
     ): void {
         if ($selectors->minStatusId()) {
             $extremumId = $selectors->minStatusId();
-            if (PHP_INT_MIN === $selectors->minStatusId())) {
+            if (PHP_INT_MIN === $selectors->minStatusId()) {
                 $extremumId = '-infinity';
             }
         }
