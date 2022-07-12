@@ -125,7 +125,7 @@ function dispatch_fetch_publications_messages {
     arguments="${arguments}${cursor_argument}"
 
     local cmd
-    cmd="bin/console app:dispatch-messages-to-fetch-member-tweets${arguments}"
+    cmd="bin/console app:dispatch-fetch-tweets-amqp-messages${arguments}"
 
     if [ -n "${DRY_MODE}" ];
     then

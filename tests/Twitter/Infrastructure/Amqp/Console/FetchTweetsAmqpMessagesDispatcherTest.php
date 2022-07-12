@@ -60,7 +60,7 @@ class FetchTweetsAmqpMessagesDispatcherTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('app:dispatch-messages-to-fetch-member-tweets');
+        $this->command = $application->find('app:dispatch-fetch-tweets-amqp-messages');
 
         $this->commandTester = new CommandTester($command);
     }

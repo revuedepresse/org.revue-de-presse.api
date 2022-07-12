@@ -42,7 +42,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
 
     public function configure()
     {
-        $this->setName('app:dispatch-messages-to-fetch-member-tweets')
+        $this->setName('app:dispatch-fetch-tweets-amqp-messages')
             ->setDescription('Dispatch AMQP messages to fetch member tweets.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,
