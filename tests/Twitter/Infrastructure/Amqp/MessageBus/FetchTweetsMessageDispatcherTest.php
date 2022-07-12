@@ -34,7 +34,7 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
         self::$kernel = self::bootKernel();
 
         /** @var FetchTweetsAmqpMessagesDispatcher $dispatcher */
-        $dispatcher = static::getContainer()->get('test.'.FetchTweetsAmqpMessagesDispatcherCommand::class);
+        $dispatcher = static::getContainer()->get('test.'.FetchTweetsAmqpMessagesDispatcher::class);
 
         $calls = 0;
 
