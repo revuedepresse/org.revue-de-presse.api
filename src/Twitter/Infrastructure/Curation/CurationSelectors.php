@@ -40,9 +40,9 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private string $memberSelectorByScreenName;
 
-    private $maxTweetId;
+    private int $maxTweetId = PHP_INT_MAX;
 
-    private $minTweetId;
+    private int $minTweetId = PHP_INT_MIN;
 
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
@@ -65,21 +65,13 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this->dateBeforeWhichStatusAreCollected;
     }
 
-    public function maxStatusId()
+    public function maxStatusId(): int
     {
-        if ($this->maxTweetId === null) {
-            return INF;
-        }
-
         return $this->maxTweetId;
     }
 
-    public function minStatusId()
+    public function minStatusId(): int
     {
-        if ($this->minTweetId === null) {
-            return -INF;
-        }
-
         return $this->minTweetId;
     }
 
