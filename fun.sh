@@ -72,8 +72,6 @@ function dispatch_amqp_messages() {
 
     fi
 
-    clean ''
-
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
