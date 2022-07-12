@@ -117,7 +117,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
         $returnStatus = self::FAILURE;
 
         try {
-            $this->FetchTweetsAmqpMessagesDispatcher->dispatchFetchTweetsMessages(
+            $this->fetchTweetsAmqpMessagesDispatcher->dispatchFetchTweetsMessages(
                 InputToCurationRuleset::convertInputToCurationRuleset($input),
                 Token::fromArray($this->getTokensFromInputOrFallback()),
                 function ($message) {
