@@ -506,17 +506,17 @@ class TweetCurator implements TweetCuratorInterface
         try {
             $statuses = $this->tweetsBatchCollectedEventRepository
                 ->collectedPublicationBatch($selectors, $options);
+
+            if ($tweetsCollection instanceof stdClass && isset($tweetsCollection->error)) {
+                throw new ProtectedAccountException(
+                    $tweetsCollection->error,
+                    $this->httpClient::ERROR_PROTECTED_ACCOUNT
+                );
+            }
         } catch (ApiAccessRateLimitException $e) {
             if ($this->isTwitterApiAvailable()) {
                 return $this->saveStatusesMatchingCriteria($options, $selectors);
             }
-        }
-
-        if ($statuses instanceof stdClass && isset($statuses->error)) {
-            throw new ProtectedAccountException(
-                $statuses->error,
-                $this->httpClient::ERROR_PROTECTED_ACCOUNT
-            );
         }
 
         $lookingBetweenLastPublicationAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
