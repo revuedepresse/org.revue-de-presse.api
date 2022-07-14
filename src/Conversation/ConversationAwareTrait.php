@@ -68,15 +68,18 @@ trait ConversationAwareTrait
             );
         }
 
-        if (array_key_exists('avatar_url', $decodedDocument)) {
-            $status['avatar_url'] = $decodedDocument['avatar_url'];
-        }
-
         if (
             array_key_exists('user', $decodedDocument)
             && array_key_exists('profile_image_url_https', $decodedDocument['user'])
         ) {
             $status['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
+            if (!array_key_exists('base64_encoded_avatar', $status)) {
+                $avatarPicture = file_get_contents($status['avatar_url']);
+
+                if ($avatarPicture !== false) {
+                    $status['base64_encoded_avatar'] = 'data:image/jpeg;base64,'.base64_encode($avatarPicture);
+                }
+            }
         }
 
         if (array_key_exists('retweet_count', $decodedDocument)) {

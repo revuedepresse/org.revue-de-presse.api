@@ -341,7 +341,8 @@ QUERY;
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
                     $contents = file_get_contents($smallMediaUrl);
-                    if ($contents) {
+
+                    if ($contents !== false) {
                         $extractedProperties['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
                     }
                 }
