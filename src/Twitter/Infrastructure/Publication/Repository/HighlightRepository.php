@@ -332,6 +332,21 @@ QUERY;
                     $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
                 }
 
+                if (array_key_exists('extended_entities', $decodedDocument) &&
+                    array_key_exists('media', $decodedDocument['extended_entities']) &&
+                    is_array($decodedDocument['extended_entities']['media']) &&
+                    count($decodedDocument['extended_entities']['media']) > 0 &&
+                    $decodedDocument['extended_entities']['media'][0]['media_url'] &&
+                    array_key_exists('media_url', $decodedDocument['extended_entities']['media'][0])
+                ) {
+                    $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
+                    $contents = file_get_contents($smallMediaUrl);
+
+                    if ($contents !== false) {
+                        $extractedProperties['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
+                    }
+                }
+
                 unset(
                     $status['total_retweets'],
                     $status['total_favorites'],
