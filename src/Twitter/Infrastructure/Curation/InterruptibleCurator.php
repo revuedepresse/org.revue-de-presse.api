@@ -185,12 +185,28 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         return $publishersList;
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
+     */
     private function shouldSkipCollect(
         array $options
     ): bool {
         try {
             $this->guardAgainstExceptionalMember($options);
             $this->guardAgainstLockedPublishersList();
+
             $whisperer = $this->beforeFetchingStatuses($options);
         } catch (MembershipException|LockedPublishersListException $exception) {
             $this->logger->info($exception->getMessage());
@@ -213,7 +229,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return true;
         }
 
-        $tweets = $this->tweetAwareHttpClient->fetchPublications(
+        $tweets = $this->tweetAwareHttpClient->fetchTweets(
             $this->selectors,
             $options
         );
