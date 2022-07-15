@@ -10,7 +10,7 @@ services:
             - [ 'setRateLimitCompliance',                   [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setPublishersListRepository',              [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setTweetPersistenceLayer',                 [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]

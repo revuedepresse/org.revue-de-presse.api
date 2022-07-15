@@ -152,7 +152,7 @@ class TweetCurator implements TweetCuratorInterface
         }
 
         if ($this->selectors->shouldLookUpPublicationsWithMinId(
-            $this->statusRepository,
+            $this->tweetRepository,
             $this->memberRepository
         )) {
             $discoverPublicationsWithMaxId = false;
@@ -217,7 +217,7 @@ class TweetCurator implements TweetCuratorInterface
     private function updateLastStatusPublicationDate(array $options): void
     {
         try {
-            $this->statusRepository->updateLastStatusPublicationDate(
+            $this->tweetRepository->updateLastStatusPublicationDate(
                 $options[FetchAuthoredTweetInterface::SCREEN_NAME]
             );
         } catch (TweetNotFoundException $exception) {
@@ -448,7 +448,7 @@ class TweetCurator implements TweetCuratorInterface
      */
     protected function remainingStatuses($options): bool
     {
-        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor(
+        $serializedStatusCount = $this->tweetRepository->countHowManyStatusesFor(
             $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
         $existingStatus        = $this->translator->trans(
@@ -587,12 +587,12 @@ class TweetCurator implements TweetCuratorInterface
         if ($shouldDeclareMaximumStatusId) {
             $lastStatusFetched = $statuses[0];
 
-            return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
+            return $this->tweetRepository->declareMaximumStatusId($lastStatusFetched);
         }
 
         $firstStatusFetched = $statuses[count($statuses) - 1];
 
-        return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
+        return $this->tweetRepository->declareMinimumStatusId($firstStatusFetched);
     }
 
     /**
@@ -649,7 +649,7 @@ class TweetCurator implements TweetCuratorInterface
      */
     private function getExtremeStatusesIdsFor($options): array
     {
-        return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
+        return $this->tweetRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
             $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
     }
@@ -803,7 +803,7 @@ class TweetCurator implements TweetCuratorInterface
                     $options = $this->httpClient->guessMaxId(
                         $options,
                         $this->selectors->shouldLookUpPublicationsWithMinId(
-                            $this->statusRepository,
+                            $this->tweetRepository,
                             $this->memberRepository
                         )
                     );

@@ -63,7 +63,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      */
     public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
-        $status = $this->statusRepository->findOneBy(['statusId' => $identifier]);
+        $status = $this->tweetRepository->findOneBy(['statusId' => $identifier]);
         if ($status === null) {
             $status = $this->archivedStatusRepository
                 ->findOneBy(['statusId' => $identifier]);
@@ -105,11 +105,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         bool $skipExistingStatus = false,
         bool $extractProperties = true
     ) {
-        $this->statusRepository->shouldExtractProperties = $extractProperties;
+        $this->tweetRepository->shouldExtractProperties = $extractProperties;
 
         $status = null;
         if (!$skipExistingStatus) {
-            $status = $this->statusRepository
+            $status = $this->tweetRepository
                 ->findStatusIdentifiedBy($statusId);
         }
 
@@ -210,7 +210,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      */
     private function findStatusIdentifiedBy(string $identifier)
     {
-        $status = $this->statusRepository->findStatusIdentifiedBy(
+        $status = $this->tweetRepository->findStatusIdentifiedBy(
             $identifier
         );
 
@@ -306,7 +306,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $discoverMoreRecentStatuses = false;
         if (
             count($statuses) > 0
-            && $this->statusRepository->findOneBy(
+            && $this->tweetRepository->findOneBy(
                 ['statusId' => $statuses[0]->id]
             ) instanceof TweetInterface
         ) {
@@ -411,14 +411,14 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                                    $findingDirection
     ): array {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
-            return $this->statusRepository->findNextExtremum(
+            return $this->tweetRepository->findNextExtremum(
                 $options[FetchAuthoredTweetInterface::SCREEN_NAME],
                 $findingDirection,
                 $selectors->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
-        return $this->statusRepository->findLocalMaximum(
+        return $this->tweetRepository->findLocalMaximum(
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors->dateBeforeWhichPublicationsAreToBeCollected()
         );

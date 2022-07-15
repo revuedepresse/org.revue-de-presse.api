@@ -185,11 +185,6 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         return $publishersList;
     }
 
-    /**
-     * @param array $options
-     *
-     * @return bool
-     */
     private function shouldSkipCollect(
         array $options
     ): bool {
@@ -263,7 +258,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
         if (
             array_key_exists(0, $statuses) &&
-            $this->statusRepository->hasBeenSavedBefore($statuses)
+            $this->tweetRepository->hasBeenSavedBefore($statuses)
         ) {
             $this->logger->info(
                 sprintf(
@@ -360,7 +355,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
+        $storedWhispers = $this->tweetRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

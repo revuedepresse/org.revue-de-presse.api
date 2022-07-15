@@ -27,32 +27,15 @@ class MapStatusCollectionCommand extends Command
 
     const OPTION_OAUTH_SECRET = 'oauth-secret';
 
-    /**
-     * @var InputInterface
-     */
-    private $input;
+    private InputInterface $input;
 
-    /**
-     * @var OutputInterface
-     */
-    private $output;
+    public TweetRepositoryInterface $tweetRepository;
 
-    public TweetRepositoryInterface $statusRepository;
+    public RefreshStatusMapping $refreshStatusMapping;
 
-    /**
-     * @var RefreshStatusMapping
-     */
-    public $refreshStatusMapping;
+    public string $oauthToken;
 
-    /**
-     * @var string
-     */
-    public $oauthToken;
-
-    /**
-     * @var string
-     */
-    public $oauthSecret;
+    public string $oauthSecret;
 
     public function configure()
     {
@@ -98,23 +81,23 @@ class MapStatusCollectionCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
-        $this->output = $output;
+        $output1 = $output;
 
         $tokens = $this->getTokensFromInput();
         $this->refreshStatusMapping->setOAuthTokens($tokens);
 
-        $statusCollection = $this->statusRepository->queryPublicationCollection(
+        $statusCollection = $this->tweetRepository->queryPublicationCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             new DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
             new DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
         );
 
-        $mappedStatuses = $this->statusRepository->mapStatusCollectionToService(
+        $mappedStatuses = $this->tweetRepository->mapStatusCollectionToService(
             $this->refreshStatusMapping,
             $statusCollection
         );
 
-        $this->output->writeln($this->getSuccessMessage($mappedStatuses));
+        $output1->writeln($this->getSuccessMessage($mappedStatuses));
 
         return self::SUCCESS;
     }

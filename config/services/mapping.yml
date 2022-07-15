@@ -9,4 +9,4 @@ services:
         calls:
             - [ 'setLogger',            [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger'  ] ]
             - [ 'setPersistenceLayer',  [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface'  ] ]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'  ] ]
+            - [ 'setTweetRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'  ] ]

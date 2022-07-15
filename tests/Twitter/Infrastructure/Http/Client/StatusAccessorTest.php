@@ -45,8 +45,8 @@ class StatusAccessorTest extends KernelTestCase
             ]
         );
 
-        $statusRepository = $this->prophesizeStatusRepositoryForAscendingOrderFinding();
-        $this->accessor->setStatusRepository($statusRepository->reveal());
+        $tweetRepository = $this->prophesizeTweetRepositoryForAscendingOrderFinding();
+        $this->accessor->setTweetRepository($tweetRepository->reveal());
 
         $options = $this->accessor->updateExtremum(
             $selectors,
@@ -73,8 +73,8 @@ class StatusAccessorTest extends KernelTestCase
             ]
         );
 
-        $statusRepository = $this->prophesizeStatusRepositoryForDescendingOrderFinding();
-        $this->accessor->setStatusRepository($statusRepository->reveal());
+        $tweetRepository = $this->prophesizeTweetRepositoryForDescendingOrderFinding();
+        $this->accessor->setTweetRepository($tweetRepository->reveal());
 
         $options = $this->accessor->updateExtremum(
             $selectors,
@@ -91,33 +91,33 @@ class StatusAccessorTest extends KernelTestCase
     /**
      * @return ObjectProphecy
      */
-    private function prophesizeStatusRepositoryForAscendingOrderFinding(): ObjectProphecy
+    private function prophesizeTweetRepositoryForAscendingOrderFinding(): ObjectProphecy
     {
-        $statusRepository = $this->prophesize(
+        $tweetRepository = $this->prophesize(
             TweetRepositoryInterface::class
         );
-        $statusRepository->findNextExtremum(
+        $tweetRepository->findNextExtremum(
             'pierrec',
             ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER,
             '2010-01-01'
         )->willReturn(['statusId' => '201']);
 
-        return $statusRepository;
+        return $tweetRepository;
     }
 
     /**
      * @return ObjectProphecy
      */
-    private function prophesizeStatusRepositoryForDescendingOrderFinding(): ObjectProphecy
+    private function prophesizeTweetRepositoryForDescendingOrderFinding(): ObjectProphecy
     {
-        $statusRepository = $this->prophesize(
+        $tweetRepository = $this->prophesize(
             TweetRepositoryInterface::class
         );
-        $statusRepository->findLocalMaximum(
+        $tweetRepository->findLocalMaximum(
             'pierrec',
             null
         )->willReturn(['statusId' => '200']);
 
-        return $statusRepository;
+        return $tweetRepository;
     }
 }
