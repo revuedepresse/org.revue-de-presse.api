@@ -52,7 +52,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
 
-    public ArchivedTweetRepository $archivedStatusRepository;
+    public ArchivedTweetRepository $archivedTweetRepository;
 
     public EntityManagerInterface $entityManager;
 
@@ -65,7 +65,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     {
         $status = $this->tweetRepository->findOneBy(['statusId' => $identifier]);
         if ($status === null) {
-            $status = $this->archivedStatusRepository
+            $status = $this->archivedTweetRepository
                 ->findOneBy(['statusId' => $identifier]);
         }
 
@@ -257,11 +257,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     }
 
     /**
-     * @param CurationSelectorsInterface $selectors
-     * @param array                      $options
-     * @param bool                       $discoverPublicationWithMaxId
-     *
-     * @return array
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -276,7 +271,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function fetchPublications(
+    public function fetchTweets(
         CurationSelectorsInterface $selectors,
                                    $options,
         bool                       $discoverPublicationWithMaxId = true
@@ -323,7 +318,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                 unset($options['max_id']);
             }
 
-            $statuses = $this->fetchPublications(
+            $statuses = $this->fetchTweets(
                 $selectors,
                 $options,
                 $discoverPublicationWithMaxId = false

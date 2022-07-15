@@ -12,8 +12,8 @@ use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
-use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
+use App\Twitter\Infrastructure\Curation\Exception\RateLimited;
+use App\Twitter\Infrastructure\Curation\Exception\SkippedCurationException;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Curator\InterruptibleCuratorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\TweetBatchCollectedEventRepositoryTrait;
@@ -112,8 +112,8 @@ class TweetCurator implements TweetCuratorInterface
                 $this->selectors,
                 $options
             );
-        } catch (SkipCollectException $exception) {
-            if ($exception instanceof RateLimitedException) {
+        } catch (SkippedCurationException $exception) {
+            if ($exception instanceof RateLimited) {
                 unset($exception);
 
                 return false; // unsuccessfully made an attempt to collect statuses
