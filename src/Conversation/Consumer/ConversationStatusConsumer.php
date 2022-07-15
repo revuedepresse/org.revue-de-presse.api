@@ -71,7 +71,7 @@ class ConversationStatusConsumer
         ];
 
         try {
-            $this->statusRepository->shouldExtractProperties = false;
+            $this->tweetRepository->shouldExtractProperties = false;
             $status = $this->tweetAwareHttpClient->refreshStatusByIdentifier(
                 $options['status_id'],
                 $skipExistingStatus = false,
@@ -107,7 +107,7 @@ class ConversationStatusConsumer
             $this->entityManager->persist($status);
             $this->entityManager->flush();
 
-            $this->statusRepository->shouldExtractProperties = true;
+            $this->tweetRepository->shouldExtractProperties = true;
             $statusProperties = $this->findStatusOrFetchItByIdentifier($options['status_id']);
 
             try {

@@ -43,7 +43,7 @@ class TaggedTweetRepository extends ServiceEntityRepository implements TaggedTwe
         $taggedTweet = TaggedTweet::fromLegacyProps($properties);
 
         if ($this->statusHavingHashExists($taggedTweet->hash())) {
-            return $this->statusRepository->reviseDocument($taggedTweet);
+            return $this->tweetRepository->reviseDocument($taggedTweet);
         }
 
         return $taggedTweet->toStatus(

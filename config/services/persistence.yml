@@ -27,7 +27,7 @@ services:
             - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
             - [ 'setPersistenceLayer',   [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
             - [ 'setTweetCurationLogger',      [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
-            - [ 'setStatusRepository',         [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',         [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTaggedTweetRepository',    [ '@App\Twitter\Infrastructure\Repository\Status\TaggedTweetRepository' ] ]
         public: true
 

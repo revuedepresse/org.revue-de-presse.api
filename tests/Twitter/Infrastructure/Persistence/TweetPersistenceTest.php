@@ -41,7 +41,7 @@ class StatusPersistenceTest extends KernelTestCase
 
         self::$kernel = self::bootKernel();
 
-        $this->removeUnarchivedStatus();
+        $this->removeUnarchivedTweet();
 
         /** @var TweetPersistenceLayer $statusPersistence */
         $this->persistenceLayer = static::getContainer()->get(TweetPersistenceLayer::class);
@@ -49,7 +49,7 @@ class StatusPersistenceTest extends KernelTestCase
 
     protected function tearDown(): void
     {
-        $this->removeUnarchivedStatus();
+        $this->removeUnarchivedTweet();
 
         parent::tearDown();
     }
@@ -304,13 +304,15 @@ class StatusPersistenceTest extends KernelTestCase
         );
     }
 
-    private function removeUnarchivedStatus(): void
+    private function removeUnarchivedTweet(): void
     {
         $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
-        $statusRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Http\Entity\Tweet');
-        $status = $statusRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
-        if ($status instanceof TweetInterface) {
-            $entityManager->remove($status);
+        $tweetRepository = $entityManager->getRepository('App\Twitter\Infrastructure\Http\Entity\Tweet');
+
+        $tweet = $tweetRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
+
+        if ($tweet instanceof TweetInterface) {
+            $entityManager->remove($tweet);
             $entityManager->flush();
         }
     }

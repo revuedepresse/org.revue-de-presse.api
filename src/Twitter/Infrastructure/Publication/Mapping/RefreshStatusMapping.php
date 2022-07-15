@@ -64,7 +64,7 @@ class RefreshStatusMapping implements MappingAwareInterface
         }
 
         // TODO point at Status Logger
-        $reachBeforeRefresh = $this->statusRepository->extractTweetReach($status);
+        $reachBeforeRefresh = $this->tweetRepository->extractTweetReach($status);
 
         $membersList = $status->getAggregates()->first();
         if (!($membersList instanceof PublishersList)) {
@@ -86,8 +86,8 @@ class RefreshStatusMapping implements MappingAwareInterface
             );
         }
 
-        $refreshedStatus = $this->statusRepository->findOneBy(['id' => $status->getId()]);
-        $reachAfterRefresh = $this->statusRepository->extractTweetReach($refreshedStatus);
+        $refreshedStatus = $this->tweetRepository->findOneBy(['id' => $status->getId()]);
+        $reachAfterRefresh = $this->tweetRepository->extractTweetReach($refreshedStatus);
 
         $this->logger->info(sprintf(
             'Status with id %s had retweet count going from %d to %d',

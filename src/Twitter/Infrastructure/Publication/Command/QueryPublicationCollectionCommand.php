@@ -20,7 +20,7 @@ class QueryPublicationCollectionCommand extends Command
 
     private InputInterface $input;
 
-    public TweetRepositoryInterface $statusRepository;
+    public TweetRepositoryInterface $tweetRepository;
 
     public function configure()
     {
@@ -50,7 +50,7 @@ class QueryPublicationCollectionCommand extends Command
         $this->input = $input;
         $output1 = $output;
 
-        $statusCollection = $this->statusRepository->queryPublicationCollection(
+        $statusCollection = $this->tweetRepository->queryPublicationCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             new DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
             new DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
