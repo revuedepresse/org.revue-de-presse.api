@@ -203,6 +203,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
      * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
      * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \ReflectionException
@@ -214,7 +215,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             $this->guardAgainstExceptionalMember($options);
             $this->guardAgainstLockedPublishersList();
 
-            $whisperer = $this->beforeFetchingStatuses($options);
+            $whisperer = $this->beforeFetchingTweets($options);
         } catch (MembershipException|LockedPublishersListException $exception) {
             $this->logger->info($exception->getMessage());
 
@@ -223,9 +224,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return $exception->shouldSkipMessageConsumption;
         }
 
-        if ($this->memberRepository->hasBeenUpdatedBetweenHalfAnHourAgoAndNow(
-            $this->selectors->screenName()
-        )) {
+        if ($this->memberRepository->hasBeenUpdatedBetweenHalfAnHourAgoAndNow($this->selectors->screenName())) {
             $this->logger->info(
                 sprintf(
                     'Tweets have been curated for "%s".',
@@ -352,14 +351,11 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array $options
-     *
-     * @return null|Whisperer
-     * @throws SkippableMessageException
+     * @throws \App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    private function beforeFetchingStatuses(
-        $options
-    ): ?Whisperer {
+    private function beforeFetchingTweets($options): ?Whisperer {
         $whisperer = $this->whispererRepository->findOneBy(
             ['name' => $options[FetchAuthoredTweetInterface::SCREEN_NAME]]
         );
