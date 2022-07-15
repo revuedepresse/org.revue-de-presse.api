@@ -294,7 +294,8 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             $this->selectors
         );
 
-        if ($savedItems === null ||
+        if (
+            $savedItems === null ||
             count($statuses) < CurationSelectorsInterface::MAX_BATCH_SIZE
         ) {
             SkippableMessageException::stopMessageConsumption();
