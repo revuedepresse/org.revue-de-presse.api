@@ -205,7 +205,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return $exception->shouldSkipMessageConsumption;
         }
 
-        if ($this->memberRepository->hasBeenUpdatedBetween7HoursAgoAndNow(
+        if ($this->memberRepository->hasBeenUpdatedBetweenHalfAnHourAgoAndNow(
             $this->selectors->screenName()
         )) {
             $this->logger->info(

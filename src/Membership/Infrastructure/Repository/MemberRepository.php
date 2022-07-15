@@ -18,6 +18,7 @@ use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -197,7 +198,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      */
     public function findMembers(SearchParams $searchParams): array
     {
@@ -255,9 +256,9 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      */
-    public function hasBeenUpdatedBetween7HoursAgoAndNow(string $screenName): bool
+    public function hasBeenUpdatedBetweenHalfAnHourAgoAndNow(string $screenName): bool
     {
         $query = <<< QUERY
             SELECT 
@@ -266,10 +267,11 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
                     NOW()::timestamp -
                     last_status_publication_date::timestamp
                 )
-            ) > 3600*7 AS has_been_updated_between_seven_hours_ago_and_now
+            ) < 3600 * 0.5 AS has_been_updated_between_half_an_hour_ago_and_now
             FROM weaving_user 
             WHERE
-            usr_twitter_username = '%s' 
+            usr_twitter_username = 'franceinter' 
+            -- considering the last 24 hours
             AND EXTRACT(EPOCH FROM (NOW()::timestamp - last_status_publication_date::timestamp)) < 24 * 3600;
 QUERY;
 
@@ -293,7 +295,7 @@ QUERY;
             return false;
         }
 
-        return (bool)$results[0]['has_been_updated_between_seven_hours_ago_and_now'];
+        return (bool)$results[0]['has_been_updated_between_half_an_hour_ago_and_now'];
     }
 
     /**
@@ -566,7 +568,7 @@ QUERY;
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      */
     private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): array
     {
@@ -663,7 +665,7 @@ QUERY;
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      */
     private function findRelatedAggregates(SearchParams $searchParams): array
     {
