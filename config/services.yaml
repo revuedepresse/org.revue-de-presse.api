@@ -49,7 +49,7 @@ services:
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:                '@logger'
-            archivedtweetRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
+            archivedTweetRepository:  '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
             connection:               '@doctrine.dbal.default_connection'
             registry:                 '@doctrine'
         tags:
@@ -164,7 +164,7 @@ services:
     App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient:
         class: 'App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
         properties:
-            archivedtweetRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
+            archivedTweetRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
             entityManager:              '@doctrine.orm.entity_manager'
             notFoundtweetRepository:   '@repository.not_found_status'
         calls:

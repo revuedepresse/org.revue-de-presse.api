@@ -213,16 +213,16 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return true;
         }
 
-        $statuses = $this->tweetAwareHttpClient->fetchPublications(
+        $tweets = $this->tweetAwareHttpClient->fetchPublications(
             $this->selectors,
             $options
         );
 
-        if ($whisperer instanceof Whisperer && count($statuses) > 0) {
+        if ($whisperer instanceof Whisperer && count($tweets) > 0) {
             try {
                 $this->afterCountingCollectedStatuses(
                     $options,
-                    $statuses,
+                    $tweets,
                     $whisperer
                 );
             } catch (SkippableMessageException $exception) {
@@ -239,10 +239,6 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array                       $options
-     * @param array                       $statuses
-     * @param Whisperer                   $whisperer
-     *
      * @throws SkippableMessageException
      */
     private function afterCountingCollectedStatuses(

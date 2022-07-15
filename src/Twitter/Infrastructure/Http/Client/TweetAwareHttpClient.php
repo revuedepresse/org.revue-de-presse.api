@@ -52,7 +52,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
 
-    public ArchivedTweetRepository $archivedStatusRepository;
+    public ArchivedTweetRepository $archivedTweetRepository;
 
     public EntityManagerInterface $entityManager;
 
@@ -65,7 +65,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     {
         $status = $this->tweetRepository->findOneBy(['statusId' => $identifier]);
         if ($status === null) {
-            $status = $this->archivedStatusRepository
+            $status = $this->archivedTweetRepository
                 ->findOneBy(['statusId' => $identifier]);
         }
 
