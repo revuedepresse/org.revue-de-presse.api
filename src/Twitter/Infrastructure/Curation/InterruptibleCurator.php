@@ -12,8 +12,8 @@ use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
-use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
+use App\Twitter\Infrastructure\Curation\Exception\RateLimited;
+use App\Twitter\Infrastructure\Curation\Exception\SkippedCurationException;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
@@ -59,8 +59,8 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
      * @param array                      $options
      *
      * @throws ProtectedAccountException
-     * @throws RateLimitedException
-     * @throws SkipCollectException
+     * @throws RateLimited
+     * @throws SkippedCurationException
      * @throws UnavailableResourceException
      * @throws Exception
      */
@@ -71,8 +71,8 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $this->selectors = $selectors;
 
         try {
-            if ($this->shouldSkipCollect($options)) {
-                throw new SkipCollectException('Skipped pretty naturally ^_^');
+            if ($this->shouldSkipCuration($options)) {
+                throw new SkippedCurationException('Skipped pretty naturally ^_^');
             }
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
             UnavailableResourceException::handleUnavailableMemberException(
@@ -80,7 +80,14 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 $this->logger,
                 $options
             );
-        } catch (SkipCollectException $exception) {
+        } catch (SkippedCurationException $exception) {
+            $this->logger->info(
+                sprintf(
+                    'Skipping Tweets curation for member "%s".',
+                    $selectors->screenName()
+                )
+            );
+
             throw $exception;
         } catch (BadAuthenticationDataException $exception) {
             $this->logger->error(
@@ -90,12 +97,12 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 )
             );
 
-            throw new SkipCollectException('Skipped because of bad authentication credentials');
+            throw new SkippedCurationException('Skipped because of bad authentication credentials');
         } /** @noinspection BadExceptionsProcessingInspection */
         catch (ApiAccessRateLimitException $exception) {
             $this->delayingConsumption();
 
-            throw new RateLimitedException('No more call to the API can be made.');
+            throw new RateLimited('No more call to the API can be made.');
         } catch (UnavailableResourceException|Exception $exception) {
             $this->logger->error(
                 sprintf(
@@ -105,7 +112,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 ['trace' => json_encode($exception->getTrace())],
             );
 
-            throw new SkipCollectException(
+            throw new SkippedCurationException(
                 'Skipped because Twitter sent error message and code never dealt with so far'
             );
         }
@@ -200,7 +207,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \ReflectionException
      */
-    private function shouldSkipCollect(
+    private function shouldSkipCuration(
         array $options
     ): bool {
         try {
