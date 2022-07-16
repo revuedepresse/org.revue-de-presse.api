@@ -11,7 +11,7 @@ use App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInt
 use App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient;
 use App\Twitter\Infrastructure\Http\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Twitter\Infrastructure\Http\Selector\AuthenticatedSelector;
 use App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
@@ -120,7 +120,7 @@ class ListAwareHttpClientTest extends KernelTestCase
 
         // Assert
 
-        $replacementToken = Token::fromArray(
+        $replacementToken = Token::fromProps(
             [
                 'token' => self::REPLACEMENT_TOKEN,
                 'secret' => self::REPLACEMENT_SECRET,
@@ -178,11 +178,11 @@ class ListAwareHttpClientTest extends KernelTestCase
 
     /**
      * @return Token
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedAccessTokenProperties
      */
     private function getActiveToken(): Token
     {
-        return Token::fromArray(
+        return Token::fromProps(
             [
                 'token'  => self::TOKEN,
                 'secret' => self::SECRET,
@@ -194,7 +194,7 @@ class ListAwareHttpClientTest extends KernelTestCase
     {
         $tokenChangeBuilder = new TokenChangeBuilder();
         $tokenChangeBuilder = $tokenChangeBuilder->willReplaceAccessToken(
-            Token::fromArray(
+            Token::fromProps(
                 [
                     'token'  => self::REPLACEMENT_TOKEN,
                     'secret' => self::REPLACEMENT_SECRET,

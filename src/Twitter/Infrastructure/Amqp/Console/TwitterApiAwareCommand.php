@@ -19,9 +19,6 @@ abstract class TwitterApiAwareCommand extends Command
 
     protected HttpClientInterface $httpClient;
 
-    /**
-     * @var string
-     */
     protected string $defaultSecret;
 
     protected string $defaultToken;
@@ -56,10 +53,7 @@ abstract class TwitterApiAwareCommand extends Command
         return $this;
     }
 
-    /**
-     * @return bool|string|string[]|null
-     */
-    protected function getAccessTokenSecret()
+    protected function getAccessTokenSecret(): string
     {
         $secret = $this->defaultSecret;
         if ($this->hasOAuthSecretBeenPassedAsOption()) {
@@ -69,10 +63,7 @@ abstract class TwitterApiAwareCommand extends Command
         return $secret;
     }
 
-    /**
-     * @return bool|string|string[]|null
-     */
-    protected function getAccessToken()
+    protected function getAccessToken(): string
     {
         $token = $this->defaultToken;
         if ($this->hasOAuthTokenBeenPassedAsOption()) {
