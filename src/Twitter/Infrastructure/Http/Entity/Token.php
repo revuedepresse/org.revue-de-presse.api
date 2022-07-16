@@ -47,7 +47,7 @@ class Token implements TokenInterface
     protected TokenType $type;
 
     /**
-     * @ORM\Column(name=self::TOKEN, type="string", length=255)
+     * @ORM\Column(name="token", type="string", length=255)
      */
     protected string $oauthToken;
 
@@ -64,7 +64,7 @@ class Token implements TokenInterface
     }
 
     /**
-     * @ORM\Column(name=self::SECRET, type="string", length=255, nullable=true)
+     * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
     protected ?string $oauthTokenSecret;
 
