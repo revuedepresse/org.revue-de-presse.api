@@ -3,8 +3,11 @@ declare (strict_types=1);
 
 namespace App\Trends\Infrastructure\Repository;
 
+use App\Ownership\Domain\Exception\UnknownListException;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
@@ -21,17 +24,26 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private HighlightRepository $highlightRepository;
 
+    private MembersListRepositoryInterface $listRepository;
+
+    private string $defaultPublishersList;
+
     public function __construct(
         string $serviceAccountConfig,
         string $databaseUri,
+        string $defaultPublishersList,
         HighlightRepository $highlightRepository,
+        MembersListRepositoryInterface $publishersListRepository,
         LoggerInterface $logger
     )
     {
         $this->serviceAccountConfig = $serviceAccountConfig;
         $this->databaseUri = $databaseUri;
-        $this->logger = $logger;
+        $this->defaultPublishersList = $defaultPublishersList;
+
         $this->highlightRepository = $highlightRepository;
+        $this->listRepository = $publishersListRepository;
+        $this->logger = $logger;
     }
 
     private function getFirebaseDatabase(): Database
@@ -48,12 +60,17 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
-        $aggregateId = 1;
+        $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
+
+        if (!($publishersList instanceof MembersListInterface)) {
+            UnknownListException::throws();
+        }
+
         $path = '/'.implode(
             '/',
             [
                 'highlights',
-                $aggregateId,
+                $publishersList->publicId(),
                 $date->format('Y-m-d'),
                 $includeRetweets ? 'retweet' : 'status'
             ]
@@ -67,10 +84,17 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     }
 
     public function findBy(SearchParamsInterface $searchParams): array {
-        $snapshot = $this->getFirebaseDatabaseSnapshot(
-            $searchParams->getParams()['startDate'],
-            $searchParams->getParams()['includeRetweets']
-         );
+        try {
+            $snapshot = $this->getFirebaseDatabaseSnapshot(
+                $searchParams->getParams()['startDate'],
+                $searchParams->getParams()['includeRetweets']
+             );
+        } catch (UnknownListException) {
+            return [
+                'aggregates' => [],
+                'statuses' => [],
+            ];
+        }
 
         $col = $snapshot->getValue();
         if ($col === null) {

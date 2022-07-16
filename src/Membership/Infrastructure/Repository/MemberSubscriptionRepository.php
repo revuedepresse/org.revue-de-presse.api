@@ -96,7 +96,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if ($this->emptyResults($results, 'count_')) {
             return 0;
         }
@@ -135,7 +135,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $remainingSubscriptions = $subscriptions;
         if (array_key_exists(0, $results) && array_key_exists('subscription_ids', $results[0])) {
@@ -304,7 +304,7 @@ QUERY
             ['screen_name' => $subscriber->getTwitterUsername()]
         );
 
-        $cancelledSubscriptions = $statement->fetchAll();
+        $cancelledSubscriptions = $statement->fetchAllAssociative();
 
         return array_map(
             static fn (array $subscription) => (string) $subscription['subscription_id'],
@@ -365,19 +365,14 @@ QUERY
         );
         $statement = $connection->executeQuery($query);
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if (!array_key_exists(0, $results)) {
             return [];
         }
 
         return array_map(
             function (array $row) {
-                $row['aggregates'] = json_decode($row['aggregates'], $asArray = true);
-
-                $lastJsonError = json_last_error();
-                if ($lastJsonError !== JSON_ERROR_NONE) {
-                    throw new JsonException($lastJsonError);
-                }
+                $row['aggregates'] = json_decode($row['aggregates'], associative: true, flags: JSON_THROW_ON_ERROR);
 
                 return $row;
             },
@@ -449,9 +444,8 @@ QUERY
         if (!$this->emptyResults($aggregateResults, 'aggregates')) {
             $aggregates = json_decode(
                 $aggregateResults[0]['aggregates'],
-                $asArray = true,
-                512,
-                JSON_THROW_ON_ERROR
+                associative: true,
+                flags: JSON_THROW_ON_ERROR
             );
         }
 

@@ -1,8 +1,9 @@
-
 healthcheck:
-    path:     '/api/healthcheck'
-    defaults: { _controller: App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController::areServicesHealthy }
+    path:       /api/healthcheck
+    controller: App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController::areServicesHealthy
+    methods:    HEAD|GET|OPTIONS
 
 highlight:
-    path:     '/api/twitter/highlights'
-    defaults: { _controller: App\Trends\Controller\ListController::getHighlights }
+    path:       /api/twitter/highlights
+    controller: App\Trends\Infrastructure\Controller\TrendsController::getHighlights
+    methods:    GET|OPTIONS

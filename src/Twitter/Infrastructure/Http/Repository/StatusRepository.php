@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Http\Repository;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
@@ -398,7 +398,7 @@ QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 
     /**
@@ -420,7 +420,7 @@ QUERY;
 QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
-        $result = $statement->fetchAll();
+        $result = $statement->fetchAllAssociative();
 
         $criteria = ['id' => $result[0]['id']];
 

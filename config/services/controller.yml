@@ -6,9 +6,9 @@ services:
             - '%allowed.origin%'
             - '%kernel.environment%'
 
-    App\Trends\Controller\ListController:
+    App\Trends\Infrastructure\Controller\TrendsController:
         public: true
-        class: 'App\Trends\Controller\ListController'
+        class: 'App\Trends\Infrastructure\Controller\TrendsController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
