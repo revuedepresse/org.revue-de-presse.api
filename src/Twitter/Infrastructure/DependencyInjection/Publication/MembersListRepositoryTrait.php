@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Publication;
 
-use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 
 trait MembersListRepositoryTrait
 {

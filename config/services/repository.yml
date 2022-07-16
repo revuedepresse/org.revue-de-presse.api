@@ -7,7 +7,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            membersListRepository: 'App\Ownership\Infrastructure\Repository\MembersListRepository'
+            membersListRepository: '@App\Ownership\Infrastructure\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -55,12 +55,12 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Ownership\Infrastructure\Repository\MembersListRepository:
+    App\Ownership\Domain\Repository\MembersListRepositoryInterface:
         public: true
         class:  'App\Ownership\Infrastructure\Repository\MembersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
+            - 'App\Ownership\Domain\Entity\MembersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository' ] ]
@@ -68,6 +68,9 @@ services:
             - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
+
+    App\Ownership\Infrastructure\Repository\MembersListRepository:
+        '@App\Ownership\Domain\Repository\MembersListRepositoryInterface'
 
     App\Twitter\Infrastructure\Publication\Repository\PublicationRepository:
         class: 'App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
@@ -87,22 +90,6 @@ services:
             - 'App\Twitter\Infrastructure\Http\Entity\Token'
         calls:
             - [ 'setLogger', [ '@logger' ] ]
-
-    repository.owner:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\PressMedia\Repository\OwnerRepository'
-        arguments:
-            - 'App\PressMedia\Entity\Owner'
-        properties:
-            logger: '@logger'
-
-    repository.media:
-        class: 'App\PressMedia\Repository\MediaRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PressMedia\Entity\Media'
-        properties:
-            logger: '@logger'
 
     repository.member_aggregate_subscription:
         class: 'App\Trends\Infrastructure\Repository\MemberAggregateSubscriptionRepository'
@@ -169,5 +156,7 @@ services:
         arguments:
             - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             - "%env(resolve:FIREBASE_DATABASE_URI)%"
-            - "@repository.highlight"
-            - "@logger"
+            - '%list_default%'
+            - '@repository.highlight'
+            - '@App\Ownership\Domain\Repository\MembersListRepositoryInterface'
+            - '@logger'

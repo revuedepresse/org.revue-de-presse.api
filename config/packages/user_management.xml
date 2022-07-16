@@ -9,7 +9,7 @@
             <argument type="service" id="Doctrine\Common\Persistence\ManagerRegistry" />
             <argument type="string">App\Membership\Domain\Entity\Legacy\Member</argument>
             <property
-                name="\App\Ownership\Infrastructure\Repository\MembersListRepository"
+                name="membersListRepository"
                 type="service"
                 id="App\Ownership\Infrastructure\Repository\MembersListRepository" />
         </service>

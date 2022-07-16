@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;

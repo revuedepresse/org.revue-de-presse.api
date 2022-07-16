@@ -7,9 +7,9 @@ use App\Membership\Domain\Entity\MemberInterface;
 use App\Ownership\Domain\Entity\MembersList;
 use App\Trends\Domain\Entity\TimelyStatus;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\PublishersList\Repository\MembersListRepositoryInterface;
+use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
@@ -247,7 +247,7 @@ QUERY;
                 [\PDO::PARAM_INT]
             );
 
-            $list['totalStatuses'] = (int) $statement->fetchAll()[0]['total_status'];
+            $list['totalStatuses'] = (int) $statement->fetchAllAssociative()[0]['total_status'];
 
             $matchingAggregate->setTotalStatus($list['totalStatuses']);
             if ($list['totalStatuses'] === 0) {
@@ -391,7 +391,7 @@ QUERY;
             $connection = $this->getEntityManager()->getConnection();
             $statement  = $connection->executeQuery($query, [$list['id']], [\Pdo::PARAM_INT]);
 
-            $list['totalMembers'] = (int) $statement->fetchAll([0]['total_members']);
+            $list['totalMembers'] = (int) $statement->fetchAllAssociative([0]['total_members']);
 
             $matchingAggregate->totalMembers = $list['totalMembers'];
             if ($list['totalMembers'] === 0) {

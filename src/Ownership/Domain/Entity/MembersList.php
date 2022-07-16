@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 namespace App\Ownership\Domain\Entity;
 
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @ORM\Entity(repositoryClass="\App\Ownership\Infrastructure\Repository\MembersListRepository")
@@ -25,12 +26,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class MembersList implements MembersListInterface
 {
+    private const NAMESPACE = '14549ef6-01b8-4925-be2c-636cd9580b5d';
+
     /**
-     * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
+     * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
 
@@ -77,9 +78,14 @@ class MembersList implements MembersListInterface
      */
     public ?string $listId;
 
-    public function listId(): ?string
+    /**
+     * @ORM\Column(name="public_id", type="uuid")
+     */
+    public UuidInterface $publicId;
+
+    public function publicId(): UuidInterface
     {
-        return $this->listId;
+        return $this->publicId;
     }
 
     /**
@@ -173,6 +179,13 @@ class MembersList implements MembersListInterface
 
     public function __construct(string $screenName, string $listName)
     {
+        if ($listName === null) {
+            throw new InvalidArgumentException(
+                'An aggregate requires a valid list name.'
+            );
+        }
+
+        $this->publicId = UuidV5::uuid5(self::NAMESPACE, $listName);
         $this->name = $listName;
         $this->screenName = $screenName;
         $this->createdAt = new DateTime();

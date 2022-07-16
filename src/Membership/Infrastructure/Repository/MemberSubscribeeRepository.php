@@ -79,7 +79,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $remainingSubscribees = $subscribees;
         if (array_key_exists(0, $results) && array_key_exists('subscribee_ids', $results[0])) {

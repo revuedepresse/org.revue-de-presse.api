@@ -10,7 +10,7 @@ use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Http\Entity\Status;
-use App\Membership\Infrastructure\Repository\ArchivedStatusRepository;
+use App\Twitter\Infrastructure\Http\Repository\ArchivedStatusRepository;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;

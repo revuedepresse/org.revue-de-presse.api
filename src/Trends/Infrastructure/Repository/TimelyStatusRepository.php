@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Trends\Infrastructure\Repository;
 
 use App\Trends\Domain\Entity\TimelyStatus;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Ownership\Domain\Entity\MembersList;
 use \App\Ownership\Infrastructure\Repository\MembersListRepository;
 use App\Conversation\ConversationAwareTrait;

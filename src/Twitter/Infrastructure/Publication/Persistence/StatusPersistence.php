@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;

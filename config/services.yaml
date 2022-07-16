@@ -160,19 +160,19 @@ parameters:
         - 'development'
         - 'membership'
 
-    redis_cache.class:                                            'App\Twitter\Infrastructure\Cache\RedisCache'
+    redis_cache.class:              'App\Twitter\Infrastructure\Cache\RedisCache'
 
-    twitter.consumer_key:                         '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
-    twitter.consumer_secret:                      '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
+    twitter.consumer_key:           '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
+    twitter.consumer_secret:        '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
+    twitter.oauth_token.default:    '%env(resolve:API_TWITTER_USER_TOKEN)%'
+    twitter.oauth_secret.default:   '%env(resolve:API_TWITTER_USER_SECRET)%'
+    twitter.version:                '%env(resolve:API_TWITTER_VERSION)%'
 
-    twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
-    twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
+    allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 
-    twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
+    admin_route_name:               '%env(resolve:ADMIN_ROUTE_NAME)%'
 
-    allowed.origin:                                               '%env(resolve:ALLOWED_ORIGIN)%'
+    redis_host:                     '%env(resolve:REDIS_HOST)%'
+    redis_port:                     '%env(resolve:REDIS_PORT)%'
 
-    admin_route_name:                                             '%env(resolve:ADMIN_ROUTE_NAME)%'
-
-    redis_host:                                                   '%env(resolve:REDIS_HOST)%'
-    redis_port:                                                   '%env(resolve:REDIS_PORT)%'
+    list_default:                   '%env(resolve:LIST_DEFAULT)%'

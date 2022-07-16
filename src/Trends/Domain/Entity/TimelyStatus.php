@@ -2,7 +2,7 @@
 
 namespace App\Trends\Domain\Entity;
 
-use App\Twitter\Domain\Publication\MembersListInterface;
+use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Ownership\Domain\Entity\MembersList;

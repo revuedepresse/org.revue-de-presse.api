@@ -111,6 +111,6 @@ QUERY;
             $types
         );
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 }
