@@ -9,7 +9,7 @@ interface TokenInterface
 {
     public const FIELD_TOKEN = 'token';
     public const FIELD_SECRET = 'secret';
-    
+
     public function getAccessToken(): string;
 
     public function getAccessTokenSecret(): string;
@@ -44,5 +44,5 @@ interface TokenInterface
 
     public function firstIdentifierCharacters(): string;
 
-    public static function fromArray(array $token): self;
+    public static function fromProps(array $accessTokenProps): self;
 }

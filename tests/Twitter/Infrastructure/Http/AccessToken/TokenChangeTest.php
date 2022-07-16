@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Http\AccessToken\TokenChange;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Infrastructure\Http\Exception\CanNotReplaceAccessTokenException;
-use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Tests\Twitter\Infrastructure\Http\AccessToken\Builder\Repository\SimpleTokenRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Http\AccessToken\Builder\Repository\TokenRepositoryBuilder;
@@ -31,7 +31,7 @@ class TokenChangeTest extends TestCase
 
     /**
      * @test
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedAccessTokenProperties
      */
     public function it_does_not_replace_the_token_of_an_api_accessor(): void
     {
@@ -109,7 +109,7 @@ class TokenChangeTest extends TestCase
     {
         // Arrange
 
-        $expectedTokenReplacement = Token::fromArray(
+        $expectedTokenReplacement = Token::fromProps(
             [
                 'token'  => 'token-replacement',
                 'secret' => 'secret2'
@@ -154,12 +154,12 @@ class TokenChangeTest extends TestCase
 
     /**
      * @param Token|null $replacementToken
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedAccessTokenProperties
      */
     private function willFindReplacementToken(
         Token $replacementToken = null
     ): void {
-        $this->excludedToken = Token::fromArray(
+        $this->excludedToken = Token::fromProps(
             [
                 'token'  => 'token',
                 'secret' => 'secret'
@@ -179,7 +179,7 @@ class TokenChangeTest extends TestCase
     }
 
     private function willNotFindReplacementToken(): void {
-        $this->excludedToken = Token::fromArray(
+        $this->excludedToken = Token::fromProps(
             [
                 'token'  => 'token',
                 'secret' => 'secret'

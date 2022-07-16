@@ -7,7 +7,7 @@ use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchTweetsAmqpMessagesDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -108,7 +108,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
             $this->setUpDependencies();
         } catch (SkippableOperationException $exception) {
             $this->output->writeln($exception->getMessage());
-        } catch (InvalidSerializedTokenException $exception) {
+        } catch (UnexpectedAccessTokenProperties $exception) {
             $this->logger->info($exception->getMessage());
 
             return self::FAILURE;
@@ -119,7 +119,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
         try {
             $this->fetchTweetsAmqpMessagesDispatcher->dispatchFetchTweetsMessages(
                 InputToCurationRuleset::convertInputToCurationRuleset($input),
-                Token::fromArray($this->getTokensFromInputOrFallback()),
+                Token::fromProps($this->getTokensFromInputOrFallback()),
                 function ($message) {
                     $this->output->writeln($message);
                 }
@@ -164,12 +164,12 @@ EMERGENCY,
     }
 
     /**
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedAccessTokenProperties
      */
     private function setUpDependencies(): void
     {
         $this->httpClient->fromToken(
-            Token::fromArray(
+            Token::fromProps(
                 $this->getTokensFromInputOrFallback()
             )
         );

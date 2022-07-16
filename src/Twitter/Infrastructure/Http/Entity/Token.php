@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http\Entity;
 
 use App\Twitter\Domain\Http\Model\TokenInterface;
-use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
+use Assert\Assert;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -24,22 +25,26 @@ class Token implements TokenInterface
 {
     use TokenTrait;
 
+    const EXPECTED_SECRET = 'A secret is required';
+    const EXPECTED_SECRET_TYPE = 'A secret is expected to be a string.';
+    const EXPECTED_SECRET_LENGTH = 'A secret is expected to be non-empty.';
+
+    const EXPECTED_TOKEN = 'A token is required';
+    const EXPECTED_TOKEN_TYPE = 'A token is expected to be a string.';
+    const EXPECTED_TOKEN_LENGTH = 'A token is expected to be non-empty.';
+
     /**
-     * @var integer
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    protected $id;
+    protected int $id;
 
     /**
-     * @var string
-     *
      * @ORM\ManyToOne(targetEntity="TokenType", inversedBy="tokens", cascade={"all"})
      * @ORM\JoinColumn(name="type", referencedColumnName="id")
      */
-    protected $type;
+    protected TokenType $type;
 
     /**
      * @ORM\Column(name="token", type="string", length=255)
@@ -98,8 +103,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
      */
     public ?string $consumerSecret = null;
@@ -275,39 +278,58 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param array $properties
-     *
-     * @return static
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedAccessTokenProperties
      */
-    public static function fromArray(array $properties): self
+    public static function fromProps(array $accessTokenProps): self
     {
-        $token = new self();
+        $accessToken = new self();
 
-        if (!array_key_exists('token', $properties)) {
-            InvalidSerializedTokenException::throws('A token is required');
-        }
+        try {
+            if (!array_key_exists(self::FIELD_TOKEN, $accessTokenProps)) {
+                UnexpectedAccessTokenProperties::throws(self::EXPECTED_TOKEN);
+            }
 
-        if (!array_key_exists('secret', $properties)) {
-            InvalidSerializedTokenException::throws('A secret is required');
+            Assert::lazy()
+                ->that($accessTokenProps[self::FIELD_TOKEN])
+                    ->string(self::EXPECTED_TOKEN_TYPE)
+                    ->notEmpty(self::EXPECTED_TOKEN_LENGTH)
+                ->tryAll()
+                ->verifyNow();
+
+            if (!array_key_exists(self::FIELD_SECRET, $accessTokenProps)) {
+                UnexpectedAccessTokenProperties::throws(self::EXPECTED_SECRET);
+            }
+
+            Assert::lazy()
+                ->that($accessTokenProps[self::FIELD_SECRET])
+                    ->string(self::EXPECTED_SECRET_TYPE)
+                    ->notEmpty(self::EXPECTED_SECRET_LENGTH)
+                ->tryAll()
+                ->verifyNow();
+        } catch (\Exception $exception) {
+            UnexpectedAccessTokenProperties::throws(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         $consumerKey = null;
-        if (array_key_exists('consumer_key', $properties)) {
-            $consumerKey = $properties['consumer_key'];
+        if (array_key_exists('consumer_key', $accessTokenProps)) {
+            $consumerKey = $accessTokenProps['consumer_key'];
         }
 
         $consumerSecret = null;
-        if (array_key_exists('consumer_secret', $properties)) {
-            $consumerSecret = $properties['consumer_secret'];
+        if (array_key_exists('consumer_secret', $accessTokenProps)) {
+            $consumerSecret = $accessTokenProps['consumer_secret'];
         }
 
-        $token->setAccessToken($properties['token']);
-        $token->setAccessTokenSecret($properties['secret']);
-        $token->setConsumerKey($consumerKey);
-        $token->setConsumerSecret($consumerSecret);
+        $accessToken->setAccessToken($accessTokenProps[self::FIELD_TOKEN]);
+        $accessToken->setAccessTokenSecret($accessTokenProps[self::FIELD_SECRET]);
+        $accessToken->setConsumerKey($consumerKey);
+        $accessToken->setConsumerSecret($consumerSecret);
 
-        return $token;
+        return $accessToken;
     }
 
     public function isValid(): bool
@@ -327,6 +349,9 @@ class Token implements TokenInterface
         return $this->setFrozenUntil($this->nextFreezeEndsAt());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function unfreeze(): TokenInterface
     {
         return $this->setFrozenUntil(
@@ -337,6 +362,9 @@ class Token implements TokenInterface
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function nextFreezeEndsAt(): DateTimeInterface
     {
         return new DateTimeImmutable(
