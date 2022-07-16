@@ -18,6 +18,7 @@ use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -39,15 +40,11 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     private const TABLE_ALIAS = 'm';
 
-    /** @var PublishersListRepository */
     public PublishersListRepository $aggregateRepository;
 
     use PaginationAwareTrait;
 
     /**
-     * @param SearchParams $searchParams
-     *
-     * @return int
      * @throws NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
@@ -56,13 +53,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param string $maxLikeId
-     * @param string $screenName
-     *
-     * @return MemberInterface
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function declareMaxLikeIdForMemberWithScreenName(string $maxLikeId, string $screenName): MemberInterface
     {
@@ -76,13 +67,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param string $maxStatusId
-     * @param string $screenName
-     *
-     * @return MemberInterface
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function declareMaxStatusIdForMemberWithScreenName(string $maxStatusId, string $screenName)
     {
@@ -95,13 +80,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         return $this->saveMember($member);
     }
 
-    /**
-     * @param MemberInterface $user
-     *
-     * @return MemberInterface
-     * @throws OptimisticLockException*@throws ORMException
-     * @throws ORMException
-     */
     public function declareMemberAsFound(MemberInterface $user): MemberInterface
     {
         $user->setNotFound(false);
@@ -109,13 +87,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         return $this->saveMember($user);
     }
 
-    /**
-     * @param MemberInterface $user
-     *
-     * @return MemberInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function declareMemberAsNotFound(MemberInterface $user): MemberInterface
     {
         $user->setNotFound(true);
@@ -143,12 +114,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param string $screenName
-     *
-     * @return MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function declareMemberHavingScreenNameNotFound(string $screenName): MemberInterface
     {
@@ -162,29 +128,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param string $minLikeId
-     * @param string $screenName
-     *
-     * @return MemberInterface
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function declareMinLikeIdForMemberWithScreenName(string $minLikeId, string $screenName): MemberInterface
-    {
-        $member = $this->ensureMemberExists($screenName);
-
-        if ($member->minLikeId === null || ((int)$minLikeId < (int)$member->minLikeId)) {
-            $member->minLikeId = $minLikeId;
-        }
-
-        return $this->saveMember($member);
-    }
-
-    /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function declareMinStatusIdForMemberWithScreenName(
         string $minStatusId,
@@ -205,26 +149,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function declareTotalLikesOfMemberWithName(int $totalLikes, string $screenName): MemberInterface
-    {
-        $member = $this->ensureMemberExists($screenName);
-
-        if ($totalLikes > $member->totalLikes) {
-            $member->setTotalLikes($totalLikes);
-            $this->saveMember($member);
-        }
-
-        return $member;
-    }
-
-    /**
-     * @return MemberInterface
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function declareTotalStatusesOfMemberWithName(int $totalStatuses, string $screenName): MemberInterface
     {
@@ -240,9 +164,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param $screenName
-     *
-     * @return MemberInterface|null
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -258,9 +179,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param string $screenName
-     * @param string $twitterId
-     * @return Member|MemberInterface
      * @throws InvalidMemberIdentifier
      */
     public function declareUserAsProtected(string $screenName, string $twitterId)
@@ -280,50 +198,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param array $tokenInfo
-     *
-     * @return MemberInterface|null
-     * @throws DBALException
-     */
-    public function findByAuthenticationToken(array $tokenInfo): ?MemberInterface
-    {
-        /** @var Connection $connection */
-        $connection = $this->getEntityManager()->getConnection();
-        $query = <<<QUERY
-            SELECT usr_id member_id
-            FROM authentication_token a
-            LEFT JOIN weaving_user m
-            ON a.member_id = m.usr_id
-            WHERE a.token = ?
-QUERY;
-        $statement = $connection->executeQuery(
-            $query,
-            [$tokenInfo['sub']],
-            [\PDO::PARAM_STR]
-        );
-        $results = $statement->fetchAllAssociative();
-
-        if (
-            count($results) !== 1
-            || !array_key_exists('member_id', $results[0])
-        ) {
-            return null;
-        }
-
-        $member = $this->findOneBy(['id' => $results[0]['member_id']]);
-
-        if ($member instanceof MemberInterface) {
-            return $member;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param SearchParams $searchParams
-     *
-     * @return array
-     * @throws DBALException
+     * @throws Exception
      */
     public function findMembers(SearchParams $searchParams): array
     {
@@ -351,7 +226,6 @@ QUERY;
     }
 
     /**
-     * @return mixed
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -364,10 +238,7 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     *
-     * @return int|null
-     * @throws \App\Membership\Domain\Exception\InvalidMemberException
+     * @throws InvalidMemberException
      */
     public function getMinPublicationIdForMemberHavingScreenName(string $screenName): ?int
     {
@@ -384,7 +255,10 @@ QUERY;
         return $member->getMinStatusId();
     }
 
-    public function hasBeenUpdatedBetween7HoursAgoAndNow(string $screenName): bool
+    /**
+     * @throws Exception
+     */
+    public function hasBeenUpdatedBetweenHalfAnHourAgoAndNow(string $screenName): bool
     {
         $query = <<< QUERY
             SELECT 
@@ -393,10 +267,11 @@ QUERY;
                     NOW()::timestamp -
                     last_status_publication_date::timestamp
                 )
-            ) > 3600*7 AS has_been_updated_between_seven_hours_ago_and_now
+            ) < 3600 * 0.5 AS has_been_updated_between_half_an_hour_ago_and_now
             FROM weaving_user 
             WHERE
-            usr_twitter_username = '%s' 
+            usr_twitter_username = 'franceinter' 
+            -- considering the last 24 hours
             AND EXTRACT(EPOCH FROM (NOW()::timestamp - last_status_publication_date::timestamp)) < 24 * 3600;
 QUERY;
 
@@ -420,13 +295,11 @@ QUERY;
             return false;
         }
 
-        return (bool)$results[0]['has_been_updated_between_seven_hours_ago_and_now'];
+        return (bool)$results[0]['has_been_updated_between_half_an_hour_ago_and_now'];
     }
 
     /**
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function incrementTotalLikesOfMemberWithName(
         int    $likesToBeAdded,
@@ -444,8 +317,6 @@ QUERY;
 
     /**
      * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function incrementTotalStatusesOfMemberWithName(
         int    $statusesToBeAdded,
@@ -461,15 +332,6 @@ QUERY;
     }
 
     /**
-     * @param string      $twitterId
-     * @param string      $screenName
-     * @param bool        $protected
-     * @param bool        $suspended
-     * @param string|null $description
-     * @param int         $totalSubscriptions
-     * @param int         $totalSubscribees
-     *
-     * @return Member
      * @throws InvalidMemberIdentifier
      */
     public function make(
@@ -494,6 +356,8 @@ QUERY;
             $member->setTwitterID($twitterId);
         }
 
+        $screenName = strtolower($screenName);
+
         $member->setTwitterScreenName($screenName);
 
         $member->setEnabled(false);
@@ -514,6 +378,10 @@ QUERY;
         return $member;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     */
     public function memberHavingScreenName(string $screenName): MemberInterface
     {
         $queryBuilder = $this->createQueryBuilder('m');
@@ -562,6 +430,9 @@ QUERY;
         return $member;
     }
 
+    /**
+     * @throws InvalidMemberIdentifier
+     */
     public function saveApiConsumer(
         MemberIdentity $memberIdentity,
         string         $apiKey
@@ -586,12 +457,7 @@ QUERY;
     }
 
     /**
-     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
-     *
-     * @return MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveMemberFromIdentity(
         MemberIdentity $memberIdentity
@@ -601,12 +467,7 @@ QUERY;
     }
 
     /**
-     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
-     *
-     * @return MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveProtectedMember(
         MemberIdentity $memberIdentity
@@ -619,12 +480,7 @@ QUERY;
     }
 
     /**
-     * @param MemberIdentity $memberIdentity
-     *
-     * @return MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveSuspendedMember(
         MemberIdentity $memberIdentity
@@ -637,13 +493,6 @@ QUERY;
         );
     }
 
-    /**
-     * @param string $screenName
-     *
-     * @return MemberInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function suspendMember(string $screenName)
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
@@ -698,9 +547,6 @@ QUERY;
     }
 
     /**
-     * @param $identifier
-     *
-     * @return MemberInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -714,13 +560,7 @@ QUERY;
     }
 
     /**
-     * @param MemberInterface $member
-     *
-     * @return MemberInterface
-     * @throws OptimisticLockException
-     * @throws ORMException
      * @deprecated
-     *
      */
     protected function saveUser(MemberInterface $member)
     {
@@ -728,11 +568,7 @@ QUERY;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
-     * @param SearchParams $searchParams
-     *
-     * @return array
-     * @throws DBALException
+     * @throws Exception
      */
     private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): array
     {
@@ -829,10 +665,7 @@ QUERY;
     }
 
     /**
-     * @param SearchParams $searchParams
-     *
-     * @return array
-     * @throws DBALException
+     * @throws Exception
      */
     private function findRelatedAggregates(SearchParams $searchParams): array
     {
@@ -929,7 +762,6 @@ QUERY;
     }
 
     /**
-     * @return MemberInterface
      * @throws InvalidMemberIdentifier
      */
     private function saveMemberWithAdditionalProps(

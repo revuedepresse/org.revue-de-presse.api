@@ -72,7 +72,8 @@ class TwitterListCollectedEventRepository extends ServiceEntityRepository implem
                 ->that($decodedPayload)->isArray()
                 ->that($decodedPayload)->keyExists('response')
                 ->that($decodedPayload['response'])->isArray()
-            ->tryAll();
+            ->tryAll()
+            ->verifyNow();
 
             return MemberCollection::fromArray(array_map(
                 static fn ($member) => new MemberIdentity($member['screen_name'], $member['id']),

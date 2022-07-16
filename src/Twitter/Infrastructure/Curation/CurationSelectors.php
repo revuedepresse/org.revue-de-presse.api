@@ -9,7 +9,6 @@ use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use Assert\Assert;
 use function array_key_exists;
-use const INF;
 
 class CurationSelectors implements CurationSelectorsInterface
 {
@@ -40,9 +39,9 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private string $memberSelectorByScreenName;
 
-    private $maxTweetId;
+    private int $maxTweetId = PHP_INT_MAX;
 
-    private $minTweetId;
+    private int $minTweetId = PHP_INT_MIN;
 
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
@@ -65,27 +64,19 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this->dateBeforeWhichStatusAreCollected;
     }
 
-    public function maxStatusId()
+    public function maxStatusId(): int
     {
-        if ($this->maxTweetId === null) {
-            return INF;
-        }
-
         return $this->maxTweetId;
     }
 
-    public function minStatusId()
+    public function minStatusId(): int
     {
-        if ($this->minTweetId === null) {
-            return -INF;
-        }
-
         return $this->minTweetId;
     }
 
     public function oneOfTheOptionsIsActive(): bool
     {
-        return $this->publishersListId()
+        return $this->membersListId()
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
@@ -130,7 +121,7 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this;
     }
 
-    public function PublishersListId(): ?int
+    public function membersListId(): ?int
     {
         return $this->publishersListId;
     }

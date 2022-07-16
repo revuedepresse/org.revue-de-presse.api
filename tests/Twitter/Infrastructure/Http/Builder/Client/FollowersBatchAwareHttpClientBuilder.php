@@ -35,10 +35,10 @@ class FollowersBatchAwareHttpClientBuilder extends TestCase
     {
         $testCase = new self();
 
-        /** @var HttpClientInterface $apiAccessor */
-        $apiAccessor = $testCase->prophet()->prophesize(HttpClientInterface::class);
-        $apiAccessor->getApiBaseUrl()->willReturn('https://twitter.api');
-        $apiAccessor->contactEndpoint(Argument::any())
+        /** @var HttpClientInterface $httpClient */
+        $httpClient = $testCase->prophet()->prophesize(HttpClientInterface::class);
+        $httpClient->getApiBaseUrl()->willReturn('https://twitter.api');
+        $httpClient->contactEndpoint(Argument::any())
             ->will(function ($arguments) {
                 $endpoint = $arguments[0];
 
@@ -50,15 +50,17 @@ class FollowersBatchAwareHttpClientBuilder extends TestCase
                     return [];
                 }
 
+                $resourceFilePath = __DIR__ . '/' .$resourcePath;
+
                 return unserialize(
                     base64_decode(
-                        file_get_contents(__DIR__ . '/' .$resourcePath)
+                        file_get_contents($resourceFilePath)
                     )
                 );
             });
 
         return new FollowersBatchAwareHttpClient(
-            $apiAccessor->reveal(),
+            $httpClient->reveal(),
             new NullLogger()
         );
     }

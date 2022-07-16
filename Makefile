@@ -4,7 +4,7 @@ SHELL:=/bin/bash
 
 .PHONY: clear-app-cache
 
-.PHONY: consume-fetch-publication-messages dispatch-amqp-messages
+.PHONY: consume-fetch-publication-messages dispatch-fetch-tweets-amqp-messages
 
 .PHONY: purge-amqp-queue set-up-amqp-queues
 
@@ -12,7 +12,8 @@ SHELL:=/bin/bash
 
 .PHONY: start-database stop-database test
 
-WORKER ?= 'worker.revue-de-presse.org'
+COMPOSE_PROJECT_NAME ?= 'org_example_worker'
+WORKER ?= 'org.example.worker'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
 help: doc
@@ -27,7 +28,7 @@ clean: ## Remove worker container
 clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
-dispatch-amqp-messages: ## Dispatch AMQP Fetch publications messages
+dispatch-fetch-tweets-amqp-messages: ## Dispatch AMQP Fetch publications messages
 	@/bin/bash -c 'source fun.sh && dispatch_amqp_messages'
 
 consume-fetch-publication-messages: ## Consume AMQP Fetch publication messages
@@ -45,7 +46,7 @@ list-amqp-messages: ## List AMQP messags
 purge-amqp-queue: ## Purge queue
 	@/bin/bash -c 'source ./bin/console.sh && purge_queues'
 
-restart: clear-app-cache stop start ## Restart worker
+restart: clear-app-cache start ## Restart worker
 
 shell-process-manager: ## Get shell in process manager container
 	@/bin/bash -c 'source fun.sh && get_process_manager_shell'

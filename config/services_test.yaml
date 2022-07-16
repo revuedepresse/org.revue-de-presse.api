@@ -4,10 +4,12 @@ services:
         autowire: true
         autoconfigure: true
 
+    test.doctrine.dbal.connection: '@Doctrine\DBAL\Connection'
+
     test.event_repository.member_profile_collected:
         '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
-    test.App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets: '@App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'

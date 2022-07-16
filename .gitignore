@@ -1,8 +1,9 @@
 /.env*
 /.env.local.php
 /.env.*.local
-.phpunit.result.cache
 !/\.env*\.dist
+.phpunit.result.cache
+.pm2-installed
 auth.json
 bin/behat
 bin/console

@@ -89,9 +89,9 @@ class WhispererIdentification implements WhispererIdentificationInterface
         $countCollectedItems   = function (
             string $memberName
         ) {
-            return $this->statusRepository->countCollectedStatuses(
+            return $this->tweetRepository->countCollectedStatuses(
                 $memberName,
-                $maxId = INF
+                $maxId = PHP_INT_MAX
             );
         };
 

@@ -14,6 +14,8 @@ use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function sprintf;
@@ -35,8 +37,8 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     protected TweetCuratorInterface $curator;
 
     /**
-     * @throws \Doctrine\ORM\Exception\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function __invoke(FetchAuthoredTweetInterface $message): bool
     {

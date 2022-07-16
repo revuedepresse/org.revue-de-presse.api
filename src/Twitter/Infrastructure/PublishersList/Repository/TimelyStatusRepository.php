@@ -31,7 +31,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
      */
     public function fromArray(array $properties)
     {
-        $status = $this->statusRepository->findOneBy(['id' => $properties['status_id']]);
+        $status = $this->tweetRepository->findOneBy(['id' => $properties['status_id']]);
         $timelyStatus = $this->findOneBy([
             'status' => $status
         ]);

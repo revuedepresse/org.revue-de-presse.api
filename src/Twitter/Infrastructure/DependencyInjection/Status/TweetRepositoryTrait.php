@@ -7,11 +7,11 @@ use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 
 trait TweetRepositoryTrait
 {
-    private TweetRepositoryInterface $statusRepository;
+    private TweetRepositoryInterface $tweetRepository;
 
-    public function setStatusRepository(TweetRepositoryInterface $statusRepository): self
+    public function setTweetRepository(TweetRepositoryInterface $tweetRepository): self
     {
-        $this->statusRepository = $statusRepository;
+        $this->tweetRepository = $tweetRepository;
 
         return $this;
     }

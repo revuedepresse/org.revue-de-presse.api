@@ -15,6 +15,8 @@ use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\EntityManagerInterface;
 use Throwable;
 use const JSON_THROW_ON_ERROR;
 
@@ -71,6 +73,10 @@ class ListsBatchCollectedEventRepository extends ServiceEntityRepository impleme
         return $this->save($event);
     }
 
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
     private function save(OwnershipBatchCollectedEvent $event): OwnershipBatchCollectedEvent
     {
         $entityManager = $this->getEntityManager();
@@ -79,7 +85,7 @@ class ListsBatchCollectedEventRepository extends ServiceEntityRepository impleme
             $entityManager->persist($event);
             $entityManager->flush();
         } catch (Throwable $exception) {
-            $this->logger->error($exception->getMessage());
+            $this->handleMissingUuidOsspExtension($exception, $entityManager, $event);
         }
 
         return $event;
@@ -153,7 +159,8 @@ QUERY
                         ->that($decodedPayload)->isArray()
                         ->that($decodedPayload)->keyExists('response')
                         ->that($decodedPayload['response'])->isArray()
-                    ->tryAll();
+                    ->tryAll()
+                    ->verifyNow();
 
                     return array_map(
                         static fn ($publishersList) => new PublishersList($publishersList['id'], $publishersList['name']),
@@ -174,5 +181,29 @@ QUERY
         }
 
         ListsBatchNotFoundException::throws($screenName);
+    }
+
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    private function handleMissingUuidOsspExtension(
+        Throwable|\Exception $exception,
+        EntityManagerInterface $entityManager, OwnershipBatchCollectedEvent $event
+    ): void {
+        if (
+            $exception->getPrevious() &&
+            $exception->getPrevious()->getPrevious() &&
+            (string)$exception->getPrevious()->getPrevious()->getCode() === '42883'
+        ) {
+            $entityManager->getConnection()->executeQuery('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
+
+            $entityManager->persist($event);
+            $entityManager->flush();
+        } else {
+            $this->logger->error($exception->getMessage());
+
+            throw $exception;
+        }
     }
 }

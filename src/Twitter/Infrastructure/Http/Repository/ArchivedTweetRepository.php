@@ -13,10 +13,10 @@ use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -36,23 +36,21 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use JsonException;
 use Psr\Log\LoggerInterface;
 use function array_key_exists;
 use function count;
 use const JSON_THROW_ON_ERROR;
 
-/**
- * @package App\Twitter\Infrastructure\Http\Repository
- */
 class ArchivedTweetRepository extends ResourceRepository implements
     ExtremumAwareInterface,
     TweetRepositoryInterface
 {
     use MemberRepositoryTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use PublicationRepositoryTrait;
     use TweetCurationLoggerTrait;
-    use StatusPersistenceTrait;
+    use TweetPersistenceLayerTrait;
     use TaggedTweetRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
@@ -63,6 +61,14 @@ class ArchivedTweetRepository extends ResourceRepository implements
     public Connection $connection;
 
     public bool $shouldExtractProperties;
+
+    /**
+     * @throws JsonException
+     */
+    public function extractTweetReach(TweetInterface $tweet): array
+    {
+        return $this->collectStatusLogger->extractTweetReach($tweet);
+    }
 
     public function countCollectedStatuses(
         string $screenName,
@@ -76,7 +82,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
-            $extremumId < INF) {
+            $extremumId < PHP_INT_MAX) {
             $queryBuilder->andWhere('s.statusId <= :maxId');
             $queryBuilder->setParameter('maxId', $extremumId);
         }
@@ -189,10 +195,10 @@ class ArchivedTweetRepository extends ResourceRepository implements
             $this->appLogger->info($exception->getMessage());
 
             if ($direction === self::FINDING_IN_ASCENDING_ORDER) {
-                return [self::EXTREMUM_STATUS_ID => +INF];
+                return [self::EXTREMUM_STATUS_ID => PHP_INT_MAX];
             }
 
-            return [self::EXTREMUM_STATUS_ID => -INF];
+            return [self::EXTREMUM_STATUS_ID => PHP_INT_MIN];
         }
     }
 
@@ -278,7 +284,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             $this->appLogger
         );
 
-        return $this->TaggedTweetRepository->archivedStatusHavingHashExists(
+        return $this->taggedTweetRepository->archivedStatusHavingHashExists(
             $statusesProperties->first()->hash()
         );
     }
@@ -338,7 +344,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             }
 
             if (!($memberStatus instanceof TweetInterface)) {
-                $memberStatus = $this->TaggedTweetRepository
+                $memberStatus = $this->taggedTweetRepository
                     ->convertPropsToStatus($extract, $aggregate);
             }
 
@@ -347,7 +353,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             }
 
             if ($memberStatus instanceof ArchivedTweet) {
-                $memberStatus = $this->statusPersistence->unarchiveStatus(
+                $memberStatus = $this->tweetPersistenceLayer->unarchiveStatus(
                     $memberStatus,
                     $entityManager
                 );

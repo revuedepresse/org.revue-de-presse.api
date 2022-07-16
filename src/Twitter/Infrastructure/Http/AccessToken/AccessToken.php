@@ -5,9 +5,6 @@ namespace App\Twitter\Infrastructure\Http\AccessToken;
 
 class AccessToken
 {
-    /**
-     * @var string
-     */
     private string $accessToken;
 
     public function __construct(string $accessToken)
@@ -15,7 +12,7 @@ class AccessToken
         $this->accessToken = $accessToken;
     }
 
-    public function accessToken()
+    public function accessToken(): string
     {
         return $this->accessToken;
     }

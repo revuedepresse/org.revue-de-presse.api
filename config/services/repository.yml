@@ -101,7 +101,7 @@ services:
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
         tags:
@@ -109,14 +109,14 @@ services:
 
     App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface: '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
 
-    App\Twitter\Infrastructure\Publication\Repository\PublicationRepository:
-        class: 'App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
+    App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer:
+        class: 'App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Publication\Entity\Publication'
         calls:
-            - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
-            - [ 'setPublicationFormatter', [ '@App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
+            - [ 'setEntityManager',     [ '@doctrine.orm.entity_manager' ] ]
+            - [ 'setTweetFormatter',    [ '@App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -196,7 +196,7 @@ services:
         calls:
             - [ 'setLogger',                [ '@logger' ] ]
             - [ 'setTweetAwareHttpClient',  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setStatusRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
         properties:
             twitterList:                '%publishers_list_default%'
 
@@ -213,7 +213,7 @@ services:
             - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
             - [ 'setTweetAwareHttpClient',    [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
+            - [ 'setTweetRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
         class: 'App\Membership\Infrastructure\Repository\NetworkRepository'

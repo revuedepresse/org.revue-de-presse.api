@@ -27,7 +27,7 @@ class NullToken implements TokenInterface
         return false;
     }
 
-    public static function fromArray(array $token): self
+    public static function fromProps(array $accessTokenProps): self
     {
         return new self();
     }

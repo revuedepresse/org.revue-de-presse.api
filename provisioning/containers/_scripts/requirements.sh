@@ -2,20 +2,20 @@
 set -Eeuo pipefail
 
 function add_system_user_group() {
-    if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
+    if [ $(cat /etc/group | grep "${WORKER_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
-            --gid "${WORKER_GID}" \
+            --gid "${WORKER_OWNER_GID}" \
             worker
     fi
 
     useradd \
-        --gid ${WORKER_GID} \
+        --gid ${WORKER_OWNER_GID} \
         --home-dir=/var/www \
         --no-create-home \
         --no-user-group \
         --non-unique \
         --shell /usr/sbin/nologin \
-        --uid ${WORKER_UID} \
+        --uid ${WORKER_OWNER_UID} \
         worker
 }
 
@@ -34,7 +34,7 @@ function configure_blackfire_client() {
     | sed -E 's#__CLIENT_TOKEN__#'"${BLACKFIRE_CLIENT_TOKEN}"'#g' \
     > "${HOME}/.blackfire.ini"
 
-    chown "$WORKER_UID.${WORKER_GID}" "${HOME}/.blackfire.ini"
+    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini"
 }
 
 function create_log_files_when_non_existing() {

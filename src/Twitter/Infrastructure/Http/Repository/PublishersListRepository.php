@@ -382,7 +382,7 @@ QUERY;
                         continue;
                     }
 
-                    $statuses = $this->statusRepository
+                    $statuses = $this->tweetRepository
                         ->findByAggregate($twitterList);
 
                     /** @var TweetInterface $status */
