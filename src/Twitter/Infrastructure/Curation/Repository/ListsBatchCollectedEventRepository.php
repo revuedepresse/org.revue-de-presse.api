@@ -159,7 +159,8 @@ QUERY
                         ->that($decodedPayload)->isArray()
                         ->that($decodedPayload)->keyExists('response')
                         ->that($decodedPayload['response'])->isArray()
-                    ->tryAll();
+                    ->tryAll()
+                    ->verifyNow();
 
                     return array_map(
                         static fn ($publishersList) => new PublishersList($publishersList['id'], $publishersList['name']),
