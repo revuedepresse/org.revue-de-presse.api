@@ -131,7 +131,7 @@ function remove_running_container_and_image_in_debug_mode() {
 
     docker ps -a |
         \grep "${project_name}" |
-        \grep "${container_name}" |
+        \grep "\-${container_name}\-" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
 
@@ -139,7 +139,7 @@ function remove_running_container_and_image_in_debug_mode() {
     then
         docker images -a |
             \grep "${project_name}" |
-            \grep "${container_name}" |
+            \grep "\-${container_name}\-" |
             awk '{print $3}' |
             xargs -I{} docker rmi -f {}
 
