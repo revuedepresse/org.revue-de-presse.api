@@ -191,9 +191,13 @@ function install_process_manager() {
     echo '' > ./.pm2-installed
 }
 
-function install_process_manager_packages() {
+function upgrade_packages_source() {
     apt update
     apt upgrade
+}
+
+function install_process_manager_packages() {
+    upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
     apt-get install --assume-yes \
@@ -220,8 +224,7 @@ function install_shared_requirements() {
 }
 
 function install_shared_system_packages() {
-    # Update package source repositories
-    apt-get update
+    upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
     apt-get install --assume-yes \
@@ -239,7 +242,8 @@ function install_shared_system_packages() {
 }
 
 function install_worker_system_packages() {
-    # Install packages with package management system frontend (apt)
+    upgrade_packages_source
+
     apt-get install --assume-yes \
         libcurl4-gnutls-dev \
         libicu-dev \
