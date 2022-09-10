@@ -192,6 +192,9 @@ function install_process_manager() {
 }
 
 function install_process_manager_packages() {
+    apt update
+    apt upgrade
+
     # Install packages with package management system frontend (apt)
     apt-get install --assume-yes \
         curl \
