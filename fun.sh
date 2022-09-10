@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 function build() {
+    local DEBUG
     local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
@@ -35,16 +36,35 @@ function build() {
 
     fi
 
-    docker compose \
-        --file=./provisioning/containers/docker-compose.yaml \
-        --file=./provisioning/containers/docker-compose.override.yaml \
-        build \
-        --build-arg "WORKER_DIR=${WORKER}" \
-        --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-        --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
-        app \
-        process-manager \
-        worker
+    if [ -n "${DEBUG}" ];
+    then
+
+      docker compose \
+          --file=./provisioning/containers/docker-compose.yaml \
+          --file=./provisioning/containers/docker-compose.override.yaml \
+          build \
+          --no-cache \
+          --build-arg "WORKER_DIR=${WORKER}" \
+          --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+          app \
+          process-manager \
+          worker
+
+    else
+
+      docker compose \
+          --file=./provisioning/containers/docker-compose.yaml \
+          --file=./provisioning/containers/docker-compose.override.yaml \
+          build \
+          --build-arg "WORKER_DIR=${WORKER}" \
+          --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+          app \
+          process-manager \
+          worker
+
+    fi
 }
 
 function dispatch_amqp_messages() {
