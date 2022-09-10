@@ -1,4 +1,4 @@
-FROM        php:8.1-cli-bullseye
+FROM        php:8.2-rc-cli-bullseye
 
 ENV         WORKER='org.example.worker'
 
