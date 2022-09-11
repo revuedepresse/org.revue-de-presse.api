@@ -206,6 +206,8 @@ function install_process_manager() {
 function upgrade_packages_source() {
     echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
 
+    apt update  --assume-yes
+    apt upgrade --assume-yes
 }
 
 function install_process_manager_packages() {
