@@ -214,7 +214,9 @@ function install_process_manager_packages() {
     upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         curl \
         gawk \
         git \
@@ -241,7 +243,9 @@ function install_shared_system_packages() {
     upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         apt-utils \
         ca-certificates \
         git \
@@ -258,7 +262,9 @@ function install_shared_system_packages() {
 function install_worker_system_packages() {
     upgrade_packages_source
 
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         libcurl4-gnutls-dev \
         libicu-dev \
         libjpeg-dev \
