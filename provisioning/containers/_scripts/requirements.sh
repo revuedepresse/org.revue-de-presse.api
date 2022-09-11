@@ -134,7 +134,9 @@ function install_php_extensions() {
     make install
 
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
+    --tries=40 \
     --output-document=/tmp/datadog-setup.php
+
     cd /tmp || exit
     php datadog-setup.php \
     --php-bin all \
