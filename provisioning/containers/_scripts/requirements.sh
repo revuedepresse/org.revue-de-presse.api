@@ -181,7 +181,17 @@ function install_process_manager() {
 
     source "${HOME}/.bashrc"
 
-    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+    if [ $(asdf plugin list | grep -c 'nodejs') -eq 0 ];
+    then
+
+        asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+    else
+
+        printf '`%s` plugin for asdf has been installed already.%s' 'nodejs' '%s' 1>&2
+
+    fi
+
     asdf install nodejs 16.15.1
     asdf global nodejs 16.15.1
 
