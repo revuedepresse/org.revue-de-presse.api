@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http\Client;
 
 use App\Membership\Domain\Exception\InvalidMemberException;
+use App\Membership\Domain\Exception\MembershipException;
 use App\Membership\Domain\Model\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
@@ -68,7 +69,7 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
 
     /**
      * @throws UnexpectedApiResponseException
-     * @throws \App\Membership\Domain\Exception\MembershipException
+     * @throws MembershipException
      */
     public function getMemberByIdentity(
         MemberIdentity $memberIdentity

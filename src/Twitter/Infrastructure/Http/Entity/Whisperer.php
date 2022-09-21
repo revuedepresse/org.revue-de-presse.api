@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use \stdClass;
 
 /**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
  * @ORM\Entity
  * @ORM\Table(name="weaving_whisperer",
  *  uniqueConstraints={

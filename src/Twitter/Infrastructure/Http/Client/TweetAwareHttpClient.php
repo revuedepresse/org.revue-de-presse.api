@@ -15,7 +15,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfile
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\TweetBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -31,7 +31,6 @@ use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseExcept
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -42,40 +41,36 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-class TweetAwareHttpClient implements TweetAwareHttpClientInterface
+class TweetAwareHttpClient implements
+    TweetAwareHttpClientInterface
 {
     use HttpClientTrait;
     use MemberProfileCollectedEventRepositoryTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use LoggerTrait;
-    use TweetRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
+    use TweetRepositoryTrait;
 
-    public ArchivedTweetRepository $archivedStatusRepository;
-
+    public ArchivedTweetRepository $archivedTweetRepository;
     public EntityManagerInterface $entityManager;
+    public NotFoundStatusRepository $notFoundTweetRepository;
 
-    public NotFoundStatusRepository $notFoundStatusRepository;
-
-    /**
-     * @param string $identifier
-     */
     public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
-        $status = $this->statusRepository->findOneBy(['statusId' => $identifier]);
+        $status = $this->tweetRepository->findOneBy(['statusId' => $identifier]);
         if ($status === null) {
-            $status = $this->archivedStatusRepository
+            $status = $this->archivedTweetRepository
                 ->findOneBy(['statusId' => $identifier]);
         }
 
         $existingRecord = false;
         if ($status instanceof Tweet) {
-            $existingRecord = $this->notFoundStatusRepository->findOneBy(['status' => $status]) !== null;
+            $existingRecord = $this->notFoundTweetRepository->findOneBy(['status' => $status]) !== null;
         }
 
         if ($status instanceof ArchivedTweet) {
-            $existingRecord = $this->notFoundStatusRepository->findOneBy(['archivedStatus' => $status]) !== null;
+            $existingRecord = $this->notFoundTweetRepository->findOneBy(['archivedStatus' => $status]) !== null;
         }
 
         if ($existingRecord) {
@@ -86,18 +81,13 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             return;
         }
 
-        $notFoundStatus = $this->notFoundStatusRepository->markStatusAsNotFound($status);
+        $notFoundStatus = $this->notFoundTweetRepository->markStatusAsNotFound($status);
 
         $this->entityManager->persist($notFoundStatus);
         $this->entityManager->flush();
     }
 
     /**
-     * @param string $statusId
-     * @param bool   $skipExistingStatus
-     * @param bool   $extractProperties
-     *
-     * @return TweetInterface|TaggedStatus|NullStatus|array|null
      * @throws Exception
      */
     public function refreshStatusByIdentifier(
@@ -105,11 +95,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         bool $skipExistingStatus = false,
         bool $extractProperties = true
     ) {
-        $this->statusRepository->shouldExtractProperties = $extractProperties;
+        $this->tweetRepository->shouldExtractProperties = $extractProperties;
 
         $status = null;
         if (!$skipExistingStatus) {
-            $status = $this->statusRepository
+            $status = $this->tweetRepository
                 ->findStatusIdentifiedBy($statusId);
         }
 
@@ -123,7 +113,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $this->entityManager->clear();
 
         try {
-            $this->publicationPersistence->persistStatusPublications(
+            $this->persistenceLayer->persistTweetsCollection(
                 [$status],
                 new AccessToken($this->httpClient->userToken)
             );
@@ -210,7 +200,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      */
     private function findStatusIdentifiedBy(string $identifier)
     {
-        $status = $this->statusRepository->findStatusIdentifiedBy(
+        $status = $this->tweetRepository->findStatusIdentifiedBy(
             $identifier
         );
 
@@ -257,11 +247,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     }
 
     /**
-     * @param CurationSelectorsInterface $selectors
-     * @param array                      $options
-     * @param bool                       $discoverPublicationWithMaxId
-     *
-     * @return array
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -276,7 +261,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function fetchPublications(
+    public function fetchTweets(
         CurationSelectorsInterface $selectors,
                                    $options,
         bool                       $discoverPublicationWithMaxId = true
@@ -306,7 +291,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         $discoverMoreRecentStatuses = false;
         if (
             count($statuses) > 0
-            && $this->statusRepository->findOneBy(
+            && $this->tweetRepository->findOneBy(
                 ['statusId' => $statuses[0]->id]
             ) instanceof TweetInterface
         ) {
@@ -323,7 +308,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                 unset($options['max_id']);
             }
 
-            $statuses = $this->fetchPublications(
+            $statuses = $this->fetchTweets(
                 $selectors,
                 $options,
                 $discoverPublicationWithMaxId = false
@@ -357,7 +342,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $option = $this->getExtremumOption($discoverPublicationsWithMaxId);
             $shift  = $this->getShiftFromExtremum($discoverPublicationsWithMaxId);
 
-            if ($extremum['statusId'] === '-INF' && $option === 'max_id') {
+            if ($extremum['statusId'] === PHP_INT_MIN && $option === 'max_id') {
                 $extremum['statusId'] = 0;
             }
 
@@ -411,14 +396,14 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
                                    $findingDirection
     ): array {
         if ($selectors->dateBeforeWhichPublicationsAreToBeCollected()) {
-            return $this->statusRepository->findNextExtremum(
+            return $this->tweetRepository->findNextExtremum(
                 $options[FetchAuthoredTweetInterface::SCREEN_NAME],
                 $findingDirection,
                 $selectors->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
-        return $this->statusRepository->findLocalMaximum(
+        return $this->tweetRepository->findLocalMaximum(
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $selectors->dateBeforeWhichPublicationsAreToBeCollected()
         );

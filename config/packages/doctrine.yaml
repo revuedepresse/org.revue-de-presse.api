@@ -230,6 +230,20 @@ doctrine:
                         prefix:     App\Membership\Infrastructure\Entity
                         type:       xml
 
+                    SavedSearch:
+                        alias:      'SavedSearch'
+                        dir:        '%kernel.project_dir%/config/model/search'
+                        is_bundle:  false
+                        prefix:     App\Search\Domain\Entity
+                        type:       xml
+
+                    SearchMatchingStatus:
+                        alias:      'SearchMatchingStatus'
+                        dir:        '%kernel.project_dir%/config/model/search'
+                        is_bundle:  false
+                        prefix:     App\Search\Domain\Entity
+                        type:       xml
+
                     Popularity:
                         alias:      'Popularity'
                         dir:        '%kernel.project_dir%/config/model/popularity'

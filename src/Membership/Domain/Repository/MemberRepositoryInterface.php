@@ -28,5 +28,5 @@ interface MemberRepositoryInterface
 
     public function getMinPublicationIdForMemberHavingScreenName(string $screenName): ?int;
 
-    public function hasBeenUpdatedBetween7HoursAgoAndNow(string $screenName): bool;
+    public function hasBeenUpdatedBetweenHalfAnHourAgoAndNow(string $screenName): bool;
 }

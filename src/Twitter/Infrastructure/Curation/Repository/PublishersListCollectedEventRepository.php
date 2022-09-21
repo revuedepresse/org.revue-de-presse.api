@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
-use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Http\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Curation\Exception\PublishersListNotFoundException;
 use App\Twitter\Domain\Curation\Repository\PublishersListCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Http\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Curation\Entity\PublishersListCollectedEvent;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -72,7 +72,8 @@ class PublishersListCollectedEventRepository extends ServiceEntityRepository imp
                 ->that($decodedPayload)->isArray()
                 ->that($decodedPayload)->keyExists('response')
                 ->that($decodedPayload['response'])->isArray()
-            ->tryAll();
+            ->tryAll()
+            ->verifyNow();
 
             return MemberCollection::fromArray(array_map(
                 static fn ($member) => new MemberIdentity($member['screen_name'], $member['id']),

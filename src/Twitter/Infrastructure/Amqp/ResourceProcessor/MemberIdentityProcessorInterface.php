@@ -15,7 +15,7 @@ interface MemberIdentityProcessorInterface
 {
     /**
      * @throws ContinuePublicationException
-     * @throws \App\Membership\Domain\Exception\MembershipException
+     * @throws MembershipException
      * @throws StopPublicationException
      */
     public function process(

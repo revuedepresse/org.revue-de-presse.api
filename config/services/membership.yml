@@ -5,7 +5,7 @@ services:
             - [ 'setHttpClient',                            [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setTweetCurationLogger',                   [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',                      [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setTranslator',                            [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]

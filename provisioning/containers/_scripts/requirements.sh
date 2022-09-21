@@ -2,20 +2,20 @@
 set -Eeuo pipefail
 
 function add_system_user_group() {
-    if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
+    if [ $(cat /etc/group | grep "${WORKER_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
-            --gid "${WORKER_GID}" \
+            --gid "${WORKER_OWNER_GID}" \
             worker
     fi
 
     useradd \
-        --gid ${WORKER_GID} \
+        --gid ${WORKER_OWNER_GID} \
         --home-dir=/var/www \
         --no-create-home \
         --no-user-group \
         --non-unique \
         --shell /usr/sbin/nologin \
-        --uid ${WORKER_UID} \
+        --uid ${WORKER_OWNER_UID} \
         worker
 }
 
@@ -34,7 +34,7 @@ function configure_blackfire_client() {
     | sed -E 's#__CLIENT_TOKEN__#'"${BLACKFIRE_CLIENT_TOKEN}"'#g' \
     > "${HOME}/.blackfire.ini"
 
-    chown "$WORKER_UID.${WORKER_GID}" "${HOME}/.blackfire.ini"
+    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini"
 }
 
 function create_log_files_when_non_existing() {
@@ -113,25 +113,37 @@ function install_php_extensions() {
 
     docker-php-ext-enable opcache
 
-    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip \
-    --output-document /tmp/3.1.4.zip
+    local version
+    version='3.1.5'
+
+    wget https://github.com/xdebug/xdebug/archive/${version}.zip \
+        --output-document "/tmp/${version}.zip"
+
     cd /tmp || exit
-    unzip /tmp/3.1.4.zip
-    cd xdebug-3.1.4 || exit
+    unzip "/tmp/${version}.zip"
+    cd "xdebug-${version}" || exit
+
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz \
+    wget https://github.com/DataDog/dd-trace-php/archive/0.79.0.tar.gz \
     --output-document=/tmp/datadog-php-tracer.tar.gz
+
     cd /tmp || exit
-    tar -xvzf /tmp/datadog-php-tracer.tar.gz
-    cd dd-trace-php-0.74.0 || exit
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
+
+    (
+
+        tar xvzf /tmp/datadog-php-tracer.tar.gz
+        cd /tmp/dd-trace-php-0.79.0 || exit
+
+        phpize .
+        ./configure --with-php-config="$(which php-config)"
+        make
+        make install
+
+    )
 
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
     --output-document=/tmp/datadog-setup.php

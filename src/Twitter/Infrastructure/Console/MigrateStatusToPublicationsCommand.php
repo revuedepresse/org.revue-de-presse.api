@@ -3,20 +3,16 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Console;
 
-use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
+use App\Twitter\Domain\Publication\Repository\TweetPublicationPersistenceLayerInterface;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
 
-/**
- * @package App\Twitter\Command
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
 class MigrateStatusToPublicationsCommand extends Command
 {
-    private PublicationRepositoryInterface $publicationRepository;
+    private TweetPublicationPersistenceLayerInterface $publicationRepository;
 
-    public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository): void
+    public function setTweetPublicationPersistenceLayer(TweetPublicationPersistenceLayerInterface $publicationRepository): void
     {
         $this->publicationRepository = $publicationRepository;
     }

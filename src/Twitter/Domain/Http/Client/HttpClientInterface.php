@@ -6,16 +6,12 @@ namespace App\Twitter\Domain\Http\Client;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use stdClass;
 
-interface HttpClientInterface extends ApiErrorCodeAwareInterface
+interface HttpClientInterface extends TwitterAPIAwareInterface
 {
-    public const BASE_URL = 'https://api.twitter.com/';
-
-    public const TWITTER_API_VERSION_1_1 = '1.1';
-
-    public const TWITTER_API_VERSION_2 = '2';
+    public function contactEndpoint(string $endpoint);
 
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface;
 
@@ -43,6 +39,4 @@ interface HttpClientInterface extends ApiErrorCodeAwareInterface
     public function getListMembers(string $listId): MemberCollectionInterface;
 
     public function getMemberProfile(string $identifier): stdClass;
-
-    public function contactEndpoint(string $endpoint);
 }

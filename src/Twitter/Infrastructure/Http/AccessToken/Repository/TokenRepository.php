@@ -7,11 +7,13 @@ use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Repository\TokenTypeRepositoryInterface;
 use App\Twitter\Domain\Http\Security\Authorization\AccessTokenInterface;
+use App\Twitter\Infrastructure\Http\Entity\NullToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Entity\TokenType;
 use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -22,6 +24,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use Throwable;
 
 /**
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -338,6 +341,24 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $queryBuilder->getQuery()->getSingleResult();
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties
+     */
+    private function guardAgainstNullToken(TokenInterface $token): void
+    {
+        if (
+            strlen(trim($token->getAccessToken())) === 0 ||
+            strlen(trim($token->getAccessTokenSecret())) === 0 ||
+            strlen(trim($token->getConsumerKey())) === 0 ||
+            strlen(trim($token->getConsumerSecret())) === 0
+        ) {
+            UnexpectedAccessTokenProperties::throws('Null Token');
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
     private function save(TokenInterface $token): TokenInterface
     {
         $token->setUpdatedAt(new DateTime('now', new DateTimeZone('UTC')));
@@ -345,12 +366,22 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $entityManager = $this->getEntityManager();
 
         try {
+            $this->guardAgainstNullToken($token);
+
             $entityManager->persist($token);
             $entityManager->flush();
 
             return $token;
-        } catch (\Throwable $exception) {
-            $this->logger->error($exception->getMessage(), ['token' => $token->getAccessToken()]);
+        } catch (Throwable $exception) {
+            $this->logger->error(
+                $exception->getMessage(),
+                [
+                    'token' => $token->getAccessToken(),
+                    'stacktrace' => $exception->getTraceAsString()
+                ]
+            );
+
+            return NullToken::fromProps([]);
         }
     }
 

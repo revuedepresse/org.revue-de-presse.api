@@ -5,10 +5,10 @@ namespace App\Twitter\Infrastructure\Http\Client;
 
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use stdClass;
 
-class MembersBatchAwareHttpClient implements ApiEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
+class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
 {
     private HttpClientInterface $accessor;
 

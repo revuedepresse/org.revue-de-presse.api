@@ -11,10 +11,10 @@ use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\EmptyErrorCodeException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -56,11 +56,13 @@ use const PHP_URL_QUERY;
 use const PHP_URL_SCHEME;
 use const PHP_URL_USER;
 
-/**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
-class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
+class HttpClient implements
+    HttpClientInterface,
+    HttpSearchParamReducerInterface,
+    TwitterAPIEndpointsAwareInterface
 {
+    use HttpSearchParamReducerTrait;
+
     private const MAX_RETRIES = 5;
 
     public string $environment = 'dev';
@@ -122,14 +124,10 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         return 'https://' . $this->apiHost . '/' . $version;
     }
 
-    /**
-     * @param string $endpoint
-     * @return array|object
-     */
     public function connectToEndpoint(
         string $endpoint,
         array $parameters = []
-    ) {
+    ): array|stdClass {
         $matches = [];
 
         // [Enables the authenticated user to add a member to a List they own.](https://developer.twitter.com/en/docs/twitter-api/lists/list-members/api-reference/post-lists-id-members)
@@ -149,15 +147,15 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
         $path = $this->reducePath($endpoint, $version);
 
-        $endpointContainsListsMembers = strpos($endpoint, 'lists/members.json') !== false;
+        $endpointContainsListsMembers = str_contains($endpoint, 'lists/members.json');
 
         $parameters = $this->reduceParameters($endpoint, $parameters);
 
         if (
             $isAddMemberToListEndpoint
-            || strpos($endpoint, 'create.json') !== false
-            || strpos($endpoint, 'destroy.json') !== false
-            || strpos($endpoint, 'destroy_all.json') !== false
+            || str_contains($endpoint, 'create.json')
+            || str_contains($endpoint, 'destroy.json')
+            || str_contains($endpoint, 'destroy_all.json')
         ) {
             $response = $this->twitterClient->post($path, $parameters, $sendJSONBodyParameters);
 
@@ -247,7 +245,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      */
     public function contactEndpointUsingConsumerKey(
         string $endpoint,
-        Token $token
+        TokenInterface $token
     ) {
         $this->setUpTwitterClient(
             $token->getConsumerKey(),
@@ -435,7 +433,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      */
     public function getTwitterErrorCodes()
     {
-        $reflection = new \ReflectionClass(ApiErrorCodeAwareInterface::class);
+        $reflection = new \ReflectionClass(TwitterAPIAwareInterface::class);
 
         return $reflection->getConstants();
     }
@@ -490,36 +488,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         );
     }
 
-    /**
-     * @param string $endpoint
-     * @param array  $parameters
-     *
-     * @return array|mixed
-     */
-    private function reduceParameters(string $endpoint, array $parameters)
-    {
-        $queryParams = explode(
-            '&',
-            parse_url($endpoint, PHP_URL_QUERY)
-        );
-
-        return array_reduce(
-            $queryParams,
-            function ($parameters, $queryParam) {
-                $keyValue                 = explode('=', $queryParam);
-                $parameters[$keyValue[0]] = $keyValue[1];
-
-                return $parameters;
-            },
-            $parameters
-        );
-    }
-
-    /**
-     * @param string $endpoint
-     * @param $version
-     * @return string
-     */
     private function reducePath(string $endpoint, $version = self::TWITTER_API_VERSION_1_1): string
     {
         return strtr(
@@ -592,7 +560,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
                 while ($apiLimitReached && $unfrozenToken) {
                     try {
                         $apiLimitReached = !$this->isApiAvailableForToken($endpoint, $token);
-                    } catch (ApiAccessRateLimitException $e) {
+                    } catch (\Throwable $e) {
                         $this->logger->info($e->getMessage(), ['exception' => $e]);
                     }
 
@@ -647,7 +615,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             $options['max_id'] = $options['since_id'] - 2;
             unset($options['since_id']);
         } else {
-            $options['max_id'] = INF;
+            $options['max_id'] = PHP_INT_MAX;
         }
 
         return $options;
@@ -904,12 +872,11 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param string $endpoint
-     *
-     * @return Token|null
      * @throws ApiAccessRateLimitException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
      */
-    public function preEndpointContact(string $endpoint): ?TokenInterface
+    public function preEndpointContact(string $endpoint): TokenInterface
     {
         $tokens = $this->getTokens();
 
@@ -921,57 +888,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         }
 
         return $this->guardAgainstApiLimit($endpoint);
-    }
-
-    /**
-     * @param string $query
-     *
-     * @return stdClass|array
-     * @throws ApiAccessRateLimitException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws TweetNotFoundException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function saveSearch(string $query)
-    {
-        $endpoint = $this->getCreateSavedSearchEndpoint() . "query=$query";
-
-        return $this->contactEndpoint($endpoint);
-    }
-
-    /**
-     * @param string $query
-     * @param string $params
-     *
-     * @return stdClass
-     * @throws ApiAccessRateLimitException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws TweetNotFoundException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function search(string $query, string $params = ''): stdClass
-    {
-        $endpoint = $this->getSearchEndpoint() . "q=$query&count=100" . $params;
-
-        return $this->contactEndpoint($endpoint);
     }
 
     public function fromToken(TokenInterface $token): void
@@ -1126,9 +1042,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param $identifier
-     *
-     * @return array|stdClass
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -1370,16 +1283,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      *
      * @return string
      */
-    protected function getCreateSavedSearchEndpoint($version = self::TWITTER_API_VERSION_1_1)
-    {
-        return $this->getApiBaseUrl($version) . '/saved_searches/create.json?';
-    }
-
-    /**
-     * @param string $version
-     *
-     * @return string
-     */
     protected function getDestroyFriendshipsEndpoint($version = self::TWITTER_API_VERSION_1_1)
     {
         return $this->getApiBaseUrl($version) . '/friendships/destroy.json?screen_name={{ screen_name }}';
@@ -1417,16 +1320,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     {
         return $this->getApiBaseUrl($version) . self::API_ENDPOINT_RATE_LIMIT_STATUS. '.json?' .
             'resources=favorites,statuses,users,lists,friends,friendships,followers';
-    }
-
-    /**
-     * @param string $version
-     *
-     * @return string
-     */
-    protected function getSearchEndpoint($version = self::TWITTER_API_VERSION_1_1): string
-    {
-        return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
     }
 
     /**
@@ -1726,15 +1619,16 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param string $endpoint
-     * @return array|object|stdClass
      * @throws ApiAccessRateLimitException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
      */
     private function fetchContent(string $endpoint)
     {
-        $token = $this->preEndpointContact($endpoint);
-
-        return $this->contactEndpointUsingConsumerKey($endpoint, $token);
+        return $this->contactEndpointUsingConsumerKey(
+            $endpoint,
+            $this->preEndpointContact($endpoint)
+        );
     }
 
     /**

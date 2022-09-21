@@ -11,16 +11,16 @@ trait TimeRangeAwareTrait
 {
     public function updateTimeRange(): TimeRangeAwareInterface
     {
-        /** @var Tweet $status */
-        $status = $this->status;
-        $statusPublicationDate = $status->getCreatedAt();
+        /** @var Tweet $tweet */
+        $tweet = $this->tweet;
+        $tweetPublicationDate = $tweet->getCreatedAt();
 
-        $this->timeRange = $this->mapDateToTimeRange($statusPublicationDate);
+        $this->timeRange = $this->mapDateToTimeRange($tweetPublicationDate);
 
         return $this;
     }
 
-    public function mapDateToTimeRange(DateTime $statusPublicationDate)
+    public function mapDateToTimeRange(\DateTimeInterface $tweetPublicationDate)
     {
         $now = new DateTime('now', new \DateTimeZone('UTC'));
 
@@ -30,31 +30,31 @@ trait TimeRangeAwareTrait
         $oneDayAgo = (clone $now)->sub(new \DateInterval('P1D'));
         $oneWeekAgo = (clone $now)->sub(new \DateInterval('P1W'));
 
-        if ($statusPublicationDate > $fiveMinutesAgo) {
+        if ($tweetPublicationDate > $fiveMinutesAgo) {
             $timeRange = self::RANGE_SINCE_5_MIN_AGO;
 
             return $timeRange;
         }
 
-        if ($statusPublicationDate > $fiveMinutesAgo && $statusPublicationDate > $tenMinutesAgo) {
+        if ($tweetPublicationDate > $fiveMinutesAgo && $tweetPublicationDate > $tenMinutesAgo) {
             $timeRange = self::RANGE_FROM_10_MIN_AGO_TO_5_MIN_AGO;
 
             return $timeRange;
         }
 
-        if ($statusPublicationDate < $tenMinutesAgo && $statusPublicationDate > $thirtyMinutesAgo) {
+        if ($tweetPublicationDate < $tenMinutesAgo && $tweetPublicationDate > $thirtyMinutesAgo) {
             $timeRange = self::RANGE_FROM_30_MIN_AGO_TO_10_MIN_AGO;
 
             return $timeRange;
         }
 
-        if ($statusPublicationDate < $thirtyMinutesAgo && $statusPublicationDate > $oneDayAgo) {
+        if ($tweetPublicationDate < $thirtyMinutesAgo && $tweetPublicationDate > $oneDayAgo) {
             $timeRange = self::RANGE_FROM_1_DAY_AGO_TO_30_MIN_AGO;
 
             return $timeRange;
         }
 
-        if ($statusPublicationDate < $oneDayAgo && $statusPublicationDate > $oneWeekAgo) {
+        if ($tweetPublicationDate < $oneDayAgo && $tweetPublicationDate > $oneWeekAgo) {
             $timeRange = self::RANGE_FROM_1_WEEK_AGO_TO_1_DAY_AGO;
 
             return $timeRange;

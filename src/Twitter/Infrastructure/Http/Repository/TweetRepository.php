@@ -5,9 +5,12 @@ namespace App\Twitter\Infrastructure\Http\Repository;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
@@ -27,8 +30,6 @@ use function min;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- *
  * @method Tweet|null find($id, $lockMode = null, $lockVersion = null)
  * @method Tweet|null findOneBy(array $criteria, array $orderBy = null)
  * @method Tweet[]    findAll()
@@ -36,7 +37,7 @@ use const JSON_THROW_ON_ERROR;
  */
 class TweetRepository extends ArchivedTweetRepository
 {
-    public ArchivedTweetRepository $archivedStatusRepository;
+    public ArchivedTweetRepository $archivedTweetRepository;
 
     public function fromArray($properties): TweetInterface
     {
@@ -81,7 +82,7 @@ class TweetRepository extends ArchivedTweetRepository
             $column = key($orderBy);
             reset($orderBy);
 
-            $queryBuilder->select("${tableAlias}.${column}");
+            $queryBuilder->addSelect("${tableAlias}.${column}");
             $queryBuilder->orderBy("${tableAlias}.${column}", $orderBy[$column]);
         }
 
@@ -105,9 +106,16 @@ class TweetRepository extends ArchivedTweetRepository
         return $status;
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \JsonException
+     */
     public function countHowManyStatusesFor(string $screenName): int
     {
         $member = $this->memberRepository->memberHavingScreenName($screenName);
+        $totalStatuses = $this->refreshTotalTweetsPublishedByMemberHavingScreenName($screenName);
 
         if ($member->totalTweets() !== 0) {
             try {
@@ -124,29 +132,19 @@ class TweetRepository extends ArchivedTweetRepository
             );
 
             if ($decodedStatusDocument['user']['statuses_count'] > CurationSelectorsInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
-                return $decodedStatusDocument['user']['statuses_count'];
+                return min($totalStatuses, $decodedStatusDocument['user']['statuses_count']);
             }
 
             return $member->totalTweets();
         }
 
-        $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')
-            ->andWhere('s.screenName = :screenName');
-
-        $queryBuilder->setParameter('screenName', $screenName);
-
-        $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
-        $totalStatuses = (int) $totalStatuses + $this->archivedStatusRepository->countHowManyStatusesFor($screenName);
-
-        $this->memberRepository->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
-
         return $totalStatuses;
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
-     * @throws \Doctrine\DBAL\Exception
+     * @throws TweetNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws DBALException
      */
     public function updateLastStatusPublicationDate(string $screenName): MemberInterface
     {
@@ -169,11 +167,12 @@ class TweetRepository extends ArchivedTweetRepository
         );
 
         if (!$status instanceof Tweet) {
-            $status = $this->archivedStatusRepository->findOneBy(
+            $status = $this->archivedTweetRepository->findOneBy(
                 ['statusId' => $taggedTweet->documentId()]
             );
         }
 
+        $status->setScreenName($taggedTweet->screenName());
         $status->setApiDocument($taggedTweet->document());
         $status->setIdentifier($taggedTweet->token());
         $status->setText($taggedTweet->text());
@@ -238,7 +237,7 @@ class TweetRepository extends ArchivedTweetRepository
         string $direction = self::FINDING_IN_ASCENDING_ORDER,
         ?string $before = null
     ): array {
-        $nextExtremum = $this->archivedStatusRepository
+        $nextExtremum = $this->archivedTweetRepository
             ->findNextExtremum($screenName, $direction, $before);
 
         if (array_key_exists(self::EXTREMUM_FROM_MEMBER, $nextExtremum)) {
@@ -340,7 +339,7 @@ class TweetRepository extends ArchivedTweetRepository
 
     /**
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
      */
     private function howManyStatusesForMemberHavingScreenName($screenName): array
     {
@@ -358,7 +357,7 @@ QUERY;
 
     /**
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
      */
     private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
     {
@@ -384,9 +383,9 @@ QUERY;
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws TweetNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
      */
     private function getLastKnownStatusFor(string $screenName): TweetInterface {
         $result = $this->howManyStatusesForMemberHavingScreenName($screenName);
@@ -401,5 +400,38 @@ QUERY;
         }
 
         return $lastStatus;
+    }
+
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    private function refreshTotalTweetsPublishedByMemberHavingScreenName(string $screenName): int
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')
+            ->andWhere('s.screenName = :screenName');
+
+        $queryBuilder->setParameter('screenName', $screenName);
+
+        $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
+        $totalStatuses = (int)$totalStatuses + $this->archivedTweetRepository->countHowManyStatusesFor($screenName);
+
+        $this->memberRepository->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
+
+        return $totalStatuses;
+    }
+
+    public function persistTweetsCollection(
+        array $tweets,
+        AccessToken $identifier,
+        PublishersList $twitterList = null
+    ): CollectionInterface {
+        return $this->archivedTweetRepository->persistTweetsCollection(
+            $tweets,
+            $identifier,
+            $twitterList
+        );
     }
 }

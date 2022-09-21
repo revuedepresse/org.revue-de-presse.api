@@ -1,19 +1,19 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Exception\MembershipException;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Search\Infrastructure\DependencyInjection\SearchQueryAwareHttpClientTrait;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\InterruptibleCuratorInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Infrastructure\Curation\Exception\RateLimitedException;
-use App\Twitter\Infrastructure\Curation\Exception\SkipCollectException;
+use App\Twitter\Infrastructure\Curation\Exception\RateLimited;
+use App\Twitter\Infrastructure\Curation\Exception\SkippedCurationException;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
@@ -21,18 +21,26 @@ use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrai
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
+use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
+use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\Whisperer;
 use DateTime;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use ReflectionException;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -46,21 +54,20 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     use MemberRepositoryTrait;
     use PublishersListRepositoryTrait;
     use RateLimitComplianceTrait;
-    use StatusPersistenceTrait;
+    use SearchQueryAwareHttpClientTrait;
+    use TweetPersistenceLayerTrait;
     use TweetRepositoryTrait;
     use TokenRepositoryTrait;
     use TweetAwareHttpClientTrait;
     use WhispererRepositoryTrait;
 
+    const OPERATION_SKIPPED_AS_EXPECTED = 'Skipped pretty naturally ^_^';
     private CurationSelectorsInterface $selectors;
 
     /**
-     * @param CurationSelectorsInterface $selectors
-     * @param array                      $options
-     *
      * @throws ProtectedAccountException
-     * @throws RateLimitedException
-     * @throws SkipCollectException
+     * @throws RateLimited
+     * @throws SkippedCurationException
      * @throws UnavailableResourceException
      * @throws Exception
      */
@@ -70,9 +77,15 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     ): void {
         $this->selectors = $selectors;
 
+        if ($this->selectors->isSearchQuery()) {
+            $this->searchQueryAwareHttpClient->searchTweets($this->selectors->searchQuery());
+
+            throw new SkippedCurationException(self::OPERATION_SKIPPED_AS_EXPECTED);
+        }
+
         try {
-            if ($this->shouldSkipCollect($options)) {
-                throw new SkipCollectException('Skipped pretty naturally ^_^');
+            if ($this->shouldSkipCuration($options)) {
+                throw new SkippedCurationException(self::OPERATION_SKIPPED_AS_EXPECTED);
             }
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
             UnavailableResourceException::handleUnavailableMemberException(
@@ -80,7 +93,14 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 $this->logger,
                 $options
             );
-        } catch (SkipCollectException $exception) {
+        } catch (SkippedCurationException $exception) {
+            $this->logger->info(
+                sprintf(
+                    'Skipping Tweets curation for member "%s".',
+                    $selectors->screenName()
+                )
+            );
+
             throw $exception;
         } catch (BadAuthenticationDataException $exception) {
             $this->logger->error(
@@ -90,12 +110,11 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 )
             );
 
-            throw new SkipCollectException('Skipped because of bad authentication credentials');
-        } /** @noinspection BadExceptionsProcessingInspection */
-        catch (ApiAccessRateLimitException $exception) {
+            throw new SkippedCurationException('Skipped because of bad authentication credentials');
+        } catch (ApiAccessRateLimitException) {
             $this->delayingConsumption();
 
-            throw new RateLimitedException('No more call to the API can be made.');
+            throw new RateLimited('No more call to the API can be made.');
         } catch (UnavailableResourceException|Exception $exception) {
             $this->logger->error(
                 sprintf(
@@ -105,7 +124,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 ['trace' => json_encode($exception->getTrace())],
             );
 
-            throw new SkipCollectException(
+            throw new SkippedCurationException(
                 'Skipped because Twitter sent error message and code never dealt with so far'
             );
         }
@@ -165,9 +184,9 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     private function guardAgainstLockedPublishersList(): ?PublishersListInterface
     {
         $publishersList = null;
-        if ($this->selectors->publishersListId() !== null) {
+        if ($this->selectors->membersListId() !== null) {
             $publishersList = $this->publishersListRepository->findOneBy(
-                ['id' => $this->selectors->publishersListId()]
+                ['id' => $this->selectors->membersListId()]
             );
         }
 
@@ -186,17 +205,29 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array $options
-     *
-     * @return bool
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws ApiAccessRateLimitException
+     * @throws ReadOnlyApplicationException
+     * @throws TweetNotFoundException
+     * @throws UnexpectedApiResponseException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReflectionException
      */
-    private function shouldSkipCollect(
+    private function shouldSkipCuration(
         array $options
     ): bool {
         try {
             $this->guardAgainstExceptionalMember($options);
             $this->guardAgainstLockedPublishersList();
-            $whisperer = $this->beforeFetchingStatuses($options);
+
+            $whisperer = $this->beforeFetchingTweets($options);
         } catch (MembershipException|LockedPublishersListException $exception) {
             $this->logger->info($exception->getMessage());
 
@@ -205,9 +236,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return $exception->shouldSkipMessageConsumption;
         }
 
-        if ($this->memberRepository->hasBeenUpdatedBetween7HoursAgoAndNow(
-            $this->selectors->screenName()
-        )) {
+        if ($this->memberRepository->hasBeenUpdatedBetweenHalfAnHourAgoAndNow($this->selectors->screenName())) {
             $this->logger->info(
                 sprintf(
                     'Tweets have been curated for "%s".',
@@ -218,16 +247,16 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             return true;
         }
 
-        $statuses = $this->tweetAwareHttpClient->fetchPublications(
+        $tweets = $this->tweetAwareHttpClient->fetchTweets(
             $this->selectors,
             $options
         );
 
-        if ($whisperer instanceof Whisperer && count($statuses) > 0) {
+        if ($whisperer instanceof Whisperer && count($tweets) > 0) {
             try {
                 $this->afterCountingCollectedStatuses(
                     $options,
-                    $statuses,
+                    $tweets,
                     $whisperer
                 );
             } catch (SkippableMessageException $exception) {
@@ -244,10 +273,6 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array                       $options
-     * @param array                       $statuses
-     * @param Whisperer                   $whisperer
-     *
      * @throws SkippableMessageException
      */
     private function afterCountingCollectedStatuses(
@@ -263,7 +288,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
 
         if (
             array_key_exists(0, $statuses) &&
-            $this->statusRepository->hasBeenSavedBefore($statuses)
+            $this->tweetRepository->hasBeenSavedBefore($statuses)
         ) {
             $this->logger->info(
                 sprintf(
@@ -275,13 +300,14 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             SkippableMessageException::stopMessageConsumption();
         }
 
-        $savedItems = $this->statusPersistence->savePublicationsForScreenName(
+        $savedItems = $this->tweetPersistenceLayer->saveTweetsAuthoredByMemberHavingScreenName(
             $statuses,
             $options[FetchAuthoredTweetInterface::SCREEN_NAME],
             $this->selectors
         );
 
-        if ($savedItems === null ||
+        if (
+            $savedItems === null ||
             count($statuses) < CurationSelectorsInterface::MAX_BATCH_SIZE
         ) {
             SkippableMessageException::stopMessageConsumption();
@@ -338,14 +364,11 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @param array $options
-     *
-     * @return null|Whisperer
-     * @throws SkippableMessageException
+     * @throws \App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    private function beforeFetchingStatuses(
-        $options
-    ): ?Whisperer {
+    private function beforeFetchingTweets($options): ?Whisperer {
         $whisperer = $this->whispererRepository->findOneBy(
             ['name' => $options[FetchAuthoredTweetInterface::SCREEN_NAME]]
         );
@@ -360,7 +383,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
+        $storedWhispers = $this->tweetRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

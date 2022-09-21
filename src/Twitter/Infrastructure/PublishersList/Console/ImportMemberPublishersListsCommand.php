@@ -94,16 +94,24 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @param \App\Twitter\Infrastructure\Http\Resource\PublishersList $list
+     * @param PublishersList $list
      * @return bool
      */
-    function isListFilteredOut(PublishersList $list): bool
+    function isListPreservedAfterApplyingFilteringByListName(PublishersList $list): bool
     {
         if (!$this->isSingleListFilterActive()) {
             return false;
         }
 
-        return $list->name() !== $this->singleListFilter;
+        $isListPreserved = $list->name() === $this->singleListFilter;
+
+        if ($isListPreserved) {
+            $this->logger->info('filtering by list name', ['list_name' => $list->name()]);
+
+            $isListPreserved = true;
+        }
+
+        return $isListPreserved;
     }
 
     /**
@@ -205,18 +213,17 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
-     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \Doctrine\ORM\Exception\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \JsonException
+     * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
      */
     private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
     {
         $listsBatch = array_filter(
             $listsBatch,
-            fn ($list) => !$this->isListFilteredOut($list)
+            fn ($list) => $this->isListPreservedAfterApplyingFilteringByListName($list)
         );
 
         array_walk(
@@ -252,9 +259,17 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                     ->getResult();
 
                 $membersIndexedByTwitterId = [];
+
                 array_walk(
                     $members,
                     function (MemberInterface $member) use (&$membersIndexedByTwitterId) {
+                        $this->output->writeln(
+                            sprintf(
+                                'Adding member to indexed members list (member has handle: "%s")',
+                                $member->twitterScreenName()
+                            )
+                        );
+
                         $membersIndexedByTwitterId[$member->twitterId()] = $member;
                     }
                 );

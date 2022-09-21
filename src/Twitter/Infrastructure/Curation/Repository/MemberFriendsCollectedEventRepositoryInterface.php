@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Accessor\ApiAccessorInterface;
 
 interface MemberFriendsCollectedEventRepositoryInterface
 {

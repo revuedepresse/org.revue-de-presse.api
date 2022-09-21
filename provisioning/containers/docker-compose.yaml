@@ -1,7 +1,5 @@
 version: '3.8'
 
-name: 'wildcard'
-
 x-vol: &shared-volumes
   volumes:
     - './_scripts/:/scripts'

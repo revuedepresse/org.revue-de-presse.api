@@ -48,6 +48,13 @@ class ListSubscription
         return $this;
     }
 
+    public function setName(string $name): self
+    {
+        $this->listName = $name;
+
+        return $this;
+    }
+
     private Collection $aggregates;
 
     public function __construct(MemberInterface $member, array $document)

@@ -17,10 +17,7 @@ class StatusCollection implements StrictCollectionInterface
         $this->status = array_map(fn(TweetInterface $status) => $status, $status);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function count(): int
+    public function count()
     {
         return count($this->status);
     }

@@ -6,7 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Http;
 use App\Membership\Domain\Exception\ExceptionalMemberInterface;
 use App\Membership\Domain\Exception\MembershipException;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Infrastructure\Http\UnavailableResource;
 use App\Twitter\Infrastructure\Http\UnavailableResourceHandler;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
@@ -29,8 +29,8 @@ class UnavailableResourceHandlerTest extends TestCase
     public function getNotFoundErrorCodes(): array
     {
         return [
-            [ApiErrorCodeAwareInterface::ERROR_NOT_FOUND],
-            [ApiErrorCodeAwareInterface::ERROR_USER_NOT_FOUND]
+            [TwitterAPIAwareInterface::ERROR_NOT_FOUND],
+            [TwitterAPIAwareInterface::ERROR_USER_NOT_FOUND]
         ];
     }
 
@@ -106,7 +106,7 @@ class UnavailableResourceHandlerTest extends TestCase
                     '1'
                 ),
                 UnavailableResource::ofTypeAndRootCause(
-                    ApiErrorCodeAwareInterface::ERROR_SUSPENDED_USER,
+                    TwitterAPIAwareInterface::ERROR_SUSPENDED_USER,
                     'Suspended member'
                 )
             );
@@ -153,7 +153,7 @@ class UnavailableResourceHandlerTest extends TestCase
                     '1'
                 ),
                 UnavailableResource::ofTypeAndRootCause(
-                    ApiErrorCodeAwareInterface::ERROR_PROTECTED_TWEET,
+                    TwitterAPIAwareInterface::ERROR_PROTECTED_TWEET,
                     'Protected tweet'
                 )
             );
@@ -199,7 +199,7 @@ class UnavailableResourceHandlerTest extends TestCase
                     '1'
                 ),
                 UnavailableResource::ofTypeAndRootCause(
-                    ApiErrorCodeAwareInterface::ERROR_HOST_RESOLUTION,
+                    TwitterAPIAwareInterface::ERROR_HOST_RESOLUTION,
                     'Host could not be resolved'
                 )
             );

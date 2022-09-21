@@ -30,21 +30,9 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
         $this->logger->critical($exception->getMessage());
     }
 
-    /**
-     * @param ConsoleErrorEvent $event
-     */
     public function notifyException(ConsoleErrorEvent $event): void
     {
         $exception = $event->getError();
-
-        if (
-            $exception->getTrace()[0]['function'] === 'error_handler' &&
-            $exception->getTrace()[0]['class'] === 'PhpAmqpLib\Wire\IO\StreamIO'
-        ) {
-            $event->setException(new \Exception('Could not connect to RabbitMQ server'));
-
-            return;
-        }
 
         if ($exception instanceof ConnectionException) {
             $event->setError(

@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 class TweetNotFoundException extends UnavailableResourceException
 {
     /**
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws TweetNotFoundException
      */
     public static function throws(
         string $screenName,

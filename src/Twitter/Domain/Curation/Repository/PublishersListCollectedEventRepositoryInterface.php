@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Repository;
 
-use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
-use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Http\Accessor\ApiAccessorInterface;
 
 interface PublishersListCollectedEventRepositoryInterface
 {

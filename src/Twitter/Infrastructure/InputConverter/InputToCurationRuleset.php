@@ -25,6 +25,7 @@ class InputToCurationRuleset
         self::fromCursor($input, $ruleset);
         self::filterByList($input, $ruleset);
         self::filterByListCollection($input, $ruleset);
+        self::filterBySearchByQuery($input, $ruleset);
         self::filterByTweetOwnerUsername($input, $ruleset);
         self::ignoreWhispers($input, $ruleset);
         self::includeListOwnerTweets($input, $ruleset);
@@ -83,6 +84,20 @@ class InputToCurationRuleset
         ) {
             $ruleset->filterByTweetCreationDate(
                 $input->getOption(CurationRulesetInterface::RULE_BEFORE)
+            );
+        }
+    }
+
+    private static function filterBySearchByQuery(InputInterface $input, CurationRuleset $ruleset)
+    {
+        if (
+            $input->hasOption(CurationRulesetInterface::RULE_SEARCH_QUERY) &&
+            $input->getOption(CurationRulesetInterface::RULE_SEARCH_QUERY)
+        ) {
+            $ruleset->filterBySearchQuery(
+                trim(
+                    $input->getOption(CurationRulesetInterface::RULE_SEARCH_QUERY)
+                )
             );
         }
     }

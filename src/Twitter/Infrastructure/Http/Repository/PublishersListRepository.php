@@ -33,8 +33,6 @@ use function array_map;
 use function array_sum;
 
 /**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- *
  * @method PublishersListInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method PublishersListInterface|null findOneBy(array $criteria, array $orderBy = null)
  * @method PublishersListInterface[]    findAll()
@@ -382,7 +380,7 @@ QUERY;
                         continue;
                     }
 
-                    $statuses = $this->statusRepository
+                    $statuses = $this->tweetRepository
                         ->findByAggregate($twitterList);
 
                     /** @var TweetInterface $status */

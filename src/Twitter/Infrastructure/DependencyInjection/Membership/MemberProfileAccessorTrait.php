@@ -9,11 +9,6 @@ trait MemberProfileAccessorTrait
 {
     private MemberProfileAwareHttpClientInterface $memberProfileAccessor;
 
-    /**
-     * @param MemberProfileAwareHttpClientInterface $memberProfileAccessor
-     *
-     * @return $this
-     */
     public function setMemberProfileAccessor(
         MemberProfileAwareHttpClientInterface $memberProfileAccessor
     ): self {

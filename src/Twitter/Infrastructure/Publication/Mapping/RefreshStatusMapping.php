@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 
@@ -17,7 +18,7 @@ class RefreshStatusMapping implements MappingAwareInterface
 {
     use HttpClientTrait;
     use LoggerTrait;
-    use PublicationPersistenceTrait;
+    use PersistenceLayerTrait;
     use TweetRepositoryTrait;
 
     private array $oauthTokens;
@@ -63,32 +64,30 @@ class RefreshStatusMapping implements MappingAwareInterface
         }
 
         // TODO point at Status Logger
-        $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
+        $reachBeforeRefresh = $this->tweetRepository->extractTweetReach($status);
 
-        $aggregate = $status->getAggregates()->first();
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = null;
+        $membersList = $status->getAggregates()->first();
+        if (!($membersList instanceof PublishersList)) {
+            $membersList = null;
         }
 
         try {
-            $this->publicationPersistence->persistStatusPublication(
+            $this->persistenceLayer->persistTweetsCollection(
                 [$apiDocument],
-                $status->getIdentifier(),
-                $aggregate,
-                $this->logger
+                new AccessToken($status->getIdentifier()),
+                $membersList
             );
         } catch (NotFoundMemberException $exception) {
             $this->httpClient->ensureMemberHavingNameExists($exception->screenName);
-            $this->publicationPersistence->persistStatusPublication(
+            $this->persistenceLayer->persistTweetsCollection(
                 [$apiDocument],
-                $status->getIdentifier(),
-                $aggregate,
-                $this->logger
+                new AccessToken($status->getIdentifier()),
+                $membersList
             );
         }
 
-        $refreshedStatus = $this->statusRepository->findOneBy(['id' => $status->getId()]);
-        $reachAfterRefresh = $this->statusRepository->extractReachOfStatus($refreshedStatus);
+        $refreshedStatus = $this->tweetRepository->findOneBy(['id' => $status->getId()]);
+        $reachAfterRefresh = $this->tweetRepository->extractTweetReach($refreshedStatus);
 
         $this->logger->info(sprintf(
             'Status with id %s had retweet count going from %d to %d',

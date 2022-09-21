@@ -26,15 +26,15 @@ services:
             - [ 'setSubscribeesRepository',         ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
             - [ 'setSubscriptionsRepository',       ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages:
-        class: 'App\Twitter\Infrastructure\Amqp\Console\DispatchFetchTweetsMessages'
+    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand'
         calls:
             - [ 'setAggregateRepository',               [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                     [ '%app.twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                      [ '%app.twitter.oauth_token.default%'] ]
             - [ 'setHttpClient',                        [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
             - [ 'setTokenRepository',                   [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'] ]
-            - [ 'setDispatchAmqpMessagesToFetchTweets', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'] ]
+            - [ 'setFetchTweetsAmqpMessagesDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'] ]
             - [ 'setTranslator',                        [ '@App\Twitter\Infrastructure\Translation\Translator'] ]
             - [ 'setEntityManager',                     [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                            [ '@logger'] ]
@@ -45,7 +45,7 @@ services:
     App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
         class: 'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setTweetPublicationPersistenceLayer', [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
         tags:
             - { name: 'console.command' }
 
@@ -62,14 +62,14 @@ services:
     command.select_status_collection:
         class: "%command.select_status_collection.class%"
         properties:
-            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'
+            tweetRepository: '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'
         tags:
             - { name: 'console.command' }
 
     command.map_status_collection:
         class: "%command.map_status_collection.class%"
         properties:
-            statusRepository: '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'
+            tweetRepository: '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'
             refreshStatusMapping:   '@mapping.refresh_status'
             oauthToken:             "%app.twitter.oauth_token.default%"
             oauthSecret:            "%app.twitter.oauth_secret.default%"
@@ -88,7 +88,7 @@ services:
         calls:
             - [ 'setLogger',                [ '@monolog.logger.twitter_api'] ]
             - [ 'setTweetAwareHttpClient',  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setStatusRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
             - [ 'setMemberRepository',      [ '@user_manager'] ]
         properties:
             aggregateRepository:        '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'

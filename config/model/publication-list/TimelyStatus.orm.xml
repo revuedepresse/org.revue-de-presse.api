@@ -16,12 +16,11 @@
         </indexes>
 
         <id name="id" column="id" type="uuid">
-            <generator strategy="CUSTOM"/>
-            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+            <generator strategy="UUID"/>
         </id>
 
         <many-to-one
-                field="status"
+                field="tweet"
                 target-entity="App\Twitter\Infrastructure\Http\Entity\Tweet">
             <join-column
                 name="status_id"

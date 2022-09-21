@@ -12,7 +12,7 @@ The shell scripts written for bash have been tested with Ubuntu 22.04 (`Jammy Je
 ### Requirements
 
 Install [git](https://git-scm.com/downloads).
-> Git is a free and open source distributed version control system designed 
+> Git is a free and open source distributed version control system designed
 > to handle everything from small to very large projects with speed and efficiency.
 
 Install [Docker Docker Engine](https://docs.docker.com/engine/install/).

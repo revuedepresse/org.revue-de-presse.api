@@ -287,6 +287,6 @@ trait ConversationAwareTrait
             return $this->tweetAwareHttpClient->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
         }
 
-        return $this->statusRepository->findStatusIdentifiedBy($statusId);
+        return $this->tweetRepository->findStatusIdentifiedBy($statusId);
     }
 }

@@ -1,13 +1,18 @@
+parameters:
+
+    test.screen_name: !php/const App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME
+
 services:
     _defaults:
         public: true
         autowire: true
         autoconfigure: true
 
-    test.event_repository.member_profile_collected:
-        '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
+    test.doctrine.dbal.connection: '@Doctrine\DBAL\Connection'
 
-    test.App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets: '@App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets'
+    test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
+
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
@@ -32,7 +37,7 @@ services:
         arguments:
             - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@logger'
-            - !php/const 'App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME'
+            - '%test.screen_name%'
 
     App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface:
         factory: ['App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']

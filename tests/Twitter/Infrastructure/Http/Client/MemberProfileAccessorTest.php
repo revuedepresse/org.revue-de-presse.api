@@ -6,7 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Http\Client\Client;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Resource\UnavailableResourceHandlerInterface;
 use App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository;
@@ -229,7 +229,7 @@ class MemberProfileAccessorTest extends KernelTestCase
         $accessor->getMemberProfile('non_existing_member')
                  ->willThrow(new UnavailableResourceException(
                     'Host could not be resolved',
-                        ApiErrorCodeAwareInterface::ERROR_HOST_RESOLUTION
+                        TwitterAPIAwareInterface::ERROR_HOST_RESOLUTION
                  ));
 
          $accessor->getMemberProfile('existing_member')

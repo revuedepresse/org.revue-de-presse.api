@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Tests\Twitter\Infrastructure\Http\Builder\Entity\Token;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
-use App\Twitter\Infrastructure\Amqp\MessageBus\DispatchAmqpMessagesToFetchTweets;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher;
 use App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient;
 use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Http\Selector\AuthenticatedSelector;
@@ -33,13 +33,14 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
     {
         self::$kernel = self::bootKernel();
 
-        /** @var DispatchAmqpMessagesToFetchTweets $dispatcher */
-        $dispatcher = static::getContainer()->get('test.'.DispatchAmqpMessagesToFetchTweets::class);
+        /** @var FetchTweetsAmqpMessagesDispatcher $dispatcher */
+        $dispatcher = static::getContainer()->get('test.'.FetchTweetsAmqpMessagesDispatcher::class);
 
         $calls = 0;
 
         /** @var ListAwareHttpClient $ownershipAccessor */
         $ownershipAccessor = $this->prophesize(ListAwareHttpClient::class);
+
         $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
             Argument::type(AuthenticatedSelector::class),
             Argument::cetera()
@@ -75,6 +76,7 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
         $ruleset->whoseListSubscriptionsAreCurated()->willReturn('test_member');
         $ruleset->isSingleListFilterInactive()->willReturn(true);
         $ruleset->isCurationCursorActive()->willReturn(-1);
+        $ruleset->isCurationSearchQueryBased()->willReturn(false);
         $ruleset->correlationId()->willReturn(CorrelationId::generate());
 
         $dispatcher->dispatchFetchTweetsMessages(

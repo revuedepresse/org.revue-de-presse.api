@@ -9,10 +9,11 @@ services:
             - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
             - [ 'setRateLimitCompliance',                   [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setPublishersListRepository',              [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository' ] ]
-            - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
-            - [ 'setStatusPersistence',                     [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
+            - [ 'setSearchQueryAwareHttpClient',            [ '@App\Search\Domain\SearchQueryAwareHttpClientInterface' ] ]
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
+            - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setTweetPersistenceLayer',                 [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
+            - [ 'setTweetRepository',                       [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
 
@@ -28,3 +29,6 @@ services:
             -
                 name:       'messenger.message_handler'
                 handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet'
+            -
+                name:       'messenger.message_handler'
+                handles:    'App\Twitter\Infrastructure\Amqp\Message\FetchSearchQueryMatchingTweet'

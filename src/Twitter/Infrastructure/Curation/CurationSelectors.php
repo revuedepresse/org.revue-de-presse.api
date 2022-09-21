@@ -4,15 +4,22 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use Assert\Assert;
 use function array_key_exists;
-use const INF;
 
 class CurationSelectors implements CurationSelectorsInterface
 {
+    public function curateTweetsBySearchQuery(string $searchQuery): CurationSelectorsInterface
+    {
+        $this->searchQuery = $searchQuery;
+
+        return $this;
+    }
+
     public static function fromArray(array $options): self
     {
         $selectors = new self();
@@ -31,6 +38,10 @@ class CurationSelectors implements CurationSelectorsInterface
             $selectors->selectTweetsByMemberScreenName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
         }
 
+        if (array_key_exists(SavedSearch::SEARCH_QUERY, $options) && strlen(trim($options[SavedSearch::SEARCH_QUERY])) > 0) {
+            $selectors->curateTweetsBySearchQuery($options[SavedSearch::SEARCH_QUERY]);
+        }
+
         return $selectors;
     }
 
@@ -40,9 +51,11 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private string $memberSelectorByScreenName;
 
-    private $maxTweetId;
+    private int $maxTweetId = PHP_INT_MAX;
 
-    private $minTweetId;
+    private int $minTweetId = PHP_INT_MIN;
+
+    private string $searchQuery = '';
 
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
@@ -65,27 +78,27 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this->dateBeforeWhichStatusAreCollected;
     }
 
-    public function maxStatusId()
-    {
-        if ($this->maxTweetId === null) {
-            return INF;
-        }
+    public function isSearchQuery(): bool {
+        return strlen(trim($this->searchQuery)) > 0;
+    }
 
+    public function searchQuery(): string {
+        return $this->searchQuery;
+    }
+
+    public function maxStatusId(): int
+    {
         return $this->maxTweetId;
     }
 
-    public function minStatusId()
+    public function minStatusId(): int
     {
-        if ($this->minTweetId === null) {
-            return -INF;
-        }
-
         return $this->minTweetId;
     }
 
     public function oneOfTheOptionsIsActive(): bool
     {
-        return $this->publishersListId()
+        return $this->membersListId()
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
@@ -130,7 +143,7 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this;
     }
 
-    public function PublishersListId(): ?int
+    public function membersListId(): ?int
     {
         return $this->publishersListId;
     }

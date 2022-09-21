@@ -2,7 +2,7 @@ x-shared: &app-shared
   env_file:
     - '../../.env.local'
   volumes:
-    - '../../:/var/www/worker.example.org'
+    - '../../:/var/www/org.example.worker'
 
 services:
 

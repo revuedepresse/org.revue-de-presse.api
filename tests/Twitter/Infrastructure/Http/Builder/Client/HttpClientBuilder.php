@@ -18,7 +18,6 @@ use PDOException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Prophecy\Prophet;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use Throwable;

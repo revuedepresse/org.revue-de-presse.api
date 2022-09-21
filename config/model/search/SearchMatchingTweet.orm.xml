@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Search\Domain\Entity\SearchMatchingTweet"
+            repository-class="App\Search\Infrastructure\Repository\SearchMatchingTweetRepository"
+            table="search_matching_tweet">
+
+        <indexes>
+            <index name="search_tweet_idx" columns="tweet_id,publication_date_time,time_range,member_name"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint columns="tweet_id,saved_search_id" name="unique_status"/>
+        </unique-constraints>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="UUID"/>
+        </id>
+
+        <many-to-one
+                field="tweet"
+                target-entity="App\Twitter\Infrastructure\Http\Entity\Tweet">
+            <join-column
+                    name="tweet_id"
+                    referenced-column-name="ust_id"
+            />
+        </many-to-one>
+
+        <many-to-one
+                field="savedSearch"
+                target-entity="App\Search\Domain\Entity\SavedSearch">
+            <join-column
+                    name="saved_search_id"
+                    referenced-column-name="id"
+            />
+        </many-to-one>
+
+        <field
+                name="publicationDateTime"
+                column="publication_date_time"
+                type="datetime"
+        />
+
+        <field
+                name="memberName"
+                column="member_name"
+                length="100"
+        />
+
+        <field
+                name="timeRange"
+                column="time_range"
+                type="integer"
+        />
+
+    </entity>
+
+</doctrine-mapping>

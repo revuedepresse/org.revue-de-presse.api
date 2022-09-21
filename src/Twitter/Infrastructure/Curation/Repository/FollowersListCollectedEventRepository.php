@@ -16,6 +16,7 @@ use App\Twitter\Infrastructure\Http\Selector\FollowersListSelector;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Driver\PDO\Exception;
 use Throwable;
 use function json_encode;
 
@@ -100,6 +101,10 @@ class FollowersListCollectedEventRepository extends ServiceEntityRepository impl
             $entityManager->flush();
         } catch (Throwable $exception) {
             $this->logger->error($exception->getMessage());
+
+            if ($exception->getPrevious() instanceof Exception && $exception->getPrevious()->getCode() === 42883) {
+                throw $exception;
+            }
         }
 
         return $event;

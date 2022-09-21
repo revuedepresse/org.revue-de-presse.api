@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Http\Accessor\OwnershipAccessorInterface;
+use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\OwnershipCollection;
@@ -152,7 +152,8 @@ QUERY
                         ->that($decodedPayload)->isArray()
                         ->that($decodedPayload)->keyExists('response')
                         ->that($decodedPayload['response'])->isArray()
-                    ->tryAll();
+                    ->tryAll()
+                    ->verifyNow();
 
                     return array_map(
                         static fn ($publishersList) => new PublishersList($publishersList['id'], $publishersList['name']),

@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -16,19 +16,10 @@ use function is_array;
 use function is_object;
 use function sprintf;
 
-/**
- * @package App\Twitter\Infrastructure\Exception
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
-class UnavailableResourceException extends Exception implements ApiErrorCodeAwareInterface, ApiEndpointsAwareInterface
+class UnavailableResourceException extends Exception implements TwitterAPIAwareInterface, TwitterAPIEndpointsAwareInterface
 {
 
     /**
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @param LoggerInterface $logger
-     *
      * @throws ProtectedAccountException
      * @throws UnavailableResourceException
      */

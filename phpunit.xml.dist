@@ -48,6 +48,7 @@
       <group>member_subscription</group>
       <group>ownership</group>
       <group>persistence</group>
+      <group>tweet_persistence</group>
       <group>production_fixtures</group>
       <group>publication</group>
       <group>fetch_tweets_message_dispatcher</group>

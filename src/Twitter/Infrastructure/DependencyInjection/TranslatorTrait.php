@@ -7,16 +7,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 trait TranslatorTrait
 {
-    /**
-     * @var TranslatorInterface
-     */
     private TranslatorInterface $translator;
 
-    /**
-     * @param TranslatorInterface $translator
-     *
-     * @return $this
-     */
     public function setTranslator(TranslatorInterface $translator): self
     {
         $this->translator = $translator;

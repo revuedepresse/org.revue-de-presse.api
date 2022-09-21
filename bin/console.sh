@@ -125,7 +125,7 @@ function dispatch_fetch_publications_messages {
     arguments="${arguments}${cursor_argument}"
 
     local cmd
-    cmd="bin/console app:dispatch-messages-to-fetch-member-tweets${arguments}"
+    cmd="bin/console app:dispatch-fetch-tweets-amqp-messages${arguments}"
 
     if [ -n "${DRY_MODE}" ];
     then
@@ -135,7 +135,7 @@ function dispatch_fetch_publications_messages {
 
     else
 
-        /bin/bash -c "$(printf "${cmd}")"
+        /bin/bash -c "$(printf '%s' "${cmd}")"
 
     fi
 }
@@ -177,21 +177,21 @@ function get_project_dir {
 
 function get_project_name() {
     local project_name
-    project_name='wildcard'
+    project_name='org_example_worker'
 
-    if [ -n "${PROJECT_NAME}" ]; then
-        project_name="${PROJECT_NAME}"
+    if [ -n "${COMPOSE_PROJECT_NAME}" ]; then
+        project_name="${COMPOSE_PROJECT_NAME}"
     fi
 
     if [ -z "${project_name}" ]; then
 
-        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n'
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'project name' 'COMPOSE_PROJECT_NAME'  $'\n' 1>&2
 
         exit 1
 
     fi
 
-    echo "${project_name}"
+    echo -n "${project_name}"
 }
 
 function get_rabbitmq_virtual_host() {
@@ -218,10 +218,13 @@ function list_amqp_queues() {
 
     cd provisioning/containers || exit
 
+    local project_name
+    project_name="$(get_project_name)"
+
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose ${project_files} exec amqp watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose --project-name=${project_name} ${project_files} exec amqp watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function load_production_fixtures() {
@@ -245,8 +248,10 @@ function purge_queues() {
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+     echo '"'$rabbitmq_vhost'"'
+
+    /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue publications -p '${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue failures -p '${rabbitmq_vhost}'"
 }
 
 function remove_exited_containers() {
@@ -367,9 +372,9 @@ function run_php_script() {
 
     if [ $? -gt 0 ];
     then
-        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
+        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'COMPOSE_PROJECT_NAME environment variable' $'\n' 1>&2
         printf '%s%s' 'example:' $'\n' 1>&2
-        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+        printf '%s%s' 'export COMPOSE_PROJECT_NAME="org_example_worker"' '\n' 1>&2
 
         return 1
     fi
@@ -381,7 +386,7 @@ function run_php_script() {
     override_option=' -f ./docker-compose.yaml'
     if [ -e './provisioning/containers/docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
+        override_option=" --project-name=${project_name}"' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     local command

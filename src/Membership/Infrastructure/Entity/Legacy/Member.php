@@ -15,8 +15,6 @@ use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- *
  * @ORM\Table(
  *      name="weaving_user",
  *      uniqueConstraints={
@@ -169,7 +167,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     public function setTwitterScreenName(string $twitterScreenName): MemberInterface
     {
-        $this->twitter_username = $twitterScreenName;
+        $this->twitter_username = strtolower($twitterScreenName);
 
         return $this;
     }
