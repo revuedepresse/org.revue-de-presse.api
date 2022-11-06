@@ -1,4 +1,5 @@
-FROM        php:8.2.0RC4-cli-buster
+
+FROM        php:cli-buster
 
 ENV         WORKER='org.example.worker'
 
