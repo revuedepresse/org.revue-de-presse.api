@@ -135,6 +135,9 @@ function dispatch_fetch_publications_messages {
 
     else
 
+        printf '%s%s' 'About to run command:' $'\n' 1>&2
+        printf '%s%s' '"'"${cmd}"'"' $'\n' 1>&2
+
         /bin/bash -c "$(printf '%s' "${cmd}")"
 
     fi

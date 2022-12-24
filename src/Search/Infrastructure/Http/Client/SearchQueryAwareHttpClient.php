@@ -77,9 +77,11 @@ class SearchQueryAwareHttpClient implements
      */
     private function iterateOverLastPeriodAvailableByUsingTwitterAPI(SavedSearch $savedSearch): void
     {
-        $howManyDaysAgo = 6;
+        $howManyDaysAgo = 8;
         $params = [];
         $today = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
+
+        $breakLoop = fn ($howManyDaysAgo) => $howManyDaysAgo >= 0;
 
         do {
             $params['until'] = $today
@@ -91,7 +93,18 @@ class SearchQueryAwareHttpClient implements
                 $params
             );
 
-            $nextResultsParams = ((array)((array)$results)['search_metadata'])['next_results'];
+            $nextResultsParams = (string)((array)((array)$results)['search_metadata'])['next_results'];
+
+            if (count(((array)$results)['statuses']) === 0) {
+                $howManyDaysAgo--;
+
+                if ($breakLoop($howManyDaysAgo)) {
+                    break;
+                }
+
+                continue;
+            }
+
             $params = $this->params($nextResultsParams);
             unset($params['q'], $params['count']);
 
@@ -110,7 +123,7 @@ class SearchQueryAwareHttpClient implements
             }
 
             $howManyDaysAgo--;
-        } while ($howManyDaysAgo >= 0);
+        } while ($breakLoop($howManyDaysAgo));
     }
 
     private function iterateOverCursors(SavedSearch $savedSearch, array $params): void
@@ -122,6 +135,11 @@ class SearchQueryAwareHttpClient implements
             );
 
             $nextResultsParams = ((array)((array)$results)['search_metadata'])['next_results'];
+
+            if (count(((array)$results)['statuses']) === 0) {
+                break;
+            }
+
             $params = $this->params($nextResultsParams);
             unset($params['q'], $params['count']);
 
@@ -147,12 +165,12 @@ class SearchQueryAwareHttpClient implements
             $keys = array_keys($params);
 
             $paramsAsString = array_map(
-                fn ($value, $key) => $key.'='.$value,
+                fn ($value, $key) => trim($key).'='.trim($value),
                 $values,
                 $keys
             );
 
-            $queryStringSuffix = implode('&', $paramsAsString);
+            $queryStringSuffix = '&' . implode('&', $paramsAsString);
         } elseif (count($params) > 0) {
             $queryStringSuffix = '&' . implode('&', $params);
         }

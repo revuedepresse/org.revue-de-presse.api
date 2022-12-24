@@ -23,7 +23,7 @@ services:
             - 'App\Twitter\Infrastructure\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setHttpClient',      [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+            - [ 'setHttpClient',       [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
