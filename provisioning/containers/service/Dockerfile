@@ -6,8 +6,8 @@ ARG         OWNER_GID
 RUN         test -n "${OWNER_UID}"
 RUN         test -n "${OWNER_GID}"
 
-ARG         SERVICE_OWNER_UID=${OWNER_UID}
-ARG         SERVICE_OWNER_GID=${OWNER_GID}
+ENV         SERVICE_OWNER_UID=${OWNER_UID}
+ENV         SERVICE_OWNER_GID=${OWNER_GID}
 
 ENV         SERVICE=${SERVICE:-org.revue-de-presse.api}
 

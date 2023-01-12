@@ -5,22 +5,42 @@ trap "exit 1" TERM
 export service_pid=$$
 
 function build() {
+    local DEBUG
     local SERVICE
     local SERVICE_OWNER_UID
     local SERVICE_OWNER_GID
 
     load_configuration_parameters
 
-    docker compose \
-        --file=./provisioning/containers/docker-compose.yaml \
-        --file=./provisioning/containers/docker-compose.override.yaml \
-        --env-file=./.env.local
-        build \
-        --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
-        --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
-        app \
-        cache \
-        service
+    if [ -n "${DEBUG}" ];
+    then
+
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            --env-file=./.env.local \
+            build \
+            --no-cache \
+            --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
+            --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            app \
+            cache \
+            service
+
+    else
+
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            --env-file=./.env.local \
+            build \
+            --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
+            --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            app \
+            cache \
+            service
+
+      fi
 }
 
 function clean() {
@@ -100,7 +120,7 @@ function guard_against_missing_variables() {
     if [ -z "${SERVICE}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'worker name e.g. worker.example.com' 'SERVICE' $'\n'
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'service name e.g. org.example.api' 'SERVICE' $'\n'
 
         kill -s TERM $service_pid
 
@@ -193,9 +213,9 @@ function load_configuration_parameters() {
 
     validate_docker_compose_configuration
 
-    guard_against_missing_variables
-
     source ./.env.local
+
+    guard_against_missing_variables
 
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
