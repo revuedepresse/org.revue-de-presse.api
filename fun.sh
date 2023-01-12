@@ -11,20 +11,13 @@ function build() {
 
     load_configuration_parameters
 
-    printf '%s'           $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_DIR:          ' "$(reset_color)" "${SERVICE}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_UID:    ' "$(reset_color)" "${SERVICE_OWNER_UID}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_GID:    ' "$(reset_color)" "${SERVICE_OWNER_GID}" $'\n'
-    printf '%s'           $'\n'
-
     docker compose \
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
+        --env-file=./.env.local
         build \
-        --build-arg "SERVICE_DIR=${SERVICE}" \
-        --build-arg "SERVICE_OWNER_UID=${SERVICE_OWNER_UID}" \
-        --build-arg "SERVICE_OWNER_GID=${SERVICE_OWNER_GID}" \
+        --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
+        --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
         app \
         cache \
         service
@@ -153,21 +146,64 @@ function green() {
     echo -n "\e[32m"
 }
 
+function install() {
+    local SERVICE
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
+
+    load_configuration_parameters
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        up \
+        --force-recreate \
+        --detach \
+        app && \
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        --env SERVICE="${SERVICE}" \
+        --user root \
+        -T app \
+        /bin/bash -c 'source /scripts/install-app-requirements.sh'
+
+    clear_cache_warmup --reuse-existing-container
+}
+
 function load_configuration_parameters() {
     if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
+
         cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
+
     fi
 
     if [ ! -e ./.env.local ]; then
+
         cp --verbose ./.env.local{.dist,}
+
     fi
+
+    if [ ! -e ./.env ]; then
+
+        touch ./.env
+
+    fi
+
+    validate_docker_compose_configuration
+
+    guard_against_missing_variables
 
     source ./.env.local
 
-    export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-'org_example_api'}"
-    export SERVICE="${SERVICE:-'org.example.api'}"
-
-    guard_against_missing_variables
+    printf '%s'           $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                 ' "$(reset_color)" "${DEBUG}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE:              ' "$(reset_color)" "${SERVICE}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_UID:    ' "$(reset_color)" "${SERVICE_OWNER_UID}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_GID:    ' "$(reset_color)" "${SERVICE_OWNER_GID}" $'\n'
+    printf '%s'           $'\n'
 }
 
 function remove_running_container_and_image_in_debug_mode() {
@@ -212,30 +248,19 @@ function reset_color() {
     echo -n $'\033'\[00m
 }
 
-function install() {
-    local SERVICE
-    local SERVICE_OWNER_UID
-    local SERVICE_OWNER_GID
+function run_php_unit_tests() {
+    export SYMFONY_DEPRECATIONS_HELPER='disabled'
 
-    load_configuration_parameters
+    if [ -z "${DEBUG}" ];
+    then
 
-    docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        up \
-        --force-recreate \
-        --detach \
-        app && \
-    docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        exec \
-        --env SERVICE="${SERVICE}" \
-        --user root \
-        -T app \
-        /bin/bash -c 'source /scripts/install-app-requirements.sh'
+        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
 
-    clear_cache_warmup --reuse-existing-container
+        return
+
+    fi
+
+    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
 }
 
 function set_file_permissions() {
@@ -293,19 +318,11 @@ function stop() {
     remove_running_container_and_image_in_debug_mode 'service'
 }
 
-function run_php_unit_tests() {
-    export SYMFONY_DEPRECATIONS_HELPER='disabled'
-
-    if [ -z "${DEBUG}" ];
-    then
-
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
-
-        return
-
-    fi
-
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
+function validate_docker_compose_configuration() {
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        config -q
 }
 
 set +Eeuo pipefail

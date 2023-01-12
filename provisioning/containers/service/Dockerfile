@@ -1,11 +1,15 @@
 FROM        php:8.1-fpm-bullseye
 
-ENV         SERVICE='org.example.api'
+ARG         OWNER_UID
+ARG         OWNER_GID
 
-ARG         SERVICE_OWNER_UID=1000
-ARG         SERVICE_OWNER_GID=101
+RUN         test -n "${OWNER_UID}"
+RUN         test -n "${OWNER_GID}"
 
-ARG         SERVICE_DIR="${SERVICE}"
+ARG         SERVICE_OWNER_UID=${OWNER_UID}
+ARG         SERVICE_OWNER_GID=${OWNER_GID}
+
+ENV         SERVICE=${SERVICE:-org.revue-de-presse.api}
 
 HEALTHCHECK CMD /bin/bash -c "pgrep php-fpm || ( test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0 )"
 
@@ -17,16 +21,20 @@ COPY        --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
             ./service/templates \
             /templates
 
+COPY        --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
+            ./_scripts/cmd-service.sh  \
+            /start.sh
+
 RUN         /bin/bash -c 'source /scripts/install-service-requirements.sh'
 
 COPY        --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER        ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
 
-VOLUME      ["/scripts", "/var/www/shared", "/var/www/${SERVICE_DIR}"]
+VOLUME      ["/scripts", "/var/www/shared", "/var/www/${SERVICE}"]
 
-WORKDIR     "/var/www/${SERVICE_DIR}"
+WORKDIR     "/var/www/${SERVICE}"
 
 ENTRYPOINT  ["/usr/bin/tini", "--"]
 
-CMD         ["/usr/local/sbin/php-fpm"]
+CMD         ["/start.sh"]
