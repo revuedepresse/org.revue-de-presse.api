@@ -15,9 +15,12 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
+    private const SEARCH_PERIOD_DATE_FORMAT = 'Y-m-d';
+
     use PaginationAwareTrait;
     use ConversationAwareTrait;
     use LoggerTrait;
@@ -289,12 +292,28 @@ QUERY;
 
     /**
      * @param SearchParams $searchParams
+     */
+    private function assertSearchPeriodIsValid(SearchParams $searchParams): void {
+        if (
+            !($searchParams->getParams()['startDate'] instanceof \DateTime)
+            || !($searchParams->getParams()['endDate'] instanceof \DateTime)
+        ) {
+            throw new InvalidArgumentException(
+                'Expected end date and start date to be instances of ' . \DateTime::class
+            );
+        }
+    }
+
+    /**
+     * @param SearchParams $searchParams
      * @return bool
      */
     private function overOneDay(SearchParams $searchParams): bool
     {
-        return $searchParams->getParams()['startDate']->format('Y-m-d') ===
-            $searchParams->getParams()['endDate']->format('Y-m-d');
+        $this->assertSearchPeriodIsValid($searchParams);
+
+        return $searchParams->getParams()['startDate']->format(self::SEARCH_PERIOD_DATE_FORMAT) ===
+            $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
     /**
@@ -303,33 +322,41 @@ QUERY;
      */
     private function overMoreThanADay(SearchParams $searchParams): bool
     {
-        return $searchParams->getParams()['startDate']->format('Y-m-d') !==
-            $searchParams->getParams()['endDate']->format('Y-m-d');
+        $this->assertSearchPeriodIsValid($searchParams);
+
+        return $searchParams->getParams()['startDate']->format(self::SEARCH_PERIOD_DATE_FORMAT) !==
+            $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
     public function mapStatuses(SearchParamsInterface $searchParams, $results): array
     {
         return array_map(
             function ($status) use ($searchParams) {
+                $statusKey = 'status';
+                $totalFavoritesKey = 'total_favorites';
+                $totalRetweetsKey = 'total_retweets';
+                $favoriteCountKey = 'favorite_count';
+                $originalDocumentKey = 'original_document';
+
                 $extractedProperties = [
-                    'status' => $this->extractStatusProperties(
+                    $statusKey => $this->extractStatusProperties(
                         [$status],
                         false)[0]
                 ];
 
-                $decodedDocument = json_decode($status['original_document'], true);
-                $decodedDocument['retweets_count'] = (int) $status['total_retweets'];
-                $decodedDocument['favorites_count'] = (int) $status['total_favorites'];
+                $decodedDocument = json_decode($status[$originalDocumentKey], true);
+                $decodedDocument['retweets_count'] = (int) $status[$totalRetweetsKey];
+                $decodedDocument[$favoriteCountKey] = (int) $status[$totalFavoritesKey];
 
-                $extractedProperties['status']['retweet_count'] = (int) $status['total_retweets'];
-                $extractedProperties['status']['favorite_count'] = (int) $status['total_favorites'];
-                $extractedProperties['status']['original_document'] = json_encode($decodedDocument);
+                $extractedProperties['status']['retweet_count'] = (int) $status[$totalRetweetsKey];
+                $extractedProperties['status']['favorite_count'] = (int) $status[$totalFavoritesKey];
+                $extractedProperties['status'][$originalDocumentKey] = json_encode($decodedDocument);
 
                 $status['lastUpdate'] = $status['last_update'];
 
                 $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties['status']['favorite_count'] === 0) {
-                    $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
+                if ($includeRetweets && $extractedProperties[$statusKey][$favoriteCountKey] === 0) {
+                    $extractedProperties[$statusKey][$favoriteCountKey] = $decodedDocument['retweeted_status'][$favoriteCountKey];
                 }
 
                 if (array_key_exists('extended_entities', $decodedDocument) &&
@@ -340,7 +367,12 @@ QUERY;
                     array_key_exists('media_url', $decodedDocument['extended_entities']['media'][0])
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
-                    $contents = file_get_contents($smallMediaUrl);
+
+                    try {
+                        $contents = file_get_contents($smallMediaUrl);
+                    } catch (\Exception) {
+                        $contents = false;
+                    }
 
                     if ($contents !== false) {
                         $extractedProperties['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
@@ -348,9 +380,9 @@ QUERY;
                 }
 
                 unset(
-                    $status['total_retweets'],
-                    $status['total_favorites'],
-                    $status['original_document'],
+                    $status[$totalRetweetsKey],
+                    $status[$totalFavoritesKey],
+                    $status[$originalDocumentKey],
                     $status['screen_name'],
                     $status['author_avatar'],
                     $status['status_id'],
