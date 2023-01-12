@@ -1,11 +1,15 @@
 FROM    php:8.1-cli-bullseye
 
-ENV     SERVICE='org.example.api'
+ARG     OWNER_UID
+ARG     OWNER_GID
 
-ARG     SERVICE_OWNER_UID=1000
-ARG     SERVICE_OWNER_GID=101
+RUN     test -n "${OWNER_UID}"
+RUN     test -n "${OWNER_GID}"
 
-ARG     SERVICE_DIR="${SERVICE}"
+ENV     SERVICE_OWNER_UID=${OWNER_UID}
+ENV     SERVICE_OWNER_GID=${OWNER_GID}
+
+ENV     SERVICE=${SERVICE:-org.revue-de-presse.api}
 
 COPY    --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
         ./_scripts \
@@ -21,8 +25,8 @@ COPY    --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER    ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
 
-VOLUME  ["/scripts", "/var/www/shared", "/var/www/${SERVICE_DIR}"]
+VOLUME  ["/scripts", "/var/www/shared", "/var/www/${SERVICE}"]
 
-WORKDIR "/var/www/${SERVICE_DIR}"
+WORKDIR "/var/www/${SERVICE}"
 
 CMD     ["tail", "-F", "/dev/null"]
