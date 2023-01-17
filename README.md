@@ -62,4 +62,4 @@ communities, organizations and projects (in lexicographic order):
 ### Some of their logos
 
 [![Blackfire](../http-api/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
-[![JetBrains](../http-api/doc/images/jetbrains-logo.png/raw=true)](https://jb.gg/OpenSourceSupport)
+[![JetBrains](../http-api/doc/images/jetbrains-logo.png?raw=true)](https://jb.gg/OpenSourceSupport)
