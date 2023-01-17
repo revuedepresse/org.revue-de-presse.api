@@ -54,10 +54,12 @@ communities, organizations and projects (in lexicographic order):
 - [Docker](docker.com)
 - [Doctrine](https://www.doctrine-project.org/)
 - [GitHub](https://github.com/)
+- [JetBrains](https://jb.gg/OpenSourceSupport)
 - [PHP](https://www.php.net/)
 - [Symfony](https://symfony.com/)
 - [Ubuntu](https://ubuntu.com/)
 
 ### Some of their logos
 
-[![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
+[![Blackfire](../http-api/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
+[![JetBrains](../http-api/doc/images/jetbrains-logo.png/raw=true)](https://jb.gg/OpenSourceSupport)
