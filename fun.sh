@@ -254,7 +254,16 @@ function load_configuration_parameters() {
 
     validate_docker_compose_configuration
 
-    source ./.env.local
+    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'test' ];
+    then
+
+        source ./.env.test
+
+    else
+
+        source ./.env.local
+
+    fi
 
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
