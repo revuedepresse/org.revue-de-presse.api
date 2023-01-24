@@ -285,17 +285,7 @@ function run_unit_tests() {
 }
 
 function get_project_name() {
-    local project_name
-    project_name="$(
-        docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        config --format json \
-        | jq '.name' \
-        | tr -d '"'
-    )"
-
-    echo "${project_name}"
+    echo "${COMPOSE_PROJECT_NAME}"
 }
 
 function get_process_manager_shell() {
