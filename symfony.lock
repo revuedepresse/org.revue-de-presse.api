@@ -47,6 +47,9 @@
             "migrations/.gitignore"
         ]
     },
+    "kreait/firebase-bundle": {
+        "version": "4.1.0"
+    },
     "phpunit/phpunit": {
         "version": "9.5",
         "recipe": {
