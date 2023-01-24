@@ -44,9 +44,9 @@ function build() {
           --file=./provisioning/containers/docker-compose.override.yaml \
           build \
           --no-cache \
-          --build-arg "WORKER_DIR=${WORKER}" \
-          --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-          --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+          --build-arg "WORKER=${WORKER}" \
+          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
           app \
           process-manager \
           worker
@@ -57,9 +57,9 @@ function build() {
           --file=./provisioning/containers/docker-compose.yaml \
           --file=./provisioning/containers/docker-compose.override.yaml \
           build \
-          --build-arg "WORKER_DIR=${WORKER}" \
-          --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-          --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+          --build-arg "WORKER=${WORKER}" \
+          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
           app \
           process-manager \
           worker
@@ -134,9 +134,9 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
+    local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
-    local WORKER
 
     load_configuration_parameters
 
@@ -154,17 +154,6 @@ function remove_running_container_and_image_in_debug_mode() {
         \grep "\-${container_name}\-" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
-
-    if [ -n "${DEBUG}" ];
-    then
-        docker images -a |
-            \grep "${project_name}" |
-            \grep "\-${container_name}\-" |
-            awk '{print $3}' |
-            xargs -I{} docker rmi -f {}
-
-        build
-    fi
 }
 
 function clean() {
