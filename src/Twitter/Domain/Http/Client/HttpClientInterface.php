@@ -32,6 +32,8 @@ interface HttpClientInterface extends ApiErrorCodeAwareInterface
 
     public function setAccessTokenSecret(string $tokenSecret): HttpClientInterface;
 
+    public function showStatus(string $identifier): mixed;
+
     public function fromToken(TokenInterface $token): void;
 
     public function setConsumerKey(string $secret): self;
