@@ -51,6 +51,7 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
 
         if ($remoteMember === null) {
             $remoteMember = $this->collectedMemberProfile($memberName);
+            $member->setRawDocument(json_encode((array) $remoteMember));
         }
 
         $member->setDescription($remoteMember->description);
