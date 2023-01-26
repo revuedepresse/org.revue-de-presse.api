@@ -646,4 +646,17 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
+    public function setUrl(string $url): MemberInterface
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    public function setDescription(string $description): MemberInterface
+    {
+        $this->description = $description;
+
+        return $this;
+    }
 }

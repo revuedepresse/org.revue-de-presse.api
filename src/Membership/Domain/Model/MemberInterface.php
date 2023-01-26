@@ -81,4 +81,7 @@ interface MemberInterface extends UserInterface
 
     public function rawDocument(): array;
 
+    public function setUrl(string $url): self;
+
+    public function setDescription(string $description): self;
 }

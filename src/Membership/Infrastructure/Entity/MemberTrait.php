@@ -204,4 +204,13 @@ trait MemberTrait
         return $this;
     }
 
+    public function setUrl(string $url): MemberInterface
+    {
+        return $this;
+    }
+
+    public function setDescription(string $description): MemberInterface
+    {
+        return $this;
+    }
 }
