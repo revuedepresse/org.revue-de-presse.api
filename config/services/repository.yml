@@ -206,6 +206,9 @@ services:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus'
 
+    App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface:
+        '@repository.not_found_status'
+
     repository.timely_status:
         class: 'App\Twitter\Infrastructure\PublishersList\Repository\TimelyStatusRepository'
         arguments:
