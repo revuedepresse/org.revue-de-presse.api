@@ -36,13 +36,6 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
         $this->unavailableResourceHandler = $unavailableResourceHandler;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     * @param \stdClass|null  $remoteMember
-     *
-     * @return MemberInterface
-     */
     public function ensureMemberProfileIsUpToDate(
         MemberInterface $member,
         string $memberName,
