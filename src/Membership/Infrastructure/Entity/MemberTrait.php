@@ -194,4 +194,14 @@ trait MemberTrait
     {
         return new ArrayCollection([]);
     }
+
+    public function rawDocument(): array {
+        return [];
+    }
+
+    public function setRawDocument(string $rawDocument): MemberInterface
+    {
+        return $this;
+    }
+
 }

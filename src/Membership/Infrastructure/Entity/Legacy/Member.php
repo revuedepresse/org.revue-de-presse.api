@@ -57,6 +57,12 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     public ?string $minStatusId;
 
+    private ?string $rawDocument;
+
+    public function rawDocument(): array {
+        return json_decode($this->rawDocument, true);
+    }
+
     public function getMinStatusId(): int
     {
         return (int) $this->minStatusId;
@@ -632,4 +638,12 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     {
         return $this->totalStatuses;
     }
+
+    public function setRawDocument(string $rawDocument): MemberInterface
+    {
+        $this->rawDocument = $rawDocument;
+
+        return $this;
+    }
+
 }
