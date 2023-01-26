@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
+use App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface;
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Domain\Publication\TweetInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
-class NotFoundStatusRepository extends ServiceEntityRepository
+class NotFoundStatusRepository extends ServiceEntityRepository implements NotFoundTweetRepositoryInterface
 {
     public function markStatusAsNotFound(TweetInterface $status): NotFoundStatus
     {
