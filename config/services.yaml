@@ -214,6 +214,9 @@ services:
         properties:
             twitterApiLogger:                                   '@monolog.logger.twitter_api'
 
+    App\Twitter\Domain\Curation\Curator\TweetCuratorInterface:
+        '@App\Twitter\Infrastructure\Curation\TweetCurator'
+
     App\Twitter\Infrastructure\Translation\Translator:
         class: 'App\Twitter\Infrastructure\Translation\Translator'
         arguments:
