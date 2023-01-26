@@ -76,4 +76,9 @@ interface MemberInterface extends UserInterface
     public function addToken(TokenInterface $token): MemberInterface;
 
     public function getTokens(): Selectable;
+
+    public function setRawDocument(string $rawDocument): self;
+
+    public function rawDocument(): array;
+
 }
