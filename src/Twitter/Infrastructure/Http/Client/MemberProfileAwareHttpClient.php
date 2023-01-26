@@ -53,8 +53,8 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
             $remoteMember = $this->collectedMemberProfile($memberName);
         }
 
-        $member->description = $remoteMember->description;
-        $member->url         = $remoteMember->url;
+        $member->setDescription($remoteMember->description);
+        $member->setUrl($remoteMember->url);
 
         return $this->memberRepository->saveMember($member);
     }
