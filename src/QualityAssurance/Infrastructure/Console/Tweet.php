@@ -150,4 +150,16 @@ class Tweet implements TweetInterface
 
         return $this;
     }
+
+    /**
+     * @throws \App\QualityAssurance\Infrastructure\Console\MediaNotFoundException
+     */
+    public function smallMediaURL(): string
+    {
+        if (!isset($this->rawDocument['extended_entities']['media'][0]['media_url'])) {
+            MediaNotFoundException::throws($this->tweetId());
+        }
+
+        return $this->rawDocument['extended_entities']['media'][0]['media_url'] . ':small';
+    }
 }
