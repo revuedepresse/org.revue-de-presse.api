@@ -206,7 +206,7 @@ services:
             - [ 'setTweetsBatchCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
             - [ 'setTweetCurationLogger',                   [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setTweetRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',                       [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setTranslator',                            [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',               [ '@App\Twitter\Infrastructure\Identification\WhispererIdentification' ] ]
