@@ -2,6 +2,7 @@ FROM        php:8.1-fpm-bullseye
 
 ARG         OWNER_UID
 ARG         OWNER_GID
+ARG         SERVICE
 
 RUN         test -n "${OWNER_UID}" && \
             test -n "${OWNER_GID}" && \
