@@ -416,6 +416,15 @@ class GuardAgainstMissingMediaCommand extends Command {
 
     public function updateTrend(TweetInterface $tweet)
     {
+        if ($tweet->hasBeenDeleted()) {
+            $this->trendsRepository->removeTweetFromTrends(
+                $tweet->tweetId(),
+                $tweet->createdAt()
+            );
+
+            return;
+        }
+
         $this->trendsRepository->updateTweetDocument(
             $tweet->tweetId(),
             $tweet->createdAt(),
