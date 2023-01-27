@@ -34,19 +34,20 @@ class Tweet implements TweetInterface
     }
 
     public function __construct(
-        int                $id,
-        string             $hash,
-        string             $username,
-        string             $name,
-        string             $text,
-        string             $avatar,
-        string             $statusId,
-        string             $rawDocument,
+        int               $id,
+        string            $hash,
+        string            $username,
+        string            $name,
+        string            $text,
+        string            $avatar,
+        string            $statusId,
+        string            $rawDocument,
         DateTimeInterface $createdAt,
         DateTimeInterface $updatedAt,
-        bool               $isStarred,
-        bool               $isIndexed = false,
-        bool               $isPublished = false
+        bool              $isStarred,
+        bool              $isIndexed = false,
+        bool              $isPublished = false,
+        bool              $hasBeenDeleted = false
     )
     {
         $this->id = $id;
@@ -56,6 +57,7 @@ class Tweet implements TweetInterface
         $this->text = str_replace('""', '"', $text);
         $this->avatar = $avatar;
         $this->statusId = $statusId;
+        $this->hasBeenDeleted = $hasBeenDeleted;
 
         try {
             $this->rawDocument = json_decode(
@@ -63,11 +65,7 @@ class Tweet implements TweetInterface
                 true,
                 flags: JSON_THROW_ON_ERROR
             );
-        } catch (JsonException $e) {
-            error_log($e);
-
-            throw new \InvalidArgumentException($e, $e->getCode(), $e);
-        } catch (\Exception $e) {
+        } catch (JsonException|\Exception $e) {
             error_log($e);
 
             throw new \InvalidArgumentException($e, $e->getCode(), $e);
@@ -96,7 +94,8 @@ class Tweet implements TweetInterface
                     $this->updatedAt,
                     $this->isStarred,
                     $this->isIndexed,
-                    $this->isPublished
+                    $this->isPublished,
+                    $this->hasBeenDeleted
                 );
         }
 
@@ -131,7 +130,8 @@ class Tweet implements TweetInterface
             $this->updatedAt,
             $this->isStarred,
             $this->isIndexed,
-            $this->isPublished
+            $this->isPublished,
+            $this->hasBeenDeleted
         );
     }
 
