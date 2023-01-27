@@ -70,23 +70,7 @@ trait ConversationAwareTrait
             );
         }
 
-        if (
-            array_key_exists('user', $decodedDocument)
-            && array_key_exists('profile_image_url_https', $decodedDocument['user'])
-        ) {
-            $status['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
-            if (!array_key_exists('base64_encoded_avatar', $status)) {
-                try {
-                    $avatarPicture = file_get_contents($status['avatar_url']);
-                } catch (\Exception) {
-                    $avatarPicture = base64_decode($this->defaultAvatar);
-                }
-
-                if ($avatarPicture !== false) {
-                    $status['base64_encoded_avatar'] = 'data:image/jpeg;base64,'.base64_encode($avatarPicture);
-                }
-            }
-        }
+        $status = $this->addEncodedAvatarToTweetDocument($decodedDocument, $status);
 
         if (array_key_exists('retweet_count', $decodedDocument)) {
             $status['retweet_count'] = $decodedDocument['retweet_count'];
@@ -288,6 +272,35 @@ trait ConversationAwareTrait
             },
             $statuses
         );
+    }
+
+    public function addEncodedAvatarToTweetDocument(array $tweetRawDocument, array $tweet): array
+    {
+        if (array_key_exists('base64_encoded_avatar', $tweetRawDocument)) {
+            $tweet['base64_encoded_avatar'] = $tweetRawDocument['base64_encoded_avatar'];
+
+            return $tweet;
+        }
+
+        if (!isset($tweetRawDocument['user']['profile_image_url_https'])) {
+            return $tweet;
+        }
+
+        $tweet['avatar_url'] = $tweetRawDocument['user']['profile_image_url_https'];
+
+        if (!array_key_exists('base64_encoded_avatar', $tweet)) {
+            try {
+                $avatarPicture = file_get_contents($tweet['avatar_url']);
+            } catch (\Exception) {
+                $avatarPicture = base64_decode($this->defaultAvatar);
+            }
+
+            if ($avatarPicture !== false) {
+                $tweet['base64_encoded_avatar'] = 'data:image/jpeg;base64,' . base64_encode($avatarPicture);
+            }
+        }
+
+        return $tweet;
     }
 
     /**
