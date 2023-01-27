@@ -104,6 +104,21 @@ function install_service_requirements() {
     install_php_extensions
     clear_package_management_system_cache
 
+    if [ -e /start.sh ];
+    then
+
+          chown \
+              --verbose \
+              "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
+              /start.sh
+
+          chmod \
+              --verbose \
+              ug+x \
+              /start.sh
+
+    fi
+
     mkdir \
         --verbose \
         --parents \
@@ -202,21 +217,6 @@ function install_app_requirements() {
         echo 'Missing configuration file.'
 
         return 1
-    fi
-
-    if [ -e /start.sh ];
-    then
-
-          chown \
-              --verbose \
-              "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
-              /start.sh
-
-          chmod \
-              --verbose \
-              ug+x \
-              /start.sh
-
     fi
 
     \cat '/templates/www.conf.dist' | \
