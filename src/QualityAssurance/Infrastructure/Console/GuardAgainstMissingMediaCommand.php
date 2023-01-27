@@ -102,10 +102,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         $this->setName(self::COMMAND_NAME)
             ->addArgument(
                 self::ARGUMENT_FILENAME,
-                description: sprintf(
-                    'CSV filename containing Tweets ready for processing available from %s',
-                    $this->resourcesDir
-                )
+                description: 'CSV filename containing Tweets ready for processing'
             );
     }
 
