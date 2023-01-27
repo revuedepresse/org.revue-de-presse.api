@@ -38,7 +38,7 @@ class GuardAgainstMissingMediaCommandTest extends KernelTestCase
     public function it_terminates_successfully()
     {
         // Act
-        $this->commandTester->execute([]);
+        $this->commandTester->execute([GuardAgainstMissingMediaCommand::ARGUMENT_FILENAME => 'test.csv']);
 
         // Assert
         self::assertEquals(

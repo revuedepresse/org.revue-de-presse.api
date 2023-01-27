@@ -21,7 +21,7 @@ services:
             - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
             - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
             - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
-            - [ 'setResourcesDir',                 ['%kernel.project_dir%/tests/QualityAssurance/Infrastructure/Resources'] ]
+            - [ 'setResourcesDir',                 ['%kernel.project_dir%/src/QualityAssurance/Infrastructure/Resources'] ]
             - [ 'setTweetCurator',                 ['@App\Twitter\Domain\Curation\Curator\TweetCuratorInterface'] ]
             - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
         tags:
