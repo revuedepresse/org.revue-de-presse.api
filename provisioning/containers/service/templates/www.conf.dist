@@ -1,7 +1,7 @@
 [global]
 error_log                               = /var/www/__SERVICE__/var/log/php-fpm.error.log
 
-[api_revue_de_presse_org]
+[org_revue_de_presse_api]
 access.log                              = /proc/self/fd/2
 
 catch_workers_output                    = yes

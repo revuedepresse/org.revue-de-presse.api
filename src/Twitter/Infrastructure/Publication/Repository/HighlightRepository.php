@@ -359,12 +359,9 @@ QUERY;
                     $extractedProperties[$statusKey][$favoriteCountKey] = $decodedDocument['retweeted_status'][$favoriteCountKey];
                 }
 
-                if (array_key_exists('extended_entities', $decodedDocument) &&
-                    array_key_exists('media', $decodedDocument['extended_entities']) &&
-                    is_array($decodedDocument['extended_entities']['media']) &&
-                    count($decodedDocument['extended_entities']['media']) > 0 &&
-                    $decodedDocument['extended_entities']['media'][0]['media_url'] &&
-                    array_key_exists('media_url', $decodedDocument['extended_entities']['media'][0])
+                if (
+                    !isset($extractedProperties['status']['base64_encoded_media']) &&
+                    isset($decodedDocument['extended_entities']['media'][0]['media_url'])
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
 

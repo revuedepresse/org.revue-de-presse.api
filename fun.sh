@@ -18,11 +18,11 @@ function build() {
         docker compose \
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
-            --env-file=./.env.local \
             build \
             --no-cache \
             --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
             --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            --build-arg "SERVICE=${SERVICE}" \
             app \
             cache \
             service
@@ -32,10 +32,10 @@ function build() {
         docker compose \
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
-            --env-file=./.env.local \
             build \
             --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
             --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            --build-arg "SERVICE=${SERVICE}" \
             app \
             cache \
             service
@@ -49,15 +49,16 @@ function clean() {
 
     if [ -n "${temporary_directory}" ];
     then
+
         printf 'About to revise file permissions for "%s" before clean up.%s' "${temporary_directory}" $'\n'
 
         set_file_permissions "${temporary_directory}"
 
         return 0
+
     fi
 
     remove_running_container_and_image_in_debug_mode 'app'
-    remove_running_container_and_image_in_debug_mode 'service'
 }
 
 function clear_cache_warmup() {
@@ -71,6 +72,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
+
         remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
@@ -79,6 +81,7 @@ function clear_cache_warmup() {
             up \
             --detach \
             app
+
     fi
 
     docker compose \
@@ -88,21 +91,6 @@ function clear_cache_warmup() {
         --user "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
-}
-
-function get_project_name() {
-    local project_name
-
-    project_name="$(
-        docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        config --format json \
-        | jq '.name' \
-        | tr -d '"'
-    )"
-
-    echo "${project_name}"
 }
 
 function guard_against_missing_variables() {
@@ -179,12 +167,12 @@ function install() {
         up \
         --force-recreate \
         --detach \
-        app && \
+        app
+
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env SERVICE="${SERVICE}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
@@ -219,7 +207,7 @@ function load_configuration_parameters() {
 
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                 ' "$(reset_color)" "${DEBUG}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                ' "$(reset_color)" "${DEBUG}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'SERVICE:              ' "$(reset_color)" "${SERVICE}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_UID:    ' "$(reset_color)" "${SERVICE_OWNER_UID}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_GID:    ' "$(reset_color)" "${SERVICE_OWNER_GID}" $'\n'
@@ -240,28 +228,17 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
+    local SERVICE_OWNER_UID
+    local SERVICE_OWNER_GID
+    local SERVICE
 
-    source ./.env.local
-
-    local project_name
-    project_name="$(get_project_name)"
+    load_configuration_parameters
 
     docker ps -a |
-        \grep "${project_name}" |
+        \grep "${COMPOSE_PROJECT_NAME}" |
         \grep "${container_name}" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
-
-    if [ -n "${DEBUG}" ];
-    then
-
-        docker images -a |
-            \grep "${project_name}" |
-            \grep "${container_name}" |
-            awk '{print $3}' |
-            xargs -I{} docker rmi {}
-
-    fi
 }
 
 function reset_color() {
@@ -334,8 +311,10 @@ SCRIPT
 function stop() {
     load_configuration_parameters
 
-    remove_running_container_and_image_in_debug_mode 'app'
-    remove_running_container_and_image_in_debug_mode 'service'
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        down
 }
 
 function validate_docker_compose_configuration() {

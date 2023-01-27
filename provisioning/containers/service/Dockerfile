@@ -2,14 +2,15 @@ FROM        php:8.1-fpm-bullseye
 
 ARG         OWNER_UID
 ARG         OWNER_GID
+ARG         SERVICE
 
-RUN         test -n "${OWNER_UID}"
-RUN         test -n "${OWNER_GID}"
+RUN         test -n "${OWNER_UID}" && \
+            test -n "${OWNER_GID}" && \
+            test -n "${SERVICE}"
 
+ENV         SERVICE_DIR=${SERVICE}
 ENV         SERVICE_OWNER_UID=${OWNER_UID}
 ENV         SERVICE_OWNER_GID=${OWNER_GID}
-
-ENV         SERVICE=${SERVICE:-org.revue-de-presse.api}
 
 HEALTHCHECK CMD /bin/bash -c "pgrep php-fpm || ( test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0 )"
 
@@ -31,9 +32,9 @@ COPY        --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER        ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
 
-VOLUME      ["/scripts", "/var/www/shared", "/var/www/${SERVICE}"]
+VOLUME      ["/scripts", "/var/www/shared", "/var/www/${SERVICE_DIR}"]
 
-WORKDIR     "/var/www/${SERVICE}"
+WORKDIR     "/var/www/${SERVICE_DIR}"
 
 ENTRYPOINT  ["/usr/bin/tini", "--"]
 
