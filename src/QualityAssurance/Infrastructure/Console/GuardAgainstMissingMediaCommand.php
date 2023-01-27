@@ -116,7 +116,7 @@ class GuardAgainstMissingMediaCommand extends Command {
 
         array_walk(
             $tweetsPartition,
-            function ($partition) {
+            function ($partition, $index) use (&$tweetsPartition) {
                 try {
                     $processedTweets = array_map(
                         [$this, 'processTweet'],
@@ -127,6 +127,8 @@ class GuardAgainstMissingMediaCommand extends Command {
                         [$this, 'updateTrend']
                     );
 
+                    // Freeing memory
+                    $tweetsPartition[$index] = [];
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
                 }
