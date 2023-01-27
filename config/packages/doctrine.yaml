@@ -153,6 +153,13 @@ doctrine:
                         prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
 
+                    MembersList:
+                        alias:      'MembersList'
+                        dir:        '%kernel.project_dir%/src/Ownership/Domain/Entity'
+                        is_bundle:  false
+                        prefix:     'App\Ownership\Domain\Entity'
+                        type:       annotation
+
                     MemberProfileCollectedEvent:
                         alias:      'MemberProfileCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
