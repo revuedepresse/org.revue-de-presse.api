@@ -48,10 +48,9 @@ class TrendsRepository implements TrendsRepositoryInterface
             ->createDatabase();
     }
 
-    private function getFirebaseDatabaseSnapshot(
+    private function getTweetDocumentSnapshot(
         string $tweetId,
-        DateTimeInterface $date,
-        bool $includeRetweets = false
+        DateTimeInterface $date
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
@@ -67,7 +66,7 @@ class TrendsRepository implements TrendsRepositoryInterface
                 'highlights',
                 $publishersList->publicId(),
                 $date->format('Y-m-d'),
-                $includeRetweets ? 'retweet' : 'status',
+                'status',
                 $tweetId,
                 'json'
             ]
@@ -79,22 +78,46 @@ class TrendsRepository implements TrendsRepositoryInterface
             ->getSnapshot();
     }
 
+    private function getTweetSnapshot(
+        string $tweetId,
+        DateTimeInterface $date
+    ): Snapshot {
+        $database = $this->getFirebaseDatabase();
+
+        $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
+
+        if (!($publishersList instanceof MembersListInterface)) {
+            UnknownListException::throws();
+        }
+
+        $path = '/'.implode(
+            '/',
+            [
+                'highlights',
+                $publishersList->publicId(),
+                $date->format('Y-m-d'),
+                'status',
+                $tweetId
+            ]
+        );
+        $this->logger->info(sprintf('About to access Firebase Path: "%s"', $path));
+        $reference = $database->getReference($path);
+
+        return $reference->getSnapshot();
+    }
+
+    /**
+     * @throws \Kreait\Firebase\Exception\DatabaseException
+     */
     public function updateTweetDocument(
         string $tweetId,
         \DateTimeInterface $date,
         string $document
-    ) {
-        try {
-            $snapshot = $this->getFirebaseDatabaseSnapshot(
-                $tweetId,
-                $date
-             );
-        } catch (UnknownListException) {
-            return [
-                'aggregates' => [],
-                'statuses' => [],
-            ];
-        }
+    ): void {
+        $snapshot = $this->getTweetDocumentSnapshot(
+            $tweetId,
+            $date
+         );
 
         try {
             $snapshot->getReference()->set($document);
@@ -103,7 +126,26 @@ class TrendsRepository implements TrendsRepositoryInterface
 
             throw $e;
         }
+    }
 
-        return $snapshot->getValue();
+    /**
+     * @throws \Kreait\Firebase\Exception\DatabaseException
+     */
+    public function removeTweetFromTrends(
+        string $tweetId,
+        DateTimeInterface $createdAt
+    ): void {
+        $snapshot = $this->getTweetSnapshot(
+            $tweetId,
+            $createdAt
+        );
+
+        try {
+            $snapshot->getReference()->set(null);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+
+            throw $e;
+        }
     }
 }
