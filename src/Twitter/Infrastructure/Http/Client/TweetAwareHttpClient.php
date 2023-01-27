@@ -56,11 +56,8 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
 
     public EntityManagerInterface $entityManager;
 
-    public NotFoundStatusRepository $notFoundStatusRepository;
+    public NotFoundStatusRepository $notFoundTweetRepository;
 
-    /**
-     * @param string $identifier
-     */
     public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
         $status = $this->tweetRepository->findOneBy(['statusId' => $identifier]);
@@ -71,11 +68,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
 
         $existingRecord = false;
         if ($status instanceof Tweet) {
-            $existingRecord = $this->notFoundStatusRepository->findOneBy(['status' => $status]) !== null;
+            $existingRecord = $this->notFoundTweetRepository->findOneBy(['status' => $status]) !== null;
         }
 
         if ($status instanceof ArchivedTweet) {
-            $existingRecord = $this->notFoundStatusRepository->findOneBy(['archivedStatus' => $status]) !== null;
+            $existingRecord = $this->notFoundTweetRepository->findOneBy(['archivedStatus' => $status]) !== null;
         }
 
         if ($existingRecord) {
@@ -86,7 +83,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             return;
         }
 
-        $notFoundStatus = $this->notFoundStatusRepository->markStatusAsNotFound($status);
+        $notFoundStatus = $this->notFoundTweetRepository->markStatusAsNotFound($status);
 
         $this->entityManager->persist($notFoundStatus);
         $this->entityManager->flush();
