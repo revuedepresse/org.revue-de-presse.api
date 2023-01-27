@@ -25,7 +25,7 @@ trait ConversationAwareTrait
      * @throws InvalidStatusException
      * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\OptimisticLockException|\JsonException
      */
     public function updateFromDecodedDocument(
         array $status,
