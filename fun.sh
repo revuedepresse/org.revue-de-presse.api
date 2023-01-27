@@ -18,11 +18,11 @@ function build() {
         docker compose \
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
-            --env-file=./.env.local \
             build \
             --no-cache \
             --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
             --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            --build-arg "SERVICE=${SERVICE}" \
             app \
             cache \
             service
@@ -32,10 +32,10 @@ function build() {
         docker compose \
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
-            --env-file=./.env.local \
             build \
             --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
             --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
+            --build-arg "SERVICE=${SERVICE}" \
             app \
             cache \
             service
@@ -72,6 +72,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
+
         remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
@@ -80,6 +81,7 @@ function clear_cache_warmup() {
             up \
             --detach \
             app
+
     fi
 
     docker compose \
@@ -165,7 +167,8 @@ function install() {
         up \
         --force-recreate \
         --detach \
-        app && \
+        app
+
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
@@ -237,17 +240,6 @@ function remove_running_container_and_image_in_debug_mode() {
         \grep "${container_name}" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
-
-    if [ -n "${DEBUG}" ];
-    then
-
-        docker images -a |
-            \grep "${COMPOSE_PROJECT_NAME}" |
-            \grep "${container_name}" |
-            awk '{print $3}' |
-            xargs -I{} docker rmi {}
-
-    fi
 }
 
 function reset_color() {
