@@ -5,6 +5,7 @@ namespace App\QualityAssurance\Infrastructure\Console;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member as Member;
 use App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface;
+use App\QualityAssurance\Infrastructure\Console\TweetNotFoundException as HttpTweetNotFoundException;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface;
@@ -197,6 +198,39 @@ class GuardAgainstMissingMediaCommand extends Command {
         });
     }
 
+    private function fetchExtendedEntities(TweetInterface $tweet): TweetInterface
+    {
+        try {
+            $message = sprintf('About to collect tweet having id %s', $tweet->statusId);
+            $this->info($message);
+
+            $rawTweetDocument = (array)$this->tweetCurator->collectSingleTweet($tweet->statusId);
+
+            return $tweet->overrideProperties([
+                    'raw_document' => json_encode(
+                        $rawTweetDocument,
+                        JSON_OBJECT_AS_ARRAY
+                    )]
+            );
+        } catch (TweetNotFoundException) {
+            $errorMessage = sprintf('Could not find tweet having id %s', $tweet->statusId);
+            $this->error($errorMessage);
+
+            $notFoundTweet = $this->tweetRepository->findOneBy(['statusId' => $tweet->tweetId()]);
+
+            if ($notFoundTweet instanceof NotFoundTweet) {
+                $this->notFoundTweetRepository->markStatusAsNotFound($notFoundTweet);
+
+                $this->entityManager->persist($notFoundTweet);
+                $this->entityManager->flush($notFoundTweet);
+            }
+
+            $tweet->markAsDeleted();
+
+            return $tweet;
+        }
+    }
+
     /**
      * @throws \App\QualityAssurance\Infrastructure\Console\AvatarNotFoundException
      */
@@ -211,12 +245,39 @@ class GuardAgainstMissingMediaCommand extends Command {
         }
     }
 
+    /**
+     * @throws \ErrorException
+     */
     public function extractTweetMedia(TweetInterface $tweet): string
     {
-        $mediaUrl = $tweet->rawDocument['extended_entities']['media'][0]['media_url'] . ':small';
-
         try {
-            return base64_encode($this->getMedia($mediaUrl));
+            return base64_encode($this->getMedia($tweet->smallMediaURL()));
+        } catch (\ErrorException $e) {
+            if (substr_count($e->getMessage(), '404') === 0) {
+                throw $e;
+            }
+
+            try {
+                $tweet = $this->fetchExtendedEntities($tweet);
+
+                if ($tweet->hasBeenDeleted()) {
+                    HttpTweetNotFoundException::throws($tweet);
+                }
+
+                return base64_encode($tweet->smallMediaURL());
+            } catch (\Exception $e) {
+                if ($e instanceof HttpTweetNotFoundException) {
+                    throw $e;
+                }
+
+                $this->error(
+                    sprintf(
+                        'Could not fetch extended entities for tweet %s (error message: %s)',
+                        $tweet->statusId,
+                        $e->getMessage()
+                    )
+                );
+            }
         } catch (\Exception $e) {
             $this->error(
                 sprintf(
