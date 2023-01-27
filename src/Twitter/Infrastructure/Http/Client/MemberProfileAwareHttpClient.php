@@ -54,8 +54,13 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
             $member->setRawDocument(json_encode((array) $remoteMember));
         }
 
-        $member->setDescription($remoteMember->description);
-        $member->setUrl($remoteMember->url);
+        if ($remoteMember->description !== null) {
+            $member->setDescription($remoteMember->description);
+        }
+
+        if ($remoteMember->url !== null) {
+            $member->setUrl($remoteMember->url);
+        }
 
         return $this->memberRepository->saveMember($member);
     }
