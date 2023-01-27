@@ -343,41 +343,13 @@ class GuardAgainstMissingMediaCommand extends Command {
         );
     }
 
-    public function refreshExtendedEntities(mixed $tweet): TweetInterface
+    public function refreshExtendedEntities(TweetInterface $tweet): TweetInterface
     {
         if (array_key_exists('extended_entities', $tweet->rawDocument)) {
             return $tweet;
         }
 
-        try {
-            $message = sprintf('About to collect tweet having id %s', $tweet->statusId);
-            $this->info($message);
-
-            $rawTweetDocument = (array) $this->tweetCurator->collectSingleTweet($tweet->statusId);
-
-            return $tweet->overrideProperties([
-                    'raw_document' => json_encode(
-                        $rawTweetDocument,
-                        JSON_OBJECT_AS_ARRAY
-                    )]
-            );
-        } catch (TweetNotFoundException) {
-            $errorMessage = sprintf('Could not find tweet having id %s', $tweet->statusId);
-            $this->error($errorMessage);
-
-            $notFoundTweet = $this->tweetRepository->findOneBy(['statusId' => $tweet->tweetId()]);
-
-            if ($notFoundTweet instanceof NotFoundTweet) {
-                $this->notFoundTweetRepository->markStatusAsNotFound($notFoundTweet);
-
-                $this->entityManager->persist($notFoundTweet);
-                $this->entityManager->flush($notFoundTweet);
-            }
-
-            $tweet->markAsDeleted();
-        }
-
-        return $tweet;
+        return $this->fetchExtendedEntities($tweet);
     }
 
     public function getMedia(string $avatarUrl): string
@@ -428,11 +400,15 @@ class GuardAgainstMissingMediaCommand extends Command {
             return $tweet->overrideProperties($overrides);
         }
 
-        $tweetMedia = $this->extractTweetMedia($tweet);
-        if (strlen($tweetMedia) > 0) {
-            $overrides['media_data_uri'] = $tweetMedia;
+        try {
+            $tweetMedia = $this->extractTweetMedia($tweet);
+            if (strlen($tweetMedia) > 0) {
+                $overrides['media_data_uri'] = $tweetMedia;
 
-            return $tweet->overrideProperties($overrides);
+                return $tweet->overrideProperties($overrides);
+            }
+        }  catch (HttpTweetNotFoundException $e) {
+            return $e->tweet;
         }
 
         return $tweet;
