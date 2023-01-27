@@ -30,8 +30,9 @@ trait ConversationAwareTrait
     public function updateFromDecodedDocument(
         array $status,
         array $decodedDocument,
-        bool $includeRepliedToStatuses = false
-    ): array {
+        bool  $includeRepliedToStatuses = false
+    ): array
+    {
         $status['media'] = [];
 
         $extendedMedia = [];
@@ -101,16 +102,17 @@ trait ConversationAwareTrait
     private function extractConversationProperties(
         array $updatedStatus,
         array $decodedDocument,
-        bool $includeRepliedToStatuses = false
-    ): array {
+        bool  $includeRepliedToStatuses = false
+    ): array
+    {
         $updatedStatus['in_conversation'] = null;
         if (
             $includeRepliedToStatuses && array_key_exists('in_reply_to_status_id_str', $decodedDocument)
             && $decodedDocument['in_reply_to_status_id_str'] !== null
         ) {
-            $updatedStatus['id_of_status_replied_to']       = $decodedDocument['in_reply_to_status_id_str'];
+            $updatedStatus['id_of_status_replied_to'] = $decodedDocument['in_reply_to_status_id_str'];
             $updatedStatus['username_of_member_replied_to'] = $decodedDocument['in_reply_to_screen_name'];
-            $updatedStatus['in_conversation']               = true;
+            $updatedStatus['in_conversation'] = true;
 
             try {
                 $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
@@ -123,7 +125,7 @@ trait ConversationAwareTrait
                 );
             }
 
-            $repliedToStatus                    =
+            $repliedToStatus =
                 $this->extractStatusProperties([$repliedToStatus], $includeRepliedToStatuses = true);
             $updatedStatus['status_replied_to'] = $repliedToStatus[0];
         }
@@ -140,8 +142,9 @@ trait ConversationAwareTrait
      */
     private function extractStatusProperties(
         array $statuses,
-        bool $includeRepliedToStatuses = false
-    ): array {
+        bool  $includeRepliedToStatuses = false
+    ): array
+    {
         return array_map(
             function ($status) use ($includeRepliedToStatuses) {
                 if ($status instanceof StatusInterface) {
@@ -200,14 +203,14 @@ trait ConversationAwareTrait
                     return $defaultStatus;
                 }
 
-                if ($hasDocumentFromApi) {
+                if ($hasDocumentFromApi && empty($status['original_document'])) {
                     $status['original_document'] = $status['api_document'];
                     unset($status['api_document']);
                 }
 
-                $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
+                try {
+                    $decodedDocument = json_decode($status['original_document'], associative: true, flags: JSON_THROW_ON_ERROR);
+                } catch (\JsonException) {
                     return $defaultStatus;
                 }
 
@@ -240,16 +243,16 @@ trait ConversationAwareTrait
                 }
 
                 if (array_key_exists('retweeted_status', $decodedDocument)) {
-                    $updatedStatus                                  = $this->updateFromDecodedDocument(
+                    $updatedStatus = $this->updateFromDecodedDocument(
                         $defaultStatus,
                         $decodedDocument['retweeted_status'],
                         $includeRepliedToStatuses
                     );
-                    $updatedStatus['username']                      =
+                    $updatedStatus['username'] =
                         $decodedDocument['retweeted_status']['user']['screen_name'];
                     $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
-                    $updatedStatus['retweet']                       = true;
-                    $updatedStatus['text']                          = $decodedDocument['retweeted_status']['full_text'];
+                    $updatedStatus['retweet'] = true;
+                    $updatedStatus['text'] = $decodedDocument['retweeted_status']['full_text'];
                     if (!is_null($likedBy)) {
                         $updatedStatus['liked_by'] = $likedBy;
                     }
@@ -258,12 +261,12 @@ trait ConversationAwareTrait
                 }
 
                 $statusUpdatedFromDecodedDocument = $defaultStatus;
-                $updatedStatus                    = $this->updateFromDecodedDocument(
+                $updatedStatus = $this->updateFromDecodedDocument(
                     $statusUpdatedFromDecodedDocument,
                     $decodedDocument,
                     $includeRepliedToStatuses
                 );
-                $updatedStatus['retweet']         = false;
+                $updatedStatus['retweet'] = false;
                 if ($likedBy !== null) {
                     $updatedStatus['liked_by'] = $likedBy;
                 }
