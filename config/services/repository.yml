@@ -200,26 +200,20 @@ services:
         properties:
             twitterList:                '%publishers_list_default%'
 
-    repository.not_found_status:
+    App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface:
         class: 'App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus'
 
-    App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface:
-        '@repository.not_found_status'
-
-    repository.timely_status:
+    App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface:
         class: 'App\Twitter\Infrastructure\PublishersList\Repository\TimelyStatusRepository'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
-            - [ 'setTweetAwareHttpClient',    [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setTweetRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
-
-    App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface:
-        '@repository.timely_status'
+            - [ 'setTweetAwareHttpClient', [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
         class: 'App\Membership\Infrastructure\Repository\NetworkRepository'
@@ -263,6 +257,14 @@ services:
     App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface:
         '@App\QualityAssurance\Infrastructure\Repository\TrendsRepository'
 
+    repository.member_subscribee:
+        class: 'App\Membership\Infrastructure\Repository\MemberSubscribeeRepository'
+        arguments:
+            - '@doctrine'
+            - 'App\Membership\Infrastructure\Entity\MemberSubscribee'
+        properties:
+            memberRepository: "@user_manager"
+
     repository.member_subscription:
         class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
         arguments:
@@ -271,13 +273,13 @@ services:
         properties:
             memberRepository: "@user_manager"
 
-    repository.member_subscribee:
-        class: 'App\Membership\Infrastructure\Repository\MemberSubscribeeRepository'
-        arguments:
-            - '@doctrine'
-            - 'App\Membership\Infrastructure\Entity\MemberSubscribee'
-        properties:
-            memberRepository: "@user_manager"
+    # @deprecated
+    repository.not_found_status:
+        '@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'
+
+    # @deprecated
+    repository.timely_status:
+        '@App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface'
 
     repository.whisperer:
         class: 'App\Twitter\Infrastructure\Http\Repository\WhispererRepository'
