@@ -173,7 +173,6 @@ function install() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --env SERVICE="${SERVICE}" \
         --user root \
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
