@@ -144,7 +144,11 @@ class GuardAgainstMissingMediaCommand extends Command {
     public function makeTweets(string $filePath): array
     {
         $lines = [];
-        preg_match_all('#(^[0-9][0-9][0-9][0-9][0-9].*,(?:False|True))#m', file_get_contents($filePath), $lines);
+        $contents = file_get_contents($filePath);
+        $size = (4 * strlen($contents)) / 1024 / 1024;
+        ini_set('memory_limit', sprintf('%dM', $size * 2));
+
+        preg_match_all('#(^[0-9][0-9][0-9][0-9][0-9].*,(?:False|True))#m', $contents, $lines);
 
         return array_reduce($lines[1], function ($carry, $item) {
             if ($carry === null) {
