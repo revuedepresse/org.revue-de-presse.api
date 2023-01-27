@@ -16,6 +16,7 @@ services:
     App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand:
         class: 'App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand'
         calls:
+            - [ 'setEntityManager',                ['@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                       ['@logger'] ]
             - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
             - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]

@@ -15,6 +15,7 @@ use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,6 +33,15 @@ class GuardAgainstMissingMediaCommand extends Command {
     private OutputInterface $output;
 
     private array $cachedMembers = [];
+
+    private EntityManagerInterface $entityManager;
+
+    public function setEntityManager(EntityManagerInterface $entityManager): self
+    {
+        $this->entityManager = $entityManager;
+
+        return $this;
+    }
 
     private MemberProfileAwareHttpClientInterface $memberProfileHttpClient;
 
@@ -292,6 +302,9 @@ class GuardAgainstMissingMediaCommand extends Command {
 
             if ($notFoundTweet instanceof NotFoundTweet) {
                 $this->notFoundTweetRepository->markStatusAsNotFound($notFoundTweet);
+
+                $this->entityManager->persist($notFoundTweet);
+                $this->entityManager->flush($notFoundTweet);
             }
 
             $tweet->markAsDeleted();
