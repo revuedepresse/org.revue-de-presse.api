@@ -231,6 +231,23 @@ services:
     App\Membership\Domain\Repository\NetworkRepositoryInterface:
         '@App\Membership\Infrastructure\Repository\NetworkRepository'
 
+    App\Ownership\Domain\Repository\MembersListRepositoryInterface:
+        public: true
+        class:  'App\Ownership\Infrastructure\Repository\MembersListRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Ownership\Domain\Entity\MembersList'
+        calls:
+            - [ 'setLogger',                    [ '@logger' ] ]
+            - [ 'setTweetRepository',           [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
+            - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
+            - [ 'setTokenRepository',           [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    App\Ownership\Infrastructure\Repository\MembersListRepository:
+        '@App\Ownership\Domain\Repository\MembersListRepositoryInterface'
+
     repository.member_subscription:
         class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
         arguments:
