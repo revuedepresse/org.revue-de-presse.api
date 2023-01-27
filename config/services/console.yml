@@ -13,6 +13,19 @@ services:
         tags:
             - { name: 'console.command' }
 
+    App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand:
+        class: 'App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand'
+        calls:
+            - [ 'setLogger',                       ['@logger'] ]
+            - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
+            - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
+            - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
+            - [ 'setResourcesDir',                 ['%kernel.project_dir%/tests/QualityAssurance/Infrastructure/Resources'] ]
+            - [ 'setTweetCurator',                 ['@App\Twitter\Domain\Curation\Curator\TweetCuratorInterface'] ]
+            - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
+        tags:
+            - { name: 'console.command' }
+
     App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
         tags:

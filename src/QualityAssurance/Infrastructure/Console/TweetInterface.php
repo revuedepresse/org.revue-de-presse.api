@@ -2,6 +2,8 @@
 
 namespace App\QualityAssurance\Infrastructure\Console;
 
+use DateTimeInterface;
+
 interface TweetInterface
 {
     public function hasBeenDeleted(): bool;
@@ -11,6 +13,8 @@ interface TweetInterface
     public function rawDocument(): array;
 
     public function tweetId(): string;
+
+    public function createdAt(): DateTimeInterface;
 
     public function overrideProperties(array $overrides): self;
 }

@@ -4,6 +4,7 @@ namespace App\QualityAssurance\Infrastructure\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member as Member;
+use App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface;
@@ -68,6 +69,13 @@ class GuardAgainstMissingMediaCommand extends Command {
         return $this;
     }
 
+    private TrendsRepositoryInterface $trendsRepository;
+
+    public function setTrendsRepository(TrendsRepositoryInterface $trendsRepository): void
+    {
+        $this->trendsRepository = $trendsRepository;
+    }
+
     private TweetCuratorInterface $tweetCurator;
 
     public function setTweetCurator(TweetCuratorInterface $tweetCurator): self
@@ -90,24 +98,29 @@ class GuardAgainstMissingMediaCommand extends Command {
         $filePath = sprintf(
             '%s/%s',
             $this->resourcesDir,
-            '2019-01-01_tweets-sample.csv'
+            '2023-01-26_org.revue-de-presse.api.csv'
         );
 
         $tweets = $this->makeTweets($filePath);
         $tweetsPartition = array_chunk($tweets, 100, true);
 
-        array_map(
+        array_walk(
+            $tweetsPartition,
             function ($partition) {
                 try {
-                    return array_map(
+                    $processedTweets = array_map(
                         [$this, 'processTweet'],
                         $partition
                     );
+                    array_walk(
+                        $processedTweets,
+                        [$this, 'updateTrend']
+                    );
+
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
                 }
-            },
-            $tweetsPartition
+            }
         );
 
         return self::SUCCESS;
@@ -182,7 +195,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         }
     }
 
-    function extractTweetMedia(TweetInterface $tweet): string
+    public function extractTweetMedia(TweetInterface $tweet): string
     {
         $mediaUrl = $tweet->rawDocument['extended_entities']['media'][0]['media_url'] . ':small';
 
@@ -224,7 +237,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         return $this->defaultAvatar;
     }
 
-    function refreshProfileImageURL(MemberInterface $member, TweetInterface $tweet): TweetInterface
+    public function refreshProfileImageURL(MemberInterface $member, TweetInterface $tweet): TweetInterface
     {
         $message = sprintf('About to collect member having id %s', $member->twitterId());
         $this->info($message);
@@ -253,7 +266,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         );
     }
 
-    function refreshExtendedEntities(mixed $tweet): TweetInterface
+    public function refreshExtendedEntities(mixed $tweet): TweetInterface
     {
         if (array_key_exists('extended_entities', $tweet->rawDocument)) {
             return $tweet;
@@ -343,5 +356,14 @@ class GuardAgainstMissingMediaCommand extends Command {
         }
 
         return $tweet;
+    }
+
+    public function updateTrend(TweetInterface $tweet)
+    {
+        $this->trendsRepository->updateTweetDocument(
+            $tweet->tweetId(),
+            $tweet->createdAt(),
+            json_encode($tweet->rawDocument())
+        );
     }
 }

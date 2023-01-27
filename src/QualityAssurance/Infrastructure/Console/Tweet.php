@@ -2,6 +2,7 @@
 
 namespace App\QualityAssurance\Infrastructure\Console;
 
+use DateTimeInterface;
 use JsonException;
 
 class Tweet implements TweetInterface
@@ -16,8 +17,8 @@ class Tweet implements TweetInterface
     public readonly array $rawDocument;
     public readonly bool $isStarred;
     public readonly bool $isIndexed;
-    public readonly \DateTimeInterface $createdAt;
-    public readonly \DateTimeInterface $updatedAt;
+    public readonly DateTimeInterface $createdAt;
+    public readonly DateTimeInterface $updatedAt;
     public readonly bool $isPublished;
 
     private bool $hasBeenDeleted = false;
@@ -41,8 +42,8 @@ class Tweet implements TweetInterface
         string             $avatar,
         string             $statusId,
         string             $rawDocument,
-        \DateTimeInterface $createdAt,
-        \DateTimeInterface $updatedAt,
+        DateTimeInterface $createdAt,
+        DateTimeInterface $updatedAt,
         bool               $isStarred,
         bool               $isIndexed = false,
         bool               $isPublished = false
@@ -105,10 +106,7 @@ class Tweet implements TweetInterface
         $rawDocument['_profile_image_url_https'] = $avatarDataURI;
 
         if (array_key_exists('avatar_data_uri', $overrides)) {
-            $avatarDataURI = $overrides['avatar_data_uri'];
-
-            $rawDocument['avatar_data_uri'] = $avatarDataURI;
-            $rawDocument['status']['base64_encoded_avatar'] = 'data:image/jpeg;base64,'.$avatarDataURI;
+            $rawDocument['base64_encoded_avatar'] = 'data:image/jpeg;base64,'.$overrides['avatar_data_uri'];
         }
 
         if (array_key_exists('extended_entities', $this->rawDocument)) {
@@ -116,10 +114,7 @@ class Tweet implements TweetInterface
             $rawDocument['_media_url'] = $mediaDataURI;
 
             if (array_key_exists('media_data_uri', $overrides)) {
-                $mediaDataURI = $overrides['media_data_uri'];
-
-                $rawDocument['media_data_uri'] = $mediaDataURI;
-                $rawDocument['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.$mediaDataURI;
+                $rawDocument['base64_encoded_media'] = 'data:image/jpeg;base64,'.$overrides['media_data_uri'];
             }
         }
 
@@ -131,13 +126,17 @@ class Tweet implements TweetInterface
             $this->text,
             $avatarDataURI,
             $this->statusId,
-            json_encode($rawDocument, JSON_OBJECT_AS_ARRAY),
+            json_encode($rawDocument),
             $this->createdAt,
             $this->updatedAt,
             $this->isStarred,
             $this->isIndexed,
             $this->isPublished
         );
+    }
+
+    public function createdAt(): DateTimeInterface {
+        return $this->createdAt;
     }
 
     public function hasBeenDeleted(): bool
