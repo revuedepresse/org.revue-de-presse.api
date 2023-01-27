@@ -51,7 +51,7 @@ class TrendsRepository implements TrendsRepositoryInterface
     private function getFirebaseDatabaseSnapshot(
         string $tweetId,
         DateTimeInterface $date,
-        bool $includeRetweets = true
+        bool $includeRetweets = false
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
