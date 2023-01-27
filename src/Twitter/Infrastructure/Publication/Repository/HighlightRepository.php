@@ -361,7 +361,7 @@ QUERY;
 
                 if (
                     !isset($extractedProperties['status']['base64_encoded_media']) &&
-                    isset(['extended_entities']['media'][0]['media_url'])
+                    isset($decodedDocument['extended_entities']['media'][0]['media_url'])
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
 
