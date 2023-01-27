@@ -89,16 +89,6 @@ function install_php_extensions() {
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz \
-    --output-document=/tmp/datadog-php-tracer.tar.gz
-    cd /tmp || exit
-    tar -xvzf /tmp/datadog-php-tracer.tar.gz
-    cd dd-trace-php-0.74.0 || exit
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
-
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
     --output-document=/tmp/datadog-setup.php
     cd /tmp || exit
@@ -113,6 +103,21 @@ function install_service_requirements() {
     install_system_packages
     install_php_extensions
     clear_package_management_system_cache
+
+    if [ -e /start.sh ];
+    then
+
+          chown \
+              --verbose \
+              "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
+              /start.sh
+
+          chmod \
+              --verbose \
+              ug+x \
+              /start.sh
+
+    fi
 
     mkdir \
         --verbose \
@@ -227,7 +232,9 @@ function install_app_requirements() {
 
     if [ ! -d "${project_dir}/.git" ];
     then
+
         rm --recursive --force --verbose "${project_dir}/.git"
+
     fi
 
     find "${project_dir}"  \
