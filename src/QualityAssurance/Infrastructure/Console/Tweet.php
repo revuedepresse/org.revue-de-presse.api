@@ -38,7 +38,6 @@ class Tweet implements TweetInterface
         string            $hash,
         string            $username,
         string            $name,
-        string            $text,
         string            $avatar,
         string            $statusId,
         string            $rawDocument,
@@ -50,15 +49,6 @@ class Tweet implements TweetInterface
         bool              $hasBeenDeleted = false
     )
     {
-        $this->id = $id;
-        $this->hash = $hash;
-        $this->username = $username;
-        $this->name = $name;
-        $this->text = str_replace('""', '"', $text);
-        $this->avatar = $avatar;
-        $this->statusId = $statusId;
-        $this->hasBeenDeleted = $hasBeenDeleted;
-
         try {
             $this->rawDocument = json_decode(
                 $rawDocument,
@@ -71,11 +61,26 @@ class Tweet implements TweetInterface
             throw new \InvalidArgumentException($e, $e->getCode(), $e);
         }
 
+        $this->id = $id;
+        $this->hash = $hash;
+        $this->username = $username;
+        $this->name = $name;
+        $this->avatar = $avatar;
+        $this->statusId = $statusId;
+        $this->hasBeenDeleted = $hasBeenDeleted;
         $this->isStarred = $isStarred;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
         $this->isPublished = $isPublished;
         $this->isIndexed = $isIndexed;
+
+        if (array_key_exists('text', $this->rawDocument)) {
+            $this->text = $this->rawDocument['text'];
+
+            return;
+        }
+
+        $this->text = $this->rawDocument['full_text'];
     }
 
     public function overrideProperties(array $overrides = []): self
@@ -86,7 +91,6 @@ class Tweet implements TweetInterface
                     $this->hash,
                     $this->username,
                     $this->name,
-                    $this->text,
                     $this->avatar,
                     $this->statusId,
                     $overrides['raw_document'],
@@ -122,7 +126,6 @@ class Tweet implements TweetInterface
             $this->hash,
             $this->username,
             $this->name,
-            $this->text,
             $avatarDataURI,
             $this->statusId,
             json_encode($rawDocument),
