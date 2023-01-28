@@ -322,10 +322,10 @@ class GuardAgainstMissingMediaCommand extends Command {
 
     public function refreshProfileImageURL(MemberInterface $member, TweetInterface $tweet): TweetInterface
     {
-        $message = sprintf('About to collect member having id %s', $member->twitterId());
-        $this->info($message);
-
         if (!array_key_exists($member->twitterId(), $this->cachedMembers)) {
+            $message = sprintf('About to collect member having id %s', $member->twitterId());
+            $this->info($message);
+
             $member = $this->memberProfileHttpClient->ensureMemberProfileIsUpToDate(
                 $member,
                 $member->twitterScreenName()
