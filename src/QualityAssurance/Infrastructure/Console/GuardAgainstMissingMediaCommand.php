@@ -120,7 +120,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         );
 
         $tweets = $this->makeTweets($filePath);
-        $tweetsPartition = array_chunk($tweets, 1000, true);
+        $tweetsPartition = array_chunk($tweets, 2000, true);
 
         array_walk(
             $tweetsPartition,
