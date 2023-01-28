@@ -165,7 +165,7 @@ class GuardAgainstMissingMediaCommand extends Command {
 
             preg_match(
                 '#(?<id>\d+),"(?!>")(?<hash>[^,]+)","(?!>")(?<username>[^,]+)","(?!>")(?<name>[^"]+)",' .
-                '"(?!>")(?<text>.+)","(?!>")(?<avatarURL>http(s)?://[^,]+)","(?!>")(?<userToken>[-a-z0-9A-Z]+)",' .
+                '"(?!>")(?<avatarURL>http(s)?://[^,]+)",' .
                 '"(?!>")(?<statusId>\d+)","(?<rawDocument>.+\})",(?<isStarred>.+),' .
                 '(?<isIndexed>.+),"(?!>")(?<createdAt>.+)","?(?<updatedAt>(?!>)' .
                 '(:?[^"]+)|NULL)"?,(?<isPublished>.+)' .
@@ -188,7 +188,6 @@ class GuardAgainstMissingMediaCommand extends Command {
                 $matches['hash'],
                 $matches['username'],
                 $matches['name'],
-                $matches['text'],
                 $matches['avatarURL'],
                 $matches['statusId'],
                 str_replace('""', '"', $matches['rawDocument']),
