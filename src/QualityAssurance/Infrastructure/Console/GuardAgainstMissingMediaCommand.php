@@ -19,6 +19,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -102,6 +103,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         $this->setName(self::COMMAND_NAME)
             ->addArgument(
                 self::ARGUMENT_FILENAME,
+                InputArgument::REQUIRED,
                 description: 'CSV filename containing Tweets ready for processing'
             );
     }
