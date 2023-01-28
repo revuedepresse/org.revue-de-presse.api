@@ -6,6 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Http\Builder\Client;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
+use App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -200,8 +201,7 @@ class HttpClientBuilder
 
     public static function willAllowPublishersListToBeImportedForMemberHavingScreenName(
         MemberRepositoryInterface $memberRepository,
-        LoggerInterface $logger,
-        string $screenName
+        LoggerInterface $logger
     )
     {
         $builder = new self();
@@ -210,7 +210,7 @@ class HttpClientBuilder
             $builder->makeOwnershipCollection(),
         );
 
-        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, $screenName);
+        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, ImportMemberPublishersListsCommandTest::SCREEN_NAME);
         $builder->willGetMembersInList(
             self::LIST_ID,
             MemberCollection::fromArray([

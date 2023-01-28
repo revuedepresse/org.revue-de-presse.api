@@ -1109,7 +1109,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      * @throws OptimisticLockException
      * @throws Exception
      */
-    public function showStatus($identifier)
+    public function showStatus(string $identifier): mixed
     {
         if (!is_numeric($identifier)) {
             throw new \InvalidArgumentException('A status identifier should be an integer');
@@ -1446,7 +1446,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      */
     protected function getShowStatusEndpoint($version = self::TWITTER_API_VERSION_1_1)
     {
-        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended';
+        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended&include_entities=true';
     }
 
     /**

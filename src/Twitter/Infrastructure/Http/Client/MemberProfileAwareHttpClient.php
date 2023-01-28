@@ -36,13 +36,6 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
         $this->unavailableResourceHandler = $unavailableResourceHandler;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     * @param \stdClass|null  $remoteMember
-     *
-     * @return MemberInterface
-     */
     public function ensureMemberProfileIsUpToDate(
         MemberInterface $member,
         string $memberName,
@@ -58,10 +51,16 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
 
         if ($remoteMember === null) {
             $remoteMember = $this->collectedMemberProfile($memberName);
+            $member->setRawDocument(json_encode((array) $remoteMember));
         }
 
-        $member->description = $remoteMember->description;
-        $member->url         = $remoteMember->url;
+        if ($remoteMember->description !== null) {
+            $member->setDescription($remoteMember->description);
+        }
+
+        if ($remoteMember->url !== null) {
+            $member->setUrl($remoteMember->url);
+        }
 
         return $this->memberRepository->saveMember($member);
     }

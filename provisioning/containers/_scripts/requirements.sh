@@ -134,7 +134,9 @@ function install_php_extensions() {
     make install
 
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
+    --tries=40 \
     --output-document=/tmp/datadog-setup.php
+
     cd /tmp || exit
     php datadog-setup.php \
     --php-bin all \
@@ -179,7 +181,17 @@ function install_process_manager() {
 
     source "${HOME}/.bashrc"
 
-    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+    if [ $(asdf plugin list | grep -c 'nodejs') -eq 0 ];
+    then
+
+        asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+    else
+
+        printf '`%s` plugin for asdf has been installed already.%s' 'nodejs' '%s' 1>&2
+
+    fi
+
     asdf install nodejs 16.15.1
     asdf global nodejs 16.15.1
 
@@ -191,9 +203,20 @@ function install_process_manager() {
     echo '' > ./.pm2-installed
 }
 
+function upgrade_packages_source() {
+    echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
+
+    apt update  --assume-yes
+    apt upgrade --assume-yes
+}
+
 function install_process_manager_packages() {
+    upgrade_packages_source
+
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         curl \
         gawk \
         git \
@@ -217,11 +240,12 @@ function install_shared_requirements() {
 }
 
 function install_shared_system_packages() {
-    # Update package source repositories
-    apt-get update
+    upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         apt-utils \
         ca-certificates \
         git \
@@ -236,8 +260,11 @@ function install_shared_system_packages() {
 }
 
 function install_worker_system_packages() {
-    # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    upgrade_packages_source
+
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         libcurl4-gnutls-dev \
         libicu-dev \
         libjpeg-dev \

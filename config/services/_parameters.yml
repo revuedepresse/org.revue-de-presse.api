@@ -30,6 +30,9 @@ parameters:
     app.twitter.oauth_secret.default:   '%env(resolve:API_TWITTER_USER_SECRET)%'
     app.twitter.version:                '%env(resolve:API_TWITTER_VERSION)%'
 
+    list_default:                       '%env(resolve:LIST_DEFAULT)%'
+
     publishers_list_default:            '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'
 
     repository.publishers_list.class:   'App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
+

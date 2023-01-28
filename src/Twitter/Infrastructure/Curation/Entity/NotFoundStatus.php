@@ -10,48 +10,20 @@ use Ramsey\Uuid\UuidInterface;
 
 class NotFoundStatus
 {
-    /**
-     * @var string
-     */
     private UuidInterface $id;
 
-    /**
-     * @var Tweet
-     */
     private ?Tweet $status = null;
 
-    /**
-     * @var ArchivedTweet
-     */
     private ?ArchivedTweet $archivedStatus = null;
 
-    /**
-     * @param $status
-     * @param $archivedStatus
-     */
     public function __construct(Tweet $status = null, ArchivedTweet $archivedStatus = null)
     {
         $this->archivedStatus = $archivedStatus;
         $this->status = $status;
     }
 
-    /**
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
-        return $this->id;
-    }
-
-    /**
-     * @return TweetInterface
-     */
-    public function getStatus()
-    {
-        if ($this->status === null) {
-            return $this->archivedStatus;
-        }
-
-        return $this->status;
+        return (string) $this->id;
     }
 }

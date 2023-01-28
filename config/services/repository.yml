@@ -200,20 +200,20 @@ services:
         properties:
             twitterList:                '%publishers_list_default%'
 
-    repository.not_found_status:
+    App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface:
         class: 'App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Curation\Entity\NotFoundStatus'
 
-    repository.timely_status:
+    App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface:
         class: 'App\Twitter\Infrastructure\PublishersList\Repository\TimelyStatusRepository'
         arguments:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
-            - [ 'setTweetAwareHttpClient',    [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setTweetRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
+            - [ 'setTweetAwareHttpClient', [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
         class: 'App\Membership\Infrastructure\Repository\NetworkRepository'
@@ -228,13 +228,17 @@ services:
     App\Membership\Domain\Repository\NetworkRepositoryInterface:
         '@App\Membership\Infrastructure\Repository\NetworkRepository'
 
-    repository.member_subscription:
-        class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
+    App\QualityAssurance\Infrastructure\Repository\TrendsRepository:
+        class: 'App\QualityAssurance\Infrastructure\Repository\TrendsRepository'
         arguments:
-            - '@doctrine'
-            - 'App\Membership\Infrastructure\Entity\MemberSubscription'
-        properties:
-            memberRepository: "@user_manager"
+            - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
+            - "%env(resolve:FIREBASE_DATABASE_URI)%"
+            - '%list_default%'
+            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
+            - '@logger'
+
+    App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface:
+        '@App\QualityAssurance\Infrastructure\Repository\TrendsRepository'
 
     repository.member_subscribee:
         class: 'App\Membership\Infrastructure\Repository\MemberSubscribeeRepository'
@@ -243,6 +247,22 @@ services:
             - 'App\Membership\Infrastructure\Entity\MemberSubscribee'
         properties:
             memberRepository: "@user_manager"
+
+    repository.member_subscription:
+        class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
+        arguments:
+            - '@doctrine'
+            - 'App\Membership\Infrastructure\Entity\MemberSubscription'
+        properties:
+            memberRepository: "@user_manager"
+
+    # @deprecated
+    repository.not_found_status:
+        '@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'
+
+    # @deprecated
+    repository.timely_status:
+        '@App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface'
 
     repository.whisperer:
         class: 'App\Twitter\Infrastructure\Http\Repository\WhispererRepository'

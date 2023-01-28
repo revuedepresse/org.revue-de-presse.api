@@ -1,9 +1,15 @@
-FROM php:8.1-cli-bullseye
+FROM        php:8.1-cli-bullseye
 
-ENV         WORKER='org.example.worker'
+ARG         OWNER_UID
+ARG         OWNER_GID
+ARG         WORKER
 
-ARG         WORKER_OWNER_UID=1000
-ARG         WORKER_OWNER_GID=101
+RUN         test -n OWNER_UID && \
+            test -n OWNER_GID && \
+            test -n WORKER
+
+ENV         WORKER_OWNER_UID=$OWNER_UID
+ENV         WORKER_OWNER_GID=$OWNER_GID
 
 ARG         WORKER_DIR="${WORKER}"
 

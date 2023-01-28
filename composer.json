@@ -33,6 +33,7 @@
         "doctrine/inflector": "^2.0",
         "doctrine/orm": "^2.8",
         "guzzlehttp/guzzle": "^7.4",
+        "kreait/firebase-bundle": "^4.0",
         "ocramius/package-versions": "^1.9",
         "ocramius/proxy-manager": "^2.14",
         "oro/doctrine-extensions": "^2.0",

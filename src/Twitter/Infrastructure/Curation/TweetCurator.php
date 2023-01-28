@@ -332,9 +332,6 @@ class TweetCurator implements TweetCuratorInterface
         }
     }
 
-    /**
-     * @return bool
-     */
     protected function isApiAvailable(): bool
     {
         $availableApi = false;
@@ -729,6 +726,11 @@ class TweetCurator implements TweetCuratorInterface
         );
 
         return $options;
+    }
+
+    public function collectSingleTweet(string $identifier): mixed
+    {
+        return $this->httpClient->showStatus($identifier);
     }
 
     /**

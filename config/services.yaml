@@ -32,8 +32,8 @@ services:
         public: true
         class: 'App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter'
         calls:
-            - [ 'setTweetAwareHttpClient',   [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setTweetRepository', [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetAwareHttpClient', [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
 
     App\Twitter\Infrastructure\Http\Repository\TweetRepository:
         class: 'App\Twitter\Infrastructure\Http\Repository\TweetRepository'
@@ -165,16 +165,16 @@ services:
         class: 'App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
         properties:
             archivedTweetRepository: '@App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository'
-            entityManager:              '@doctrine.orm.entity_manager'
-            notFoundtweetRepository:   '@repository.not_found_status'
+            entityManager:           '@doctrine.orm.entity_manager'
+            notFoundTweetRepository: '@repository.not_found_status'
         calls:
-            - [ 'setHttpClient',                               [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
-            - [ 'setLogger',                                    [ '@logger' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
-            - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setPersistenceLayer',                    [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
-            - [ 'setTweetRepository',                          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
-            - [ 'setTweetsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
+            - [ 'setHttpClient',                            [ '@App\Twitter\Infrastructure\Http\Client\HttpClient' ] ]
+            - [ 'setLogger',                                [ '@logger' ] ]
+            - [ 'setMemberRepository',                      [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setPersistenceLayer',                      [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface' ] ]
+            - [ 'setTweetRepository',                       [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetsBatchCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
         public: true
 
     App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
@@ -206,13 +206,16 @@ services:
             - [ 'setTweetsBatchCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\TweetsBatchCollectedEventRepository' ] ]
             - [ 'setTweetCurationLogger',                   [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger' ] ]
             - [ 'setTweetAwareHttpClient',                  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient' ] ]
-            - [ 'setTweetRepository',                      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
+            - [ 'setTweetRepository',                       [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
             - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setTranslator',                            [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',               [ '@App\Twitter\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:                                   '@monolog.logger.twitter_api'
+
+    App\Twitter\Domain\Curation\Curator\TweetCuratorInterface:
+        '@App\Twitter\Infrastructure\Curation\TweetCurator'
 
     App\Twitter\Infrastructure\Translation\Translator:
         class: 'App\Twitter\Infrastructure\Translation\Translator'

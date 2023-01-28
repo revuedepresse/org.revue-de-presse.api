@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 function build() {
+    local DEBUG
     local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
@@ -35,16 +36,35 @@ function build() {
 
     fi
 
-    docker compose \
-        --file=./provisioning/containers/docker-compose.yaml \
-        --file=./provisioning/containers/docker-compose.override.yaml \
-        build \
-        --build-arg "WORKER_DIR=${WORKER}" \
-        --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-        --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
-        app \
-        process-manager \
-        worker
+    if [ -n "${DEBUG}" ];
+    then
+
+      docker compose \
+          --file=./provisioning/containers/docker-compose.yaml \
+          --file=./provisioning/containers/docker-compose.override.yaml \
+          build \
+          --no-cache \
+          --build-arg "WORKER=${WORKER}" \
+          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
+          app \
+          process-manager \
+          worker
+
+    else
+
+      docker compose \
+          --file=./provisioning/containers/docker-compose.yaml \
+          --file=./provisioning/containers/docker-compose.override.yaml \
+          build \
+          --build-arg "WORKER=${WORKER}" \
+          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
+          app \
+          process-manager \
+          worker
+
+    fi
 }
 
 function dispatch_amqp_messages() {
@@ -114,9 +134,9 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
+    local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
-    local WORKER
 
     load_configuration_parameters
 
@@ -134,17 +154,6 @@ function remove_running_container_and_image_in_debug_mode() {
         \grep "\-${container_name}\-" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
-
-    if [ -n "${DEBUG}" ];
-    then
-        docker images -a |
-            \grep "${project_name}" |
-            \grep "\-${container_name}\-" |
-            awk '{print $3}' |
-            xargs -I{} docker rmi -f {}
-
-        build
-    fi
 }
 
 function clean() {
@@ -245,10 +254,20 @@ function load_configuration_parameters() {
 
     validate_docker_compose_configuration
 
-    source ./.env.local
+    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'test' ];
+    then
+
+        source ./.env.test
+
+    else
+
+        source ./.env.local
+
+    fi
 
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                ' "$(reset_color)" "${DEBUG}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_DIR:           ' "$(reset_color)" "${WORKER}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_UID:     ' "$(reset_color)" "${WORKER_OWNER_UID}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_GID:     ' "$(reset_color)" "${WORKER_OWNER_GID}" $'\n'
@@ -276,17 +295,7 @@ function run_unit_tests() {
 }
 
 function get_project_name() {
-    local project_name
-    project_name="$(
-        docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        config --format json \
-        | jq '.name' \
-        | tr -d '"'
-    )"
-
-    echo "${project_name}"
+    echo "${COMPOSE_PROJECT_NAME}"
 }
 
 function get_process_manager_shell() {
