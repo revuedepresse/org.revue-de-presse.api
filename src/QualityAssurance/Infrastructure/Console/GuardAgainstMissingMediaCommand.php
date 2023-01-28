@@ -158,6 +158,8 @@ class GuardAgainstMissingMediaCommand extends Command {
 
         ini_set('memory_limit', '1G');
 
+        preg_match_all('#(^\d+,".*,(?:False|True))\s#m', $contents, $lines);
+
         return array_reduce($lines[1], function ($carry, $item) {
             if ($carry === null) {
                 return [];
