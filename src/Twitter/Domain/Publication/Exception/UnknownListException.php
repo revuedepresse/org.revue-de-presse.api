@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace App\Ownership\Domain\Exception;
+namespace App\Twitter\Domain\Publication\Exception;
 
 use InvalidArgumentException;
 

@@ -3,11 +3,11 @@ declare (strict_types=1);
 
 namespace App\QualityAssurance\Infrastructure\Repository;
 
-use App\Ownership\Domain\Exception\UnknownListException;
-use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
-use App\Ownership\Domain\Entity\MembersListInterface;
 use App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface;
-use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
+use App\Twitter\Domain\Publication\Exception\UnknownListException;
+use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use DateTimeInterface;
 use Kreait\Firebase\Database;
 use Kreait\Firebase\Database\Snapshot;
@@ -21,22 +21,22 @@ class TrendsRepository implements TrendsRepositoryInterface
 
     private LoggerInterface $logger;
 
-    private MembersListRepositoryInterface $listRepository;
+    private PublishersListRepositoryInterface $listRepository;
 
     private string $defaultPublishersList;
 
     public function __construct(
-        string $serviceAccountConfig,
-        string $databaseUri,
-        string $defaultPublishersList,
-        MembersListRepositoryInterface $publishersListRepository,
-        LoggerInterface $logger
+        string                            $serviceAccountConfig,
+        string                            $databaseUri,
+        string                            $defaultPublishersList,
+        PublishersListRepositoryInterface $repository,
+        LoggerInterface                   $logger
     )
     {
         $this->serviceAccountConfig = $serviceAccountConfig;
         $this->databaseUri = $databaseUri;
         $this->defaultPublishersList = $defaultPublishersList;
-        $this->listRepository = $publishersListRepository;
+        $this->listRepository = $repository;
         $this->logger = $logger;
     }
 
@@ -56,7 +56,7 @@ class TrendsRepository implements TrendsRepositoryInterface
 
         $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
 
-        if (!($publishersList instanceof MembersListInterface)) {
+        if (!($publishersList instanceof PublishersList)) {
             UnknownListException::throws();
         }
 
@@ -86,7 +86,7 @@ class TrendsRepository implements TrendsRepositoryInterface
 
         $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
 
-        if (!($publishersList instanceof MembersListInterface)) {
+        if (!($publishersList instanceof PublishersListInterface)) {
             UnknownListException::throws();
         }
 
