@@ -7,6 +7,7 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use stdClass;
 
 interface HttpClientInterface extends ApiErrorCodeAwareInterface
@@ -45,6 +46,8 @@ interface HttpClientInterface extends ApiErrorCodeAwareInterface
     public function getListMembers(string $listId): MemberCollectionInterface;
 
     public function getMemberProfile(string $identifier): stdClass;
+
+    public function getMemberProfileByScreenNameOrUserId(MemberIdentity $memberIdentity): stdClass|array|null;
 
     public function contactEndpoint(string $endpoint);
 }

@@ -19,11 +19,24 @@ services:
             - [ 'setHttpClient',                   ['@App\QualityAssurance\Infrastructure\HttpClient\HttpClient'] ]
             - [ 'setEntityManager',                ['@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                       ['@logger'] ]
-            - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
             - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
             - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
             - [ 'setResourcesDir',                 ['%kernel.project_dir%/src/QualityAssurance/Infrastructure/Resources'] ]
+            - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
             - [ 'setTweetCurator',                 ['@App\Twitter\Domain\Curation\Curator\TweetCuratorInterface'] ]
+            - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
+        tags:
+            - { name: 'console.command' }
+
+    App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMemberProfilePictureCommand:
+        class: 'App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMemberProfilePictureCommand'
+        calls:
+            - [ 'setHttpClient',                   ['@App\QualityAssurance\Infrastructure\HttpClient\HttpClient'] ]
+            - [ 'setEntityManager',                ['@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                       ['@logger'] ]
+            - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
+            - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
+            - [ 'setResourcesDir',                 ['%kernel.project_dir%/src/QualityAssurance/Infrastructure/Resources'] ]
             - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
         tags:
             - { name: 'console.command' }

@@ -57,7 +57,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     public ?string $minStatusId;
 
-    private ?string $rawDocument;
+    private ?string $rawDocument = '{}';
 
     public function rawDocument(): array {
         return json_decode($this->rawDocument, true);

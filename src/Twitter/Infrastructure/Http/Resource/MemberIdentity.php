@@ -7,6 +7,8 @@ use Assert\Assert;
 
 class MemberIdentity
 {
+    public const NOT_PERSISTED_MEMBER_NUMERIC_ID = '-1';
+
     private string $screenName;
 
     private string $id;
@@ -34,6 +36,11 @@ class MemberIdentity
     public function screenName(): string
     {
         return strtolower($this->screenName);
+    }
+
+    public function isNumeric(): bool
+    {
+        return is_numeric($this->id) && intval($this->id) > 0;
     }
 
     public function toArray(): array
