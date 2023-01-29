@@ -368,8 +368,20 @@ QUERY;
                         $contents = false;
                     }
 
+
+                    try {
+                        $jpegImageContents = imagecreatefromstring($contents);
+
+                        ob_start();
+                        imagewebp($jpegImageContents);
+                        $webpImageContents = ob_get_contents();
+                        ob_end_clean();
+                    } catch (\Exception $e) {
+                        $this->logger->error($e->getMessage());
+                    }
+
                     if ($contents !== false) {
-                        $extractedProperties[$tweetIndex]['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
+                        $extractedProperties[$tweetIndex]['base64_encoded_media'] = 'data:image/webp;base64,'.base64_encode($webpImageContents);
                     }
                 }
 
