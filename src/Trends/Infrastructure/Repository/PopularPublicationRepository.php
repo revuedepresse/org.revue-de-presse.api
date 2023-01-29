@@ -140,6 +140,10 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 ];
             }
 
+            if (isset($decodedDocument['user']['profile_image_url_https'])) {
+                $lightweightJsonDocument['user'] = ['profile_image_url_https' => $decodedDocument['user']['profile_image_url_https']];
+            }
+
             return [
                 'original_document' => json_encode($lightweightJsonDocument),
                 'id' => $highlight['id'],
