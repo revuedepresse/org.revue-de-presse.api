@@ -123,16 +123,22 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 $textIndex = 'full_text';
             }
 
-            $retweetedStatus = $decodedDocument['retweeted_status'];
             $idAsString = $decodedDocument['id_str'];
 
             $lightweightJsonDocument = [
                 'user' => ['name' => $fullMemberName],
                 'entities' => ['urls' => $entitiesUrls],
-                'retweeted_status' => $retweetedStatus,
                 $textIndex => $text,
                 'id_str' => $idAsString
             ];
+
+            if (isset($decodedDocument['extended_entities']['media'][0]['media_url'])) {
+                $lightweightJsonDocument['extended_entities'] = [
+                    'media' => [
+                        ['media_url' => $decodedDocument['extended_entities']['media'][0]['media_url']]
+                    ]
+                ];
+            }
 
             return [
                 'original_document' => json_encode($lightweightJsonDocument),
