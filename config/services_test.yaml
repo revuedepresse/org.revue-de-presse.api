@@ -1,3 +1,6 @@
+imports:
+    - { resource: tests/quality_assurance.yaml }
+
 services:
     _defaults:
         public: true
@@ -8,20 +11,6 @@ services:
 
     test.event_repository.member_profile_collected:
         '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
-
-    test.App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand:
-        class: 'App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand'
-        calls:
-            - [ 'setEntityManager',                ['@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                       ['@logger'] ]
-            - [ 'setTrendsRepository',             ['@App\QualityAssurance\Domain\Repository\TrendsRepositoryInterface'] ]
-            - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
-            - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
-            - [ 'setResourcesDir',                 ['%kernel.project_dir%/tests/QualityAssurance/Infrastructure/Resources'] ]
-            - [ 'setTweetCurator',                 ['@App\Twitter\Domain\Curation\Curator\TweetCuratorInterface'] ]
-            - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
-        tags:
-            - { name: 'console.command' }
 
     test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
 
