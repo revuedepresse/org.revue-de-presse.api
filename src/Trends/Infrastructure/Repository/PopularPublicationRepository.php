@@ -126,6 +126,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             $idAsString = $decodedDocument['id_str'];
 
             $lightweightJsonDocument = [
+                'created_at' => $decodedDocument['created_at'],
                 'user' => ['name' => $fullMemberName],
                 'entities' => ['urls' => $entitiesUrls],
                 $textIndex => $text,
@@ -137,6 +138,12 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                     'media' => [
                         ['media_url' => $decodedDocument['extended_entities']['media'][0]['media_url']]
                     ]
+                ];
+            }
+
+            if (isset($decodedDocument['entities']['media'])) {
+                $lightweightJsonDocument['entities'] = [
+                    'media' => $decodedDocument['entities']['media']
                 ];
             }
 
