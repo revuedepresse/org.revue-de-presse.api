@@ -103,8 +103,37 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         $highlights = array_reverse($col);
         $highlights = array_map(function (array $highlight) {
+            $fullMemberName = '';
+            if (isset($highlight['json']['user']['name'])) {
+                $fullMemberName = $highlight['json']['user']['name'];
+            }
+
+            $entitiesUrls = [];
+            if (isset($highlight['json']['entities']['urls'])) {
+                $entitiesUrls = $highlight['json']['entities']['urls'];
+            }
+
+            if (array_key_exists('text', $highlight['json'])) {
+                $text = $highlight['json']['text'];
+                $textIndex = 'text';
+            } else {
+                $text = $highlight['json']['full_text'];
+                $textIndex = 'full_text';
+            }
+
+            $retweetedStatus = $highlight['json']['retweeted_status'];
+            $idAsString = $highlight['json']['id_str'];
+
+            $lightweightJsonDocument = [
+                'user' => ['name' => $fullMemberName],
+                'entities' => ['urls' => $entitiesUrls],
+                'retweeted_status' => $retweetedStatus,
+                $textIndex => $text,
+                'id_str' => $idAsString
+            ];
+
             return [
-                'original_document' => $highlight['json'],
+                'original_document' => $lightweightJsonDocument,
                 'id' => $highlight['id'],
                 'publicationDateTime' => $highlight['publishedAt'],
                 'screen_name' => $highlight['username'],

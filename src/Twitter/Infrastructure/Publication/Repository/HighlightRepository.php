@@ -332,35 +332,38 @@ QUERY;
     {
         return array_map(
             function ($status) use ($searchParams) {
-                $statusKey = 'status';
+                $tweet = 'status';
                 $totalFavoritesKey = 'total_favorites';
                 $totalRetweetsKey = 'total_retweets';
-                $favoriteCountKey = 'favorite_count';
-                $originalDocumentKey = 'original_document';
+
+                $favoriteCount = 'favorite_count';
+                $retweetCount = 'retweet_count';
+
+                $originalDocument = 'original_document';
 
                 $extractedProperties = [
-                    $statusKey => $this->extractStatusProperties(
-                        [$status],
-                        false)[0]
+                    $tweet => $this->extractStatusProperties(
+                        [$status]
+                    )[0]
                 ];
 
-                $decodedDocument = json_decode($status[$originalDocumentKey], true);
-                $decodedDocument['retweets_count'] = (int) $status[$totalRetweetsKey];
-                $decodedDocument[$favoriteCountKey] = (int) $status[$totalFavoritesKey];
+                $decodedDocument = json_decode($status[$originalDocument], true);
+                $decodedDocument[$retweetCount] = (int) $status[$totalRetweetsKey];
+                $decodedDocument[$favoriteCount] = (int) $status[$totalFavoritesKey];
 
-                $extractedProperties['status']['retweet_count'] = (int) $status[$totalRetweetsKey];
-                $extractedProperties['status']['favorite_count'] = (int) $status[$totalFavoritesKey];
-                $extractedProperties['status'][$originalDocumentKey] = json_encode($decodedDocument);
+                $extractedProperties[$tweet][$retweetCount] = (int) $status[$totalRetweetsKey];
+                $extractedProperties[$tweet][$favoriteCount] = (int) $status[$totalFavoritesKey];
+                $extractedProperties[$tweet][$originalDocument] = json_encode($decodedDocument);
 
                 $status['lastUpdate'] = $status['last_update'];
 
                 $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties[$statusKey][$favoriteCountKey] === 0) {
-                    $extractedProperties[$statusKey][$favoriteCountKey] = $decodedDocument['retweeted_status'][$favoriteCountKey];
+                if ($includeRetweets && $extractedProperties[$tweet][$favoriteCount] === 0) {
+                    $extractedProperties[$tweet][$favoriteCount] = $decodedDocument['retweeted_status'][$favoriteCount];
                 }
 
                 if (
-                    !isset($extractedProperties['status']['base64_encoded_media']) &&
+                    !isset($extractedProperties[$tweet]['base64_encoded_media']) &&
                     isset($decodedDocument['extended_entities']['media'][0]['media_url'])
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
@@ -372,14 +375,14 @@ QUERY;
                     }
 
                     if ($contents !== false) {
-                        $extractedProperties['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
+                        $extractedProperties[$tweet]['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
                     }
                 }
 
                 unset(
                     $status[$totalRetweetsKey],
                     $status[$totalFavoritesKey],
-                    $status[$originalDocumentKey],
+                    $status[$originalDocument],
                     $status['screen_name'],
                     $status['author_avatar'],
                     $status['status_id'],

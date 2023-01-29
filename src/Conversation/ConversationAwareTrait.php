@@ -125,8 +125,7 @@ trait ConversationAwareTrait
                 );
             }
 
-            $repliedToStatus =
-                $this->extractStatusProperties([$repliedToStatus], $includeRepliedToStatuses = true);
+            $repliedToStatus = $this->extractStatusProperties([$repliedToStatus], includeRepliedToStatuses: true);
             $updatedStatus['status_replied_to'] = $repliedToStatus[0];
         }
 
