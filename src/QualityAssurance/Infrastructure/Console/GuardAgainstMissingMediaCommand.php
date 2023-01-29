@@ -138,7 +138,7 @@ class GuardAgainstMissingMediaCommand extends Command {
                     // Freeing memory
                     $tweetsPartition[$index] = [];
 
-                    $this->info(sprintf('Processed successfully partition #%d', $index));
+                    $this->info(sprintf('Processed successfully partition chunk #%d', $index));
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
                 }
