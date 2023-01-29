@@ -140,7 +140,10 @@ class MemberProfileAccessorTest extends KernelTestCase
         $memberRepository        = $memberRepositoryBuilder->build();
 
         $memberProfileAccessor = new MemberProfileAwareHttpClient(
-            $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
+            $this->prophesizeApiAccessor((object) [
+                'screen_name' => 'existing_member',
+                'id_str' => '1'
+            ]),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
         );
