@@ -103,26 +103,28 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         $highlights = array_reverse($col);
         $highlights = array_map(function (array $highlight) {
+            $decodedDocument = json_decode($highlight['json'], associative: true);
+
             $fullMemberName = '';
-            if (isset($highlight['json']['user']['name'])) {
-                $fullMemberName = $highlight['json']['user']['name'];
+            if (isset($decodedDocument['user']['name'])) {
+                $fullMemberName = $decodedDocument['user']['name'];
             }
 
             $entitiesUrls = [];
-            if (isset($highlight['json']['entities']['urls'])) {
-                $entitiesUrls = $highlight['json']['entities']['urls'];
+            if (isset($decodedDocument['entities']['urls'])) {
+                $entitiesUrls = $decodedDocument['entities']['urls'];
             }
 
-            if (array_key_exists('text', $highlight['json'])) {
-                $text = $highlight['json']['text'];
+            if (array_key_exists('text', $decodedDocument)) {
+                $text = $decodedDocument['text'];
                 $textIndex = 'text';
             } else {
-                $text = $highlight['json']['full_text'];
+                $text = $decodedDocument['full_text'];
                 $textIndex = 'full_text';
             }
 
-            $retweetedStatus = $highlight['json']['retweeted_status'];
-            $idAsString = $highlight['json']['id_str'];
+            $retweetedStatus = $decodedDocument['retweeted_status'];
+            $idAsString = $decodedDocument['id_str'];
 
             $lightweightJsonDocument = [
                 'user' => ['name' => $fullMemberName],
@@ -133,7 +135,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             ];
 
             return [
-                'original_document' => $lightweightJsonDocument,
+                'original_document' => json_encode($lightweightJsonDocument),
                 'id' => $highlight['id'],
                 'publicationDateTime' => $highlight['publishedAt'],
                 'screen_name' => $highlight['username'],
