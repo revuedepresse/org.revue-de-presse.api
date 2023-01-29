@@ -332,38 +332,32 @@ QUERY;
     {
         return array_map(
             function ($status) use ($searchParams) {
-                $tweet = 'status';
-                $totalFavoritesKey = 'total_favorites';
-                $totalRetweetsKey = 'total_retweets';
+                $favoriteCountIndex = 'favorite_count';
+                $originalDocumentIndex = 'original_document';
+                $retweetCountIndex = 'retweet_count';
+                $totalFavoritesIndex = 'total_favorites';
+                $totalRetweetsIndex = 'total_retweets';
+                $tweetIndex = 'status';
 
-                $favoriteCount = 'favorite_count';
-                $retweetCount = 'retweet_count';
+                $extractedProperties = [$tweetIndex => $this->extractStatusProperties([$status])[0]];
 
-                $originalDocument = 'original_document';
+                $decodedDocument = json_decode($status[$originalDocumentIndex], true);
+                $decodedDocument[$retweetCountIndex] = (int) $status[$totalRetweetsIndex];
+                $decodedDocument[$favoriteCountIndex] = (int) $status[$totalFavoritesIndex];
 
-                $extractedProperties = [
-                    $tweet => $this->extractStatusProperties(
-                        [$status]
-                    )[0]
-                ];
-
-                $decodedDocument = json_decode($status[$originalDocument], true);
-                $decodedDocument[$retweetCount] = (int) $status[$totalRetweetsKey];
-                $decodedDocument[$favoriteCount] = (int) $status[$totalFavoritesKey];
-
-                $extractedProperties[$tweet][$retweetCount] = (int) $status[$totalRetweetsKey];
-                $extractedProperties[$tweet][$favoriteCount] = (int) $status[$totalFavoritesKey];
-                $extractedProperties[$tweet][$originalDocument] = json_encode($decodedDocument);
+                $extractedProperties[$tweetIndex][$retweetCountIndex] = (int) $status[$totalRetweetsIndex];
+                $extractedProperties[$tweetIndex][$favoriteCountIndex] = (int) $status[$totalFavoritesIndex];
+                $extractedProperties[$tweetIndex][$originalDocumentIndex] = json_encode($decodedDocument);
 
                 $status['lastUpdate'] = $status['last_update'];
 
                 $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties[$tweet][$favoriteCount] === 0) {
-                    $extractedProperties[$tweet][$favoriteCount] = $decodedDocument['retweeted_status'][$favoriteCount];
+                if ($includeRetweets && $extractedProperties[$tweetIndex][$favoriteCountIndex] === 0) {
+                    $extractedProperties[$tweetIndex][$favoriteCountIndex] = $decodedDocument['retweeted_status'][$favoriteCountIndex];
                 }
 
                 if (
-                    !isset($extractedProperties[$tweet]['base64_encoded_media']) &&
+                    !isset($extractedProperties[$tweetIndex]['base64_encoded_media']) &&
                     isset($decodedDocument['extended_entities']['media'][0]['media_url'])
                 ) {
                     $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
@@ -375,14 +369,14 @@ QUERY;
                     }
 
                     if ($contents !== false) {
-                        $extractedProperties[$tweet]['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
+                        $extractedProperties[$tweetIndex]['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
                     }
                 }
 
                 unset(
-                    $status[$totalRetweetsKey],
-                    $status[$totalFavoritesKey],
-                    $status[$originalDocument],
+                    $status[$totalRetweetsIndex],
+                    $status[$totalFavoritesIndex],
+                    $status[$originalDocumentIndex],
                     $status['screen_name'],
                     $status['author_avatar'],
                     $status['status_id'],
