@@ -377,12 +377,27 @@ class GuardAgainstMissingMediaCommand extends Command {
         $this->info($message);
 
         $contents = $this->httpClient::getContents($mediaUrl);
+        $contents = $this->convertFromJpegToWebp($contents);
 
         if ($contents === false) {
             throw new \InvalidArgumentException('Could not get media.');
         }
 
         return $contents;
+    }
+
+    private function convertFromJpegToWebp(bool|string $contents): string|false
+    {
+        try {
+            ob_start();
+            imagewebp(imagecreatefromstring($contents));
+            $webpImageContents = ob_get_contents();
+            ob_end_clean();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
+        return $webpImageContents;
     }
 
     public function info(string $message): void

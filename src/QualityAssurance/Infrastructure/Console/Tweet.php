@@ -109,7 +109,7 @@ class Tweet implements TweetInterface
         $rawDocument['_profile_image_url_https'] = $avatarDataURI;
 
         if (array_key_exists('avatar_data_uri', $overrides)) {
-            $rawDocument['base64_encoded_avatar'] = 'data:image/jpeg;base64,'.$overrides['avatar_data_uri'];
+            $rawDocument['base64_encoded_avatar'] = 'data:image/webp;base64,'.$overrides['avatar_data_uri'];
         }
 
         if (array_key_exists('extended_entities', $this->rawDocument)) {
@@ -117,7 +117,7 @@ class Tweet implements TweetInterface
             $rawDocument['_media_url'] = $mediaDataURI;
 
             if (array_key_exists('media_data_uri', $overrides)) {
-                $rawDocument['base64_encoded_media'] = 'data:image/jpeg;base64,'.$overrides['media_data_uri'];
+                $rawDocument['base64_encoded_media'] = 'data:image/webp;base64,'.$overrides['media_data_uri'];
             }
         }
 
