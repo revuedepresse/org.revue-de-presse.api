@@ -125,7 +125,7 @@ trait ConversationAwareTrait
                 );
             }
 
-            $repliedToStatus = $this->extractStatusProperties([$repliedToStatus], includeRepliedToStatuses: true);
+            $repliedToStatus = $this->extractTweetProperties([$repliedToStatus], includeRepliedToStatuses: true);
             $updatedStatus['status_replied_to'] = $repliedToStatus[0];
         }
 
@@ -139,133 +139,49 @@ trait ConversationAwareTrait
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
      */
-    private function extractStatusProperties(
+    private function extractTweetProperties(
         array $statuses,
         bool  $includeRepliedToStatuses = false
     ): array
     {
         return array_map(
-            function ($status) use ($includeRepliedToStatuses) {
-                if ($status instanceof StatusInterface) {
-                    $status = [
-                        'screen_name'       => $status->getScreenName(),
-                        'status_id'         => $status->getStatusId(),
-                        'text'              => $status->getText(),
-                        'original_document' => $status->getApiDocument(),
-                    ];
-                }
+            function ($tweet) use ($includeRepliedToStatuses) {
+                $tweet = $this->convertTweetToArray($tweet);
 
-                if ($status instanceof PublicationInterface) {
-                    $status = [
-                        'screen_name'       => $status->getScreenName(),
-                        'status_id'         => $status->getDocumentId(),
-                        'text'              => $status->getText(),
-                        'original_document' => $status->getDocument(),
-                    ];
+                if ($this->guardAgainstMissingUpstreamTweetDocument($tweet)) {
+                    return $this->getTweetTemplate($tweet);
                 }
 
                 try {
-                    StatusValidator::guardAgainstMissingOriginalDocument($status);
-                    StatusValidator::guardAgainstMissingStatusId($status);
-                    StatusValidator::guardAgainstMissingText($status);
-                } catch (InvalidStatusException $exception) {
-                    if ($exception->wasThrownBecauseOfMissingOriginalDocument()) {
-                        throw $exception;
-                    }
-
-                    $status = StatusConsistency::fillMissingStatusProps(
-                        $status['original_document'],
-                        $status
-                    );
-                }
-
-                $defaultStatus = [
-                    'status_id'      => $status['status_id'],
-                    'avatar_url'     => 'N/A',
-                    'text'           => $status['text'],
-                    'url'            => 'https://twitter.com/'
-                        . $status['screen_name']
-                        . '/status/'
-                        . $status['status_id'],
-                    'retweet_count'  => 'N/A',
-                    'favorite_count' => 'N/A',
-                    'username'       => $status['screen_name'],
-                    'published_at'   => 'N/A',
-                ];
-
-                $hasDocumentFromApi = array_key_exists('api_document', $status);
-
-                if (
-                    !array_key_exists('original_document', $status)
-                    && !$hasDocumentFromApi
-                ) {
-                    return $defaultStatus;
-                }
-
-                if ($hasDocumentFromApi && empty($status['original_document'])) {
-                    $status['original_document'] = $status['api_document'];
-                    unset($status['api_document']);
-                }
-
-                try {
-                    $decodedDocument = json_decode($status['original_document'], associative: true, flags: JSON_THROW_ON_ERROR);
+                    $decodedDocument = $this->decodeUpstreamDocument($tweet);
                 } catch (\JsonException) {
-                    return $defaultStatus;
+                    return $this->getTweetTemplate($tweet);
                 }
 
-                if ($defaultStatus['status_id'] === null) {
-                    $defaultStatus['url'] =
-                        'https://twitter.com/' . $status['screen_name'] . '/status/' . $decodedDocument['id_str'];
-                }
-
-                if ($defaultStatus['status_id'] === null) {
-                    $defaultStatus['status_id'] = $decodedDocument['id_str'];
-                }
-
-                if (
-                    array_key_exists('full_text', $decodedDocument)
-                    && $defaultStatus['text'] !== $decodedDocument['full_text']
-                ) {
-                    $defaultStatus['text'] = $decodedDocument['full_text'];
-                }
-
-                if (
-                    !array_key_exists('full_text', $decodedDocument)
-                    && array_key_exists('text', $decodedDocument)
-                ) {
-                    $defaultStatus['text'] = $decodedDocument['text'];
-                }
+                $tweetTemplate = $this->getTweetTemplate($tweet, $decodedDocument);
 
                 $likedBy = null;
-                if (array_key_exists('liked_by', $status)) {
-                    $likedBy = $status['liked_by'];
+                if (array_key_exists('liked_by', $tweet)) {
+                    $likedBy = $tweet['liked_by'];
                 }
 
                 if (array_key_exists('retweeted_status', $decodedDocument)) {
-                    $updatedStatus = $this->updateFromDecodedDocument(
-                        $defaultStatus,
+                    return $this->extractRetweetedStatus(
+                        $tweetTemplate,
                         $decodedDocument['retweeted_status'],
-                        $includeRepliedToStatuses
+                        $includeRepliedToStatuses,
+                        $likedBy
                     );
-                    $updatedStatus['username'] =
-                        $decodedDocument['retweeted_status']['user']['screen_name'];
-                    $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
-                    $updatedStatus['retweet'] = true;
-                    $updatedStatus['text'] = $decodedDocument['retweeted_status']['full_text'];
-                    if (!is_null($likedBy)) {
-                        $updatedStatus['liked_by'] = $likedBy;
-                    }
-
-                    return $updatedStatus;
                 }
 
-                $statusUpdatedFromDecodedDocument = $defaultStatus;
                 $updatedStatus = $this->updateFromDecodedDocument(
-                    $statusUpdatedFromDecodedDocument,
+                    $tweetTemplate,
                     $decodedDocument,
                     $includeRepliedToStatuses
                 );
+
                 $updatedStatus['retweet'] = false;
+
                 if ($likedBy !== null) {
                     $updatedStatus['liked_by'] = $likedBy;
                 }
@@ -290,33 +206,163 @@ trait ConversationAwareTrait
 
         $tweet['avatar_url'] = $tweetRawDocument['user']['profile_image_url_https'];
 
-        if (!array_key_exists('base64_encoded_avatar', $tweet)) {
-            try {
-                $avatarPicture = file_get_contents($tweet['avatar_url']);
-            } catch (\Exception) {
-                $avatarPicture = base64_decode($this->defaultAvatar);
+        try {
+            $memberProfilePicture = file_get_contents($tweet['avatar_url']);
+            $memberProfilePicture = $this->convertFromJpegToWebp($memberProfilePicture);
+        } catch (\Exception) {
+            $memberProfilePicture = base64_decode($this->defaultAvatar);
+        }
+
+        if ($memberProfilePicture !== false) {
+            $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode($memberProfilePicture);
+        }
+
+        return $tweet;
+    }
+
+    private function extractText($fallbackText, array $decodedDocument): string
+    {
+        if (array_key_exists('full_text', $decodedDocument) && $fallbackText !== $decodedDocument['full_text']) {
+            return $decodedDocument['full_text'];
+        } elseif (array_key_exists('text', $decodedDocument)) {
+            return $decodedDocument['text'];
+        }
+
+        return $fallbackText;
+    }
+
+    public function convertFromJpegToWebp(bool|string $contents): string|false
+    {
+        try {
+            ob_start();
+            imagewebp(imagecreatefromstring($contents));
+            $webpImageContents = ob_get_contents();
+            ob_end_clean();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
+        return $webpImageContents;
+    }
+
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \Safe\Exceptions\JsonException
+     */
+    private function convertTweetToArray($tweet): array
+    {
+        if ($tweet instanceof StatusInterface) {
+            $tweet = [
+                'screen_name'       => $tweet->getScreenName(),
+                'status_id'         => $tweet->getStatusId(),
+                'text'              => $tweet->getText(),
+                'original_document' => $tweet->getApiDocument(),
+            ];
+        }
+
+        if ($tweet instanceof PublicationInterface) {
+            $tweet = [
+                'screen_name'       => $tweet->getScreenName(),
+                'status_id'         => $tweet->getDocumentId(),
+                'text'              => $tweet->getText(),
+                'original_document' => $tweet->getDocument(),
+            ];
+        }
+
+        try {
+            StatusValidator::guardAgainstMissingOriginalDocument($tweet);
+            StatusValidator::guardAgainstMissingStatusId($tweet);
+            StatusValidator::guardAgainstMissingText($tweet);
+        } catch (InvalidStatusException $exception) {
+            if ($exception->wasThrownBecauseOfMissingOriginalDocument()) {
+                throw $exception;
             }
 
-            if ($avatarPicture !== false) {
-                $tweet['base64_encoded_avatar'] = 'data:image/jpeg;base64,' . base64_encode($avatarPicture);
-            }
+            $tweet = StatusConsistency::fillMissingStatusProps(
+                $tweet['original_document'],
+                $tweet
+            );
         }
 
         return $tweet;
     }
 
     /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
      * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
      */
-    private function findStatusOrFetchItByIdentifier($statusId, $shouldRefreshStatus = false)
+    private function extractRetweetedStatus(
+        array $tweet,
+        array $tweetJSONDocument,
+        bool  $includeRepliedToStatuses,
+        mixed $likedBy
+    ): array
     {
-        if ($shouldRefreshStatus) {
-            return $this->statusAccessor->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
+        $retweetedStatus = $this->updateFromDecodedDocument(
+            $tweet,
+            $tweetJSONDocument,
+            $includeRepliedToStatuses
+        );
+        $retweetedStatus['username'] = $tweetJSONDocument['user']['screen_name'];
+        $retweetedStatus['username_of_retweeting_member'] = $tweet['username'];
+        $retweetedStatus['retweet'] = true;
+        $retweetedStatus['text'] = $tweetJSONDocument['full_text'];
+
+        if (!is_null($likedBy)) {
+            $retweetedStatus['liked_by'] = $likedBy;
         }
 
-        return $this->statusRepository->findStatusIdentifiedBy($statusId);
+        return $retweetedStatus;
+    }
+
+    private function getTweetTemplate(array $tweet, ?array $tweetAsJSON = null): array
+    {
+        $template = [
+            'avatar_url'     => 'N/A',
+            'favorite_count' => 'N/A',
+            'published_at'   => 'N/A',
+            'retweet_count'  => 'N/A',
+            'status_id'      => $tweet['status_id'],
+            'text'           => 'N/A',
+            'username'       => $tweet['screen_name'],
+        ];
+
+        if ($tweetAsJSON !== null) {
+            $template['text'] = $this->extractText($tweet['text'], $tweetAsJSON);
+
+            if ($template['status_id'] === null) {
+                $template['status_id'] = $tweetAsJSON['id_str'];
+            }
+        }
+
+        $template['url'] = 'https://twitter.com/'.$tweet['screen_name'].'/status/'.$tweet['status_id'];
+
+        return $template;
+    }
+
+    private function guardAgainstMissingUpstreamTweetDocument(array $tweet): bool
+    {
+        return !array_key_exists('original_document', $tweet)
+            && !array_key_exists('api_document', $tweet);
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    private function decodeUpstreamDocument(array $tweet): array
+    {
+        if (array_key_exists('api_document', $tweet) && empty($tweet['original_document'])) {
+            $tweet['original_document'] = $tweet['api_document'];
+            unset($tweet['api_document']);
+        }
+
+        return json_decode(
+            $tweet['original_document'],
+            associative: true,
+            flags: JSON_THROW_ON_ERROR
+        );
     }
 }

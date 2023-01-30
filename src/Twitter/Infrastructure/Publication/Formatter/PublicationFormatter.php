@@ -15,7 +15,7 @@ class PublicationFormatter implements PublicationFormatterInterface
     {
         return $publications->map(
             function (PublicationInterface $publication) {
-                $extractedProperties                       = $this->extractStatusProperties(
+                $extractedProperties                       = $this->extractTweetProperties(
                     [$publication]
                 )[0];
                 $extractedProperties['original_document'] = $publication->getDocument();

@@ -242,71 +242,37 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     {
         return array_map(
             function ($tweet) use ($searchParams) {
+                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($tweet['json']);
+
                 $tweetDocument = [
                     'id' => $tweet['id'],
-                    'publicationDateTime' => $tweet['publishedAt'],
                     'lastUpdate' => $tweet['checkedAt'],
+                    'publicationDateTime' => $tweet['publishedAt'],
                     'screen_name' => $tweet['username'],
                     'total_retweets' => $tweet['totalRetweets'],
                     'total_favorites' => $tweet['totalFavorites'],
+                    'original_document' => json_encode($lightweightJSON),
                 ];
 
-                $favoriteCountIndex = 'favorite_count';
-                $originalDocumentIndex = 'original_document';
-                $retweetCountIndex = 'retweet_count';
-                $totalFavoritesIndex = 'total_favorites';
-                $totalRetweetsIndex = 'total_retweets';
-                $tweetIndex = 'status';
-
-                $overridingProperties = [$tweetIndex => $this->extractStatusProperties([$tweetDocument])[0]];
-
-                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($tweet['json']);
-
-                $lightweightJSON[$retweetCountIndex] = (int) $tweetDocument[$totalRetweetsIndex];
-                $lightweightJSON[$favoriteCountIndex] = (int) $tweetDocument[$totalFavoritesIndex];
-
-                $overridingProperties[$tweetIndex][$retweetCountIndex] = (int) $tweetDocument[$totalRetweetsIndex];
-                $overridingProperties[$tweetIndex][$favoriteCountIndex] = (int) $tweetDocument[$totalFavoritesIndex];
-                $overridingProperties[$tweetIndex][$originalDocumentIndex] = json_encode($lightweightJSON);
-
-                $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $overridingProperties[$tweetIndex][$favoriteCountIndex] === 0) {
-                    $overridingProperties[$tweetIndex][$favoriteCountIndex] = $lightweightJSON['retweeted_status'][$favoriteCountIndex];
-                }
-
-                $contents = $this->extractMediaContents($lightweightJSON);
-                if (!isset($overridingProperties[$tweetIndex]['base64_encoded_media']) && $contents !== false) {
-                    $overridingProperties[$tweetIndex]['base64_encoded_media'] = $contents;
-                }
+                $tweetPropertiesToOverride = $this->extractTweetPropertiesToOverride(
+                    $tweetDocument,
+                    $lightweightJSON,
+                    $searchParams
+                );
 
                 unset(
-                    $tweetDocument[$originalDocumentIndex],
-                    $tweetDocument[$totalFavoritesIndex],
-                    $tweetDocument[$totalRetweetsIndex],
+                    $tweetDocument['original_document'],
+                    $tweetDocument['total_favorites'],
+                    $tweetDocument['total_retweets'],
                     $tweetDocument['author_avatar'],
                     $tweetDocument['screen_name'],
                     $tweetDocument['status_id']
                 );
 
-                return array_merge($tweetDocument, $overridingProperties);
+                return array_merge($tweetDocument, $tweetPropertiesToOverride);
             },
             $tweets
         );
-    }
-
-    public function convertFromJpegToWebp(bool|string $contents): string|false
-    {
-        try {
-            $jpegImageContents = imagecreatefromstring($contents);
-
-            ob_start();
-            imagewebp($jpegImageContents);
-            $webpImageContents = ob_get_contents();
-            ob_end_clean();
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-        }
-        return $webpImageContents;
     }
 
     public function extractMemberFullName(mixed $decodedDocument): string
@@ -386,5 +352,47 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         return $lightweightJSON;
+    }
+
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
+    private function extractTweetPropertiesToOverride(
+        array                 $tweetAsJSON,
+        array                 $lightweightJSON,
+        SearchParamsInterface $searchParams
+    ): array
+    {
+        $favoriteCountIndex = 'favorite_count';
+        $originalDocumentIndex = 'original_document';
+        $retweetCountIndex = 'retweet_count';
+        $totalFavoritesIndex = 'total_favorites';
+        $totalRetweetsIndex = 'total_retweets';
+        $tweetIndex = 'status';
+
+        $properties = [$tweetIndex => $this->extractTweetProperties([$tweetAsJSON])[0]];
+
+        $lightweightJSON[$retweetCountIndex] = (int)$tweetAsJSON[$totalRetweetsIndex];
+        $lightweightJSON[$favoriteCountIndex] = (int)$tweetAsJSON[$totalFavoritesIndex];
+
+        $properties[$tweetIndex][$retweetCountIndex] = (int)$tweetAsJSON[$totalRetweetsIndex];
+        $properties[$tweetIndex][$favoriteCountIndex] = (int)$tweetAsJSON[$totalFavoritesIndex];
+        $properties[$tweetIndex][$originalDocumentIndex] = json_encode($lightweightJSON);
+
+        $includeRetweets = $searchParams->getParams()['includeRetweets'];
+        if ($includeRetweets && $properties[$tweetIndex][$favoriteCountIndex] === 0) {
+            $properties[$tweetIndex][$favoriteCountIndex] = $lightweightJSON['retweeted_status'][$favoriteCountIndex];
+        }
+
+        $contents = $this->extractMediaContents($lightweightJSON);
+        if (!isset($properties[$tweetIndex]['base64_encoded_media']) && $contents !== false) {
+            $properties[$tweetIndex]['base64_encoded_media'] = $contents;
+        }
+
+        return $properties;
     }
 }
