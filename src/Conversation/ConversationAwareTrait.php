@@ -208,13 +208,19 @@ trait ConversationAwareTrait
 
         try {
             $memberProfilePicture = file_get_contents($tweet['avatar_url']);
-            $memberProfilePicture = $this->convertFromJpegToWebp($memberProfilePicture);
-        } catch (\Exception) {
-            $memberProfilePicture = base64_decode($this->defaultAvatar);
-        }
+            if ($memberProfilePicture === false) {
+                throw new \Exception('Could not fetch member profile picture');
+            }
 
-        if ($memberProfilePicture !== false) {
+            $memberProfilePicture = $this->convertFromJpegToWebp($memberProfilePicture);
+
+            if ($memberProfilePicture === false) {
+                throw new \Exception('Could not convert member profile picture from jpeg to webp');
+            }
+
             $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode($memberProfilePicture);
+        } catch (\Exception) {
+            $tweet['base64_encoded_avatar'] = $this->getDefaultAvatarDataURI();
         }
 
         return $tweet;
@@ -364,5 +370,10 @@ trait ConversationAwareTrait
             associative: true,
             flags: JSON_THROW_ON_ERROR
         );
+    }
+
+    public function getDefaultAvatarDataURI(): string
+    {
+        return 'data:image/jpeg;base64,' . $this->defaultAvatar;
     }
 }
