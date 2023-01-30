@@ -412,6 +412,9 @@ class GuardAgainstMissingMediaCommand extends Command {
         $this->logger->error($errorMessage);
     }
 
+    /**
+     * @throws \ErrorException
+     */
     private function processTweet(TweetInterface $tweet): TweetInterface
     {
         try {
