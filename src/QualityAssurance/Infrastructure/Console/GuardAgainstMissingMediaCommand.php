@@ -267,7 +267,7 @@ class GuardAgainstMissingMediaCommand extends Command {
     /**
      * @throws \ErrorException
      */
-    public function extractTweetMedia(TweetInterface $tweet): string
+    public function getTweetMediaAsEncodedDataURI(TweetInterface $tweet): string
     {
         try {
             return base64_encode($this->getMedia($tweet->smallMediaURL()));
@@ -310,7 +310,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         return '';
     }
 
-    public function extractAvatarDataURI(MemberInterface $member, TweetInterface $tweet): mixed
+    public function getMemberProfilePictureAsEncodedDataURI(MemberInterface $member, TweetInterface $tweet): string
     {
         $rawMemberDocument = $member->rawDocument();
 
@@ -425,7 +425,7 @@ class GuardAgainstMissingMediaCommand extends Command {
                 )
             );
             $tweet = $this->refreshProfileImageURL($member, $tweet);
-            $overrides['avatar_data_uri'] = $this->extractAvatarDataURI($member, $tweet);
+            $overrides['avatar_data_uri'] = $this->getMemberProfilePictureAsEncodedDataURI($member, $tweet);
         }
 
         $tweet = $this->refreshExtendedEntities($tweet);
@@ -435,7 +435,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         }
 
         try {
-            $tweetMedia = $this->extractTweetMedia($tweet);
+            $tweetMedia = $this->getTweetMediaAsEncodedDataURI($tweet);
             if (strlen($tweetMedia) > 0) {
                 $overrides['media_data_uri'] = $tweetMedia;
 
