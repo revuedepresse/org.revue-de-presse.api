@@ -41,9 +41,11 @@ function install_system_packages() {
         libcurl4-gnutls-dev \
         libicu-dev \
         libcurl4-gnutls-dev \
+        libfreetype-dev \
         libicu-dev \
         libjpeg-dev \
         libpng-dev \
+        libwebp-dev \
         libpq-dev \
         libsodium-dev \
         procps \
@@ -76,6 +78,9 @@ function install_php_extensions() {
         pdo_pgsql \
         sockets \
         sodium
+
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install gd
 
     docker-php-ext-enable opcache
 
