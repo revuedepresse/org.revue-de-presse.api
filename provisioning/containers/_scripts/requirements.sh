@@ -111,6 +111,9 @@ function install_php_extensions() {
         sockets \
         sodium
 
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install gd
+
     docker-php-ext-enable opcache
 
     wget https://github.com/xdebug/xdebug/archive/3.1.4.zip \
@@ -267,8 +270,11 @@ function install_worker_system_packages() {
         --no-install-recommends \
         libcurl4-gnutls-dev \
         libicu-dev \
+        libfreetype-dev \
+        libicu-dev \
         libjpeg-dev \
         libpng-dev \
+        libwebp-dev \
         libpq-dev \
         librabbitmq-dev \
         libsodium-dev
