@@ -237,15 +237,21 @@ trait ConversationAwareTrait
         return $fallbackText;
     }
 
-    public function convertFromJpegToWebp(bool|string $contents): string|false
+    public function convertFromJpegToWebp(string $contents): string|false
     {
         try {
             ob_start();
-            imagewebp(imagecreatefromstring($contents));
+
+            $contents = imagecreatefromstring($contents);
+            imagepalettetotruecolor($contents);
+            imagewebp($contents);
+
             $webpImageContents = ob_get_contents();
             ob_end_clean();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+
+            return false;
         }
 
         return $webpImageContents;
