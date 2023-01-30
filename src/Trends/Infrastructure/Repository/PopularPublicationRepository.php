@@ -96,77 +96,16 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             ];
         }
 
-        $col = $snapshot->getValue();
-        if ($col === null) {
-            $col = [];
+        $highlights = $snapshot->getValue();
+        if ($highlights === null) {
+            $highlights = [];
         }
 
-        $highlights = array_reverse($col);
-        $highlights = array_map(function (array $highlight) {
-            $decodedDocument = json_decode($highlight['json'], associative: true);
-
-            $fullMemberName = '';
-            if (isset($decodedDocument['user']['name'])) {
-                $fullMemberName = $decodedDocument['user']['name'];
-            }
-
-            $entitiesUrls = [];
-            if (isset($decodedDocument['entities']['urls'])) {
-                $entitiesUrls = $decodedDocument['entities']['urls'];
-            }
-
-            if (array_key_exists('text', $decodedDocument)) {
-                $text = $decodedDocument['text'];
-                $textIndex = 'text';
-            } else {
-                $text = $decodedDocument['full_text'];
-                $textIndex = 'full_text';
-            }
-
-            $idAsString = $decodedDocument['id_str'];
-
-            $lightweightJsonDocument = [
-                'created_at' => $decodedDocument['created_at'],
-                'user' => ['name' => $fullMemberName],
-                'entities' => ['urls' => $entitiesUrls],
-                $textIndex => $text,
-                'id_str' => $idAsString
-            ];
-
-            if (isset($decodedDocument['extended_entities']['media'][0]['media_url'])) {
-                $lightweightJsonDocument['extended_entities'] = [
-                    'media' => [
-                        ['media_url' => $decodedDocument['extended_entities']['media'][0]['media_url']]
-                    ]
-                ];
-            }
-
-            if (isset($decodedDocument['entities']['media'])) {
-                $lightweightJsonDocument['entities'] = [
-                    'media' => $decodedDocument['entities']['media']
-                ];
-            }
-
-            if (isset($decodedDocument['user']['profile_image_url_https'])) {
-                $lightweightJsonDocument['user'] = ['profile_image_url_https' => $decodedDocument['user']['profile_image_url_https']];
-            }
-
-            return [
-                'original_document' => json_encode($lightweightJsonDocument),
-                'id' => $highlight['id'],
-                'publicationDateTime' => $highlight['publishedAt'],
-                'screen_name' => $highlight['username'],
-                'last_update' => $highlight['checkedAt'],
-                'total_retweets' => $highlight['totalRetweets'],
-                'total_favorites' => $highlight['totalFavorites'],
-            ];
-        }, $highlights);
-
-        $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
+        $tweets = $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights));
 
         return [
             'aggregates' => [],
-            'statuses' => $statuses,
+            'statuses' => $tweets,
         ];
     }
 }

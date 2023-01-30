@@ -238,10 +238,19 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
-    public function mapStatuses(SearchParamsInterface $searchParams, $results): array
+    public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
         return array_map(
-            function ($status) use ($searchParams) {
+            function ($tweet) use ($searchParams) {
+                $tweetDocument = [
+                    'id' => $tweet['id'],
+                    'publicationDateTime' => $tweet['publishedAt'],
+                    'lastUpdate' => $tweet['checkedAt'],
+                    'screen_name' => $tweet['username'],
+                    'total_retweets' => $tweet['totalRetweets'],
+                    'total_favorites' => $tweet['totalFavorites'],
+                ];
+
                 $favoriteCountIndex = 'favorite_count';
                 $originalDocumentIndex = 'original_document';
                 $retweetCountIndex = 'retweet_count';
@@ -249,65 +258,133 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 $totalRetweetsIndex = 'total_retweets';
                 $tweetIndex = 'status';
 
-                $extractedProperties = [$tweetIndex => $this->extractStatusProperties([$status])[0]];
+                $overridingProperties = [$tweetIndex => $this->extractStatusProperties([$tweetDocument])[0]];
 
-                $decodedDocument = json_decode($status[$originalDocumentIndex], true);
-                $decodedDocument[$retweetCountIndex] = (int) $status[$totalRetweetsIndex];
-                $decodedDocument[$favoriteCountIndex] = (int) $status[$totalFavoritesIndex];
+                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($tweet['json']);
 
-                $extractedProperties[$tweetIndex][$retweetCountIndex] = (int) $status[$totalRetweetsIndex];
-                $extractedProperties[$tweetIndex][$favoriteCountIndex] = (int) $status[$totalFavoritesIndex];
-                $extractedProperties[$tweetIndex][$originalDocumentIndex] = json_encode($decodedDocument);
+                $lightweightJSON[$retweetCountIndex] = (int) $tweetDocument[$totalRetweetsIndex];
+                $lightweightJSON[$favoriteCountIndex] = (int) $tweetDocument[$totalFavoritesIndex];
 
-                $status['lastUpdate'] = $status['last_update'];
+                $overridingProperties[$tweetIndex][$retweetCountIndex] = (int) $tweetDocument[$totalRetweetsIndex];
+                $overridingProperties[$tweetIndex][$favoriteCountIndex] = (int) $tweetDocument[$totalFavoritesIndex];
+                $overridingProperties[$tweetIndex][$originalDocumentIndex] = json_encode($lightweightJSON);
 
                 $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties[$tweetIndex][$favoriteCountIndex] === 0) {
-                    $extractedProperties[$tweetIndex][$favoriteCountIndex] = $decodedDocument['retweeted_status'][$favoriteCountIndex];
+                if ($includeRetweets && $overridingProperties[$tweetIndex][$favoriteCountIndex] === 0) {
+                    $overridingProperties[$tweetIndex][$favoriteCountIndex] = $lightweightJSON['retweeted_status'][$favoriteCountIndex];
                 }
 
-                if (
-                    !isset($extractedProperties[$tweetIndex]['base64_encoded_media']) &&
-                    isset($decodedDocument['extended_entities']['media'][0]['media_url'])
-                ) {
-                    $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
-
-                    try {
-                        $contents = file_get_contents($smallMediaUrl);
-                    } catch (\Exception) {
-                        $contents = false;
-                    }
-
-
-                    try {
-                        $jpegImageContents = imagecreatefromstring($contents);
-
-                        ob_start();
-                        imagewebp($jpegImageContents);
-                        $webpImageContents = ob_get_contents();
-                        ob_end_clean();
-                    } catch (\Exception $e) {
-                        $this->logger->error($e->getMessage());
-                    }
-
-                    if ($contents !== false) {
-                        $extractedProperties[$tweetIndex]['base64_encoded_media'] = 'data:image/webp;base64,'.base64_encode($webpImageContents);
-                    }
+                $contents = $this->extractMediaContents($lightweightJSON);
+                if (!isset($overridingProperties[$tweetIndex]['base64_encoded_media']) && $contents !== false) {
+                    $overridingProperties[$tweetIndex]['base64_encoded_media'] = $contents;
                 }
 
                 unset(
-                    $status[$totalRetweetsIndex],
-                    $status[$totalFavoritesIndex],
-                    $status[$originalDocumentIndex],
-                    $status['screen_name'],
-                    $status['author_avatar'],
-                    $status['status_id'],
-                    $status['last_update']
+                    $tweetDocument[$originalDocumentIndex],
+                    $tweetDocument[$totalFavoritesIndex],
+                    $tweetDocument[$totalRetweetsIndex],
+                    $tweetDocument['author_avatar'],
+                    $tweetDocument['screen_name'],
+                    $tweetDocument['status_id']
                 );
 
-                return array_merge($status, $extractedProperties);
+                return array_merge($tweetDocument, $overridingProperties);
             },
-            $results
+            $tweets
         );
+    }
+
+    public function convertFromJpegToWebp(bool|string $contents): string|false
+    {
+        try {
+            $jpegImageContents = imagecreatefromstring($contents);
+
+            ob_start();
+            imagewebp($jpegImageContents);
+            $webpImageContents = ob_get_contents();
+            ob_end_clean();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+        return $webpImageContents;
+    }
+
+    public function extractMemberFullName(mixed $decodedDocument): string
+    {
+        $fullMemberName = '';
+        if (isset($decodedDocument['user']['name'])) {
+            $fullMemberName = $decodedDocument['user']['name'];
+        }
+
+        return $fullMemberName;
+    }
+
+    public function extractEntitiesUrls(mixed $decodedDocument): array
+    {
+        $entitiesUrls = [];
+        if (isset($decodedDocument['entities']['urls'])) {
+            $entitiesUrls = $decodedDocument['entities']['urls'];
+        }
+
+        return $entitiesUrls;
+    }
+
+    public function extractMediaContents(array $lightweightJSON): string|false
+    {
+        if (!isset($lightweightJSON['extended_entities']['media'][0]['media_url'])) {
+            return false;
+        }
+
+        $smallMediaUrl = $lightweightJSON['extended_entities']['media'][0]['media_url'] . ':small';
+
+        try {
+            $jpegImageContents = file_get_contents($smallMediaUrl);
+            $webpImageContents = $this->convertFromJpegToWebp($jpegImageContents);
+
+            return 'data:image/webp;base64,' . base64_encode($webpImageContents);
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    public function stripUpstreamTweetDocumentFromExtraProperties(string $json): array
+    {
+        $upstreamDocument = json_decode($json, associative: true);
+
+        if (array_key_exists('text', $upstreamDocument)) {
+            $text = $upstreamDocument['text'];
+            $textIndex = 'text';
+        } else {
+            $text = $upstreamDocument['full_text'];
+            $textIndex = 'full_text';
+        }
+
+        $lightweightJSON = [
+            'created_at' => $upstreamDocument['created_at'],
+            'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
+            'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
+            $textIndex   => $text,
+            'id_str'     => $upstreamDocument['id_str']
+        ];
+
+        if (isset($upstreamDocument['user']['profile_image_url_https'])) {
+            $lightweightJSON['user']['profile_image_url_https'] = $upstreamDocument['user']['profile_image_url_https'];
+        }
+
+        if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
+            $lightweightJSON['extended_entities'] = [
+                'media' => [
+                    ['media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url']]
+                ]
+            ];
+        }
+
+        if (isset($upstreamDocument['entities']['media'])) {
+            $lightweightJSON['entities'] = [
+                'media' => $upstreamDocument['entities']['media']
+            ];
+        }
+
+        return $lightweightJSON;
     }
 }
