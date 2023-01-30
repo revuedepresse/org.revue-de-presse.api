@@ -12,9 +12,6 @@ use function array_key_exists;
 class StatusValidator
 {
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
     public static function guardAgainstMissingOriginalDocument(
@@ -28,9 +25,6 @@ class StatusValidator
     }
 
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
     public static function guardAgainstMissingStatusId(
@@ -44,9 +38,6 @@ class StatusValidator
     }
 
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
     public static function guardAgainstMissingText(

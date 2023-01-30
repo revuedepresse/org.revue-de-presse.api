@@ -11,10 +11,6 @@ use function Safe\json_decode;
 class StatusConsistency
 {
     /**
-     * @param string $json
-     * @param array  $status
-     *
-     * @return array
      * @throws \Safe\Exceptions\JsonException
      */
     public static function fillMissingStatusProps(
