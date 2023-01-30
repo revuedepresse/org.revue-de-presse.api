@@ -179,22 +179,6 @@ class TrendsController
         $totalPagesHeader = ['x-total-pages' => $totalPagesOrResponse];
         $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
 
-        if ($searchParams->getPageIndex() > $totalPagesOrResponse) {
-            $highlightUrl = $this->router->generate('highlight');
-            $response = $this->makeOkResponse([]);
-
-            if ($request->getPathInfo() === $highlightUrl) {
-                $response = $this->makeOkResponse([
-                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
-                ]);
-            }
-
-            $response->headers->add($totalPagesHeader);
-            $response->headers->add($pageIndexHeader);
-
-            return $response;
-        }
-
         $items = $finder($searchParams);
 
         $response = $this->makeOkResponse($items);
