@@ -19,6 +19,7 @@ use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GdImage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -385,6 +386,8 @@ class GuardAgainstMissingMediaCommand extends Command {
         $this->info($message);
 
         $contents = $this->httpClient::getContents($mediaUrl);
+        $contents = imagecreatefromstring($contents);
+        imagepalettetotruecolor($contents);
         $contents = $this->convertFromJpegToWebp($contents);
 
         if ($contents === false) {
@@ -394,11 +397,11 @@ class GuardAgainstMissingMediaCommand extends Command {
         return $contents;
     }
 
-    private function convertFromJpegToWebp(bool|string $contents): string|false
+    private function convertFromJpegToWebp(GdImage $contents): string|false
     {
         try {
             ob_start();
-            imagewebp(imagecreatefromstring($contents));
+            imagewebp($contents);
             $webpImageContents = ob_get_contents();
             ob_end_clean();
         } catch (\Exception $e) {
