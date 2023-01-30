@@ -440,7 +440,7 @@ class GuardAgainstMissingMediaCommand extends Command {
         }
 
         if ($this->input->hasOption(self::OPTION_SKIP_TWEET_MEDIA)) {
-            return $tweet;
+            return $tweet->overrideProperties($overrides);
         }
 
         $tweet = $this->refreshExtendedEntities($tweet);
