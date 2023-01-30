@@ -283,7 +283,7 @@ class GuardAgainstMissingMediaCommand extends Command {
                     HttpTweetNotFoundException::throws($tweet);
                 }
 
-                return base64_encode($tweet->smallMediaURL());
+                return base64_encode($this->getMedia($tweet->smallMediaURL()));
             } catch (\Exception $e) {
                 if ($e instanceof HttpTweetNotFoundException) {
                     throw $e;
