@@ -21,26 +21,12 @@ class SearchParams implements SearchParamsInterface
 {
     public const PARAM_AGGREGATE_IDS = 'aggregateIds';
 
-    /**
-     * @var PaginationParams
-     */
     private PaginationParams $paginationParams;
 
-    /**
-     * @var string|null
-     */
     private ?string $keyword;
 
-    /**
-     * @var array
-     */
     private array $params;
 
-    /**
-     * @param PaginationParams $paginationParams
-     * @param string|null      $keyword
-     * @param array            $filteredParams
-     */
     public function __construct(
         PaginationParams $paginationParams,
         string $keyword = null,
@@ -51,12 +37,6 @@ class SearchParams implements SearchParamsInterface
         $this->params = $filteredParams;
     }
 
-    /**
-     * @param Request $request
-     * @param array   $params
-     *
-     * @return SearchParams
-     */
     public static function fromRequest(Request $request, array $params = []): self
     {
         $paginationParams = PaginationParams::fromRequest($request);
@@ -108,9 +88,6 @@ class SearchParams implements SearchParamsInterface
         );
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [
@@ -120,88 +97,52 @@ class SearchParams implements SearchParamsInterface
         ];
     }
 
-    /**
-     * @return int
-     */
     public function getPageIndex(): int
     {
         return $this->paginationParams->pageIndex;
     }
 
-    /**
-     * @return int
-     */
     public function getPageSize(): int
     {
         return $this->paginationParams->pageSize;
     }
 
-    /**
-     * @return null|string
-     */
     public function getKeyword(): ?string
     {
         return $this->keyword;
     }
 
-    /**
-     * @return bool
-     */
     public function hasKeyword(): bool
     {
         return $this->keyword !== null;
     }
 
-    /**
-     * @return int
-     */
     public function getFirstItemIndex(): int
     {
         return $this->paginationParams->getFirstItemIndex();
     }
 
-    /**
-     * @return array
-     */
     public function getParams(): array
     {
         return $this->params;
     }
 
-    /**
-     * @param $name
-     * @return bool
-     */
     public function hasParam(string $name): bool
     {
         return array_key_exists($name, $this->params);
     }
 
-    /**
-     * @param string $name
-     * @param        $value
-     * @return bool
-     */
     public function paramIs(string $name, $value): bool
     {
         return $this->hasParam($name) && $this->params[$name] === $value;
     }
 
-    /**
-     * @param string $name
-     * @param array  $options
-     *
-     * @return bool
-     */
     public function paramBelongsTo(string $name, array $options): bool
     {
         return $this->hasParam($name) &&
             in_array($this->params[$name], array_values($options), true);
     }
 
-    /**
-     * @return string
-     */
     public function getFingerprint()
     {
         return sha1(serialize($this));
