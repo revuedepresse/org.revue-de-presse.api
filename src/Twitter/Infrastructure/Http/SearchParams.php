@@ -40,14 +40,14 @@ class SearchParams implements SearchParamsInterface
     public static function fromRequest(Request $request, array $params = []): self
     {
         $paginationParams = PaginationParams::fromRequest($request);
-        $keyword = $request->get('keyword', null);
+        $keyword = $request->get('keyword');
 
         $filteredParams = [];
         $paramsNames = array_keys($params);
         array_walk(
             $paramsNames,
             function ($name) use ($request, $params, &$filteredParams) {
-                $value = $request->get($name, null);
+                $value = $request->get($name);
 
                 if ($value === null) {
                     return;
