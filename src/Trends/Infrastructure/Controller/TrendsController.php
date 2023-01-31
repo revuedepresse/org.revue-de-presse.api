@@ -54,13 +54,14 @@ class TrendsController
                 return $this->getHighlightsFromSearchParams($searchParams);
             },
             params: [
-                'aggregate' => 'string',
-                'endDate' => 'datetime',
-                'includeRetweets' => 'bool',
-                'routeName' => 'string',
+                'aggregate'          => 'string',
+                'endDate'            => 'datetime',
+                'includeRetweets'    => 'bool',
+                'excludeMedia'       => 'bool',
+                'routeName'          => 'string',
                 'selectedAggregates' => 'array',
-                'startDate' => 'datetime',
-                'term' => 'string',
+                'startDate'          => 'datetime',
+                'term'               => 'string',
             ]
         );
     }
