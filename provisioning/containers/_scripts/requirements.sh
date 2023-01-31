@@ -48,6 +48,7 @@ function install_system_packages() {
         libwebp-dev \
         libpq-dev \
         libsodium-dev \
+        parallel \
         procps \
         symfony-cli \
         tini \
