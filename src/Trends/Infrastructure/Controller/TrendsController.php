@@ -39,6 +39,10 @@ class TrendsController
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
+    /**
+     * @throws \JsonException
+     * @throws \RedisException
+     */
     public function getHighlights(Request $request)
     {
         return $this->getCollection(
@@ -84,6 +88,7 @@ class TrendsController
 
     /**
      * @throws \JsonException
+     * @throws \RedisException
      */
     private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -141,6 +146,9 @@ class TrendsController
             !\array_key_exists('includeRetweets', $searchParams->getParams());
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getCollection(
         Request $request,
         callable $counter,

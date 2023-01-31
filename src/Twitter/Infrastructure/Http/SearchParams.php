@@ -37,6 +37,9 @@ class SearchParams implements SearchParamsInterface
         $this->params = $filteredParams;
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function fromRequest(Request $request, array $params = []): self
     {
         $paginationParams = PaginationParams::fromRequest($request);
