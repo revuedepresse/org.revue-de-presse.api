@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http;
 
 use App\Trends\Domain\Repository\SearchParamsInterface;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 use function array_keys;
@@ -47,6 +48,7 @@ class SearchParams implements SearchParamsInterface
 
         $filteredParams = [];
         $paramsNames = array_keys($params);
+
         array_walk(
             $paramsNames,
             function ($name) use ($request, $params, &$filteredParams) {
@@ -71,7 +73,7 @@ class SearchParams implements SearchParamsInterface
                 }
 
                 if ($params[$name] === 'datetime') {
-                    $filteredParams[$name] = new \DateTime($value, new \DateTimeZone('Europe/Paris'));
+                    $filteredParams[$name] = new DateTime($value, new \DateTimeZone('Europe/Paris'));
                 }
 
                 if ($params[$name] === 'array') {
