@@ -65,7 +65,8 @@ class TrendsController
         );
     }
 
-    private function getTotalPages(SearchParams $searchParams, Request $request) {
+    private function getTotalPages(SearchParams $searchParams): JsonResponse|int
+    {
         $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
         $unauthorizedJsonResponse = new JsonResponse(
             'Unauthorized request',
