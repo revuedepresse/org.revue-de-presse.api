@@ -240,9 +240,13 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
     public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
-        return array_map(
+        return array_filter(array_map(
             function ($tweet) use ($searchParams) {
                 $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($tweet['json']);
+
+                if (!array_key_exists('id', $tweet)) {
+                    return false;
+                }
 
                 $tweetDocument = [
                     'id' => $tweet['id'],
@@ -272,7 +276,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 return array_merge($tweetDocument, $tweetPropertiesToOverride);
             },
             $tweets
-        );
+        ));
     }
 
     public function extractMemberFullName(mixed $decodedDocument): string
