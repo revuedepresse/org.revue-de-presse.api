@@ -22,7 +22,7 @@ COPY    --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
 
 RUN     /bin/bash -c 'source /scripts/install-service-requirements.sh'
 
-COPY    --from=composer:2.3 /usr/bin/composer /usr/bin/composer
+COPY    --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 USER    ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
 
