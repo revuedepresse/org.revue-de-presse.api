@@ -290,6 +290,7 @@ function set_file_permissions() {
 }
 
 function start() {
+    remove_running_container_and_image_in_debug_mode 'app'
     load_configuration_parameters
 
     local command
