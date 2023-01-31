@@ -141,4 +141,13 @@ class SearchParams implements SearchParamsInterface
     {
         return $this->hasParam($name) && $this->params[$name] === $value;
     }
+
+    public function includeMedia(): bool
+    {
+        if ($this->hasParam('excludeMedia') && $this->getParams()['excludeMedia']) {
+            return !$this->getParams()['excludeMedia'];
+        }
+
+        return true;
+    }
 }

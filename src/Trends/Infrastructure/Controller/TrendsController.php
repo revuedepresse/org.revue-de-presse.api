@@ -113,8 +113,9 @@ class TrendsController
 
     public function getCacheKey(string $prefix, SearchParams $searchParams): string
     {
+        $includeMedia = 'includeMedia=' . intval($searchParams->includeMedia());
         $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
-
+    
         $sortedSelectedAggregates = [];
         if ($searchParams->hasParam('selectedAggregates')) {
             $sortedSelectedAggregates = $searchParams->getParams()['selectedAggregates'];
@@ -134,6 +135,7 @@ class TrendsController
                 $searchParams->getParams()['endDate']->format('Y-m-d H'),
                 implode(',', $sortedSelectedAggregates),
                 $includedRetweets,
+                $includeMedia,
                 $term
             ]
         );

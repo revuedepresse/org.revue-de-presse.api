@@ -83,6 +83,13 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             ->getSnapshot();
     }
 
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
     public function findBy(SearchParamsInterface $searchParams): array {
         try {
             $snapshot = $this->getFirebaseDatabaseSnapshot(

@@ -238,11 +238,18 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
     public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
         return array_filter(array_map(
             function ($tweet) use ($searchParams) {
-                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($tweet['json']);
+                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($searchParams, $tweet['json']);
 
                 if (!array_key_exists('id', $tweet)) {
                     return false;
@@ -259,9 +266,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 ];
 
                 $tweetPropertiesToOverride = $this->extractTweetPropertiesToOverride(
+                    $searchParams,
                     $tweetDocument,
-                    $lightweightJSON,
-                    $searchParams
+                    $lightweightJSON
                 );
 
                 unset(
@@ -317,7 +324,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
     }
 
-    public function stripUpstreamTweetDocumentFromExtraProperties(string $json): array
+    public function stripUpstreamTweetDocumentFromExtraProperties(SearchParamsInterface $searchParams, string $json): array
     {
         $upstreamDocument = json_decode($json, associative: true);
 
@@ -341,18 +348,20 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             $lightweightJSON['user']['profile_image_url_https'] = $upstreamDocument['user']['profile_image_url_https'];
         }
 
-        if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
-            $lightweightJSON['extended_entities'] = [
-                'media' => [
-                    ['media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url']]
-                ]
-            ];
-        }
+        if ($searchParams->includeMedia()) {
+            if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
+                $lightweightJSON['extended_entities'] = [
+                    'media' => [
+                        ['media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url']]
+                    ]
+                ];
+            }
 
-        if (isset($upstreamDocument['entities']['media'])) {
-            $lightweightJSON['entities'] = [
-                'media' => $upstreamDocument['entities']['media']
-            ];
+            if (isset($upstreamDocument['entities']['media'])) {
+                $lightweightJSON['entities'] = [
+                    'media' => $upstreamDocument['entities']['media']
+                ];
+            }
         }
 
         return $lightweightJSON;
@@ -366,9 +375,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      * @throws \JsonException
      */
     private function extractTweetPropertiesToOverride(
+        SearchParamsInterface $searchParams,
         array                 $tweetAsJSON,
-        array                 $lightweightJSON,
-        SearchParamsInterface $searchParams
+        array                 $lightweightJSON
     ): array
     {
         $favoriteCountIndex = 'favorite_count';
@@ -390,6 +399,10 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $includeRetweets = $searchParams->getParams()['includeRetweets'];
         if ($includeRetweets && $properties[$tweetIndex][$favoriteCountIndex] === 0) {
             $properties[$tweetIndex][$favoriteCountIndex] = $lightweightJSON['retweeted_status'][$favoriteCountIndex];
+        }
+
+        if (!$searchParams->includeMedia()) {
+            return $properties;
         }
 
         $contents = $this->extractMediaContents($lightweightJSON);
