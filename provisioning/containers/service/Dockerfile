@@ -1,4 +1,4 @@
-FROM        php:8.1-fpm-bullseye
+FROM        php:8.2-fpm-bullseye
 
 ARG         OWNER_UID
 ARG         OWNER_GID
