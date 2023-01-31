@@ -43,8 +43,8 @@ class TrendsController
     {
         return $this->getCollection(
             $request,
-            counter: function (SearchParams $searchParams) use ($request) {
-                return $this->getTotalPages($searchParams, $request);
+            counter: function (SearchParams $searchParams) {
+                return $this->getTotalPages($searchParams);
             },
             finder: function (SearchParams $searchParams) {
                 return $this->getHighlightsFromSearchParams($searchParams);
