@@ -136,9 +136,4 @@ class SearchParams implements SearchParamsInterface
     {
         return $this->hasParam($name) && $this->params[$name] === $value;
     }
-
-    public function getFingerprint()
-    {
-        return sha1(serialize($this));
-    }
 }
