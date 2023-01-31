@@ -137,12 +137,6 @@ class SearchParams implements SearchParamsInterface
         return $this->hasParam($name) && $this->params[$name] === $value;
     }
 
-    public function paramBelongsTo(string $name, array $options): bool
-    {
-        return $this->hasParam($name) &&
-            in_array($this->params[$name], array_values($options), true);
-    }
-
     public function getFingerprint()
     {
         return sha1(serialize($this));
