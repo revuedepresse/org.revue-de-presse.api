@@ -249,9 +249,10 @@ function install_app_requirements() {
         -type d \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
+        -exec sem --jobs +0 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
+        sem --wait && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
@@ -261,7 +262,8 @@ function install_app_requirements() {
         -readable \
         -regex '.+/var.+' \
         -not -path "${project_dir}"'/var/log' \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
+        sem --wait && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
 
     find "${project_dir}" \
@@ -269,9 +271,10 @@ function install_app_requirements() {
         -readable \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
+        -exec sem --jobs +0 'export file_path="{}" && \chown '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
+        sem --wait && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
 
     find "${project_dir}"  \
@@ -279,8 +282,9 @@ function install_app_requirements() {
         -not -path "${project_dir}"'/bin' \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
+        -exec sem --jobs +0 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
+        -exec sem --jobs +0 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
+        sem --wait && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
 
