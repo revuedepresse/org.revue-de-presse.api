@@ -17,6 +17,9 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
+use JoliTypo\Fixer;
+use LitEmoji\LitEmoji;
+use Safe\Exceptions\FilesystemException;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
@@ -345,7 +348,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             'created_at' => $upstreamDocument['created_at'],
             'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
             'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
-            $textIndex   => $text,
+            $textIndex    => $this->processText($text),
             'id_str'     => $upstreamDocument['id_str']
         ];
 
@@ -428,6 +431,32 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         return $properties;
+    }
+
+    public function getTypographyFixer(): Fixer
+    {
+        $fixer = new Fixer([
+            'Ellipsis',
+            'Dimension',
+            'Unit',
+            'Dash',
+            'SmartQuotes',
+            'FrenchNoBreakSpace',
+            'NoSpaceBeforeComma',
+            'CurlyQuote',
+            'Hyphen',
+            'Trademark'
+        ]);
+        $fixer->setLocale('fr_FR');
+
+        return $fixer;
+    }
+
+    public function processText(mixed $text): string
+    {
+        $text = LitEmoji::encodeUnicode($text);
+
+        return $this->getTypographyFixer()->fixString($text);
     }
 
     public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
