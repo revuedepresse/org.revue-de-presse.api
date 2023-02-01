@@ -355,6 +355,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
         if ($searchParams->includeMedia()) {
             if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
+                $upstreamDocument['extended_entities']['media'][0]['sizes']['small']['h'] = Image::scaleImageHeight(
+                    $upstreamDocument['extended_entities']['media'][0]['sizes']['large']['w'],
+                    $upstreamDocument['extended_entities']['media'][0]['sizes']['large']['h'],
+                );
+
                 $lightweightJSON['extended_entities'] = [
                     'media' => [
                         [
@@ -366,6 +371,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             }
 
             if (isset($upstreamDocument['entities']['media'])) {
+                $upstreamDocument['entities']['media'][0]['sizes']['small']['h'] = Image::scaleImageHeight(
+                    $upstreamDocument['extended_entities']['media'][0]['sizes']['large']['w'],
+                    $upstreamDocument['extended_entities']['media'][0]['sizes']['large']['h'],
+                );
+
                 $lightweightJSON['entities'] = [
                     'media' => $upstreamDocument['entities']['media']
                 ];

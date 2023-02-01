@@ -58,7 +58,7 @@ class Image
     private static function scaleImage(GdImage|false $contents, int $width, int $height): GdImage
     {
         $destinationWidth = self::IMAGE_WIDTH;
-        $destinationHeight = intval(floor(self::IMAGE_WIDTH * $height / $width));
+        $destinationHeight = self::scaleImageHeight($width, $height);
 
         $destinationImage = imagecreatetruecolor($destinationWidth, $destinationHeight);
 
@@ -95,5 +95,10 @@ class Image
         ob_end_clean();
 
         return $webpImageContents;
+    }
+
+    public static function scaleImageHeight(int $width, int $height): int
+    {
+        return intval(floor(self::IMAGE_WIDTH * $height / $width));
     }
 }
