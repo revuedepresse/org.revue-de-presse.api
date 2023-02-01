@@ -2023,16 +2023,16 @@
         },
         {
             "name": "friendsofphp/proxy-manager-lts",
-            "version": "v1.0.13",
+            "version": "v1.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfPHP/proxy-manager-lts.git",
-                "reference": "88354616f4cf4f6620910fd035e282173ba453e8"
+                "reference": "a527c9d9d5348e012bd24482d83a5cd643bcbc9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfPHP/proxy-manager-lts/zipball/88354616f4cf4f6620910fd035e282173ba453e8",
-                "reference": "88354616f4cf4f6620910fd035e282173ba453e8",
+                "url": "https://api.github.com/repos/FriendsOfPHP/proxy-manager-lts/zipball/a527c9d9d5348e012bd24482d83a5cd643bcbc9e",
+                "reference": "a527c9d9d5348e012bd24482d83a5cd643bcbc9e",
                 "shasum": ""
             },
             "require": {
@@ -2089,7 +2089,7 @@
             ],
             "support": {
                 "issues": "https://github.com/FriendsOfPHP/proxy-manager-lts/issues",
-                "source": "https://github.com/FriendsOfPHP/proxy-manager-lts/tree/v1.0.13"
+                "source": "https://github.com/FriendsOfPHP/proxy-manager-lts/tree/v1.0.14"
             },
             "funding": [
                 {
@@ -2101,7 +2101,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-10-17T19:48:16+00:00"
+            "time": "2023-01-30T10:40:19+00:00"
         },
         {
             "name": "google/auth",
@@ -2163,16 +2163,16 @@
         },
         {
             "name": "google/cloud-core",
-            "version": "v1.48.1",
+            "version": "v1.49.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-core.git",
-                "reference": "07f275bb0b915e5671edda16506366a67eab0916"
+                "reference": "5db0d164b61440312e99e4af9b43a59823098a8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-core/zipball/07f275bb0b915e5671edda16506366a67eab0916",
-                "reference": "07f275bb0b915e5671edda16506366a67eab0916",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-core/zipball/5db0d164b61440312e99e4af9b43a59823098a8d",
+                "reference": "5db0d164b61440312e99e4af9b43a59823098a8d",
                 "shasum": ""
             },
             "require": {
@@ -2180,7 +2180,7 @@
                 "guzzlehttp/guzzle": "^5.3|^6.5.7|^7.4.4",
                 "guzzlehttp/promises": "^1.3",
                 "guzzlehttp/psr7": "^1.7|^2.0",
-                "monolog/monolog": "^1.1|^2.0",
+                "monolog/monolog": "^1.1|^2.0|^3.0",
                 "php": ">=5.6",
                 "psr/http-message": "1.0.*",
                 "rize/uri-template": "~0.3"
@@ -2190,7 +2190,7 @@
                 "google/cloud-common-protos": "^0.3",
                 "google/gax": "^1.9",
                 "opis/closure": "^3",
-                "phpdocumentor/reflection": "^3.0||^4.0",
+                "phpdocumentor/reflection": "^3.0||^4.0||^5.3",
                 "phpspec/prophecy": "^1.10.3",
                 "phpunit/phpunit": "^4.8|^5.0|^8.0",
                 "squizlabs/php_codesniffer": "2.*",
@@ -2223,22 +2223,22 @@
             ],
             "description": "Google Cloud PHP shared dependency, providing functionality useful to all components.",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-core/tree/v1.48.1"
+                "source": "https://github.com/googleapis/google-cloud-php-core/tree/v1.49.0"
             },
-            "time": "2022-12-13T22:56:52+00:00"
+            "time": "2023-01-27T18:26:22+00:00"
         },
         {
             "name": "google/cloud-storage",
-            "version": "v1.30.1",
+            "version": "v1.30.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-storage.git",
-                "reference": "f983b1fe602ee15c33cb6d6d469ff0e14d3171d0"
+                "reference": "b7f74ec1b701d56945cbc6c20345e2d21b1b3545"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/f983b1fe602ee15c33cb6d6d469ff0e14d3171d0",
-                "reference": "f983b1fe602ee15c33cb6d6d469ff0e14d3171d0",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-storage/zipball/b7f74ec1b701d56945cbc6c20345e2d21b1b3545",
+                "reference": "b7f74ec1b701d56945cbc6c20345e2d21b1b3545",
                 "shasum": ""
             },
             "require": {
@@ -2279,9 +2279,9 @@
             ],
             "description": "Cloud Storage Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-storage/tree/v1.30.1"
+                "source": "https://github.com/googleapis/google-cloud-php-storage/tree/v1.30.2"
             },
-            "time": "2022-12-13T22:56:52+00:00"
+            "time": "2023-01-27T18:26:22+00:00"
         },
         {
             "name": "google/crc32",

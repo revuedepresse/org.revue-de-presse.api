@@ -111,23 +111,26 @@ function install_php_extensions() {
         sockets \
         sodium
 
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install gd
+
     docker-php-ext-enable opcache
 
-    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip \
-    --output-document /tmp/3.1.4.zip
+    wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
+    --output-document /tmp/3.2.0.zip
     cd /tmp || exit
-    unzip /tmp/3.1.4.zip
-    cd xdebug-3.1.4 || exit
+    unzip /tmp/3.2.0.zip
+    cd xdebug-3.2.0 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz \
+    wget https://github.com/DataDog/dd-trace-php/archive/0.83.1.tar.gz \
     --output-document=/tmp/datadog-php-tracer.tar.gz
     cd /tmp || exit
     tar -xvzf /tmp/datadog-php-tracer.tar.gz
-    cd dd-trace-php-0.74.0 || exit
+    cd dd-trace-php-0.83.1 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
@@ -267,8 +270,11 @@ function install_worker_system_packages() {
         --no-install-recommends \
         libcurl4-gnutls-dev \
         libicu-dev \
+        libfreetype-dev \
+        libicu-dev \
         libjpeg-dev \
         libpng-dev \
+        libwebp-dev \
         libpq-dev \
         librabbitmq-dev \
         libsodium-dev

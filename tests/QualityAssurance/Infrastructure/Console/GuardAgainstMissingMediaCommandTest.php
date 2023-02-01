@@ -13,8 +13,6 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class GuardAgainstMissingMediaCommandTest extends KernelTestCase
 {
-    private EntityManagerInterface $entityManager;
-
     private GuardAgainstMissingMediaCommand $command;
 
     private CommandTester $commandTester;

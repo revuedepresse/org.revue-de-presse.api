@@ -9,5 +9,8 @@ use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 
 interface MemberProfileAwareHttpClientInterface extends ExceptionalMemberInterface
 {
-    public function getMemberByIdentity(MemberIdentity $memberIdentity): MemberInterface;
+    public function getMemberByIdentity(
+        MemberIdentity $memberIdentity,
+        bool $preventEventSourcing = false
+    ): MemberInterface;
 }

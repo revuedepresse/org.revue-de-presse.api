@@ -33,6 +33,7 @@ use App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Translation\Translator;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\Exception\ORMException;
@@ -1126,9 +1127,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param $identifier
-     *
-     * @return array|stdClass
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -1146,34 +1144,19 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      */
     public function getMemberProfile(string $identifier): stdClass
     {
-        $screenName = null;
-        $userId     = null;
+        $memberIdentity = new MemberIdentity(
+            $identifier,
+            is_numeric($identifier) ? $identifier : MemberIdentity::NOT_PERSISTED_MEMBER_NUMERIC_ID
+        );
 
-        if (is_numeric($identifier)) {
-            $userId = $identifier;
-            $option = 'user_id';
-
+        if ($memberIdentity->isNumeric()) {
             $this->guardAgainstSpecialMemberWithIdentifier($identifier);
         } else {
-            $screenName = $identifier;
-            $option     = 'screen_name';
-
-            $this->guardAgainstSpecialMembers($screenName);
+            $this->guardAgainstSpecialMembers($identifier);
         }
 
-        $showUserEndpoint = $this->getShowUserEndpoint($version = self::TWITTER_API_VERSION_1_1, $option);
-        $this->guardAgainstApiLimit($showUserEndpoint);
-
         try {
-            $twitterUser = $this->contactEndpoint(
-                strtr(
-                    $showUserEndpoint,
-                    [
-                        '{{ screen_name }}' => $screenName,
-                        '{{ user_id }}'     => $userId
-                    ]
-                )
-            );
+            $memberProfile = $this->getMemberProfileByScreenNameOrUserId($memberIdentity);
         } catch (UnavailableResourceException $exception) {
             if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
                 $suspendedMember = $this->memberRepository->suspendMemberByScreenNameOrIdentifier($identifier);
@@ -1191,18 +1174,20 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
                 $exception->getCode() === self::ERROR_NOT_FOUND
                 || $exception->getCode() === self::ERROR_USER_NOT_FOUND
             ) {
-                $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
-                if (!($member instanceof MemberInterface) && $screenName !== null) {
-                    $member = $this->memberRepository->declareMemberHavingScreenNameNotFound($screenName);
+                $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentity->screenName()]);
+
+                if (!($member instanceof MemberInterface) && $memberIdentity->screenName() !== null) {
+                    $member = $this->memberRepository->declareMemberHavingScreenNameNotFound($memberIdentity->screenName());
                 }
 
                 if ($member instanceof MemberInterface && !$member->hasBeenDeclaredAsNotFound()) {
                     $this->memberRepository->declareMemberAsNotFound($member);
                 }
 
-                $this->logNotFoundMemberMessage($screenName ?? $identifier);
+                $this->logNotFoundMemberMessage($memberIdentity->screenName() ?? $identifier);
+
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    is_null($screenName) ? $identifier : $screenName,
+                    $identifier,
                     $identifier,
                     $exception->getCode(),
                     $exception
@@ -1212,9 +1197,9 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             throw $exception;
         }
 
-        $this->guardAgainstUnavailableResource($twitterUser);
+        $this->guardAgainstUnavailableResource($memberProfile);
 
-        return $twitterUser;
+        return $memberProfile;
     }
 
     /**
@@ -1355,24 +1340,47 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
     /**
      * @see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
-     *
-     * @param string $version
-     *
-     * @return string
      */
     protected function getCreateFriendshipsEndpoint($version = self::TWITTER_API_VERSION_1_1): string
     {
         return $this->getApiBaseUrl($version) . '/friendships/create.json?screen_name={{ screen_name }}';
     }
 
-    /**
-     * @param string $version
-     *
-     * @return string
-     */
     protected function getCreateSavedSearchEndpoint($version = self::TWITTER_API_VERSION_1_1)
     {
         return $this->getApiBaseUrl($version) . '/saved_searches/create.json?';
+    }
+
+    /**
+     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \App\Twitter\Infrastructure\Exception\UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
+     */
+    public function getMemberProfileByScreenNameOrUserId(MemberIdentity $memberIdentity): stdClass|array|null
+    {
+        $showUserEndpoint = $this->getShowUserEndpoint(option: ($memberIdentity->isNumeric() ? 'user_id' : 'screen_name'));
+        $this->guardAgainstApiLimit($showUserEndpoint);
+
+        return $this->contactEndpoint(
+            strtr(
+                $showUserEndpoint,
+                [
+                    '{{ screen_name }}' => $memberIdentity->isNumeric() ? '' : $memberIdentity->screenName(),
+                    '{{ user_id }}'     => $memberIdentity->isNumeric() ? $memberIdentity->id() : ''
+                ]
+            )
+        );
     }
 
     /**
@@ -1449,13 +1457,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended&include_entities=true';
     }
 
-    /**
-     * @param string $version
-     * @param string $option
-     *
-     * @return string
-     */
-    protected function getShowUserEndpoint($version = self::TWITTER_API_VERSION_1_1, $option = 'screen_name')
+    protected function getShowUserEndpoint($version = self::TWITTER_API_VERSION_1_1, $option = 'screen_name'): string
     {
         if ($option === 'screen_name') {
             $parameters = 'screen_name={{ screen_name }}';
@@ -1535,12 +1537,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param $twitterUser
-     *
-     * @return bool
-     * @throws ProtectedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      */
     protected function guardAgainstUnavailableResource($twitterUser)
     {

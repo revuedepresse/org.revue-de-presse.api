@@ -514,14 +514,7 @@ QUERY;
         return $this->saveMember($member);
     }
 
-    /**
-     * @param int $identifier
-     *
-     * @return MemberInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function suspendMemberByIdentifier(int $identifier): MemberInterface
+    public function suspendMemberByIdentifier(string $identifier): MemberInterface
     {
         $suspendedMember = $this->findOneBy(['twitterID' => $identifier]);
 

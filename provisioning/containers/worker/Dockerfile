@@ -1,4 +1,4 @@
-FROM        php:8.1-cli-bullseye
+FROM        php:8.2-cli-bullseye
 
 ARG         OWNER_UID
 ARG         OWNER_GID
@@ -20,7 +20,7 @@ COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts          
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts/cmd-worker.sh   /start.sh
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./worker/templates         /templates
 
-COPY        --from=composer:2.3 /usr/bin/composer /usr/bin/composer
+COPY        --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 RUN         /bin/bash -c 'source /scripts/install-shared-requirements.sh' && \
             /bin/bash -c 'source /scripts/install-worker-requirements.sh'

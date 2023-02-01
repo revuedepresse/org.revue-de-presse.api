@@ -75,16 +75,21 @@ function set_file_permissions() {
     chmod --verbose -R ug+rx  /scripts
     chmod --verbose -R  u+w   /scripts
 
+    local change_directory_permissions
+    change_directory_permissions=<<"EOF"
+        \chown --recursive $2:$3 "$1" && \
+        \chmod --recursive og-rwx "$1" && \
+        \chmod --recursive g+rx "$1"
+EOF
+
     find "${project_dir}"  \
         -maxdepth 1 \
         -executable \
         -readable \
         -type d \
-        -not -path '*provisioning' \
-        -not -path '*provisioning/volumes*' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
+        -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
+        -exec sh -c "${change_directory_permissions}" shell {} "${SERVICE_OWNER_UID}" "${SERVICE_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
@@ -93,25 +98,38 @@ function set_file_permissions() {
         -executable \
         -readable \
         -regex '.+/var.+' \
+        -regex '.+/src/Media/Resources/.+.b64' \
         -not -path "${project_dir}"'/var/log' \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
+        -exec sh -c '\chmod --recursive ug+w "${1}"' shell {} \; && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
+
+    local change_file_permissions
+    change_file_permissions=<<"EOF"
+        \chown $2:$3 "$1" && \
+        \chmod og-rwx "$1" && \
+        \chmod  g+r "$1"
+EOF
 
     find "${project_dir}" \
         -type f \
         -readable \
-        -not -path '*provisioning/volumes*' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
+        -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
+        -exec sh -c "${change_file_permissions}" shell {} \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
+
+    local change_binaries_permissions
+    change_binaries_permissions=<<"EOF"
+        \chown --recursive $2:$3 "$1" && \
+        \chmod --recursive ug+x "$1"
+EOF
 
     find "${project_dir}"  \
         -type f \
         -not -path "${project_dir}"'/bin' \
-        -not -path '*provisioning/volumes' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_OWNER_UID}"':'"${WORKER_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
+        -not -path "${project_dir}"'/provisioning/volumes' \
+        -not -path "${project_dir}"'/public/emoji-data' \
+        -exec sh -c "${change_binaries_permissions}" shell {} \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
 
