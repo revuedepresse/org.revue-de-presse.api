@@ -113,7 +113,7 @@ services:
             - [ 'setStatusAccessor', [ '@App\Twitter\Infrastructure\Http\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
         properties:
-            adminRouteName: '%admin_route_name%'
+            mediaDirectory: '%media_directory%'
 
     repository.not_found_status:
         class: 'App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository'
