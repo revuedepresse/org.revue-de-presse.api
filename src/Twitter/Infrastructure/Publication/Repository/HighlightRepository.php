@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
+use App\Media\Image;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
@@ -25,7 +26,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
-    public string $adminRouteName;
+    public string $mediaDirectory;
 
     private const TABLE_ALIAS = 'h';
 
@@ -308,15 +309,19 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
     public function extractMediaContents(array $lightweightJSON): string|false
     {
-        if (!isset($lightweightJSON['extended_entities']['media'][0]['media_url'])) {
+        if ($this->guardAgainstNonExistingMedia($lightweightJSON)) {
             return false;
         }
 
-        $smallMediaUrl = $lightweightJSON['extended_entities']['media'][0]['media_url'] . ':small';
+        $smallMediaUrl = $lightweightJSON['extended_entities']['media'][0]['media_url'] . ':large';
 
         try {
             $jpegImageContents = file_get_contents($smallMediaUrl);
-            $webpImageContents = $this->convertFromJpegToWebp($jpegImageContents);
+            $webpImageContents = Image::fromJpegToResizedWebp(
+                $jpegImageContents,
+                $lightweightJSON['extended_entities']['media'][0]['sizes']['large']['w'],
+                $lightweightJSON['extended_entities']['media'][0]['sizes']['large']['h']
+            );
 
             return 'data:image/webp;base64,' . base64_encode($webpImageContents);
         } catch (\Exception) {
@@ -352,7 +357,10 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
                 $lightweightJSON['extended_entities'] = [
                     'media' => [
-                        ['media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url']]
+                        [
+                            'media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url'],
+                            'sizes' => $upstreamDocument['extended_entities']['media'][0]['sizes']
+                        ]
                     ]
                 ];
             }
@@ -405,11 +413,52 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             return $properties;
         }
 
-        $contents = $this->extractMediaContents($lightweightJSON);
-        if (!isset($properties[$tweetIndex]['base64_encoded_media']) && $contents !== false) {
-            $properties[$tweetIndex]['base64_encoded_media'] = $contents;
+        if ($this->guardAgainstNonExistingMedia($lightweightJSON)) {
+            return $properties;
+        }
+
+        if (isset($properties[$tweetIndex]['base64_encoded_media'])) {
+            return $properties;
+        }
+
+        try {
+            $properties[$tweetIndex]['base64_encoded_media'] = $this->getExistingMediaOrFetchIt($lightweightJSON);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
         }
 
         return $properties;
+    }
+
+    public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
+    {
+        return !isset($lightweightJSON['extended_entities']['media'][0]['media_url']);
+    }
+
+    /**
+     * @throws \Safe\Exceptions\FilesystemException
+     */
+    public function getExistingMediaOrFetchIt(array $lightweightJSON): string
+    {
+        $encodedMediaPath = sprintf(
+            '%s/%s.%s',
+            $this->mediaDirectory,
+            $lightweightJSON['id_str'],
+            'b64'
+        );
+
+        if (file_exists($encodedMediaPath)) {
+            return \Safe\file_get_contents($encodedMediaPath);
+        }
+
+        $contents = $this->extractMediaContents($lightweightJSON);
+
+        if ($contents !== false) {
+            \Safe\file_put_contents($encodedMediaPath, $contents);
+
+            return $contents;
+        }
+
+        throw new InvalidArgumentException('Cannot extract media contents');
     }
 }

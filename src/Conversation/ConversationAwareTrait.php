@@ -6,12 +6,17 @@ namespace App\Conversation;
 use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
+use App\Media\Image;
+use App\Media\ImageProcessingException;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Domain\Publication\Repository\PublicationInterface;
+use Exception;
+use GdImage;
 use function array_key_exists;
+use function Exception;
 use function json_decode;
 
 trait ConversationAwareTrait
@@ -209,17 +214,11 @@ trait ConversationAwareTrait
         try {
             $memberProfilePicture = file_get_contents($tweet['avatar_url']);
             if ($memberProfilePicture === false) {
-                throw new \Exception('Could not fetch member profile picture');
+                throw new Exception('Could not fetch member profile picture');
             }
 
-            $memberProfilePicture = $this->convertFromJpegToWebp($memberProfilePicture);
-
-            if ($memberProfilePicture === false) {
-                throw new \Exception('Could not convert member profile picture from jpeg to webp');
-            }
-
-            $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode($memberProfilePicture);
-        } catch (\Exception) {
+            $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode(Image::fromJpegToWebp($memberProfilePicture));
+        } catch (Exception|ImageProcessingException) {
             $tweet['base64_encoded_avatar'] = $this->getDefaultAvatarDataURI();
         }
 
@@ -235,26 +234,6 @@ trait ConversationAwareTrait
         }
 
         return $fallbackText;
-    }
-
-    public function convertFromJpegToWebp(string $contents): string|false
-    {
-        try {
-            ob_start();
-
-            $contents = imagecreatefromstring($contents);
-            imagepalettetotruecolor($contents);
-            imagewebp($contents);
-
-            $webpImageContents = ob_get_contents();
-            ob_end_clean();
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return false;
-        }
-
-        return $webpImageContents;
     }
 
     /**

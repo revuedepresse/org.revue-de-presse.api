@@ -176,3 +176,5 @@ parameters:
     redis_port:                     '%env(resolve:REDIS_PORT)%'
 
     list_default:                   '%env(resolve:LIST_DEFAULT)%'
+
+    media_directory:                '%kernel.project_dir%/src/Media/Resources'

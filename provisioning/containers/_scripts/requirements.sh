@@ -266,6 +266,7 @@ EOF
         -executable \
         -readable \
         -regex '.+/var.+' \
+        -regex '.+/src/Media/Resources/.+.b64' \
         -not -path "${project_dir}"'/var/log' \
         -exec sh -c '\chmod --recursive ug+w "${1}"' shell {} \; && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
