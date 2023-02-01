@@ -6,7 +6,7 @@ use GdImage;
 
 class Image
 {
-    private const IMAGE_WIDTH = 572;
+    private const IMAGE_WIDTH = 570;
 
     /**
      * @throws \App\Media\ImageProcessingException
