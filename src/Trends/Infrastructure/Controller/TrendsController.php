@@ -115,7 +115,7 @@ class TrendsController
     {
         $includeMedia = 'includeMedia=' . intval($searchParams->includeMedia());
         $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
-    
+
         $sortedSelectedAggregates = [];
         if ($searchParams->hasParam('selectedAggregates')) {
             $sortedSelectedAggregates = $searchParams->getParams()['selectedAggregates'];
