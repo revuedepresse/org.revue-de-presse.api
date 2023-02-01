@@ -3,17 +3,14 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
+use App\Conversation\ConversationAwareTrait;
 use App\Media\Image;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
-use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
