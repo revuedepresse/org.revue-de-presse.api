@@ -151,7 +151,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         $statuses = array_map(
             function ($status) {
                 $extractedProperties = [
-                    'status' => $this->extractStatusProperties(
+                    'status' => $this->extractTweetProperties(
                         [$status],
                         false)[0]
                 ];

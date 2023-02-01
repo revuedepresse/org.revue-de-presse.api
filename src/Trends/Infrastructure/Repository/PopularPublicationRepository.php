@@ -83,6 +83,13 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             ->getSnapshot();
     }
 
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
     public function findBy(SearchParamsInterface $searchParams): array {
         try {
             $snapshot = $this->getFirebaseDatabaseSnapshot(
@@ -96,29 +103,16 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             ];
         }
 
-        $col = $snapshot->getValue();
-        if ($col === null) {
-            $col = [];
+        $highlights = $snapshot->getValue();
+        if ($highlights === null) {
+            $highlights = [];
         }
 
-        $highlights = array_reverse($col);
-        $highlights = array_map(function (array $highlight) {
-            return [
-                'original_document' => $highlight['json'],
-                'id' => $highlight['id'],
-                'publicationDateTime' => $highlight['publishedAt'],
-                'screen_name' => $highlight['username'],
-                'last_update' => $highlight['checkedAt'],
-                'total_retweets' => $highlight['totalRetweets'],
-                'total_favorites' => $highlight['totalFavorites'],
-            ];
-        }, $highlights);
-
-        $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
+        $tweets = $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights));
 
         return [
             'aggregates' => [],
-            'statuses' => $statuses,
+            'statuses' => $tweets,
         ];
     }
 }

@@ -174,6 +174,18 @@
     "incenteev/composer-parameter-handler": {
         "version": "2.1.x-dev"
     },
+    "jolicode/jolitypo": {
+        "version": "1.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "e6b3307304d3829993635408736601e5a1d25f72"
+        },
+        "files": [
+            "config/packages/joli_typo.yaml"
+        ]
+    },
     "kreait/firebase-bundle": {
         "version": "4.0.0"
     },

@@ -3,19 +3,20 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
+use App\Conversation\ConversationAwareTrait;
+use App\Media\Image;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
-use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
+use JoliTypo\Fixer;
+use LitEmoji\LitEmoji;
+use Safe\Exceptions\FilesystemException;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
@@ -25,7 +26,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
-    public string $adminRouteName;
+    public string $mediaDirectory;
 
     private const TABLE_ALIAS = 'h';
 
@@ -147,96 +148,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     }
 
     /**
-     * @param SearchParams $searchParams
-     * @return bool
-     */
-    private function accessingAdministrativeRoute(SearchParams $searchParams): bool
-    {
-        return $searchParams->paramIs('routeName', $this->adminRouteName);
-    }
-
-    /**
-     * @param SearchParams $searchParams
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function selectDistinctAggregates(SearchParams $searchParams): array
-    {
-        $aggregateRestriction = 'AND a.name = ? ';
-        $groupBy = 'GROUP BY h.member_id';
-
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $aggregateRestriction = 'AND a.name != ? ';
-            $groupBy = 'GROUP BY h.aggregate_id';
-        }
-
-        $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
-        $clauseAboutRetweets = '';
-        if ($excludeRetweets) {
-            $clauseAboutRetweets = 'AND h.is_retweet = 0';
-        }
-
-        $queryDistinctAggregates = <<< QUERY
-                SELECT
-                ust_name as memberFullName,
-                usr_twitter_username as memberName,
-                usr_twitter_id as twitterMemberId,
-                usr_id as memberId,
-                count(h.id) totalHighlights
-                FROM highlight h,
-                publishers_list a,
-                weaving_status s,
-                weaving_user m
-                WHERE h.member_id = m.usr_id
-                AND a.id = h.aggregate_id
-                $aggregateRestriction
-                AND h.status_id = s.ust_id
-                AND DATE(publication_date_time) >= ?
-                AND DATE(publication_date_time) <= ?
-                AND DATE(COALESCE(retweeted_status_publication_date, ?)) >= ?
-                AND DATE(COALESCE(retweeted_status_publication_date, ?)) <= ?
-                $clauseAboutRetweets
-                $groupBy
-                ORDER BY totalHighlights
-QUERY;
-
-        /** @var Connection $connection */
-        $connection = $this->getEntityManager()->getConnection();
-
-        try {
-            $statement = $connection->executeQuery(
-                $queryDistinctAggregates,
-                [
-                    $this->list,
-                    $searchParams->getParams()['startDate'],
-                    $searchParams->getParams()['endDate'],
-                    $searchParams->getParams()['startDate'],
-                    $searchParams->getParams()['startDate'],
-                    $searchParams->getParams()['endDate'],
-                    $searchParams->getParams()['endDate'],
-                ],
-                [
-                    \Pdo::PARAM_STR,
-                    Types::DATETIME_MUTABLE,
-                    Types::DATETIME_MUTABLE,
-                    Types::DATETIME_MUTABLE,
-                    Types::DATETIME_MUTABLE,
-                    Types::DATETIME_MUTABLE,
-                    Types::DATETIME_MUTABLE,
-                ]
-            );
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            return [];
-        }
-
-        $aggregates = $statement->fetchAllAssociative();
-
-        return $aggregates;
-    }
-
-    /**
      * @param QueryBuilder $queryBuilder
      * @param SearchParams $searchParams
      * @return HighlightRepository
@@ -328,67 +239,252 @@ QUERY;
             $searchParams->getParams()['endDate']->format(self::SEARCH_PERIOD_DATE_FORMAT);
     }
 
-    public function mapStatuses(SearchParamsInterface $searchParams, $results): array
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
+    public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
-        return array_map(
-            function ($status) use ($searchParams) {
-                $statusKey = 'status';
-                $totalFavoritesKey = 'total_favorites';
-                $totalRetweetsKey = 'total_retweets';
-                $favoriteCountKey = 'favorite_count';
-                $originalDocumentKey = 'original_document';
+        return array_filter(array_map(
+            function ($tweet) use ($searchParams) {
+                $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($searchParams, $tweet['json']);
 
-                $extractedProperties = [
-                    $statusKey => $this->extractStatusProperties(
-                        [$status],
-                        false)[0]
+                if (!array_key_exists('id', $tweet)) {
+                    return false;
+                }
+
+                $tweetDocument = [
+                    'id' => $tweet['id'],
+                    'lastUpdate' => $tweet['checkedAt'],
+                    'publicationDateTime' => $tweet['publishedAt'],
+                    'screen_name' => $tweet['username'],
+                    'total_retweets' => $tweet['totalRetweets'],
+                    'total_favorites' => $tweet['totalFavorites'],
+                    'original_document' => json_encode($lightweightJSON),
                 ];
 
-                $decodedDocument = json_decode($status[$originalDocumentKey], true);
-                $decodedDocument['retweets_count'] = (int) $status[$totalRetweetsKey];
-                $decodedDocument[$favoriteCountKey] = (int) $status[$totalFavoritesKey];
-
-                $extractedProperties['status']['retweet_count'] = (int) $status[$totalRetweetsKey];
-                $extractedProperties['status']['favorite_count'] = (int) $status[$totalFavoritesKey];
-                $extractedProperties['status'][$originalDocumentKey] = json_encode($decodedDocument);
-
-                $status['lastUpdate'] = $status['last_update'];
-
-                $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties[$statusKey][$favoriteCountKey] === 0) {
-                    $extractedProperties[$statusKey][$favoriteCountKey] = $decodedDocument['retweeted_status'][$favoriteCountKey];
-                }
-
-                if (
-                    !isset($extractedProperties['status']['base64_encoded_media']) &&
-                    isset($decodedDocument['extended_entities']['media'][0]['media_url'])
-                ) {
-                    $smallMediaUrl = $decodedDocument['extended_entities']['media'][0]['media_url'].':small';
-
-                    try {
-                        $contents = file_get_contents($smallMediaUrl);
-                    } catch (\Exception) {
-                        $contents = false;
-                    }
-
-                    if ($contents !== false) {
-                        $extractedProperties['status']['base64_encoded_media'] = 'data:image/jpeg;base64,'.base64_encode($contents);
-                    }
-                }
-
-                unset(
-                    $status[$totalRetweetsKey],
-                    $status[$totalFavoritesKey],
-                    $status[$originalDocumentKey],
-                    $status['screen_name'],
-                    $status['author_avatar'],
-                    $status['status_id'],
-                    $status['last_update']
+                $tweetPropertiesToOverride = $this->extractTweetPropertiesToOverride(
+                    $searchParams,
+                    $tweetDocument,
+                    $lightweightJSON
                 );
 
-                return array_merge($status, $extractedProperties);
+                unset(
+                    $tweetDocument['original_document'],
+                    $tweetDocument['total_favorites'],
+                    $tweetDocument['total_retweets'],
+                    $tweetDocument['author_avatar'],
+                    $tweetDocument['screen_name'],
+                    $tweetDocument['status_id']
+                );
+
+                return array_merge($tweetDocument, $tweetPropertiesToOverride);
             },
-            $results
+            $tweets
+        ));
+    }
+
+    public function extractMemberFullName(mixed $decodedDocument): string
+    {
+        $fullMemberName = '';
+        if (isset($decodedDocument['user']['name'])) {
+            $fullMemberName = $decodedDocument['user']['name'];
+        }
+
+        return $fullMemberName;
+    }
+
+    public function extractEntitiesUrls(mixed $decodedDocument): array
+    {
+        $entitiesUrls = [];
+        if (isset($decodedDocument['entities']['urls'])) {
+            $entitiesUrls = $decodedDocument['entities']['urls'];
+        }
+
+        return $entitiesUrls;
+    }
+
+    public function extractMediaContents(array $lightweightJSON): string|false
+    {
+        if ($this->guardAgainstNonExistingMedia($lightweightJSON)) {
+            return false;
+        }
+
+        $smallMediaUrl = $lightweightJSON['extended_entities']['media'][0]['media_url'] . ':large';
+
+        try {
+            $jpegImageContents = file_get_contents($smallMediaUrl);
+            $webpImageContents = Image::fromJpegToResizedWebp(
+                $jpegImageContents,
+                $lightweightJSON['extended_entities']['media'][0]['sizes']['large']['w'],
+                $lightweightJSON['extended_entities']['media'][0]['sizes']['large']['h']
+            );
+
+            return 'data:image/webp;base64,' . base64_encode($webpImageContents);
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    public function stripUpstreamTweetDocumentFromExtraProperties(SearchParamsInterface $searchParams, string $json): array
+    {
+        $upstreamDocument = json_decode($json, associative: true);
+
+        if (array_key_exists('text', $upstreamDocument)) {
+            $text = $upstreamDocument['text'];
+            $textIndex = 'text';
+        } else {
+            $text = $upstreamDocument['full_text'];
+            $textIndex = 'full_text';
+        }
+
+        $lightweightJSON = [
+            'created_at' => $upstreamDocument['created_at'],
+            'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
+            'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
+            $textIndex    => $this->processText($text),
+            'id_str'     => $upstreamDocument['id_str']
+        ];
+
+        if (isset($upstreamDocument['user']['profile_image_url_https'])) {
+            $lightweightJSON['user']['profile_image_url_https'] = $upstreamDocument['user']['profile_image_url_https'];
+        }
+
+        if ($searchParams->includeMedia()) {
+            if (isset($upstreamDocument['extended_entities']['media'][0]['media_url'])) {
+                $lightweightJSON['extended_entities'] = [
+                    'media' => [
+                        [
+                            'media_url' => $upstreamDocument['extended_entities']['media'][0]['media_url'],
+                            'sizes' => $upstreamDocument['extended_entities']['media'][0]['sizes']
+                        ]
+                    ]
+                ];
+            }
+
+            if (isset($upstreamDocument['entities']['media'])) {
+                $lightweightJSON['entities'] = [
+                    'media' => $upstreamDocument['entities']['media']
+                ];
+            }
+        }
+
+        return $lightweightJSON;
+    }
+
+    /**
+     * @throws \App\Conversation\Exception\InvalidStatusException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \JsonException
+     */
+    private function extractTweetPropertiesToOverride(
+        SearchParamsInterface $searchParams,
+        array                 $tweetAsJSON,
+        array                 $lightweightJSON
+    ): array
+    {
+        $favoriteCountIndex = 'favorite_count';
+        $originalDocumentIndex = 'original_document';
+        $retweetCountIndex = 'retweet_count';
+        $totalFavoritesIndex = 'total_favorites';
+        $totalRetweetsIndex = 'total_retweets';
+        $tweetIndex = 'status';
+
+        $properties = [$tweetIndex => $this->extractTweetProperties([$tweetAsJSON])[0]];
+
+        $lightweightJSON[$retweetCountIndex] = (int)$tweetAsJSON[$totalRetweetsIndex];
+        $lightweightJSON[$favoriteCountIndex] = (int)$tweetAsJSON[$totalFavoritesIndex];
+
+        $properties[$tweetIndex][$retweetCountIndex] = (int)$tweetAsJSON[$totalRetweetsIndex];
+        $properties[$tweetIndex][$favoriteCountIndex] = (int)$tweetAsJSON[$totalFavoritesIndex];
+        $properties[$tweetIndex][$originalDocumentIndex] = json_encode($lightweightJSON);
+
+        $includeRetweets = $searchParams->getParams()['includeRetweets'];
+        if ($includeRetweets && $properties[$tweetIndex][$favoriteCountIndex] === 0) {
+            $properties[$tweetIndex][$favoriteCountIndex] = $lightweightJSON['retweeted_status'][$favoriteCountIndex];
+        }
+
+        if (!$searchParams->includeMedia()) {
+            return $properties;
+        }
+
+        if ($this->guardAgainstNonExistingMedia($lightweightJSON)) {
+            return $properties;
+        }
+
+        if (isset($properties[$tweetIndex]['base64_encoded_media'])) {
+            return $properties;
+        }
+
+        try {
+            $properties[$tweetIndex]['base64_encoded_media'] = $this->getExistingMediaOrFetchIt($lightweightJSON);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
+        return $properties;
+    }
+
+    public function getTypographyFixer(): Fixer
+    {
+        $fixer = new Fixer([
+            'Ellipsis',
+            'Dimension',
+            'Unit',
+            'Dash',
+            'SmartQuotes',
+            'FrenchNoBreakSpace',
+            'NoSpaceBeforeComma',
+            'CurlyQuote',
+            'Hyphen',
+            'Trademark'
+        ]);
+        $fixer->setLocale('fr_FR');
+
+        return $fixer;
+    }
+
+    public function processText(mixed $text): string
+    {
+        $text = LitEmoji::encodeUnicode($text);
+
+        return $this->getTypographyFixer()->fixString($text);
+    }
+
+    public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
+    {
+        return !isset($lightweightJSON['extended_entities']['media'][0]['media_url']);
+    }
+
+    /**
+     * @throws \Safe\Exceptions\FilesystemException
+     */
+    public function getExistingMediaOrFetchIt(array $lightweightJSON): string
+    {
+        $encodedMediaPath = sprintf(
+            '%s/%s.%s',
+            $this->mediaDirectory,
+            $lightweightJSON['id_str'],
+            'b64'
         );
+
+        if (file_exists($encodedMediaPath)) {
+            return \Safe\file_get_contents($encodedMediaPath);
+        }
+
+        $contents = $this->extractMediaContents($lightweightJSON);
+
+        if ($contents !== false) {
+            \Safe\file_put_contents($encodedMediaPath, $contents);
+
+            return $contents;
+        }
+
+        throw new InvalidArgumentException('Cannot extract media contents');
     }
 }

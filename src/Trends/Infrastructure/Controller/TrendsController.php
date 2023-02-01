@@ -39,29 +39,35 @@ class TrendsController
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
+    /**
+     * @throws \JsonException
+     * @throws \RedisException
+     */
     public function getHighlights(Request $request)
     {
         return $this->getCollection(
             $request,
-            counter: function (SearchParams $searchParams) use ($request) {
-                return $this->getTotalPages($searchParams, $request);
+            counter: function (SearchParams $searchParams) {
+                return $this->getTotalPages($searchParams);
             },
             finder: function (SearchParams $searchParams) {
                 return $this->getHighlightsFromSearchParams($searchParams);
             },
             params: [
-                'aggregate' => 'string',
-                'endDate' => 'datetime',
-                'includeRetweets' => 'bool',
-                'routeName' => 'string',
+                'aggregate'          => 'string',
+                'endDate'            => 'datetime',
+                'includeRetweets'    => 'bool',
+                'excludeMedia'       => 'bool',
+                'routeName'          => 'string',
                 'selectedAggregates' => 'array',
-                'startDate' => 'datetime',
-                'term' => 'string',
+                'startDate'          => 'datetime',
+                'term'               => 'string',
             ]
         );
     }
 
-    private function getTotalPages(SearchParams $searchParams, Request $request) {
+    private function getTotalPages(SearchParams $searchParams): JsonResponse|int
+    {
         $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
         $unauthorizedJsonResponse = new JsonResponse(
             'Unauthorized request',
@@ -84,6 +90,7 @@ class TrendsController
 
     /**
      * @throws \JsonException
+     * @throws \RedisException
      */
     private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -106,6 +113,7 @@ class TrendsController
 
     public function getCacheKey(string $prefix, SearchParams $searchParams): string
     {
+        $includeMedia = 'includeMedia=' . intval($searchParams->includeMedia());
         $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
 
         $sortedSelectedAggregates = [];
@@ -127,6 +135,7 @@ class TrendsController
                 $searchParams->getParams()['endDate']->format('Y-m-d H'),
                 implode(',', $sortedSelectedAggregates),
                 $includedRetweets,
+                $includeMedia,
                 $term
             ]
         );
@@ -141,6 +150,9 @@ class TrendsController
             !\array_key_exists('includeRetweets', $searchParams->getParams());
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getCollection(
         Request $request,
         callable $counter,
@@ -178,22 +190,6 @@ class TrendsController
 
         $totalPagesHeader = ['x-total-pages' => $totalPagesOrResponse];
         $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
-
-        if ($searchParams->getPageIndex() > $totalPagesOrResponse) {
-            $highlightUrl = $this->router->generate('highlight');
-            $response = $this->makeOkResponse([]);
-
-            if ($request->getPathInfo() === $highlightUrl) {
-                $response = $this->makeOkResponse([
-                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
-                ]);
-            }
-
-            $response->headers->add($totalPagesHeader);
-            $response->headers->add($pageIndexHeader);
-
-            return $response;
-        }
 
         $items = $finder($searchParams);
 

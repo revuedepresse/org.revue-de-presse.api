@@ -170,9 +170,9 @@ parameters:
 
     allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 
-    admin_route_name:               '%env(resolve:ADMIN_ROUTE_NAME)%'
-
     redis_host:                     '%env(resolve:REDIS_HOST)%'
     redis_port:                     '%env(resolve:REDIS_PORT)%'
 
     list_default:                   '%env(resolve:LIST_DEFAULT)%'
+
+    media_directory:                '%kernel.project_dir%/src/Media/Resources'

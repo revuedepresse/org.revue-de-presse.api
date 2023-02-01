@@ -11,4 +11,6 @@ interface SearchParamsInterface
     public function hasParam(string $name): bool;
 
     public function paramIs(string $name, $value): bool;
+
+    public function includeMedia(): bool;
 }

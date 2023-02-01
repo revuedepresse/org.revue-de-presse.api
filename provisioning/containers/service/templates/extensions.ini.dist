@@ -10,9 +10,10 @@ html_errors                 = on
 output_buffering            = on
 short_open_tag              = off
 
-;xdebug.client_host=
-;xdebug.discover_client_host=yes
-;xdebug.log=/var/www/org.example.api/var/log/xdebug.log
-;xdebug.mode=debug
-;xdebug.start_with_request=yes
-;zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
+;xdebug.client_host          =
+;xdebug.discover_client_host = yes
+;xdebug.log                  = /var/www/org.example.api/var/log/xdebug.log
+;xdebug.mode                 = debug
+;xdebug.start_with_request   = yes
+;zend_extension              = /usr/local/lib/php/extensions/no-debug-non-zts-20220829/xdebug.so
+

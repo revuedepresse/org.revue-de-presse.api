@@ -12,51 +12,36 @@ use function array_key_exists;
 class StatusValidator
 {
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
-    public static function guardAgainstMissingOriginalDocument(
-        array $status
-    ): array {
-        if (!array_key_exists('original_document', $status)) {
+    public static function guardAgainstMissingOriginalDocument(array $tweet): array {
+        if (!array_key_exists('original_document', $tweet)) {
             InvalidStatusException::missingOriginalDocument();
         }
 
-        return $status;
+        return $tweet;
     }
 
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
-    public static function guardAgainstMissingStatusId(
-        array $status
-    ): array {
-        if (!array_key_exists('status_id', $status)) {
+    public static function guardAgainstMissingStatusId(array $tweet): array {
+        if (!array_key_exists('status_id', $tweet)) {
             InvalidStatusException::missingStatusId();
         }
 
-        return $status;
+        return $tweet;
     }
 
     /**
-     * @param array $status
-     *
-     * @return array
      * @throws InvalidStatusException
      */
-    public static function guardAgainstMissingText(
-        array $status
-    )
+    public static function guardAgainstMissingText(array $tweet)
     : array {
-        if (!array_key_exists('text', $status)) {
+        if (!array_key_exists('text', $tweet)) {
             InvalidStatusException::missingText();
         }
 
-        return $status;
+        return $tweet;
     }
 }

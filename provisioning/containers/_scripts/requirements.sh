@@ -41,11 +41,14 @@ function install_system_packages() {
         libcurl4-gnutls-dev \
         libicu-dev \
         libcurl4-gnutls-dev \
+        libfreetype-dev \
         libicu-dev \
         libjpeg-dev \
         libpng-dev \
+        libwebp-dev \
         libpq-dev \
         libsodium-dev \
+        parallel \
         procps \
         symfony-cli \
         tini \
@@ -77,13 +80,16 @@ function install_php_extensions() {
         sockets \
         sodium
 
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install gd
+
     docker-php-ext-enable opcache
 
-    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip \
-    --output-document /tmp/3.1.4.zip
+    wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
+    --output-document /tmp/3.2.0.zip
     cd /tmp || exit
-    unzip /tmp/3.1.4.zip
-    cd xdebug-3.1.4 || exit
+    unzip /tmp/3.2.0.zip
+    cd xdebug-3.2.0 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
@@ -237,6 +243,13 @@ function install_app_requirements() {
 
     fi
 
+    local change_directory_permissions
+    change_directory_permissions=<<"EOF"
+        \chown --recursive $2:$3 "$1" && \
+        \chmod --recursive og-rwx "$1" && \
+        \chmod --recursive g+rx "$1"
+EOF
+
     find "${project_dir}"  \
         -maxdepth 1 \
         -executable \
@@ -244,9 +257,7 @@ function install_app_requirements() {
         -type d \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
+        -exec sh -c "${change_directory_permissions}" shell {} "${SERVICE_OWNER_UID}" "${SERVICE_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
@@ -255,27 +266,38 @@ function install_app_requirements() {
         -executable \
         -readable \
         -regex '.+/var.+' \
+        -regex '.+/src/Media/Resources/.+.b64' \
         -not -path "${project_dir}"'/var/log' \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+w "${file_path}"' \; && \
+        -exec sh -c '\chmod --recursive ug+w "${1}"' shell {} \; && \
         printf '%s.%s' 'Successfully made var directories writable' $'\n'
+
+    local change_file_permissions
+    change_file_permissions=<<"EOF"
+        \chown $2:$3 "$1" && \
+        \chmod og-rwx "$1" && \
+        \chmod  g+r "$1"
+EOF
 
     find "${project_dir}" \
         -type f \
         -readable \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
+        -exec sh -c "${change_file_permissions}" shell {} \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
+
+    local change_binaries_permissions
+    change_binaries_permissions=<<"EOF"
+        \chown --recursive $2:$3 "$1" && \
+        \chmod --recursive ug+x "$1"
+EOF
 
     find "${project_dir}"  \
         -type f \
         -not -path "${project_dir}"'/bin' \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${SERVICE_OWNER_UID}"':'"${SERVICE_OWNER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
+        -exec sh -c "${change_binaries_permissions}" shell {} \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
 

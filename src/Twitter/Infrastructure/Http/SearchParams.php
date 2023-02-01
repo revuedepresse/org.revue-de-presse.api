@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http;
 
 use App\Trends\Domain\Repository\SearchParamsInterface;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 use function array_keys;
@@ -21,26 +22,12 @@ class SearchParams implements SearchParamsInterface
 {
     public const PARAM_AGGREGATE_IDS = 'aggregateIds';
 
-    /**
-     * @var PaginationParams
-     */
     private PaginationParams $paginationParams;
 
-    /**
-     * @var string|null
-     */
     private ?string $keyword;
 
-    /**
-     * @var array
-     */
     private array $params;
 
-    /**
-     * @param PaginationParams $paginationParams
-     * @param string|null      $keyword
-     * @param array            $filteredParams
-     */
     public function __construct(
         PaginationParams $paginationParams,
         string $keyword = null,
@@ -52,22 +39,20 @@ class SearchParams implements SearchParamsInterface
     }
 
     /**
-     * @param Request $request
-     * @param array   $params
-     *
-     * @return SearchParams
+     * @throws \Exception
      */
     public static function fromRequest(Request $request, array $params = []): self
     {
         $paginationParams = PaginationParams::fromRequest($request);
-        $keyword = $request->get('keyword', null);
+        $keyword = $request->get('keyword');
 
         $filteredParams = [];
         $paramsNames = array_keys($params);
+
         array_walk(
             $paramsNames,
             function ($name) use ($request, $params, &$filteredParams) {
-                $value = $request->get($name, null);
+                $value = $request->get($name);
 
                 if ($value === null) {
                     return;
@@ -88,7 +73,7 @@ class SearchParams implements SearchParamsInterface
                 }
 
                 if ($params[$name] === 'datetime') {
-                    $filteredParams[$name] = new \DateTime($value, new \DateTimeZone('Europe/Paris'));
+                    $filteredParams[$name] = new DateTime($value, new \DateTimeZone('Europe/Paris'));
                 }
 
                 if ($params[$name] === 'array') {
@@ -108,9 +93,6 @@ class SearchParams implements SearchParamsInterface
         );
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [
@@ -120,90 +102,52 @@ class SearchParams implements SearchParamsInterface
         ];
     }
 
-    /**
-     * @return int
-     */
     public function getPageIndex(): int
     {
         return $this->paginationParams->pageIndex;
     }
 
-    /**
-     * @return int
-     */
     public function getPageSize(): int
     {
         return $this->paginationParams->pageSize;
     }
 
-    /**
-     * @return null|string
-     */
     public function getKeyword(): ?string
     {
         return $this->keyword;
     }
 
-    /**
-     * @return bool
-     */
     public function hasKeyword(): bool
     {
         return $this->keyword !== null;
     }
 
-    /**
-     * @return int
-     */
     public function getFirstItemIndex(): int
     {
         return $this->paginationParams->getFirstItemIndex();
     }
 
-    /**
-     * @return array
-     */
     public function getParams(): array
     {
         return $this->params;
     }
 
-    /**
-     * @param $name
-     * @return bool
-     */
     public function hasParam(string $name): bool
     {
         return array_key_exists($name, $this->params);
     }
 
-    /**
-     * @param string $name
-     * @param        $value
-     * @return bool
-     */
     public function paramIs(string $name, $value): bool
     {
         return $this->hasParam($name) && $this->params[$name] === $value;
     }
 
-    /**
-     * @param string $name
-     * @param array  $options
-     *
-     * @return bool
-     */
-    public function paramBelongsTo(string $name, array $options): bool
+    public function includeMedia(): bool
     {
-        return $this->hasParam($name) &&
-            in_array($this->params[$name], array_values($options), true);
-    }
+        if ($this->hasParam('excludeMedia') && $this->getParams()['excludeMedia']) {
+            return !$this->getParams()['excludeMedia'];
+        }
 
-    /**
-     * @return string
-     */
-    public function getFingerprint()
-    {
-        return sha1(serialize($this));
+        return true;
     }
 }
