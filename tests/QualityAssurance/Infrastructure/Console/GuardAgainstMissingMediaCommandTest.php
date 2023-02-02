@@ -52,18 +52,14 @@ class GuardAgainstMissingMediaCommandTest extends KernelTestCase
 
         $expectedOutput = <<<OUTPUT
 About to get media located at https://pbs.twimg.com/profile_images/817042499134980096/LTpqSDMM_normal.jpg
-About to collect tweet having id 1002929140973162498
-Could not find tweet having id 1002929140973162498
 About to get media located at https://pbs.twimg.com/profile_images/854315131395878912/jZceoVi9_normal.jpg
-About to collect tweet having id 1002947636108955649
-Could not find tweet having id 1002947636108955649
 Processed successfully partition chunk #0
 
 OUTPUT
 ;
         self::assertEquals(
-            $this->commandTester->getDisplay(),
             $expectedOutput,
+            $this->commandTester->getDisplay(),
             sprintf(
                 'When executing "%s" command, it should render fetched media locations and tweets not found ids.',
                 $this->command::COMMAND_NAME
