@@ -24,7 +24,7 @@ class MembersBatchAwareHttpClient implements ApiEndpointsAwareInterface, Members
 
         array_walk(
             $members,
-            fn ($memberId) => $this->accessor->contactEndpoint("${endpoint}?user_id=${memberId}"),
+            fn ($memberId) => $this->accessor->contactEndpoint("{$endpoint}?user_id={$memberId}"),
         );
     }
 
