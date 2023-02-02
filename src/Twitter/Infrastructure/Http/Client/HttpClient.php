@@ -515,7 +515,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
                 ]
             ),
             [
-                self::BASE_URL."${version}/" => '',
+                self::BASE_URL."{$version}/" => '',
                 '.json' => ''
             ]
         );
