@@ -102,7 +102,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
-    public function excludeDeletedRecords(QueryBuilder $queryBuilder)
+    public function excludeDeletedRecords(QueryBuilder $queryBuilder): QueryBuilder
     {
         $queryBuilder->andWhere(self::TABLE_ALIAS . '.deletedAt IS NULL');
 
