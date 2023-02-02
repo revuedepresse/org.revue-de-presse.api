@@ -8,8 +8,8 @@ services:
     App\Membership\Infrastructure\Console\AddSingleMemberToListCommand:
         class: 'App\Membership\Infrastructure\Console\AddSingleMemberToListCommand'
         properties:
-            EditListMembers: '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
-            logger:                     '@logger'
+            editListMembers: '@App\Membership\Domain\Repository\EditListMembersInterface'
+            logger:          '@logger'
         tags:
             - { name: 'console.command' }
 
