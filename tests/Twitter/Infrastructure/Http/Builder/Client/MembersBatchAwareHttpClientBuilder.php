@@ -18,7 +18,7 @@ class MembersBatchAwareHttpClientBuilder extends TestCase
         $prophecy = $testCase->prophesize(MembersBatchAwareHttpClientInterface::class);
 
         $prophecy
-            ->addMembersToListOneByOne(
+            ->addUpTo100MembersAtOnceToList(
                 Argument::type('array'),
                 Argument::type('string')
             )
