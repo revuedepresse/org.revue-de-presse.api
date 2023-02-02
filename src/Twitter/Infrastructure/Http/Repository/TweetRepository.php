@@ -73,8 +73,8 @@ class TweetRepository extends ArchivedTweetRepository
         $tableAlias = 't';
         $queryBuilder = $this->createQueryBuilder($tableAlias);
         $queryBuilder
-            ->select("${tableAlias}.id as identifier")
-            ->andWhere("LOWER(${tableAlias}.screenName) = :screenName")
+            ->select("{$tableAlias}.id as identifier")
+            ->andWhere("LOWER({$tableAlias}.screenName) = :screenName")
             ->setMaxResults(1);
 
         if (is_array($orderBy)) {
