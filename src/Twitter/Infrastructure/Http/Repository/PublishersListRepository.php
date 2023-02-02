@@ -77,12 +77,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $this->save($aggregate);
     }
 
-    /**
-     * @param array $aggregateIds
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function bulkRemoveAggregates(array $aggregateIds)
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
@@ -101,9 +95,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     }
 
     /**
-     * @param SearchParams $searchParams
-     *
-     * @return int
      * @throws NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
@@ -111,11 +102,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
-    /**
-     * @param QueryBuilder $queryBuilder
-     *
-     * @return QueryBuilder|mixed
-     */
     public function excludeDeletedRecords(QueryBuilder $queryBuilder)
     {
         $queryBuilder->andWhere(self::TABLE_ALIAS . '.deletedAt IS NULL');
@@ -123,11 +109,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $queryBuilder;
     }
 
-    /**
-     * @param SearchParams $searchParams
-     *
-     * @return array
-     */
     public function findAggregates(SearchParams $searchParams): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
