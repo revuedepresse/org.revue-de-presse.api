@@ -5,6 +5,7 @@ namespace App\Membership\Infrastructure\Console;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\EditListMembersInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\EditListMembers;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
@@ -25,9 +26,11 @@ class AddMembersBatchToListCommand extends AbstractCommand
 {
     public const COMMAND_NAME = 'app:add-members-batch-to-list';
 
+    public const OPTION_LIST_NAME = 'list';
+
     public const OPTION_PUBLISHERS_LIST_NAME = 'list-name';
 
-    public const OPTION_LIST_NAME = 'list';
+    public const OPTION_SAVE_MEMBER_NETWORK = 'save-member-network';
 
     public const OPTION_MEMBER_LIST = 'member-ids-list';
 
@@ -43,6 +46,8 @@ class AddMembersBatchToListCommand extends AbstractCommand
 
     private MemberRepositoryInterface $memberRepository;
 
+    private NetworkRepositoryInterface $networkRepository;
+
     private PublishersListRepositoryInterface $publishersListRepository;
 
     private TweetAwareHttpClientInterface $tweetAwareHttpClient;
@@ -52,6 +57,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
         EditListMembers                      $ListSubscriptionRepository,
         MemberRepositoryInterface            $memberRepository,
         PublishersListRepositoryInterface    $publishersListRepository,
+        NetworkRepositoryInterface           $networkRepository,
         MembersBatchAwareHttpClientInterface $membersListAccessor,
         ListAwareHttpClientInterface         $ownershipAccessor,
         TweetAwareHttpClientInterface        $tweetAwareHttpClient,
@@ -59,6 +65,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
     ) {
         $this->listRepository = $ListSubscriptionRepository;
         $this->memberRepository = $memberRepository;
+        $this->networkRepository = $networkRepository;
         $this->publishersListRepository = $publishersListRepository;
 
         $this->membersBatchHttpClient = $membersListAccessor;
@@ -95,6 +102,12 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 InputOption::VALUE_REQUIRED,
                 'The name of a Twitter list'
             )
+            ->addOption(
+                self::OPTION_SAVE_MEMBER_NETWORK,
+                null,
+                InputOption::VALUE_NONE,
+                'Synchronize subscription network beforehand.'
+            )
         ;
     }
 
@@ -111,7 +124,16 @@ class AddMembersBatchToListCommand extends AbstractCommand
         }
 
         try {
-            $this->addMembersToList($this->findListToWhichMembersShouldBeAddedTo());
+            $memberUserName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
+
+            if (
+                $this->input->hasOption(self::OPTION_SAVE_MEMBER_NETWORK) &&
+                $this->input->getOption(self::OPTION_SAVE_MEMBER_NETWORK)
+            ) {
+                $this->networkRepository->saveNetwork([$memberUserName]);
+            }
+
+            $this->addMembersToList($this->findListToWhichMembersShouldBeAddedTo($memberUserName));
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
             $this->output->writeln($exception->getMessage());
@@ -122,18 +144,20 @@ class AddMembersBatchToListCommand extends AbstractCommand
         return self::SUCCESS;
     }
 
-    private function findListToWhichMembersShouldBeAddedTo(): PublishersList
+    private function findListToWhichMembersShouldBeAddedTo($memberUserName): PublishersList
     {
-        $screenName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
-            new ListsBatchSelector($screenName)
+            new ListsBatchSelector($memberUserName)
         );
 
         $publishersListName = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
 
         $filteredLists = [];
 
-        while (empty($filteredLists) && $ownershipsLists->nextPage() !== -1) {
+        while (
+            empty($filteredLists) &&
+            $ownershipsLists->nextPage() !== -1
+        ) {
             $filteredLists = array_filter(
                 $ownershipsLists->toArray(),
                 static function (PublishersList $list) use ($publishersListName) {
@@ -142,8 +166,12 @@ class AddMembersBatchToListCommand extends AbstractCommand
             );
 
             $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
-                new ListsBatchSelector($screenName, $ownershipsLists->nextPage())
+                new ListsBatchSelector($memberUserName, $ownershipsLists->nextPage())
             );
+
+            if ($ownershipsLists->isEmpty()) {
+                break;
+            }
         }
 
         if (count($filteredLists) !== 1) {

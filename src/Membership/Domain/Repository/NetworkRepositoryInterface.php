@@ -8,4 +8,6 @@ use App\Membership\Domain\Model\MemberInterface;
 interface NetworkRepositoryInterface
 {
     public function ensureMemberExists(string $memberId): ?MemberInterface;
+
+    public function saveNetwork(array $members): void;
 }
