@@ -187,11 +187,12 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function getMemberByTwitterId(
         MemberIdentity $memberIdentity,
@@ -209,6 +210,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
      * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
      * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
      * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
