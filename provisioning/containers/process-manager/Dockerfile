@@ -1,11 +1,17 @@
 FROM        php:8.1.13-cli-buster
 
-ENV         WORKER='org.example.worker'
+ARG         OWNER_UID
+ARG         OWNER_GID
+ARG         WORKER
 
-ARG         WORKER_OWNER_UID=1000
-ARG         WORKER_OWNER_GID=101
+RUN         test -n "${OWNER_UID}"
+RUN         test -n "${OWNER_GID}"
+RUN         test -n "${WORKER}"
 
-ARG         WORKER_DIR="${WORKER}"
+ENV         WORKER_OWNER_UID=${OWNER_UID}
+ENV         WORKER_OWNER_GID=${OWNER_GID}
+
+ARG         WORKER_DIR=${WORKER}
 
 HEALTHCHECK CMD /bin/bash -c "pgrep node || ( test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0 )"
 

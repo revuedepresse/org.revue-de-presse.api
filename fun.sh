@@ -44,9 +44,9 @@ function build() {
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
             --no-cache \
-            --build-arg "WORKER_DIR=${WORKER}" \
-            --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-            --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+            --build-arg "WORKER=${WORKER}" \
+            --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+            --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
             app \
             process-manager \
             worker
@@ -57,9 +57,9 @@ function build() {
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
-            --build-arg "WORKER_DIR=${WORKER}" \
-            --build-arg "WORKER_OWNER_UID=${WORKER_OWNER_UID}" \
-            --build-arg "WORKER_OWNER_GID=${WORKER_OWNER_GID}" \
+            --build-arg "WORKER=${WORKER}" \
+            --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+            --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
             app \
             process-manager \
             worker
@@ -143,13 +143,7 @@ function remove_running_container_and_image_in_debug_mode() {
     load_configuration_parameters
 
     local project_name
-
-    if [ -n "${COMPOSE_PROJECT_NAME}" ];
-    then
-        project_name="${COMPOSE_PROJECT_NAME}"
-    else
-        project_name="$(get_project_name)"
-    fi
+    project_name="${COMPOSE_PROJECT_NAME}"
 
     docker ps -a |
         \grep "${project_name}" |
@@ -159,13 +153,13 @@ function remove_running_container_and_image_in_debug_mode() {
 
     if [ -n "${DEBUG}" ];
     then
+
         docker images -a |
             \grep "${project_name}" |
             \grep "\-${container_name}\-" |
             awk '{print $3}' |
             xargs -I{} docker rmi -f {}
 
-        build
     fi
 }
 
@@ -183,6 +177,7 @@ function clean() {
     fi
 
     remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'process-manager'
     remove_running_container_and_image_in_debug_mode 'worker'
 }
 
@@ -297,20 +292,6 @@ function run_unit_tests() {
     --verbose
 }
 
-function get_project_name() {
-    local project_name
-    project_name="$(
-        docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        config --format json \
-        | jq '.name' \
-        | tr -d '"'
-    )"
-
-    echo "${project_name}"
-}
-
 function get_process_manager_shell() {
     if ! command -v jq >> /dev/null 2>&1;
     then
@@ -320,7 +301,7 @@ function get_process_manager_shell() {
     fi
 
     local project_name
-    project_name="$(get_project_name)"
+    project_name="${COMPOSE_PROJECT_NAME}"
 
     docker exec -ti "$(
         docker ps -a \
@@ -339,7 +320,7 @@ function get_worker_shell() {
     fi
 
     local project_name
-    project_name="$(get_project_name)"
+    project_name="${COMPOSE_PROJECT_NAME}"
 
     docker exec -ti "$(
         docker ps -a \

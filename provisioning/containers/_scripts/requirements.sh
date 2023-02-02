@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 function add_system_user_group() {
+    # shellcheck disable=SC2046
     if [ $(cat /etc/group | grep "${WORKER_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
             --gid "${WORKER_OWNER_GID}" \
@@ -34,7 +35,7 @@ function configure_blackfire_client() {
     | sed -E 's#__CLIENT_TOKEN__#'"${BLACKFIRE_CLIENT_TOKEN}"'#g' \
     > "${HOME}/.blackfire.ini"
 
-    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini"
+    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini" || echo 'Could not change blackfire configuration file permissions' 1>&2
 }
 
 function create_log_files_when_non_existing() {

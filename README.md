@@ -1,6 +1,6 @@
-# snapshots.fr worker
+# weaving-the-web worker
 
-![api.snapshots.fr continuous integration](https://github.com/thierrymarianne/api.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
+![api.weaving-the-web continuous integration](https://github.com/thierrymarianne/org.weaving-the-web.api/actions/workflows/continuous-integration.yml/badge.svg)
 
 Worker collecting tweets from Twitter [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
@@ -48,6 +48,12 @@ communities, organizations and projects (in lexicographic order):
 - [Docker](docker.com)
 - [Doctrine](https://www.doctrine-project.org/)
 - [GitHub](https://github.com/)
+- [JetBrains](https://jb.gg/OpenSourceSupport)
 - [PHP](https://www.php.net/)
 - [Symfony](https://symfony.com/)
 - [Ubuntu](https://ubuntu.com/)
+
+### Some of their logos
+
+[![Blackfire](../http-api/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
+[![JetBrains](../http-api/doc/images/jetbrains-logo.png?raw=true)](https://jb.gg/OpenSourceSupport)
