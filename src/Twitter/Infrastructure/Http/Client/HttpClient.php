@@ -1374,7 +1374,12 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
      */
     protected function getListMembersEndpoint(string $version = self::TWITTER_API_VERSION_1_1): string
     {
-        return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
+        return sprintf(
+          '%s%s%s',
+            $this->getApiBaseUrl($version),
+            self::API_ENDPOINT_GET_MEMBERS_LISTS,
+            '.json?count=5000&list_id={{ id }}'
+        );
     }
 
     protected function getRateLimitStatusEndpoint(string $version = self::TWITTER_API_VERSION_1_1): string
