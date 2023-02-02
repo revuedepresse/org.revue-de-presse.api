@@ -183,7 +183,13 @@ class AddMembersBatchToListCommand extends AbstractCommand
     private function addMembersToList(PublishersList $targetList): void {
         $memberIds = $this->getListOfMembers();
 
-        $this->membersBatchHttpClient->addMembersToList($memberIds, $targetList->id());
+        if (count($memberIds) <= 100) {
+            $this->membersBatchHttpClient->addUpTo100MembersAtOnceToList($memberIds, $targetList->id());
+        }
+        else {
+            $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
+        }
+
         $members = $this->ensureMembersExist($memberIds);
 
         array_walk(
