@@ -151,13 +151,13 @@ services:
             tweetAwareHttpClient:   '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
             twitterApiLogger:       '@monolog.logger.twitter_api'
         calls:
-            - [ 'setConsumerKey', [ '%app.twitter_api.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%app.twitter_api.consumer_secret%' ] ]
-            - [ 'setMemberRepository', [ '@user_manager' ] ]
+            - [ 'setConsumerKey',         [ '%app.twitter_api.consumer_key%' ] ]
+            - [ 'setConsumerSecret',      [ '%app.twitter_api.consumer_secret%' ] ]
+            - [ 'setMemberRepository',    [ '@user_manager' ] ]
             - [ 'setRateLimitCompliance', [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
-            - [ 'setTranslator', [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
-            - [ 'setAccessToken', [ '%app.twitter.oauth_token.default%' ] ]
-            - [ 'setAccessTokenSecret', [ '%app.twitter.oauth_secret.default%' ] ]
+            - [ 'setTranslator',          [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
+            - [ 'setAccessToken',         [ '%app.twitter.oauth_token.default%' ] ]
+            - [ 'setAccessTokenSecret',   [ '%app.twitter.oauth_secret.default%' ] ]
 
     App\Twitter\Domain\Http\Client\HttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\HttpClient'
 
