@@ -1820,9 +1820,8 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             ['{{ user }}' => $screenName],
             'messages'
         );
-        $this->logger->info($notFoundMemberMessage);
 
-        return $notFoundMemberMessage;
+        $this->logger->info($notFoundMemberMessage);
     }
 
     private function logProtectedMemberMessage(string $screenName)
@@ -1832,9 +1831,8 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             ['{{ user }}' => $screenName],
             'messages'
         );
-        $this->logger->info($protectedMemberMessage);
 
-        return $protectedMemberMessage;
+        $this->logger->info($protectedMemberMessage);
     }
 
     private function logSuspendedMemberMessage(string $screenName)
@@ -1844,9 +1842,8 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
             ['{{ user }}' => $screenName],
             'messages'
         );
-        $this->logger->info($suspendedMessageMessage);
 
-        return $suspendedMessageMessage;
+        $this->logger->info($suspendedMessageMessage);
     }
 
     private function maybeGetToken(string $endpoint, TokenInterface $token = null): TokenInterface
