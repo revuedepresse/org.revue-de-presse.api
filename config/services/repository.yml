@@ -142,7 +142,7 @@ services:
             - '@doctrine'
             - 'App\Membership\Infrastructure\Entity\MemberInList'
         properties:
-            accessor: '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+            httpClient:                       '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             logger:                           '@logger'
             memberListSubscriptionRepository: '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
             memberSubscriptionRepository:     '@repository.member_subscription'
@@ -233,7 +233,7 @@ services:
         arguments:
             - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             - "%env(resolve:FIREBASE_DATABASE_URI)%"
-            - '%list_default%'
+            - '%publishers_list_default%'
             - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
             - '@logger'
 

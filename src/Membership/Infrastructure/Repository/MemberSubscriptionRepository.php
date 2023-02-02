@@ -38,27 +38,27 @@ class MemberSubscriptionRepository extends ServiceEntityRepository
     /**
      * @throws \Exception
      */
-    public function cancelAllSubscriptionsFor(MemberInterface $member): bool
+    public function cancelAllSubscriptionsFor(MemberInterface $member): int
     {
         $query = <<< QUERY
-            UPDATE member_subscription ms, weaving_user u
-            SET has_been_cancelled = 1
+            UPDATE member_subscription ms
+            SET has_been_cancelled = true
+            FROM weaving_user u
             WHERE ms.member_id = :member_id
             AND ms.subscription_id = u.usr_id
-            AND u.suspended = 0
-            AND u.protected = 0
-            AND u.not_found = 0
+            AND u.suspended = false
+            AND u.protected = false
+            AND u.not_found = false
 QUERY;
 
         $connection = $this->getEntityManager()->getConnection();
-        $statement  = $connection->executeQuery(
+
+        return $connection->executeStatement(
             strtr(
                 $query,
                 [':member_id' => $member->getId()]
             )
         );
-
-        return $statement->closeCursor();
     }
 
     /**
@@ -101,23 +101,19 @@ QUERY;
     }
 
     /**
-     * @param MemberInterface $member
-     * @param array           $subscriptions
-     *
-     * @return array
      * @throws \Exception
      */
-    public function findMissingSubscriptions(MemberInterface $member, array $subscriptions)
+    public function findMissingSubscriptions(MemberInterface $member, array $subscriptions): array
     {
         $query = <<< QUERY
-            SELECT array_agg(sm.usr_twitter_id) subscription_ids
+            SELECT array_agg(sm.usr_twitter_id::bigint) subscription_ids
             FROM member_subscription s,
             weaving_user sm
             WHERE sm.usr_id = s.subscription_id
             AND member_id = :member_id1
-            AND (s.has_been_cancelled IS NULL OR s.has_been_cancelled = 0)
+            AND (s.has_been_cancelled IS NULL OR s.has_been_cancelled = false)
             AND sm.usr_twitter_id is not null
-            AND sm.usr_twitter_id in (:subscription_ids)
+            AND sm.usr_twitter_id::bigint in (:subscription_ids)
 QUERY;
 
         $connection = $this->getEntityManager()->getConnection();
@@ -137,7 +133,7 @@ QUERY;
         if (array_key_exists(0, $results) && array_key_exists('subscription_ids', $results[0])) {
             $subscriptionIds        = array_map(
                 'intval',
-                explode(',', $results[0]['subscription_ids'])
+                explode(',', (string) $results[0]['subscription_ids'])
             );
             $remainingSubscriptions = array_diff(
                 array_values($subscriptions),
@@ -148,7 +144,7 @@ QUERY;
         return $remainingSubscriptions;
     }
 
-    public function getConstraints(PublishersListIdentityInterface $publishersListIdentity = null)
+    public function getConstraints(PublishersListIdentityInterface $publishersListIdentity = null): array|string
     {
         $restrictionByAggregate = '';
 
@@ -173,9 +169,9 @@ QUERY
                 AND a.screen_name IS NOT NULL 
                 WHERE member_id = :member_id 
                 AND ms.subscription_id = u.usr_id
-                AND u.suspended = 0
-                AND u.protected = 0
-                AND u.not_found = 0
+                AND u.suspended = false
+                AND u.protected = false
+                AND u.not_found = false
 QUERY
                 ,
                 $restrictionByAggregate
@@ -190,11 +186,8 @@ QUERY
     }
 
     /**
-     * @param MemberInterface $member
-     * @param Request         $request
-     *
-     * @return array
-     * @throws \Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \JsonException
      */
     public function getMemberSubscriptions(
         MemberInterface $member,
@@ -313,7 +306,6 @@ QUERY
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      * @throws \JsonException
      */

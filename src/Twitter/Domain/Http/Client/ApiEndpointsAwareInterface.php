@@ -8,7 +8,7 @@ interface ApiEndpointsAwareInterface
 
     public const API_ENDPOINT_MEMBERS_LISTS = '/lists/members/create_all';
 
-    public const API_ENDPOINT_MEMBERS_LISTS_VERSION_2 = '/lists/:id/members';
+    public const API_ENDPOINT_MEMBERS_LISTS_VERSION_2 = '/lists/:list_id/members';
 
     public const API_ENDPOINT_REMOVE_MEMBERS_FROM_LISTS = '/lists/members/destroy_all';
 

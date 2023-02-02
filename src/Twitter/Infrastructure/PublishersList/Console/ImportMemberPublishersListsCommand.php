@@ -18,15 +18,10 @@ use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
-use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -187,11 +182,12 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function getMemberByTwitterId(
         MemberIdentity $memberIdentity,
@@ -209,8 +205,8 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
      * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
      * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
      * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \JsonException
      */
     private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
     {

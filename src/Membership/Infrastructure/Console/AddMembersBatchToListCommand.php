@@ -4,18 +4,21 @@ namespace App\Membership\Infrastructure\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\EditListMembersInterface;
-use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\EditListMembers;
-use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
+use App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
-use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
-use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
+use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use LogicException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -23,49 +26,48 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddMembersBatchToListCommand extends AbstractCommand
 {
+    use LoggerTrait;
+    use HttpClientTrait;
+    use MemberRepositoryTrait;
+    use PublishersListRepositoryTrait;
+    use TweetAwareHttpClientTrait;
+
     public const COMMAND_NAME = 'app:add-members-batch-to-list';
+
+    public const OPTION_LIST_NAME = 'list';
 
     public const OPTION_PUBLISHERS_LIST_NAME = 'list-name';
 
-    public const OPTION_LIST_NAME = 'list';
+    public const OPTION_SAVE_MEMBER_NETWORK = 'save-member-network';
 
     public const OPTION_MEMBER_LIST = 'member-ids-list';
 
     public const ARGUMENT_SCREEN_NAME = 'screen-name';
 
-    private LoggerInterface $logger;
-
     private EditListMembersInterface $listRepository;
-
-    private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
     private ListAwareHttpClientInterface $listAwareHttpClient;
 
-    private MemberRepositoryInterface $memberRepository;
+    private ListSubscriptionRepositoryInterface $listSubscriptionRepository;
 
-    private PublishersListRepositoryInterface $publishersListRepository;
+    private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
-    private TweetAwareHttpClientInterface $tweetAwareHttpClient;
+    private NetworkRepositoryInterface $networkRepository;
 
     public function __construct(
         string                               $name,
         EditListMembers                      $ListSubscriptionRepository,
-        MemberRepositoryInterface            $memberRepository,
-        PublishersListRepositoryInterface    $publishersListRepository,
+        ListSubscriptionRepositoryInterface  $listSubscriptionRepository,
+        NetworkRepositoryInterface           $networkRepository,
         MembersBatchAwareHttpClientInterface $membersListAccessor,
-        ListAwareHttpClientInterface         $ownershipAccessor,
-        TweetAwareHttpClientInterface        $tweetAwareHttpClient,
-        LoggerInterface                      $logger
+        ListAwareHttpClientInterface         $ownershipAccessor
     ) {
         $this->listRepository = $ListSubscriptionRepository;
-        $this->memberRepository = $memberRepository;
-        $this->publishersListRepository = $publishersListRepository;
+        $this->listSubscriptionRepository = $listSubscriptionRepository;
+        $this->networkRepository = $networkRepository;
 
-        $this->membersBatchHttpClient = $membersListAccessor;
         $this->listAwareHttpClient = $ownershipAccessor;
-        $this->tweetAwareHttpClient = $tweetAwareHttpClient;
-
-        $this->logger = $logger;
+        $this->membersBatchHttpClient = $membersListAccessor;
 
         parent::__construct($name);
     }
@@ -95,6 +97,12 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 InputOption::VALUE_REQUIRED,
                 'The name of a Twitter list'
             )
+            ->addOption(
+                self::OPTION_SAVE_MEMBER_NETWORK,
+                null,
+                InputOption::VALUE_NONE,
+                'Synchronize subscription network beforehand.'
+            )
         ;
     }
 
@@ -111,7 +119,16 @@ class AddMembersBatchToListCommand extends AbstractCommand
         }
 
         try {
-            $this->addMembersToList($this->findListToWhichMembersShouldBeAddedTo());
+            $memberUserName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
+
+            if (
+                $this->input->hasOption(self::OPTION_SAVE_MEMBER_NETWORK) &&
+                $this->input->getOption(self::OPTION_SAVE_MEMBER_NETWORK)
+            ) {
+                $this->networkRepository->saveNetwork([$memberUserName]);
+            }
+
+            $this->addMembersToList($this->findListToWhichMembersShouldBeAddedTo($memberUserName));
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
             $this->output->writeln($exception->getMessage());
@@ -122,18 +139,20 @@ class AddMembersBatchToListCommand extends AbstractCommand
         return self::SUCCESS;
     }
 
-    private function findListToWhichMembersShouldBeAddedTo(): PublishersList
+    private function findListToWhichMembersShouldBeAddedTo($memberUserName): PublishersList
     {
-        $screenName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
-            new ListsBatchSelector($screenName)
+            new ListsBatchSelector($memberUserName)
         );
 
         $publishersListName = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
 
         $filteredLists = [];
 
-        while (empty($filteredLists) && $ownershipsLists->nextPage() !== -1) {
+        while (
+            empty($filteredLists) &&
+            $ownershipsLists->nextPage() !== -1
+        ) {
             $filteredLists = array_filter(
                 $ownershipsLists->toArray(),
                 static function (PublishersList $list) use ($publishersListName) {
@@ -141,8 +160,20 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 }
             );
 
+            if (count($filteredLists) === 0 && $ownershipsLists->nextPage() === 0) {
+                $this->logger->error(
+                    sprintf(
+                        'Could not find list %s among {%s}.',
+                        $publishersListName,
+                        implode(', ', array_map(fn (PublishersList $p) => $p->name(), $ownershipsLists->toArray()))
+                    )
+                );
+
+                break;
+            }
+
             $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
-                new ListsBatchSelector($screenName, $ownershipsLists->nextPage())
+                new ListsBatchSelector($memberUserName, $ownershipsLists->nextPage())
             );
         }
 
@@ -153,16 +184,41 @@ class AddMembersBatchToListCommand extends AbstractCommand
         return array_pop($filteredLists);
     }
 
+    /**
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     private function addMembersToList(PublishersList $targetList): void {
         $memberIds = $this->getListOfMembers();
 
-        $this->membersBatchHttpClient->addMembersToList($memberIds, $targetList->id());
-        $members = $this->ensureMembersExist($memberIds);
+        if (count($memberIds) <= 100) {
+            $this->membersBatchHttpClient->addUpTo100MembersAtOnceToList($memberIds, $targetList->id());
 
-        array_walk(
-            $members,
-            fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-        );
+            $members = $this->ensureMembersExist($memberIds);
+
+            array_walk(
+                $members,
+                function (MemberInterface $member) use ($targetList) {
+                    $listSubscription = $this->listSubscriptionRepository
+                        ->make($member, $targetList->toArray());
+
+                    $this->listRepository->make($listSubscription, $member);
+                }
+            );
+            array_walk(
+                $members,
+                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+            );
+        } else {
+            $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
+
+            $members = $this->ensureMembersExist($memberIds);
+
+            array_walk(
+                $members,
+                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+            );
+        }
 
         $this->output->writeln('All members have been successfully added to the Twitter list.');
     }

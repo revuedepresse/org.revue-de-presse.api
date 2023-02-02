@@ -114,10 +114,10 @@ services:
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor:
         class: 'App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
         calls:
-            - [ 'setMemberIdentityProcessor',                 [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
-            - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberIdentityProcessor',                [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setMemberProfileCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository'] ]
-            - [ 'setTokenChange',                             [ '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'] ]
+            - [ 'setTokenChange',                            [ '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'] ]
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Infrastructure\Translation\Translator'
@@ -151,13 +151,13 @@ services:
             tweetAwareHttpClient:   '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
             twitterApiLogger:       '@monolog.logger.twitter_api'
         calls:
-            - [ 'setConsumerKey', [ '%app.twitter_api.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%app.twitter_api.consumer_secret%' ] ]
-            - [ 'setMemberRepository', [ '@user_manager' ] ]
+            - [ 'setConsumerKey',         [ '%app.twitter_api.consumer_key%' ] ]
+            - [ 'setConsumerSecret',      [ '%app.twitter_api.consumer_secret%' ] ]
+            - [ 'setMemberRepository',    [ '@user_manager' ] ]
             - [ 'setRateLimitCompliance', [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
-            - [ 'setTranslator', [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
-            - [ 'setAccessToken', [ '%app.twitter.oauth_token.default%' ] ]
-            - [ 'setAccessTokenSecret', [ '%app.twitter.oauth_secret.default%' ] ]
+            - [ 'setTranslator',          [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
+            - [ 'setAccessToken',         [ '%app.twitter.oauth_token.default%' ] ]
+            - [ 'setAccessTokenSecret',   [ '%app.twitter.oauth_secret.default%' ] ]
 
     App\Twitter\Domain\Http\Client\HttpClientInterface: '@App\Twitter\Infrastructure\Http\Client\HttpClient'
 

@@ -69,7 +69,7 @@ function build() {
 
 function dispatch_amqp_messages() {
     local USERNAME
-    local LIST_NAME
+    local PUBLISHERS_LIST_DEFAULT
     local WORKER
 
     load_configuration_parameters
@@ -83,10 +83,10 @@ function dispatch_amqp_messages() {
 
     fi
 
-    if [ -z "${LIST_NAME}" ];
+    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'publisher list' 'LIST_NAME' $'\n'
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'publisher list' 'PUBLISHERS_LIST_DEFAULT' $'\n'
 
         return 1
 
