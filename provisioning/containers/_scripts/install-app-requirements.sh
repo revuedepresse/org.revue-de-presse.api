@@ -89,7 +89,7 @@ EOF
         -type d \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_directory_permissions}" shell {} "${SERVICE_OWNER_UID}" "${SERVICE_OWNER_GID}" \; && \
+        -exec sh -c "${change_directory_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
@@ -115,7 +115,7 @@ EOF
         -readable \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_file_permissions}" shell {} \; && \
+        -exec sh -c "${change_file_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
 
     local change_binaries_permissions
@@ -129,7 +129,7 @@ EOF
         -not -path "${project_dir}"'/bin' \
         -not -path "${project_dir}"'/provisioning/volumes' \
         -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_binaries_permissions}" shell {} \; && \
+        -exec sh -c "${change_binaries_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
 
