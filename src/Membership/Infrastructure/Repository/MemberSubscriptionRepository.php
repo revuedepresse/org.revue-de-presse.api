@@ -38,7 +38,7 @@ class MemberSubscriptionRepository extends ServiceEntityRepository
     /**
      * @throws \Exception
      */
-    public function cancelAllSubscriptionsFor(MemberInterface $member): bool
+    public function cancelAllSubscriptionsFor(MemberInterface $member): int
     {
         $query = <<< QUERY
             UPDATE member_subscription ms
@@ -52,14 +52,13 @@ class MemberSubscriptionRepository extends ServiceEntityRepository
 QUERY;
 
         $connection = $this->getEntityManager()->getConnection();
-        $statement  = $connection->executeQuery(
+
+        return $connection->executeStatement(
             strtr(
                 $query,
                 [':member_id' => $member->getId()]
             )
         );
-
-        return $statement->closeCursor();
     }
 
     /**
@@ -102,13 +101,9 @@ QUERY;
     }
 
     /**
-     * @param MemberInterface $member
-     * @param array           $subscriptions
-     *
-     * @return array
      * @throws \Exception
      */
-    public function findMissingSubscriptions(MemberInterface $member, array $subscriptions)
+    public function findMissingSubscriptions(MemberInterface $member, array $subscriptions): array
     {
         $query = <<< QUERY
             SELECT array_agg(sm.usr_twitter_id::bigint) subscription_ids
@@ -149,7 +144,7 @@ QUERY;
         return $remainingSubscriptions;
     }
 
-    public function getConstraints(PublishersListIdentityInterface $publishersListIdentity = null)
+    public function getConstraints(PublishersListIdentityInterface $publishersListIdentity = null): array|string
     {
         $restrictionByAggregate = '';
 
@@ -191,11 +186,8 @@ QUERY
     }
 
     /**
-     * @param MemberInterface $member
-     * @param Request         $request
-     *
-     * @return array
-     * @throws \Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \JsonException
      */
     public function getMemberSubscriptions(
         MemberInterface $member,
@@ -314,7 +306,6 @@ QUERY
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      * @throws \JsonException
      */
