@@ -210,7 +210,6 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
      * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
      * @throws \Doctrine\ORM\Exception\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \JsonException
      */
     private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
     {
