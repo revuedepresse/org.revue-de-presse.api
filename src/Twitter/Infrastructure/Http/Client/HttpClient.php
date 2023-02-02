@@ -153,9 +153,9 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
         if (
             $isAddMemberToListEndpoint
-            || strpos($endpoint, 'create.json') !== false
-            || strpos($endpoint, 'destroy.json') !== false
-            || strpos($endpoint, 'destroy_all.json') !== false
+            || str_contains($endpoint, 'create.json')
+            || str_contains($endpoint, 'destroy.json')
+            || str_contains($endpoint, 'destroy_all.json')
         ) {
             $response = $this->twitterClient->post($path, $parameters, $sendJSONBodyParameters);
 
