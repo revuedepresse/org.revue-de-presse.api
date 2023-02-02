@@ -5,6 +5,7 @@ services:
         arguments:
             - !php/const 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand::COMMAND_NAME'
             - '@App\Membership\Domain\Repository\EditListMembersInterface'
+            - '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
             - '@App\Membership\Domain\Repository\NetworkRepositoryInterface'
             - '@App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface'
             - '@App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface'

@@ -6,7 +6,7 @@ interface ApiEndpointsAwareInterface
 {
     public const API_ENDPOINT_GET_MEMBERS_LISTS = '/lists/members';
 
-    public const API_ENDPOINT_MEMBERS_LISTS = '/lists/members/create_all?list_id=:list_id';
+    public const API_ENDPOINT_MEMBERS_LISTS = '/lists/members/create_all';
 
     public const API_ENDPOINT_MEMBERS_LISTS_VERSION_2 = '/lists/:list_id/members';
 

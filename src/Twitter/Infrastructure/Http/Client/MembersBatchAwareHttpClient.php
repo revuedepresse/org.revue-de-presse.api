@@ -29,8 +29,6 @@ readonly class MembersBatchAwareHttpClient implements ApiEndpointsAwareInterface
      */
     public function addUpTo100MembersAtOnceToList(array $members, string $listId)
     {
-        $endpoint = strtr($this->getAddMembersBatchToListEndpoint(), [':list_id' => $listId]);
-
         if (count($members) > 100) {
             $errorMessage = 'There are too many members to be added all at once';
             $this->logger->error($errorMessage);
@@ -39,7 +37,8 @@ readonly class MembersBatchAwareHttpClient implements ApiEndpointsAwareInterface
         }
 
         $commaSeparatedMemberIdsList = implode(',', array_chunk($members, 100, true)[0]);
-        $this->httpClient->contactEndpoint("{$endpoint}?user_id={$commaSeparatedMemberIdsList}");
+        $endpoint = $this->getAddMembersBatchToListEndpoint();
+        $this->httpClient->contactEndpoint("{$endpoint}.json?list_id={$listId}&user_id={$commaSeparatedMemberIdsList}");
     }
 
     private function getAddMembersToListEndpoint(): string

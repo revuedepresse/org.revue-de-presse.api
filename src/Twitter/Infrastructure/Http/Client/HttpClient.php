@@ -154,6 +154,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         if (
             $isAddMemberToListEndpoint
             || str_contains($endpoint, 'create.json')
+            || str_contains($endpoint, 'create_all.json')
             || str_contains($endpoint, 'destroy.json')
             || str_contains($endpoint, 'destroy_all.json')
         ) {
@@ -1659,11 +1660,10 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
     }
 
     /**
-     * @param string $endpoint
-     * @return array|object|stdClass
-     * @throws ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \Exception
      */
-    private function fetchContent(string $endpoint)
+    private function fetchContent(string $endpoint): object|array
     {
         $token = $this->preEndpointContact($endpoint);
 

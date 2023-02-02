@@ -8,10 +8,10 @@ use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\EditListMembers;
+use App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -48,6 +48,8 @@ class AddMembersBatchToListCommand extends AbstractCommand
 
     private ListAwareHttpClientInterface $listAwareHttpClient;
 
+    private ListSubscriptionRepositoryInterface $listSubscriptionRepository;
+
     private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
     private NetworkRepositoryInterface $networkRepository;
@@ -55,11 +57,13 @@ class AddMembersBatchToListCommand extends AbstractCommand
     public function __construct(
         string                               $name,
         EditListMembers                      $ListSubscriptionRepository,
+        ListSubscriptionRepositoryInterface  $listSubscriptionRepository,
         NetworkRepositoryInterface           $networkRepository,
         MembersBatchAwareHttpClientInterface $membersListAccessor,
         ListAwareHttpClientInterface         $ownershipAccessor
     ) {
         $this->listRepository = $ListSubscriptionRepository;
+        $this->listSubscriptionRepository = $listSubscriptionRepository;
         $this->networkRepository = $networkRepository;
 
         $this->listAwareHttpClient = $ownershipAccessor;
@@ -189,17 +193,28 @@ class AddMembersBatchToListCommand extends AbstractCommand
 
         if (count($memberIds) <= 100) {
             $this->membersBatchHttpClient->addUpTo100MembersAtOnceToList($memberIds, $targetList->id());
-        }
-        else {
+
+            $members = $this->ensureMembersExist($memberIds);
+
+            array_walk(
+                $members,
+                function (MemberInterface $member) use ($targetList) {
+                    $listSubscription = $this->listSubscriptionRepository
+                        ->make($member, $targetList->toArray());
+
+                    $this->listRepository->make($listSubscription, $member);
+                }
+            );
+        } else {
             $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
+
+            $members = $this->ensureMembersExist($memberIds);
+
+            array_walk(
+                $members,
+                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+            );
         }
-
-        $members = $this->ensureMembersExist($memberIds);
-
-        array_walk(
-            $members,
-            fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-        );
 
         $this->output->writeln('All members have been successfully added to the Twitter list.');
     }
