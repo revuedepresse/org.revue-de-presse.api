@@ -62,6 +62,7 @@ services:
         class: 'App\Twitter\Infrastructure\Http\Client\MembersBatchAwareHttpClient'
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+            - '@logger'
 
     App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient:
         class: 'App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient'
