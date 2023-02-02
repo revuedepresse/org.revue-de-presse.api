@@ -49,9 +49,9 @@ class MemberSubscriptionRepository extends ServiceEntityRepository implements Me
             SET has_been_cancelled = 1
             WHERE ms.member_id = :member_id
             AND ms.subscription_id = u.usr_id
-            AND u.suspended = 0
-            AND u.protected = 0
-            AND u.not_found = 0
+            AND u.suspended = false
+            AND u.protected = false
+            AND u.not_found = false
 QUERY;
 
         $connection = $this->getEntityManager()->getConnection();
