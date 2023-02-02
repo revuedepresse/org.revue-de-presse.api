@@ -1846,6 +1846,9 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         $this->logger->info($suspendedMessageMessage);
     }
 
+    /**
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     */
     private function maybeGetToken(string $endpoint, TokenInterface $token = null): TokenInterface
     {
         if ($token instanceof TokenInterface) {
