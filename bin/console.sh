@@ -91,10 +91,10 @@ function dispatch_fetch_publications_messages {
 
     fi
 
-    if [ -z "${LIST_NAME}" ] && [ -z "${MULTIPLE_LISTS}" ];
+    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'LIST_NAME' $'\n' 1>&2
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'PUBLISHERS_LIST_DEFAULT' $'\n' 1>&2
         printf 'or%s' $'\n'  1>&2
         printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'comma-separated lists' 'MULTIPLE_LISTS' $'\n' 1>&2
 
@@ -103,7 +103,7 @@ function dispatch_fetch_publications_messages {
     fi
 
     local list_option
-    list_option=' --list='"'${LIST_NAME}'"
+    list_option=' --list='"'${PUBLISHERS_LIST_DEFAULT}'"
 
     if [ -n "${MULTIPLE_LISTS}" ];
     then
