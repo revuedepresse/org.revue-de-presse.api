@@ -4,19 +4,21 @@ namespace App\Membership\Infrastructure\Console;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\EditListMembersInterface;
-use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\EditListMembers;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
-use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
-use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\HttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Http\TweetAwareHttpClientTrait;
+use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use LogicException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,6 +26,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddMembersBatchToListCommand extends AbstractCommand
 {
+    use LoggerTrait;
+    use HttpClientTrait;
+    use MemberRepositoryTrait;
+    use PublishersListRepositoryTrait;
+    use TweetAwareHttpClientTrait;
+
     public const COMMAND_NAME = 'app:add-members-batch-to-list';
 
     public const OPTION_LIST_NAME = 'list';
@@ -36,43 +44,26 @@ class AddMembersBatchToListCommand extends AbstractCommand
 
     public const ARGUMENT_SCREEN_NAME = 'screen-name';
 
-    private LoggerInterface $logger;
-
     private EditListMembersInterface $listRepository;
-
-    private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
     private ListAwareHttpClientInterface $listAwareHttpClient;
 
-    private MemberRepositoryInterface $memberRepository;
+    private MembersBatchAwareHttpClientInterface $membersBatchHttpClient;
 
     private NetworkRepositoryInterface $networkRepository;
-
-    private PublishersListRepositoryInterface $publishersListRepository;
-
-    private TweetAwareHttpClientInterface $tweetAwareHttpClient;
 
     public function __construct(
         string                               $name,
         EditListMembers                      $ListSubscriptionRepository,
-        MemberRepositoryInterface            $memberRepository,
-        PublishersListRepositoryInterface    $publishersListRepository,
         NetworkRepositoryInterface           $networkRepository,
         MembersBatchAwareHttpClientInterface $membersListAccessor,
-        ListAwareHttpClientInterface         $ownershipAccessor,
-        TweetAwareHttpClientInterface        $tweetAwareHttpClient,
-        LoggerInterface                      $logger
+        ListAwareHttpClientInterface         $ownershipAccessor
     ) {
         $this->listRepository = $ListSubscriptionRepository;
-        $this->memberRepository = $memberRepository;
         $this->networkRepository = $networkRepository;
-        $this->publishersListRepository = $publishersListRepository;
 
-        $this->membersBatchHttpClient = $membersListAccessor;
         $this->listAwareHttpClient = $ownershipAccessor;
-        $this->tweetAwareHttpClient = $tweetAwareHttpClient;
-
-        $this->logger = $logger;
+        $this->membersBatchHttpClient = $membersListAccessor;
 
         parent::__construct($name);
     }
