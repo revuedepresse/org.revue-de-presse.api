@@ -158,7 +158,16 @@ function install_app_requirements() {
     local project_dir
     project_dir='/var/www/'${WORKER}
 
-    source "${project_dir}/.env.local"
+    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'test' ];
+    then
+
+        source "${project_dir}/.env.test"
+
+    else
+
+        source "${project_dir}/.env.local"
+
+    fi
 
     if [ -z "${APP_SECRET}" ];
     then
