@@ -410,8 +410,8 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);
 
-        $sendRequest = function () use ($listMembersEndpoint, $id) {
-            return $this->contactEndpoint(strtr($listMembersEndpoint, ['{{ id }}' => $id]));
+        $sendRequest = function () use ($listMembersEndpoint, $listId) {
+            return $this->contactEndpoint(strtr($listMembersEndpoint, ['{{ id }}' => $listId]));
         };
 
         try {
