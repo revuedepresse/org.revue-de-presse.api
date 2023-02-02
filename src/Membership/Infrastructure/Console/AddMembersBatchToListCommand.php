@@ -180,6 +180,10 @@ class AddMembersBatchToListCommand extends AbstractCommand
         return array_pop($filteredLists);
     }
 
+    /**
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     private function addMembersToList(PublishersList $targetList): void {
         $memberIds = $this->getListOfMembers();
 
