@@ -1090,7 +1090,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         if (!is_numeric($identifier)) {
             throw new \InvalidArgumentException('A status identifier should be an integer');
         }
-        $showStatusEndpoint = $this->getShowStatusEndpoint($version = self::TWITTER_API_VERSION_1_1);
+        $showStatusEndpoint = $this->getShowStatusEndpoint();
 
         try {
             return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
