@@ -8,13 +8,13 @@ use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\EditListMembers;
-use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
+use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
+use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use LogicException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -165,13 +165,21 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 }
             );
 
+            if (count($filteredLists) === 0 && $ownershipsLists->nextPage() === 0) {
+                $this->logger->error(
+                    sprintf(
+                        'Could not find list %s among {%s}.',
+                        $publishersListName,
+                        implode(', ', array_map(fn (PublishersList $p) => $p->name(), $ownershipsLists->toArray()))
+                    )
+                );
+
+                break;
+            }
+
             $ownershipsLists = $this->listAwareHttpClient->getMemberOwnerships(
                 new ListsBatchSelector($memberUserName, $ownershipsLists->nextPage())
             );
-
-            if ($ownershipsLists->isEmpty()) {
-                break;
-            }
         }
 
         if (count($filteredLists) !== 1) {
