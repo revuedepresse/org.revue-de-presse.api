@@ -2,6 +2,7 @@
 /.env.local.php
 /.env.*.local
 !/\.env*\.dist
+\.idea
 .phpunit.result.cache
 .pm2-installed
 auth.json
