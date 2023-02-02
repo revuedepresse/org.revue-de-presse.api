@@ -114,10 +114,10 @@ services:
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor:
         class: 'App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
         calls:
-            - [ 'setMemberIdentityProcessor',                 [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
-            - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberIdentityProcessor',                [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setMemberProfileCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository'] ]
-            - [ 'setTokenChange',                             [ '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'] ]
+            - [ 'setTokenChange',                            [ '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'] ]
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Infrastructure\Translation\Translator'
