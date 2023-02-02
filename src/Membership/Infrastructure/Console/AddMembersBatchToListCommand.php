@@ -205,6 +205,10 @@ class AddMembersBatchToListCommand extends AbstractCommand
                     $this->listRepository->make($listSubscription, $member);
                 }
             );
+            array_walk(
+                $members,
+                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+            );
         } else {
             $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
 
