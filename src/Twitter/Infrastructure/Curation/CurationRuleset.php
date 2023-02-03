@@ -33,13 +33,23 @@ class CurationRuleset implements CurationRulesetInterface, CorrelationIdAwareInt
 
     private ?string $singleMemberFilter = null;
 
-    private ?string $queryRestriction = null;
+    private string $searchQuery = '';
 
     private string $screenName;
 
     public function __construct(CorrelationIdInterface $correlationId)
     {
         $this->correlationId = $correlationId;
+    }
+
+    public function isCurationSearchQueryBased(): bool
+    {
+        return strlen(trim($this->searchQuery)) > 0;
+    }
+
+    public function searchQuery(): string
+    {
+        return $this->searchQuery;
     }
 
     public function tweetCreationDateFilter(): ?string
@@ -148,6 +158,13 @@ class CurationRuleset implements CurationRulesetInterface, CorrelationIdAwareInt
     public function filterByMember(string $memberName): CurationRulesetInterface
     {
         $this->singleMemberFilter = $memberName;
+
+        return $this;
+    }
+
+    public function filterBySearchQuery(string $searchQuery): CurationRulesetInterface
+    {
+        $this->searchQuery = $searchQuery;
 
         return $this;
     }

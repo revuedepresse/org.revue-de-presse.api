@@ -2,8 +2,10 @@
 
 namespace App\Twitter\Domain\Http\Client;
 
-interface ApiEndpointsAwareInterface
+interface TwitterAPIEndpointsAwareInterface
 {
+    public const API_ENDPOINT_CREATE_SAVED_SEARCHES = '/saved_searches/create';
+
     public const API_ENDPOINT_GET_MEMBERS_LISTS = '/lists/members';
 
     public const API_ENDPOINT_MEMBERS_LISTS = '/lists/members/create_all';
@@ -11,6 +13,8 @@ interface ApiEndpointsAwareInterface
     public const API_ENDPOINT_MEMBERS_LISTS_VERSION_2 = '/lists/:list_id/members';
 
     public const API_ENDPOINT_REMOVE_MEMBERS_FROM_LISTS = '/lists/members/destroy_all';
+
+    public const API_ENDPOINT_SEARCH_TWEETS = '/search/tweets.json';
 
     public const API_ENDPOINT_OWNERSHIPS = '/lists/ownerships';
 

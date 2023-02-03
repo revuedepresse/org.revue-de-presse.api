@@ -12,6 +12,7 @@ use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchSearchQueryMatchingTweetInterface;
 use App\Twitter\Infrastructure\Curation\Exception\RateLimited;
 use App\Twitter\Infrastructure\Curation\Exception\SkippedCurationException;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Curator\InterruptibleCuratorTrait;
@@ -100,8 +101,8 @@ class TweetCurator implements TweetCuratorInterface
      */
     public function curateTweets(
         array $options,
-        $greedy = false,
-        $discoverPublicationsWithMaxId = true
+              $greedy = false,
+              $discoverPublicationsWithMaxId = true
     ): bool {
         $success = false;
 
@@ -139,16 +140,20 @@ class TweetCurator implements TweetCuratorInterface
         }
 
         if (
-            !$this->isTwitterApiAvailable()
-            && ($remainingItemsToCollect = $this->remainingItemsToCollect($options))
+            !$this->isTwitterApiAvailable() &&
+            $this->remainingItemsToCollect($options)
         ) {
             $this->unlockPublishersList();
 
             /**
-             * Marks the collect as successful when there is no remaining status
+             * There is no stone left unturned
+             * as soon as there is no more operation to run,
+             * that is to say as soon as there are no more tweets to be curated
+             *
+             * Marks the curation as undefined as there are remaining operations left
              * or when Twitter API is not available
              */
-            return isset($remainingItemsToCollect) ?: false;
+            return false;
         }
 
         if ($this->selectors->shouldLookUpPublicationsWithMinId(
@@ -179,14 +184,17 @@ class TweetCurator implements TweetCuratorInterface
             $options = $this->setUpAccessorWithFirstAvailableToken($token, $options);
             $success = $this->tryCollectingFurther($options, $greedy, $discoverPublicationsWithMaxId);
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
+
+            // Figuring out a member is now protected,
+            // suspended or not found is considered to be a successful operation,
+            // provided the workers would not call the API on behalf of them
+
             UnavailableResourceException::handleUnavailableMemberException(
                 $exception,
                 $this->logger,
                 $options
             );
 
-            // Figuring out a member is now protected, suspended or not found is considered to be a "success",
-            // provided the workers would not call the API on behalf of them
             $success = true;
         } catch (ConstraintViolationException $constraintViolationException) {
             $this->logger->critical(
@@ -211,11 +219,12 @@ class TweetCurator implements TweetCuratorInterface
         return $success;
     }
 
-    /**
-     * @param array $options
-     */
     private function updateLastStatusPublicationDate(array $options): void
     {
+        if (array_key_exists(FetchSearchQueryMatchingTweetInterface::SEARCH_QUERY, $options)) {
+            return;
+        }
+
         try {
             $this->tweetRepository->updateLastStatusPublicationDate(
                 $options[FetchAuthoredTweetInterface::SCREEN_NAME]
@@ -225,12 +234,6 @@ class TweetCurator implements TweetCuratorInterface
         }
     }
 
-    /**
-     * @param $lastCollectionBatchSize
-     * @param $totalCollectedStatuses
-     *
-     * @return bool
-     */
     public function collectedAllAvailableStatuses(
         $lastCollectionBatchSize,
         $totalCollectedStatuses
@@ -431,15 +434,16 @@ class TweetCurator implements TweetCuratorInterface
         return true;
     }
 
+    /**
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
     protected function remainingItemsToCollect(array $options): bool
     {
         return $this->remainingStatuses($options);
     }
 
     /**
-     * @param $options
-     *
-     * @return bool
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -623,7 +627,7 @@ class TweetCurator implements TweetCuratorInterface
         if ($publishersList->isLocked()) {
             throw new LockedPublishersListException(
                 sprintf(
-                'Won\'t process message for already locked aggregate "%s"',
+                    'Won\'t process message for already locked aggregate "%s"',
                     $publishersList->publicId()
                 )
             );

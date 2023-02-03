@@ -9,19 +9,21 @@ use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception;
-use Doctrine\ORM\Exception\ORMException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use function is_numeric;
 use function sprintf;
@@ -473,7 +475,7 @@ QUERY;
     {
         return $this->saveMemberWithAdditionalProps(
             $memberIdentity,
-            $protected = true
+            protected: true
         );
     }
 
@@ -486,8 +488,7 @@ QUERY;
     {
         return $this->saveMemberWithAdditionalProps(
             $memberIdentity,
-            $protected = false,
-            $suspended = true
+            suspended: true
         );
     }
 
@@ -640,6 +641,7 @@ QUERY;
     private function ensureMemberExists(string $screenName): MemberInterface
     {
         Assert::lazy()
+            ->tryAll()
             ->that($screenName)
             ->notEmpty()
             ->verifyNow();

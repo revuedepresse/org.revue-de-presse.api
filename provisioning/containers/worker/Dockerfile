@@ -4,12 +4,12 @@ ARG         OWNER_UID
 ARG         OWNER_GID
 ARG         WORKER
 
-RUN         test -n OWNER_UID && \
-            test -n OWNER_GID && \
-            test -n WORKER
+RUN         test -n "${OWNER_UID}"
+RUN         test -n "${OWNER_GID}"
+RUN         test -n "${WORKER}"
 
-ENV         WORKER_OWNER_UID=$OWNER_UID
-ENV         WORKER_OWNER_GID=$OWNER_GID
+ENV         WORKER_OWNER_UID=${OWNER_UID}
+ENV         WORKER_OWNER_GID=${OWNER_GID}
 
 ARG         WORKER_DIR="${WORKER}"
 

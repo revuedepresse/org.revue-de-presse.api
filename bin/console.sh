@@ -135,7 +135,10 @@ function dispatch_fetch_publications_messages {
 
     else
 
-        /bin/bash -c "$(printf "${cmd}")"
+        printf '%s%s' 'About to run command:' $'\n' 1>&2
+        printf '%s%s' '"'"${cmd}"'"' $'\n' 1>&2
+
+        /bin/bash -c "$(printf '%s' "${cmd}")"
 
     fi
 }
@@ -248,8 +251,8 @@ function purge_queues() {
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue publications -p '${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue failures -p '${rabbitmq_vhost}'"
 }
 
 function remove_exited_containers() {
@@ -436,7 +439,10 @@ function set_up_amqp_queues() {
         local project_files
         project_files=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-        /bin/bash -c "docker compose${project_files} exec -T worker php bin/console messenger:setup-transports -vvvv"
+        local project_name
+        project_name="$(get_project_name)"
+
+        /bin/bash -c "docker compose --project-name=${project_name} ${project_files} exec -T worker php bin/console messenger:setup-transports -vvvv"
     )
 }
 

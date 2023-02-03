@@ -165,7 +165,7 @@ function install_app_requirements() {
 
     else
 
-        source "${project_dir}/.env.local"
+    source "${project_dir}/.env.local"
 
     fi
 

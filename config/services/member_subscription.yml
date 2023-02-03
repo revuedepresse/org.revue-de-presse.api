@@ -1,5 +1,4 @@
 services:
-
     App\Membership\Infrastructure\Console\AddMembersBatchToListCommand:
         class: 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand'
         arguments:

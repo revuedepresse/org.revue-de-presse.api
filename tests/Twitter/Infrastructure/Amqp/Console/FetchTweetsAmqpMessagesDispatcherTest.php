@@ -6,7 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\Console;
 use App\Tests\Twitter\Infrastructure\Http\Builder\Client\HttpClientBuilder;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
-use App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand;
 use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;

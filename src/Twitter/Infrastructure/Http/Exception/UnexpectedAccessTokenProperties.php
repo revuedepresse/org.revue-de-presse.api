@@ -5,9 +5,6 @@ namespace App\Twitter\Infrastructure\Http\Exception;
 
 use Exception;
 
-/**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
 class UnexpectedAccessTokenProperties extends Exception
 {
     /**

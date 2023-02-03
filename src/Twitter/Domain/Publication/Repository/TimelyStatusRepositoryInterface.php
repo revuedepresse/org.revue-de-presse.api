@@ -9,7 +9,7 @@ use App\Twitter\Domain\Publication\TweetInterface;
 interface TimelyStatusRepositoryInterface
 {
     public function fromTweetInList(
-        TweetInterface  $status,
+        TweetInterface  $tweet,
         ?PublishersList $list = null
     );
 }

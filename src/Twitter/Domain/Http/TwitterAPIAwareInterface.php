@@ -32,8 +32,14 @@ namespace App\Twitter\Domain\Http;
  * error code 251 => Corresponds to a HTTP request to a retired URL.
  * error code 261 => Application cannot perform write actions.
  */
-interface ApiErrorCodeAwareInterface
+interface TwitterAPIAwareInterface
 {
+    public const BASE_URL = 'https://api.twitter.com/';
+
+    public const TWITTER_API_VERSION_1_1 = '1.1';
+
+    public const TWITTER_API_VERSION_2 = '2';
+
     public const ERROR_HOST_RESOLUTION = 6;
 
     public const ERROR_AUTHENTICATION = 32;

@@ -1,17 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Amqp\Console;
+namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
+use App\Twitter\Infrastructure\Amqp\Console\TwitterListAwareCommand;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
-use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchTweetsAmqpMessagesDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
+use App\Twitter\Infrastructure\Http\Entity\Token;
+use App\Twitter\Infrastructure\Http\Exception\UnexpectedAccessTokenProperties;
 use App\Twitter\Infrastructure\InputConverter\InputToCurationRuleset;
 use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,6 +31,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
     private const OPTION_INCLUDE_OWNER                  = CurationRulesetInterface::RULE_INCLUDE_OWNER;
     private const OPTION_LIST                           = CurationRulesetInterface::RULE_LIST;
     private const OPTION_LISTS                          = CurationRulesetInterface::RULE_LISTS;
+    private const OPTION_SEARCH_QUERY                   = CurationRulesetInterface::RULE_SEARCH_QUERY;
 
     private const OPTION_OAUTH_TOKEN                    = 'oauth_token';
     private const OPTION_OAUTH_SECRET                   = 'oauth_secret';
@@ -67,7 +69,13 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
                 self::OPTION_CURSOR,
                 mode: InputOption::VALUE_OPTIONAL,
                 description: 'Cursor from which ownership are to be fetched'
-            )->addOption(
+            )
+            ->addOption(
+                self::OPTION_SEARCH_QUERY,
+                mode: InputOption::VALUE_OPTIONAL,
+                description: 'Curated tweets will be paired with this search query'
+            )
+            ->addOption(
                 self::OPTION_FILTER_BY_TWEET_OWNER_USERNAME,
                 mode: InputOption::VALUE_OPTIONAL,
                 description:'Filter by Twitter member username'

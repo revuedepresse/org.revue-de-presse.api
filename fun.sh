@@ -39,30 +39,30 @@ function build() {
     if [ -n "${DEBUG}" ];
     then
 
-      docker compose \
-          --file=./provisioning/containers/docker-compose.yaml \
-          --file=./provisioning/containers/docker-compose.override.yaml \
-          build \
-          --no-cache \
-          --build-arg "WORKER=${WORKER}" \
-          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
-          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
-          app \
-          process-manager \
-          worker
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            build \
+            --no-cache \
+            --build-arg "WORKER=${WORKER}" \
+            --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+            --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
+            app \
+            process-manager \
+            worker
 
     else
 
-      docker compose \
-          --file=./provisioning/containers/docker-compose.yaml \
-          --file=./provisioning/containers/docker-compose.override.yaml \
-          build \
-          --build-arg "WORKER=${WORKER}" \
-          --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
-          --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
-          app \
-          process-manager \
-          worker
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            build \
+            --build-arg "WORKER=${WORKER}" \
+            --build-arg "OWNER_UID=${WORKER_OWNER_UID}" \
+            --build-arg "OWNER_GID=${WORKER_OWNER_GID}" \
+            app \
+            process-manager \
+            worker
 
     fi
 }
@@ -83,10 +83,11 @@ function dispatch_amqp_messages() {
 
     fi
 
-    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ];
+    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'publisher list' 'PUBLISHERS_LIST_DEFAULT' $'\n'
+        printf 'Either %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'Twitter list' 'PUBLISHERS_LIST_DEFAULT' $'\n'
+        printf 'Or %s is expected as %s ("%s" environment variable).%s' 'a comma-separated list as non-empty string' 'Twitter list collection' 'MULTIPLE_LISTS' $'\n'
 
         return 1
 
@@ -134,9 +135,9 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
-    local WORKER
     local WORKER_OWNER_UID
     local WORKER_OWNER_GID
+    local WORKER
 
     load_configuration_parameters
 
@@ -154,6 +155,17 @@ function remove_running_container_and_image_in_debug_mode() {
         \grep "\-${container_name}\-" |
         awk '{print $1}' |
         xargs -I{} docker rm -f {}
+
+    if [ -n "${DEBUG}" ];
+    then
+
+        docker images -a |
+            \grep "${project_name}" |
+            \grep "\-${container_name}\-" |
+            awk '{print $3}' |
+            xargs -I{} docker rmi -f {}
+
+    fi
 }
 
 function clean() {
@@ -170,6 +182,7 @@ function clean() {
     fi
 
     remove_running_container_and_image_in_debug_mode 'app'
+    remove_running_container_and_image_in_debug_mode 'process-manager'
     remove_running_container_and_image_in_debug_mode 'worker'
 }
 
@@ -277,7 +290,7 @@ function load_configuration_parameters() {
 function run_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 
-    if [ -z ${DEBUG} ];
+    if [ -z "${DEBUG}" ];
     then
         bin/phpunit -c ./phpunit.xml.dist \
         --process-isolation \

@@ -13,8 +13,13 @@ interface CurationRulesetInterface
     public const RULE_LIST                              = 'list';
     public const RULE_LISTS                             = 'lists';
     public const RULE_SCREEN_NAME                       = 'screen_name';
-
-    public function tweetCreationDateFilter(): ?string;
+    public const RULE_SEARCH_QUERY                      = 'search_query';
 
     public function isCurationCursorActive(): ?int;
+
+    public function isCurationSearchQueryBased(): bool;
+
+    public function searchQuery(): string;
+
+    public function tweetCreationDateFilter(): ?string;
 }

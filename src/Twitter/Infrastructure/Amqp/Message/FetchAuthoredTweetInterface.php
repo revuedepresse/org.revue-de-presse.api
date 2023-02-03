@@ -7,7 +7,7 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 
-interface FetchAuthoredTweetInterface
+interface FetchAuthoredTweetInterface extends FetchTweetInterface
 {
     public const BEFORE = 'before';
     public const TWITTER_LIST_ID = 'twitter_list_id';

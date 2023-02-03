@@ -1,7 +1,6 @@
 {
-    "name": "revuedepresse/worker",
-    "license": "GPL-3.0-or-later",
-    "description": "Worker collecting publications from online social network via Twitter API.",
+    "name": "weaving-the-web/experiments",
+    "description": "Driving experiments for fun's sake",
     "autoload": {
         "psr-4": {
             "App\\": "src/"

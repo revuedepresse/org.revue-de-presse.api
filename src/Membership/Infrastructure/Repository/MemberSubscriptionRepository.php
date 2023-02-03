@@ -277,7 +277,7 @@ QUERY;
             ON subscription.usr_id = member_subscription.subscription_id
             AND member_subscription.has_been_cancelled = true;
 QUERY
-;
+        ;
 
         $connection = $this->getEntityManager()->getConnection();
         $statement = $connection->executeQuery(
@@ -306,6 +306,7 @@ QUERY
     }
 
     /**
+     * @throws \Doctrine\DBAL\Driver\Exception
      * @throws \Doctrine\DBAL\Exception
      * @throws \JsonException
      */

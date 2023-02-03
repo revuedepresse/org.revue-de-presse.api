@@ -10,11 +10,11 @@ use App\Membership\Infrastructure\Entity\MemberInList;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Membership\Infrastructure\Repository\MemberRepository;
 use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Resource\MemberCollectionInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\EmptyErrorCodeException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -57,11 +57,13 @@ use const PHP_URL_QUERY;
 use const PHP_URL_SCHEME;
 use const PHP_URL_USER;
 
-/**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
-class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
+class HttpClient implements
+    HttpClientInterface,
+    HttpSearchParamReducerInterface,
+    TwitterAPIEndpointsAwareInterface
 {
+    use HttpSearchParamReducerTrait;
+
     private const MAX_RETRIES = 5;
 
     public string $environment = 'dev';
@@ -432,7 +434,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
     public function getTwitterErrorCodes(): array
     {
-        $reflection = new \ReflectionClass(ApiErrorCodeAwareInterface::class);
+        $reflection = new \ReflectionClass(TwitterAPIAwareInterface::class);
 
         return $reflection->getConstants();
     }
@@ -478,25 +480,6 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
                     '{{ reverse }}'    => true,
                 ]
             )
-        );
-    }
-
-    private function reduceParameters(string $endpoint, array $parameters)
-    {
-        $queryParams = explode(
-            '&',
-            parse_url($endpoint, PHP_URL_QUERY)
-        );
-
-        return array_reduce(
-            $queryParams,
-            function ($parameters, $queryParam) {
-                $keyValue                 = explode('=', $queryParam);
-                $parameters[$keyValue[0]] = $keyValue[1];
-
-                return $parameters;
-            },
-            $parameters
         );
     }
 
@@ -572,7 +555,7 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
                 while ($apiLimitReached && $unfrozenToken) {
                     try {
                         $apiLimitReached = !$this->isApiAvailableForToken($endpoint, $token);
-                    } catch (ApiAccessRateLimitException $e) {
+                    } catch (\Throwable $e) {
                         $this->logger->info($e->getMessage(), ['exception' => $e]);
                     }
 
@@ -691,11 +674,11 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
         callable $fetchContent
     ) {
         if (
-        !\in_array(
-            $exception->getCode(),
-            [self::ERROR_EXCEEDED_RATE_LIMIT, self::ERROR_OVER_CAPACITY],
-            true
-        )
+            !\in_array(
+                $exception->getCode(),
+                [self::ERROR_EXCEEDED_RATE_LIMIT, self::ERROR_OVER_CAPACITY],
+                true
+            )
         ) {
             $this->throwException($exception);
         }
@@ -1316,6 +1299,10 @@ class HttpClient implements HttpClientInterface, ApiEndpointsAwareInterface
 
     /**
      * @see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
+     *
+     * @param string $version
+     *
+     * @return string
      */
     protected function getCreateFriendshipsEndpoint(string $version = self::TWITTER_API_VERSION_1_1): string
     {

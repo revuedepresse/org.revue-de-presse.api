@@ -27,7 +27,5 @@ framework:
 
         routing:
             # Route your messages to the transports
-            'App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet': tweets
-
-    router:
-        enabled:    false
+            'App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet':             tweets
+            'App\Twitter\Infrastructure\Amqp\Message\FetchSearchQueryMatchingTweet':  tweets

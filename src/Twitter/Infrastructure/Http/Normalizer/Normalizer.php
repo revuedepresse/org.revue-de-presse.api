@@ -45,31 +45,24 @@ class Normalizer implements NormalizerInterface
         return TaggedTweet::fromLegacyProps($normalizedProperties);
     }
 
-    /**
-     * @param array           $statuses
-     * @param callable        $setter
-     * @param LoggerInterface $logger
-     *
-     * @return CollectionInterface
-     */
     public static function normalizeAll(
-        array $statuses,
+        array $tweets,
         callable $setter,
         LoggerInterface $logger
     ): CollectionInterface {
         $normalizedStatusCollection = new Collection();
 
-        foreach ($statuses as $status) {
+        foreach ($tweets as $tweet) {
             if (
-                !property_exists($status, 'text')
-                && !property_exists($status, 'full_text')
+                !property_exists($tweet, 'text') &&
+                !property_exists($tweet, 'full_text')
             ) {
                 continue;
             }
 
             try {
                 $normalizedStatusCollection[] = self::normalizeStatusProperties(
-                    $status,
+                    $tweet,
                     $setter
                 );
             } catch (\Exception $exception) {

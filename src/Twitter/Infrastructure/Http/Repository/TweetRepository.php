@@ -5,30 +5,25 @@ namespace App\Twitter\Infrastructure\Http\Repository;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
-use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
 use function array_key_exists;
 use function max;
 use function min;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- *
  * @method Tweet|null find($id, $lockMode = null, $lockVersion = null)
  * @method Tweet|null findOneBy(array $criteria, array $orderBy = null)
  * @method Tweet[]    findAll()
@@ -402,8 +397,6 @@ QUERY;
     }
 
     /**
-     * @param string $screenName
-     * @return int
      * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -422,5 +415,17 @@ QUERY;
         $this->memberRepository->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
 
         return $totalStatuses;
+    }
+
+    public function persistTweetsCollection(
+        array $tweets,
+        AccessToken $identifier,
+        PublishersList $twitterList = null
+    ): CollectionInterface {
+        return $this->archivedTweetRepository->persistTweetsCollection(
+            $tweets,
+            $identifier,
+            $twitterList
+        );
     }
 }

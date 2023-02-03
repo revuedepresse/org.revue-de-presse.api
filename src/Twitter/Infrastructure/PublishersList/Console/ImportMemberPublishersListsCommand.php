@@ -18,10 +18,15 @@ use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\PublishersList;
 use App\Twitter\Infrastructure\Http\Selector\ListsBatchSelector;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -88,17 +93,21 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         }
     }
 
-    /**
-     * @param \App\Twitter\Infrastructure\Http\Resource\PublishersList $list
-     * @return bool
-     */
-    function isListFilteredOut(PublishersList $list): bool
+    function isListPreservedAfterApplyingFilteringByListName(PublishersList $list): bool
     {
         if (!$this->isSingleListFilterActive()) {
             return false;
         }
 
-        return $list->name() !== $this->singleListFilter;
+        $isListPreserved = $list->name() === $this->singleListFilter;
+
+        if ($isListPreserved) {
+            $this->logger->info('filtering by list name', ['list_name' => $list->name()]);
+
+            $isListPreserved = true;
+        }
+
+        return $isListPreserved;
     }
 
     /**
@@ -112,18 +121,18 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
-             ->addArgument(
-                 self::ARGUMENT_SCREEN_NAME,
-                 InputArgument::REQUIRED,
-                 'The screen name of a Twitter member'
-             )
-             ->addOption(
-                 self::OPTION_SINGLE_LIST_FILTER,
-                 'r',
-                 InputOption::VALUE_OPTIONAL,
-                 'Restrict list import to single list'
-             )
-             ->setDescription('Import Twitter list');
+            ->addArgument(
+                self::ARGUMENT_SCREEN_NAME,
+                InputArgument::REQUIRED,
+                'The screen name of a Twitter member'
+            )
+            ->addOption(
+                self::OPTION_SINGLE_LIST_FILTER,
+                'r',
+                InputOption::VALUE_OPTIONAL,
+                'Restrict list import to single list'
+            )
+            ->setDescription('Import Twitter list');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -212,7 +221,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     {
         $listsBatch = array_filter(
             $listsBatch,
-            fn ($list) => !$this->isListFilteredOut($list)
+            fn ($list) => $this->isListPreservedAfterApplyingFilteringByListName($list)
         );
 
         array_walk(
@@ -248,9 +257,17 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                     ->getResult();
 
                 $membersIndexedByTwitterId = [];
+
                 array_walk(
                     $members,
                     function (MemberInterface $member) use (&$membersIndexedByTwitterId) {
+                        $this->output->writeln(
+                            sprintf(
+                                'Adding member to indexed members list (member has handle: "%s")',
+                                $member->twitterScreenName()
+                            )
+                        );
+
                         $membersIndexedByTwitterId[$member->twitterId()] = $member;
                     }
                 );

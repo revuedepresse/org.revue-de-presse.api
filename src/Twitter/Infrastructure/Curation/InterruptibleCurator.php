@@ -1,11 +1,11 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Exception\MembershipException;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Search\Infrastructure\DependencyInjection\SearchQueryAwareHttpClientTrait;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\InterruptibleCuratorInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
@@ -25,14 +25,22 @@ use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceL
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
+use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
+use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
+use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\Whisperer;
 use DateTime;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use ReflectionException;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -46,18 +54,17 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     use MemberRepositoryTrait;
     use PublishersListRepositoryTrait;
     use RateLimitComplianceTrait;
+    use SearchQueryAwareHttpClientTrait;
     use TweetPersistenceLayerTrait;
     use TweetRepositoryTrait;
     use TokenRepositoryTrait;
     use TweetAwareHttpClientTrait;
     use WhispererRepositoryTrait;
 
+    const OPERATION_SKIPPED_AS_EXPECTED = 'Skipped pretty naturally ^_^';
     private CurationSelectorsInterface $selectors;
 
     /**
-     * @param CurationSelectorsInterface $selectors
-     * @param array                      $options
-     *
      * @throws ProtectedAccountException
      * @throws RateLimited
      * @throws SkippedCurationException
@@ -70,9 +77,15 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     ): void {
         $this->selectors = $selectors;
 
+        if ($this->selectors->isSearchQuery()) {
+            $this->searchQueryAwareHttpClient->searchTweets($this->selectors->searchQuery());
+
+            throw new SkippedCurationException(self::OPERATION_SKIPPED_AS_EXPECTED);
+        }
+
         try {
             if ($this->shouldSkipCuration($options)) {
-                throw new SkippedCurationException('Skipped pretty naturally ^_^');
+                throw new SkippedCurationException(self::OPERATION_SKIPPED_AS_EXPECTED);
             }
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
             UnavailableResourceException::handleUnavailableMemberException(

@@ -55,11 +55,6 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     }
 
     /**
-     * @param PublishersList           $list
-     * @param TokenInterface           $token
-     * @param CurationRulesetInterface $ruleset
-     *
-     * @return int
      * @throws Exception
      */
     public function processPublishersList(

@@ -6,7 +6,6 @@ namespace App\Tests\Twitter\Infrastructure\Http\Builder\Client;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
-use App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -19,7 +18,6 @@ use PDOException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Prophecy\Prophet;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use Throwable;
@@ -201,7 +199,8 @@ class HttpClientBuilder
 
     public static function willAllowPublishersListToBeImportedForMemberHavingScreenName(
         MemberRepositoryInterface $memberRepository,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        string $screenName
     )
     {
         $builder = new self();
@@ -210,7 +209,7 @@ class HttpClientBuilder
             $builder->makeOwnershipCollection(),
         );
 
-        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, ImportMemberPublishersListsCommandTest::SCREEN_NAME);
+        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, $screenName);
         $builder->willGetMembersInList(
             self::LIST_ID,
             MemberCollection::fromArray([

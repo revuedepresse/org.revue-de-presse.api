@@ -31,7 +31,6 @@ use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseExcept
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -48,14 +47,12 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use PersistenceLayerTrait;
     use LoggerTrait;
-    use TweetRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
+    use TweetRepositoryTrait;
 
     public ArchivedTweetRepository $archivedTweetRepository;
-
     public EntityManagerInterface $entityManager;
-
     public NotFoundStatusRepository $notFoundTweetRepository;
 
     public function declareStatusNotFoundByIdentifier(string $identifier): void
@@ -90,11 +87,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     }
 
     /**
-     * @param string $statusId
-     * @param bool   $skipExistingStatus
-     * @param bool   $extractProperties
-     *
-     * @return TweetInterface|TaggedStatus|NullStatus|array|null
      * @throws Exception
      */
     public function refreshStatusByIdentifier(

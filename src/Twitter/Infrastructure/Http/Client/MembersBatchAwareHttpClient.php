@@ -5,11 +5,10 @@ namespace App\Twitter\Infrastructure\Http\Client;
 
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use Psr\Log\LoggerInterface;
-use stdClass;
 
-readonly class MembersBatchAwareHttpClient implements ApiEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
+readonly class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
 {
     public function __construct(private HttpClientInterface $httpClient, private LoggerInterface $logger) {
     }

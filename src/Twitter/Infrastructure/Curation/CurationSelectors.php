@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
@@ -12,6 +13,13 @@ use function array_key_exists;
 
 class CurationSelectors implements CurationSelectorsInterface
 {
+    public function curateTweetsBySearchQuery(string $searchQuery): CurationSelectorsInterface
+    {
+        $this->searchQuery = $searchQuery;
+
+        return $this;
+    }
+
     public static function fromArray(array $options): self
     {
         $selectors = new self();
@@ -30,6 +38,10 @@ class CurationSelectors implements CurationSelectorsInterface
             $selectors->selectTweetsByMemberScreenName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
         }
 
+        if (array_key_exists(SavedSearch::SEARCH_QUERY, $options) && strlen(trim($options[SavedSearch::SEARCH_QUERY])) > 0) {
+            $selectors->curateTweetsBySearchQuery($options[SavedSearch::SEARCH_QUERY]);
+        }
+
         return $selectors;
     }
 
@@ -42,6 +54,8 @@ class CurationSelectors implements CurationSelectorsInterface
     private int $maxTweetId = PHP_INT_MAX;
 
     private int $minTweetId = PHP_INT_MIN;
+
+    private string $searchQuery = '';
 
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
@@ -64,6 +78,14 @@ class CurationSelectors implements CurationSelectorsInterface
         return $this->dateBeforeWhichStatusAreCollected;
     }
 
+    public function isSearchQuery(): bool {
+        return strlen(trim($this->searchQuery)) > 0;
+    }
+
+    public function searchQuery(): string {
+        return $this->searchQuery;
+    }
+
     public function maxStatusId(): int
     {
         return $this->maxTweetId;
@@ -84,7 +106,7 @@ class CurationSelectors implements CurationSelectorsInterface
     {
         Assert::lazy()
             ->that($screenName)
-                ->notEmpty()
+            ->notEmpty()
             ->verifyNow();
 
         $this->memberSelectorByScreenName = strtolower($screenName);
