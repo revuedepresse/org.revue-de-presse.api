@@ -41,8 +41,7 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-class TweetAwareHttpClient implements
-    TweetAwareHttpClientInterface
+class TweetAwareHttpClient implements TweetAwareHttpClientInterface
 {
     use HttpClientTrait;
     use MemberProfileCollectedEventRepositoryTrait;

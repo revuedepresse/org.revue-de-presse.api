@@ -33,6 +33,11 @@ use Ramsey\Uuid\UuidInterface;
 class Publication implements PublicationInterface
 {
     /**
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     */
+    private ArrayCollection $collectPublicationEvents;
+
+    /**
      * @param array $item
      *
      * @return static

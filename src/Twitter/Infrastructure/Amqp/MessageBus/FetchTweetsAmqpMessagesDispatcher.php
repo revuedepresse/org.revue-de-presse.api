@@ -10,10 +10,10 @@ use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
-use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
@@ -48,6 +48,7 @@ class FetchTweetsAmqpMessagesDispatcher implements
     use RateLimitComplianceTrait;
     use ListBatchCollectedEventRepositoryTrait;
     use OwnershipAccessorTrait;
+    use PublishersListProcessorTrait;
     use SearchQueryProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
@@ -56,17 +57,14 @@ class FetchTweetsAmqpMessagesDispatcher implements
     private HttpClientInterface $accessor;
     private Closure $writer;
     private CurationRulesetInterface $ruleset;
-    private PublishersListProcessorInterface $publishersListProcessor;
 
     public function __construct(
         HttpClientInterface              $accessor,
-        PublishersListProcessorInterface $publishersListProcessor,
         TokenChangeInterface             $tokenChange,
         LoggerInterface                  $logger,
         TranslatorInterface              $translator
     ) {
         $this->accessor                 = $accessor;
-        $this->publishersListProcessor  = $publishersListProcessor;
         $this->tokenChange              = $tokenChange;
         $this->translator               = $translator;
         $this->logger                   = $logger;

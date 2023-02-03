@@ -165,7 +165,7 @@ class Whisperer
      */
     public function getUpdatedAt()
     {
-       return $this->updatedAt;
+        return $this->updatedAt;
     }
 
     /**

@@ -1,3 +1,6 @@
+imports:
+    - { resource: tests/quality_assurance.yaml }
+
 parameters:
 
     test.screen_name: !php/const App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME

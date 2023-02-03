@@ -37,7 +37,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     /**
      * @var HttpClientInterface
      */
-    private HttpClientInterface $accessor;
+    private HttpClientInterface $httpClient;
 
     /**
      * @var LoggerInterface
@@ -45,11 +45,11 @@ class PublishersListProcessor implements PublishersListProcessorInterface
     private LoggerInterface $logger;
 
     public function __construct(
-        HttpClientInterface $accessor,
+        HttpClientInterface $httpClient,
         TranslatorInterface $translator,
         LoggerInterface     $logger
     ) {
-        $this->accessor = $accessor;
+        $this->httpClient = $httpClient;
         $this->translator = $translator;
         $this->logger = $logger;
     }
@@ -65,7 +65,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         if ($ruleset->isCurationByListActive($list)) {
             $eventRepository = $this->publishersListCollectedEventRepository;
             $memberCollection = $eventRepository->collectedListOwnedByMember(
-                $this->accessor,
+                $this->httpClient,
                 [
                     $eventRepository::OPTION_PUBLISHERS_LIST_ID => $list->id(),
                     $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $list->name()
@@ -107,7 +107,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
                 // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
                 $this->tokenChange->replaceAccessToken(
                     $token,
-                    $this->accessor
+                    $this->httpClient
                 );
             } catch (CanNotReplaceAccessTokenException $exception) {
                 // keep going with the current token
@@ -174,7 +174,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         if ($ruleset->isListOwnerTweetsCurationActive()) {
             $eventRepository = $this->memberProfileCollectedEventRepository;
             $additionalMember = $eventRepository->collectedMemberProfile(
-                $this->accessor,
+                $this->httpClient,
                 [$eventRepository::OPTION_SCREEN_NAME => $ruleset->whoseListSubscriptionsAreCurated()]
             );
             array_unshift($members, $additionalMember);

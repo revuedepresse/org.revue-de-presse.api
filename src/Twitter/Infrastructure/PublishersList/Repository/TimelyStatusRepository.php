@@ -23,6 +23,50 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 
     use PaginationAwareTrait;
 
+    public PublishersListRepository $aggregateRepository;
+
+    /**
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function fromArray(array $properties)
+    {
+        $status = $this->tweetRepository->findOneBy(['id' => $properties['status_id']]);
+        $timelyStatus = $this->findOneBy([
+            'status' => $status
+        ]);
+
+        if ($timelyStatus instanceof TimelyStatus) {
+            return $timelyStatus->updateTimeRange();
+        }
+
+        $twitterList = $this->aggregateRepository->findOneBy([
+            'id' => $properties[FetchAuthoredTweetInterface::TWITTER_LIST_ID],
+            'screenName' => $properties['member_name']
+        ]);
+
+        if (!($twitterList instanceof PublishersList)) {
+            $twitterList = $this->aggregateRepository->findOneBy([
+                'name' => $properties['aggregate_name'],
+                'screenName' => $properties['member_name']
+            ]);
+
+            if (!($twitterList instanceof PublishersList)) {
+                $twitterList = $this->aggregateRepository->make(
+                    $properties['member_name'],
+                    $properties['aggregate_name']
+                );
+                $this->aggregateRepository->save($twitterList);
+            }
+        }
+
+        return new TimelyStatus(
+            $status,
+            $twitterList,
+            $status->getCreatedAt()
+        );
+    }
+
     public function selectStatuses()
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);

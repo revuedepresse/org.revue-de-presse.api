@@ -32,7 +32,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\EntityManagerClosed;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
+use Doctrine\ORM\Exception\ORMException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use function count;
@@ -57,7 +57,8 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
     public ManagerRegistry $registry;
 
     private LoggerInterface $appLogger;
-    private ObjectManager $entityManager;
+
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         TimelyStatusRepositoryInterface $timelyStatusRepository,
@@ -71,6 +72,9 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
         $this->appLogger              = $logger;
     }
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     */
     private function flushAndResetManagerOnUniqueConstraintViolation(
         EntityManagerInterface $entityManager
     ): void {
@@ -182,11 +186,12 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
                     $taggedTweet,
                     $twitterList
                 );
-            } catch (\Throwable $exception) {
-                $this->appLogger->error($exception->getMessage());
-                if ($exception instanceof EntityManagerClosed) {
+            } catch (ORMException $exception) {
+                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
                     $this->entityManager = $this->registry->resetManager('default');
                 }
+            } catch (Exception $exception) {
+                $this->appLogger->info($exception->getMessage());
             }
         }
 

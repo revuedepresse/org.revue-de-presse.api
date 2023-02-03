@@ -101,8 +101,8 @@ class TweetCurator implements TweetCuratorInterface
      */
     public function curateTweets(
         array $options,
-        $greedy = false,
-        $discoverPublicationsWithMaxId = true
+              $greedy = false,
+              $discoverPublicationsWithMaxId = true
     ): bool {
         $success = false;
 
@@ -194,11 +194,14 @@ class TweetCurator implements TweetCuratorInterface
                 $this->logger,
                 $options
             );
+
+            $success = true;
         } catch (ConstraintViolationException $constraintViolationException) {
             $this->logger->critical(
                 $constraintViolationException->getMessage(),
                 ['stacktrace' => $constraintViolationException->getTraceAsString()]
             );
+            $success = false;
         } catch (\Throwable $exception) {
             $this->logger->error(
                 sprintf(
@@ -208,6 +211,7 @@ class TweetCurator implements TweetCuratorInterface
                 ),
                 ['stacktrace' => $exception->getTraceAsString()]
             );
+            $success = false;
         } finally {
             $this->unlockPublishersList();
         }
@@ -331,9 +335,6 @@ class TweetCurator implements TweetCuratorInterface
         }
     }
 
-    /**
-     * @return bool
-     */
     protected function isApiAvailable(): bool
     {
         $availableApi = false;
@@ -626,7 +627,7 @@ class TweetCurator implements TweetCuratorInterface
         if ($publishersList->isLocked()) {
             throw new LockedPublishersListException(
                 sprintf(
-                'Won\'t process message for already locked aggregate "%s"',
+                    'Won\'t process message for already locked aggregate "%s"',
                     $publishersList->publicId()
                 )
             );
@@ -729,6 +730,11 @@ class TweetCurator implements TweetCuratorInterface
         );
 
         return $options;
+    }
+
+    public function collectSingleTweet(string $identifier): mixed
+    {
+        return $this->httpClient->showStatus($identifier);
     }
 
     /**

@@ -7,6 +7,8 @@ use Assert\Assert;
 
 class MemberIdentity
 {
+    public const NOT_PERSISTED_MEMBER_NUMERIC_ID = '-1';
+
     private string $screenName;
 
     private string $id;
@@ -16,10 +18,10 @@ class MemberIdentity
         Assert::lazy()
             ->tryAll()
             ->that($id)
-                ->numeric('Member id should be numeric.')
-                ->notEmpty('Member id should not be empty.')
+            ->numeric('Member id should be numeric.')
+            ->notEmpty('Member id should not be empty.')
             ->that($screenName)
-                ->notEmpty('Member screen name should not be empty.')
+            ->notEmpty('Member screen name should not be empty.')
             ->verifyNow();
 
         $this->screenName = strtolower(trim($screenName));
@@ -34,6 +36,11 @@ class MemberIdentity
     public function screenName(): string
     {
         return strtolower($this->screenName);
+    }
+
+    public function isNumeric(): bool
+    {
+        return is_numeric($this->id) && intval($this->id) > 0;
     }
 
     public function toArray(): array

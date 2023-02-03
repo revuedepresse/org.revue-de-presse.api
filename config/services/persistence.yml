@@ -3,11 +3,13 @@ services:
     App\Twitter\Infrastructure\Persistence\PersistenceLayer:
         class: 'App\Twitter\Infrastructure\Persistence\PersistenceLayer'
         arguments:
-            - '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'
-            - '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer'
             - '@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
+        calls:
+            - [ 'setMemberRepository',                 [ '@App\Membership\Domain\Repository\MemberRepositoryInterface' ] ]
+            - [ 'setTweetPersistenceLayer',            [ '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface' ] ]
+            - [ 'setTweetPublicationPersistenceLayer', [ '@App\Twitter\Infrastructure\Publication\Repository\TweetPublicationPersistenceLayer' ] ]
         public: true
 
     App\Twitter\Domain\Persistence\PersistenceLayerInterface:

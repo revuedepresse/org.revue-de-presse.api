@@ -10,60 +10,33 @@ use function uniqid;
 
 abstract class Member implements MemberInterface
 {
-    /**
-     * @var
-     */
     protected ?int $id;
 
-    /**
-     * @var string
-     */
     protected ?string $emailCanonical;
 
-    /**
-     * @var string
-     */
     protected ?string $username;
 
-    /**
-     * @var string
-     */
     protected ?string $usernameCanonical;
 
-    /**
-     * @var boolean
-     */
     protected bool $enabled;
 
-    /**
-     * @var integer
-     */
     protected int $positionInHierarchy;
 
     /**
      * The salt to use for hashing
-     *
-     * @var string
      */
     protected string $salt;
 
     /**
      * Encrypted password. Must be persisted.
-     *
-     * @var string
      */
     protected string $password;
 
     /**
      * Plain password. Used for model validation. Must not be persisted.
-     *
-     * @var string
      */
     protected ?string $plainPassword;
 
-    /**
-     * @var string
-     */
     protected string $email;
 
     /**
@@ -119,53 +92,33 @@ abstract class Member implements MemberInterface
         ] = $data;
     }
 
-    /**
-     * @return int|null
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @return string|null
-     */
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    /**
-     * @param $usernameCanonical
-     * @return $this
-     */
-    public function setUsernameCanonical($usernameCanonical): MemberInterface
+    public function setUsernameCanonical(?string $usernameCanonical): MemberInterface
     {
         $this->usernameCanonical = $usernameCanonical;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getUsernameCanonical(): string
     {
         return $this->usernameCanonical;
     }
 
-    /**
-     * @return string
-     */
     public function getEmail(): string
     {
         return $this->email;
     }
 
-    /**
-     * @param $email
-     * @return $this
-     */
     public function setEmail(string $email): MemberInterface
     {
         $this->email = $email;
@@ -173,35 +126,21 @@ abstract class Member implements MemberInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getEmailCanonical(): string
     {
         return $this->emailCanonical;
     }
 
-    /**
-     * @return bool
-     */
     public function isEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * @param MemberInterface|null $user
-     * @return bool
-     */
-    public function isSameMemberThan(MemberInterface $user = null): bool
+    public function isSameMemberThan(?MemberInterface $user = null): bool
     {
         return null !== $user && $this->getId() === $user->getId();
     }
 
-    /**
-     * @param $username
-     * @return $this
-     */
     public function setUsername(string $username): MemberInterface
     {
         $this->username = $username;
@@ -209,10 +148,6 @@ abstract class Member implements MemberInterface
         return $this;
     }
 
-    /**
-     * @param $emailCanonical
-     * @return $this
-     */
     public function setEmailCanonical(string $emailCanonical): MemberInterface
     {
         $this->emailCanonical = $emailCanonical;
@@ -237,17 +172,11 @@ abstract class Member implements MemberInterface
         $this->plainPassword = null;
     }
 
-    /**
-     * @return string
-     */
     public function getSalt(): string
     {
         return $this->salt;
     }
 
-    /**
-     * @return array
-     */
     public function getRoles(): array
     {
         return ['ROLE_USER'];

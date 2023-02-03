@@ -6,11 +6,11 @@ namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Twitter\Domain\Curation\Curator\TweetCuratorInterface;
 use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchSearchQueryMatchingTweetInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -28,7 +28,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
 
     public static function getHandledMessages(): iterable
     {
-        yield FetchTweetInterface::class => [
+        yield FetchAuthoredTweet::class => [
             'from_transport' => 'publications'
         ];
     }
@@ -41,7 +41,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function __invoke(FetchTweetInterface $message): bool
+    public function __invoke(FetchAuthoredTweetInterface $message): bool
     {
         $success = false;
 
@@ -120,7 +120,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
     /**
      * @throws Exception
      */
-    public function processMessage(FetchTweetInterface $message): array
+    public function processMessage(FetchAuthoredTweetInterface $message): array
     {
         $oauthToken = $this->extractOAuthToken($message);
 
@@ -134,7 +134,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
         $this->curator = $curator;
     }
 
-    private function extractOAuthToken(FetchTweetInterface $message): array
+    private function extractOAuthToken(FetchAuthoredTweetInterface $message): array
     {
         $token = $message->token();
 

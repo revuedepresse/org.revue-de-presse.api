@@ -51,10 +51,10 @@ class MemberProfileAccessorTest extends KernelTestCase
             ->setTwitterScreenName('mariec');
 
         $memberRepositoryBuilder = MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                                          ->willFindAMemberByTwitterId(
-                                                              '1',
-                                                              $expectedMember
-                                                          );
+            ->willFindAMemberByTwitterId(
+                '1',
+                $expectedMember
+            );
         $memberRepository        = $memberRepositoryBuilder->build();
 
         $memberProfileAccessor = new MemberProfileAwareHttpClient(
@@ -64,7 +64,7 @@ class MemberProfileAccessorTest extends KernelTestCase
         );
 
         $memberProfileAccessor->setMemberProfileCollectedEventRepository(
-           $this->eventRepository
+            $this->eventRepository
         );
 
         // Act
@@ -91,10 +91,10 @@ class MemberProfileAccessorTest extends KernelTestCase
         // Arrange
 
         $memberRepositoryBuilder = MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                                          ->willFindAMemberByTwitterId(
-                                                              '1',
-                                                              null
-                                                          );
+            ->willFindAMemberByTwitterId(
+                '1',
+                null
+            );
         $memberRepository        = $memberRepositoryBuilder->build();
 
         $memberProfileAccessor = new MemberProfileAwareHttpClient(
@@ -133,14 +133,17 @@ class MemberProfileAccessorTest extends KernelTestCase
         // Arrange
 
         $memberRepositoryBuilder = MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                                          ->willFindAMemberByTwitterId(
-                                                              '1',
-                                                              null
-                                                          )->willSaveMemberFromIdentity();
+            ->willFindAMemberByTwitterId(
+                '1',
+                null
+            )->willSaveMemberFromIdentity();
         $memberRepository        = $memberRepositoryBuilder->build();
 
         $memberProfileAccessor = new MemberProfileAwareHttpClient(
-            $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
+            $this->prophesizeApiAccessor((object) [
+                'screen_name' => 'existing_member',
+                'id_str' => '1'
+            ]),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
         );
@@ -179,11 +182,11 @@ class MemberProfileAccessorTest extends KernelTestCase
             ->setNotFound(true);
 
         $memberRepositoryBuilder = MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                                          ->willFindAMemberByTwitterId(
-                                                              '1',
-                                                              $expectedMember
-                                                          )
-                                                          ->willDeclareAMemberAsFound($expectedMember);
+            ->willFindAMemberByTwitterId(
+                '1',
+                $expectedMember
+            )
+            ->willDeclareAMemberAsFound($expectedMember);
 
         $memberRepository        = $memberRepositoryBuilder->build();
 
@@ -224,16 +227,16 @@ class MemberProfileAccessorTest extends KernelTestCase
         $accessor = $this->prophesize(HttpClientInterface::class);
 
         $accessor->getMemberProfile('mariec')
-                 ->willReturn($memberProfile);
+            ->willReturn($memberProfile);
 
         $accessor->getMemberProfile('non_existing_member')
-                 ->willThrow(new UnavailableResourceException(
-                    'Host could not be resolved',
-                        TwitterAPIAwareInterface::ERROR_HOST_RESOLUTION
-                 ));
+            ->willThrow(new UnavailableResourceException(
+                'Host could not be resolved',
+                TwitterAPIAwareInterface::ERROR_HOST_RESOLUTION
+            ));
 
-         $accessor->getMemberProfile('existing_member')
-                 ->willReturn($memberProfile);
+        $accessor->getMemberProfile('existing_member')
+            ->willReturn($memberProfile);
 
         return $accessor->reveal();
     }
@@ -244,6 +247,6 @@ class MemberProfileAccessorTest extends KernelTestCase
     private function prophesizeUnavailableResourceHandler(): UnavailableResourceHandlerInterface
     {
         return $this->prophesize(UnavailableResourceHandler::class)
-                    ->reveal();
+            ->reveal();
     }
 }

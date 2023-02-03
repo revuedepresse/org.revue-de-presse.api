@@ -14,10 +14,9 @@ use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\LoggerInterface;
 
 class NetworkRepository implements NetworkRepositoryInterface
@@ -35,12 +34,14 @@ class NetworkRepository implements NetworkRepositoryInterface
     public LoggerInterface $logger;
 
     /**
-     * @throws DBALException
+     * @param \App\Membership\Domain\Model\MemberInterface $member
+     * @param array $subscriptions
+     * @throws \Exception
      */
     private function saveMemberSubscriptions(
         MemberInterface $member,
         array $subscriptions
-    ): bool {
+    ) {
         $this->memberSubscriptionRepository->cancelAllSubscriptionsFor($member);
 
         if (count($subscriptions) > 0) {
@@ -48,7 +49,7 @@ class NetworkRepository implements NetworkRepositoryInterface
                 ->findMissingSubscriptions($member, $subscriptions);
         }
 
-        return array_walk(
+        array_walk(
             $subscriptions,
             function (string $subscription) use ($member) {
                 try {
@@ -84,11 +85,7 @@ class NetworkRepository implements NetworkRepositoryInterface
     }
 
     /**
-     * @param MemberInterface $member
-     * @param array           $subscribees
-     *
-     * @return bool
-     * @throws DBALException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function saveMemberSubscribees(
         MemberInterface $member,
@@ -135,11 +132,12 @@ class NetworkRepository implements NetworkRepositoryInterface
     }
 
     /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function ensureMemberExists(string $memberId): ?MemberInterface
     {
@@ -151,7 +149,7 @@ class NetworkRepository implements NetworkRepositoryInterface
         );
     }
 
-    public function saveNetwork(array $members)
+    public function saveNetwork(array $members): void
     {
         array_walk(
             $members,
@@ -175,10 +173,6 @@ class NetworkRepository implements NetworkRepositoryInterface
     }
 
     /**
-     * @param callable $doing
-     * @param string   $memberId
-     *
-     * @return MemberInterface|null|object
      * @throws NotFoundMemberException
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException

@@ -69,8 +69,7 @@ function build() {
 
 function dispatch_amqp_messages() {
     local USERNAME
-    local LIST_NAME
-    local MULTIPLE_LISTS
+    local PUBLISHERS_LIST_DEFAULT
     local WORKER
 
     load_configuration_parameters
@@ -84,10 +83,10 @@ function dispatch_amqp_messages() {
 
     fi
 
-    if [ -z "${LIST_NAME}" ] && [ -z "${MULTIPLE_LISTS}" ];
+    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
-        printf 'Either %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'Twitter list' 'LIST_NAME' $'\n'
+        printf 'Either %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'Twitter list' 'PUBLISHERS_LIST_DEFAULT' $'\n'
         printf 'Or %s is expected as %s ("%s" environment variable).%s' 'a comma-separated list as non-empty string' 'Twitter list collection' 'MULTIPLE_LISTS' $'\n'
 
         return 1
@@ -143,7 +142,13 @@ function remove_running_container_and_image_in_debug_mode() {
     load_configuration_parameters
 
     local project_name
-    project_name="${COMPOSE_PROJECT_NAME}"
+
+    if [ -n "${COMPOSE_PROJECT_NAME}" ];
+    then
+        project_name="${COMPOSE_PROJECT_NAME}"
+    else
+        project_name="$(get_project_name)"
+    fi
 
     docker ps -a |
         \grep "${project_name}" |
@@ -262,10 +267,20 @@ function load_configuration_parameters() {
 
     validate_docker_compose_configuration
 
-    source ./.env.local
+    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'test' ];
+    then
+
+        source ./.env.test
+
+    else
+
+        source ./.env.local
+
+    fi
 
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                ' "$(reset_color)" "${DEBUG}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_DIR:           ' "$(reset_color)" "${WORKER}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_UID:     ' "$(reset_color)" "${WORKER_OWNER_UID}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'WORKER_OWNER_GID:     ' "$(reset_color)" "${WORKER_OWNER_GID}" $'\n'
@@ -292,6 +307,10 @@ function run_unit_tests() {
     --verbose
 }
 
+function get_project_name() {
+    echo "${COMPOSE_PROJECT_NAME}"
+}
+
 function get_process_manager_shell() {
     if ! command -v jq >> /dev/null 2>&1;
     then
@@ -301,7 +320,7 @@ function get_process_manager_shell() {
     fi
 
     local project_name
-    project_name="${COMPOSE_PROJECT_NAME}"
+    project_name="$(get_project_name)"
 
     docker exec -ti "$(
         docker ps -a \
@@ -320,7 +339,7 @@ function get_worker_shell() {
     fi
 
     local project_name
-    project_name="${COMPOSE_PROJECT_NAME}"
+    project_name="$(get_project_name)"
 
     docker exec -ti "$(
         docker ps -a \

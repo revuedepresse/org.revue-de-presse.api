@@ -93,10 +93,6 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         }
     }
 
-    /**
-     * @param PublishersList $list
-     * @return bool
-     */
     function isListPreservedAfterApplyingFilteringByListName(PublishersList $list): bool
     {
         if (!$this->isSingleListFilterActive()) {
@@ -125,18 +121,18 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
-             ->addArgument(
-                 self::ARGUMENT_SCREEN_NAME,
-                 InputArgument::REQUIRED,
-                 'The screen name of a Twitter member'
-             )
-             ->addOption(
-                 self::OPTION_SINGLE_LIST_FILTER,
-                 'r',
-                 InputOption::VALUE_OPTIONAL,
-                 'Restrict list import to single list'
-             )
-             ->setDescription('Import Twitter list');
+            ->addArgument(
+                self::ARGUMENT_SCREEN_NAME,
+                InputArgument::REQUIRED,
+                'The screen name of a Twitter member'
+            )
+            ->addOption(
+                self::OPTION_SINGLE_LIST_FILTER,
+                'r',
+                InputOption::VALUE_OPTIONAL,
+                'Restrict list import to single list'
+            )
+            ->setDescription('Import Twitter list');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -195,11 +191,12 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function getMemberByTwitterId(
         MemberIdentity $memberIdentity,
@@ -213,11 +210,12 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     }
 
     /**
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function traverseListsBatch(array $listsBatch, MemberInterface $member): void
     {

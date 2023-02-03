@@ -41,6 +41,7 @@
                 column="created_at"
                 type="datetime"
         />
+
     </entity>
 
 </doctrine-mapping>

@@ -34,7 +34,7 @@ class MemberCollection implements MemberCollectionInterface
         return $this->count() === 0;
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->members);
     }

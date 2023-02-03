@@ -47,7 +47,7 @@ class UnavailableResourceHandlerTest extends TestCase
 
         $this->handler = new UnavailableResourceHandler(
             MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                   ->build(),
+                ->build(),
             new NullLogger()
         );
 
@@ -93,8 +93,8 @@ class UnavailableResourceHandlerTest extends TestCase
 
         $this->handler = new UnavailableResourceHandler(
             MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                   ->willSaveASuspendedMember()
-                                   ->build(),
+                ->willSaveASuspendedMember()
+                ->build(),
             new NullLogger()
         );
 
@@ -140,8 +140,8 @@ class UnavailableResourceHandlerTest extends TestCase
 
         $this->handler = new UnavailableResourceHandler(
             MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                   ->willSaveAProtectedMember()
-                                   ->build(),
+                ->willSaveAProtectedMember()
+                ->build(),
             new NullLogger()
         );
 
@@ -187,7 +187,7 @@ class UnavailableResourceHandlerTest extends TestCase
 
         $this->handler = new UnavailableResourceHandler(
             MemberRepositoryBuilder::newMemberRepositoryBuilder()
-                                   ->build(),
+                ->build(),
             new NullLogger()
         );
 

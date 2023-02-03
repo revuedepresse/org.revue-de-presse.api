@@ -112,41 +112,34 @@ function install_php_extensions() {
         sockets \
         sodium
 
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install gd
+
     docker-php-ext-enable opcache
 
-    local version
-    version='3.1.5'
-
-    wget https://github.com/xdebug/xdebug/archive/${version}.zip \
-        --output-document "/tmp/${version}.zip"
-
+    wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
+    --output-document /tmp/3.2.0.zip
     cd /tmp || exit
-    unzip "/tmp/${version}.zip"
-    cd "xdebug-${version}" || exit
-
+    unzip /tmp/3.2.0.zip
+    cd xdebug-3.2.0 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.79.0.tar.gz \
+    wget https://github.com/DataDog/dd-trace-php/archive/0.83.1.tar.gz \
     --output-document=/tmp/datadog-php-tracer.tar.gz
 
     cd /tmp || exit
-
-    (
-
-        tar xvzf /tmp/datadog-php-tracer.tar.gz
-        cd /tmp/dd-trace-php-0.79.0 || exit
-
+    tar -xvzf /tmp/datadog-php-tracer.tar.gz
+    cd dd-trace-php-0.83.1 || exit
         phpize .
         ./configure --with-php-config="$(which php-config)"
         make
         make install
 
-    )
-
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
+    --tries=40 \
     --output-document=/tmp/datadog-setup.php
     cd /tmp || exit
     php datadog-setup.php \
@@ -192,7 +185,17 @@ function install_process_manager() {
 
     source "${HOME}/.bashrc"
 
+    if [ $(asdf plugin list | grep -c 'nodejs') -eq 0 ];
+    then
+
     asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+    else
+
+        printf '`%s` plugin for asdf has been installed already.%s' 'nodejs' '%s' 1>&2
+
+    fi
+
     asdf install nodejs 16.15.1
     asdf global nodejs 16.15.1
 
@@ -204,9 +207,20 @@ function install_process_manager() {
     echo '' > ./.pm2-installed
 }
 
+function upgrade_packages_source() {
+    echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
+
+    apt update  --assume-yes
+    apt upgrade --assume-yes
+}
+
 function install_process_manager_packages() {
+    upgrade_packages_source
+
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         curl \
         gawk \
         git \
@@ -230,11 +244,12 @@ function install_shared_requirements() {
 }
 
 function install_shared_system_packages() {
-    # Update package source repositories
-    apt-get update
+    upgrade_packages_source
 
     # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         apt-utils \
         ca-certificates \
         git \
@@ -249,12 +264,18 @@ function install_shared_system_packages() {
 }
 
 function install_worker_system_packages() {
-    # Install packages with package management system frontend (apt)
-    apt-get install --assume-yes \
+    upgrade_packages_source
+
+    apt-get install \
+        --assume-yes \
+        --no-install-recommends \
         libcurl4-gnutls-dev \
+        libicu-dev \
+        libfreetype-dev \
         libicu-dev \
         libjpeg-dev \
         libpng-dev \
+        libwebp-dev \
         libpq-dev \
         librabbitmq-dev \
         libsodium-dev

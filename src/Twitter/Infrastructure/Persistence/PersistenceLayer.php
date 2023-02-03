@@ -9,14 +9,11 @@ use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Persistence\PersistenceLayerInterface;
-use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
-use App\Twitter\Domain\Publication\Repository\TweetPublicationPersistenceLayerInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\TweetPublicationPersistenceLayerTrait;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
@@ -29,21 +26,16 @@ const PROP_FOREIGN_USER_ID = 'foreign_user_id';
 class PersistenceLayer implements PersistenceLayerInterface
 {
     use MemberRepositoryTrait;
-    use PublicationRepositoryTrait;
+    use TweetPublicationPersistenceLayerTrait;
     use TweetPersistenceLayerTrait;
-
     private MemberProfileAwareHttpClientInterface $memberProfileHttpClient;
     private EntityManagerInterface $entityManager;
 
     public function __construct(
-        TweetPersistenceLayerInterface            $tweetPersistence,
-        TweetPublicationPersistenceLayerInterface $publicationRepository,
         MemberProfileAwareHttpClientInterface     $memberProfileHttpClient,
         MemberRepositoryInterface                 $memberRepository,
         EntityManagerInterface                    $entityManager,
     ) {
-        $this->tweetPersistenceLayer = $tweetPersistence;
-        $this->publicationRepository = $publicationRepository;
         $this->entityManager = $entityManager;
         $this->memberRepository = $memberRepository;
         $this->memberProfileHttpClient = $memberProfileHttpClient;
@@ -71,7 +63,7 @@ class PersistenceLayer implements PersistenceLayerInterface
 
         // Make publications
         $tweetAsArrayCollection = StatusToArray::fromStatusCollection($tweetCollection);
-        $this->publicationRepository->persistTweetsCollection($tweetAsArrayCollection);
+        $this->tweetPublicationPersistenceLayer->persistTweetsCollection($tweetAsArrayCollection);
 
         // Commit transaction
         $this->entityManager->flush();
@@ -121,7 +113,7 @@ class PersistenceLayer implements PersistenceLayerInterface
 
         // Make publications
         $tweetCollection = StatusToArray::fromStatusCollection($tweetCollection);
-        $this->publicationRepository->persistTweetsCollection($tweetCollection);
+        $this->tweetPublicationPersistenceLayer->persistTweetsCollection($tweetCollection);
 
         // Commit transaction
         $this->entityManager->flush();

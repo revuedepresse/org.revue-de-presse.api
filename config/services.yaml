@@ -77,7 +77,6 @@ services:
         class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
-            - '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
             - '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
             - '@logger'
             - '@App\Twitter\Infrastructure\Translation\Translator'
@@ -85,6 +84,7 @@ services:
             - [ 'setListsBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository' ] ]
             - [ 'setRateLimitCompliance',                [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setOwnershipAccessor',                  [ '@App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface' ] ]
+            - [ 'setPublishersListProcessor',            [ '@App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor' ] ]
             - [ 'setSearchQueryRulesetProcessor',        [ '@App\Search\Domain\Ruleset\SearchQueryRulesetProcessorInterface' ] ]
 
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
@@ -197,6 +197,9 @@ services:
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:                               '@monolog.logger.twitter_api'
+
+    App\Twitter\Domain\Curation\Curator\TweetCuratorInterface:
+        '@App\Twitter\Infrastructure\Curation\TweetCurator'
 
     App\Twitter\Infrastructure\Translation\Translator:
         class: 'App\Twitter\Infrastructure\Translation\Translator'

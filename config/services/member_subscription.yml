@@ -4,12 +4,16 @@ services:
         arguments:
             - !php/const 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand::COMMAND_NAME'
             - '@App\Membership\Domain\Repository\EditListMembersInterface'
-            - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
-            - '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'
+            - '@App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface'
+            - '@App\Membership\Domain\Repository\NetworkRepositoryInterface'
             - '@App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface'
             - '@App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface'
-            - '@App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface'
-            - '@logger'
+        calls:
+            - [ 'setLogger',                                 [ '@logger' ] ]
+            - [ 'setHttpClient',                             [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+            - [ 'setMemberRepository',                       [ '@App\Membership\Domain\Repository\MemberRepositoryInterface' ] ]
+            - [ 'setPublishersListRepository',               [ '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface' ] ]
+            - [ 'setTweetAwareHttpClient',                   [ '@App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface' ] ]
         tags:
             - { name: 'console.command' }
 

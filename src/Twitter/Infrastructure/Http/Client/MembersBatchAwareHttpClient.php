@@ -6,33 +6,53 @@ namespace App\Twitter\Infrastructure\Http\Client;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
-use stdClass;
+use Psr\Log\LoggerInterface;
 
-class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
+readonly class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
 {
-    private HttpClientInterface $accessor;
-
-    public function __construct(
-        HttpClientInterface $accessor
-    ) {
-        $this->accessor = $accessor;
+    public function __construct(private HttpClientInterface $httpClient, private LoggerInterface $logger) {
     }
 
-    public function addMembersToList(array $members, string $listId)
+    public function addMembersToListSequentially(array $members, string $listId)
     {
-        $endpoint = strtr($this->getAddMembersToListEndpoint(), [':id' => $listId]);
+        $endpoint = strtr($this->getAddMembersToListEndpoint(), [':list_id' => $listId]);
 
         array_walk(
             $members,
-            fn ($memberId) => $this->accessor->contactEndpoint("${endpoint}?user_id=${memberId}"),
+            fn ($memberId) => $this->httpClient->contactEndpoint("{$endpoint}?user_id={$memberId}"),
         );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function addUpTo100MembersAtOnceToList(array $members, string $listId)
+    {
+        if (count($members) > 100) {
+            $errorMessage = 'There are too many members to be added all at once';
+            $this->logger->error($errorMessage);
+
+            throw new \Exception($errorMessage);
+        }
+
+        $commaSeparatedMemberIdsList = implode(',', array_chunk($members, 100, true)[0]);
+        $endpoint = $this->getAddMembersBatchToListEndpoint();
+        $this->httpClient->contactEndpoint("{$endpoint}.json?list_id={$listId}&user_id={$commaSeparatedMemberIdsList}");
     }
 
     private function getAddMembersToListEndpoint(): string
     {
         return implode([
-            $this->accessor->getApiBaseUrl($this->accessor::TWITTER_API_VERSION_2),
+            $this->httpClient->getApiBaseUrl($this->httpClient::TWITTER_API_VERSION_2),
             self::API_ENDPOINT_MEMBERS_LISTS_VERSION_2,
+        ]);
+    }
+
+    private function getAddMembersBatchToListEndpoint(): string
+    {
+        return implode([
+            $this->httpClient->getApiBaseUrl(),
+            self::API_ENDPOINT_MEMBERS_LISTS,
         ]);
     }
 }

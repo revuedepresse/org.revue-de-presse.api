@@ -15,7 +15,11 @@ interface FetchAuthoredTweetInterface extends FetchTweetInterface
 
     public function listId(): int;
 
+    public function dateBeforeWhichStatusAreCollected(): ?string;
+
     public function screenName(): string;
+
+    public function token(): TokenInterface;
 
     public static function identifyMember(
         PublishersList  $aggregate,

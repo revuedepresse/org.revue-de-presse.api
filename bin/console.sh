@@ -91,10 +91,10 @@ function dispatch_fetch_publications_messages {
 
     fi
 
-    if [ -z "${LIST_NAME}" ] && [ -z "${MULTIPLE_LISTS}" ];
+    if [ -z "${PUBLISHERS_LIST_DEFAULT}" ] && [ -z "${MULTIPLE_LISTS}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'LIST_NAME' $'\n' 1>&2
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'PUBLISHERS_LIST_DEFAULT' $'\n' 1>&2
         printf 'or%s' $'\n'  1>&2
         printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'comma-separated lists' 'MULTIPLE_LISTS' $'\n' 1>&2
 
@@ -103,7 +103,7 @@ function dispatch_fetch_publications_messages {
     fi
 
     local list_option
-    list_option=' --list='"'${LIST_NAME}'"
+    list_option=' --list='"'${PUBLISHERS_LIST_DEFAULT}'"
 
     if [ -n "${MULTIPLE_LISTS}" ];
     then
@@ -250,8 +250,6 @@ function purge_queues() {
 
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
-
-     echo '"'$rabbitmq_vhost'"'
 
     /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue publications -p '${rabbitmq_vhost}'"
     /bin/bash -c "docker compose ${project_files} exec amqp rabbitmqctl purge_queue failures -p '${rabbitmq_vhost}'"
@@ -441,7 +439,10 @@ function set_up_amqp_queues() {
         local project_files
         project_files=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-        /bin/bash -c "docker compose${project_files} exec -T worker php bin/console messenger:setup-transports -vvvv"
+        local project_name
+        project_name="$(get_project_name)"
+
+        /bin/bash -c "docker compose --project-name=${project_name} ${project_files} exec -T worker php bin/console messenger:setup-transports -vvvv"
     )
 }
 

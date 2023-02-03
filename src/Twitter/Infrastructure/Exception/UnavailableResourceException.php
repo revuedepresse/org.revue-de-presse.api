@@ -150,7 +150,7 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
         return is_object($response)
             && (
                 (isset($response->errors, $response->errors[0]) &&
-                is_array($response->errors))
+                    is_array($response->errors))
                 || isset($response->error));
     }
 

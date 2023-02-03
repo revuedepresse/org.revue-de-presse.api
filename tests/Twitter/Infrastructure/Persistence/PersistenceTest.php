@@ -73,10 +73,10 @@ class PersistenceTest extends KernelTestCase
                     'api_document' => '{}',
                     'id_str' => '42',
                     'created_at' => (
-                        new \DateTime(
-                            'now',
-                            new DateTimeZone('UTC')
-                        )
+                    new \DateTime(
+                        'now',
+                        new DateTimeZone('UTC')
+                    )
                     )->format(DateTimeInterface::RFC7231)
                 ]
             ],

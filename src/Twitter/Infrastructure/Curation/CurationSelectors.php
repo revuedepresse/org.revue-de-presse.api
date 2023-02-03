@@ -106,7 +106,7 @@ class CurationSelectors implements CurationSelectorsInterface
     {
         Assert::lazy()
             ->that($screenName)
-                ->notEmpty()
+            ->notEmpty()
             ->verifyNow();
 
         $this->memberSelectorByScreenName = strtolower($screenName);

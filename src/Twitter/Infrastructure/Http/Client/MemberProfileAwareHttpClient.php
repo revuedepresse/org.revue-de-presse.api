@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Http\Client;
 
 use App\Membership\Domain\Exception\InvalidMemberException;
-use App\Membership\Domain\Exception\MembershipException;
 use App\Membership\Domain\Model\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
@@ -37,13 +36,6 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
         $this->unavailableResourceHandler = $unavailableResourceHandler;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     * @param \stdClass|null  $remoteMember
-     *
-     * @return MemberInterface
-     */
     public function ensureMemberProfileIsUpToDate(
         MemberInterface $member,
         string $memberName,
@@ -59,20 +51,39 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
 
         if ($remoteMember === null) {
             $remoteMember = $this->collectedMemberProfile($memberName);
+            $member->setRawDocument(json_encode((array) $remoteMember));
         }
 
-        $member->description = $remoteMember->description;
-        $member->url         = $remoteMember->url;
+        if ($remoteMember->description !== null) {
+            $member->setDescription($remoteMember->description);
+        }
+
+        if ($remoteMember->url !== null) {
+            try {
+                $handle = curl_init();
+
+                curl_setopt($handle, CURLOPT_URL, $remoteMember->url);
+                curl_setopt($handle, CURLOPT_HTTPHEADER, ['Location:']);
+                curl_exec($handle);
+
+                $url = curl_getinfo($handle, CURLINFO_REDIRECT_URL);
+
+                $member->setUrl($url);
+            } catch (\Exception) {
+                $member->setUrl($remoteMember->url);
+            }
+        }
 
         return $this->memberRepository->saveMember($member);
     }
 
     /**
      * @throws UnexpectedApiResponseException
-     * @throws MembershipException
+     * @throws \App\Membership\Domain\Exception\MembershipException
      */
     public function getMemberByIdentity(
-        MemberIdentity $memberIdentity
+        MemberIdentity $memberIdentity,
+        bool $preventEventSourcing = false
     ): MemberInterface {
         /** @var Member $member */
         $member            = $this->memberRepository->findOneBy(
@@ -85,7 +96,11 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
         }
 
         try {
-            $twitterMember = $this->collectedMemberProfile($memberIdentity->screenName());
+            if ($preventEventSourcing) {
+                $twitterMember = $this->accessor->getMemberProfileByScreenNameOrUserId($memberIdentity);
+            } else {
+                $twitterMember = $this->collectedMemberProfile($memberIdentity->screenName());
+            }
         } catch (UnavailableResourceException $exception) {
             $this->unavailableResourceHandler->handle(
                 $memberIdentity,
@@ -105,7 +120,10 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
 
         if (!$preExistingMember) {
             return $this->memberRepository->saveMemberFromIdentity(
-                $memberIdentity
+                new MemberIdentity(
+                    $twitterMember->screen_name,
+                    $twitterMember->id_str
+                )
             );
         }
 
@@ -114,12 +132,6 @@ class MemberProfileAwareHttpClient implements MemberProfileAwareHttpClientInterf
         return $this->memberRepository->declareMemberAsFound($member);
     }
 
-    /**
-     * @param string $username
-     *
-     * @return MemberInterface
-     * @throws InvalidMemberException
-     */
     public function refresh(string $username): MemberInterface
     {
         $fetchedMember = $this->collectedMemberProfile($username);

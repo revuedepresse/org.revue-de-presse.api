@@ -1,4 +1,4 @@
-FROM        php:8.1.13-cli-buster
+FROM        php:8.2-cli-bullseye
 
 ARG         OWNER_UID
 ARG         OWNER_GID
@@ -20,7 +20,7 @@ COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts          
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts/cmd-process-manager.sh          /start.sh
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts/entrypoint-process-manager.sh   /entrypoint.sh
 
-COPY        --from=composer:2.3 /usr/bin/composer /usr/bin/composer
+COPY        --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 RUN         /bin/bash -c 'source /scripts/install-shared-requirements.sh'
 RUN         /bin/bash -c 'source /scripts/install-process-manager-requirements.sh'

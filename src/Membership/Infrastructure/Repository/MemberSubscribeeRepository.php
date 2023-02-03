@@ -57,13 +57,13 @@ class MemberSubscribeeRepository extends ServiceEntityRepository
     public function findMissingSubscribees(MemberInterface $member, array $subscribees)
     {
         $query = <<< QUERY
-            SELECT array_agg(sm.usr_twitter_id) subscribee_ids
+            SELECT array_agg(sm.usr_twitter_id::bigint) subscribee_ids
             FROM member_subscribee s,
             weaving_user sm
             WHERE sm.usr_id = s.subscribee_id
             AND member_id = :member_id
             AND sm.usr_twitter_id is not null
-            AND sm.usr_twitter_id in (:subscribee_ids)
+            AND sm.usr_twitter_id::bigint in (:subscribee_ids)
 QUERY;
 
         $connection = $this->getEntityManager()->getConnection();

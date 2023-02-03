@@ -2,6 +2,7 @@
 /.env.local.php
 /.env.*.local
 !/\.env*\.dist
+\.idea
 .phpunit.result.cache
 .pm2-installed
 auth.json
@@ -26,5 +27,6 @@ composer.phar
 provisioning/containers/docker-compose.override*.yaml
 provisioning/volumes/amqp*
 provisioning/volumes/database*
-vendor*
-
+/public/bundles/
+/var/
+/vendor/

@@ -92,12 +92,12 @@ class ListMemberSubscribeesCommand extends AbstractCommand
         return implode(
             PHP_EOL,
             [
-                "Name: ${friendAsArray['name']}",
-                "Description: ${friendAsArray['description']}",
-                "URL: https://twitter/${friendAsArray['screen_name']}",
-                "Followers: ${friendAsArray['followers_count']}",
-                "Friends: ${friendAsArray['friends_count']}",
-                "Location: ${friendAsArray['location']}",
+                "Name: {$friendAsArray['name']}",
+                "Description: {$friendAsArray['description']}",
+                "URL: https://twitter/{$friendAsArray['screen_name']}",
+                "Followers: {$friendAsArray['followers_count']}",
+                "Friends: {$friendAsArray['friends_count']}",
+                "Location: {$friendAsArray['location']}",
             ]
         );
     }

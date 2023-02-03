@@ -16,7 +16,7 @@ use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\TweetPublicationPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
@@ -50,7 +50,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
 {
     use MemberRepositoryTrait;
     use PersistenceLayerTrait;
-    use PublicationRepositoryTrait;
+    use TweetPublicationPersistenceLayerTrait;
     use TweetCurationLoggerTrait;
     use TweetPersistenceLayerTrait;
     use TaggedTweetRepositoryTrait;
@@ -71,12 +71,12 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
     public function countCollectedStatuses(
         string $screenName,
-        $extremumId,
+               $extremumId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
     ): ?int {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
-                     ->andWhere('s.screenName = :screenName');
+            ->andWhere('s.screenName = :screenName');
 
         $queryBuilder->setParameter('screenName', $screenName);
 
@@ -108,7 +108,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')
-                     ->andWhere('s.screenName = :screenName');
+            ->andWhere('s.screenName = :screenName');
 
         $queryBuilder->setParameter('screenName', $screenName);
 
@@ -163,10 +163,10 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
-                     ->andWhere('s.screenName = :screenName')
-                     ->andWhere('s.apiDocument is not null')
-                     ->orderBy('CAST(s.statusId AS bigint)', $direction)
-                     ->setMaxResults(1);
+            ->andWhere('s.screenName = :screenName')
+            ->andWhere('s.apiDocument is not null')
+            ->orderBy('CAST(s.statusId AS bigint)', $direction)
+            ->setMaxResults(1);
 
         $queryBuilder->setParameter('screenName', $screenName);
 
@@ -300,7 +300,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
     public function saveLikes(
         array $statuses,
-        $identifier,
+              $identifier,
         ?PublishersList $aggregate,
         LoggerInterface $logger,
         MemberInterface $likedBy,

@@ -1,0 +1,25 @@
+services:
+
+    test.App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand:
+        class: 'App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand'
+        calls:
+            - [ 'setEntityManager',                ['@doctrine.orm.entity_manager'] ]
+            - [ 'setHttpClient',                   ['@test.App\Tests\QualityAssurance\Infrastructure\HttpClient'] ]
+            - [ 'setLogger',                       ['@logger'] ]
+            - [ 'setMemberProfileAwareHttpClient', ['@App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface'] ]
+            - [ 'setNotFoundTweetRepository',      ['@App\Twitter\Domain\Publication\Repository\NotFoundTweetRepositoryInterface'] ]
+            - [ 'setResourcesDir',                 ['%kernel.project_dir%/tests/QualityAssurance/Infrastructure/Resources'] ]
+            - [ 'setTrendsRepository',             ['@tests.App\Tests\QualityAssurance\Infrastructure\Repository\TrendsRepository' ] ]
+            - [ 'setTweetCurator',                 ['@test.App\Tests\QualityAssurance\Infrastructure\Curation\Curator\TweetCurator'] ]
+            - [ 'setTweetRepository',              ['@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
+        tags:
+            - { name: 'console.command' }
+
+    test.App\Tests\QualityAssurance\Infrastructure\Curation\Curator\TweetCurator:
+        class: 'App\Tests\QualityAssurance\Infrastructure\Curation\Curator\TweetCurator'
+
+    test.App\Tests\QualityAssurance\Infrastructure\HttpClient:
+        class: 'App\Tests\QualityAssurance\Infrastructure\HttpClient\HttpClient'
+
+    tests.App\Tests\QualityAssurance\Infrastructure\Repository\TrendsRepository:
+        class: 'App\Tests\QualityAssurance\Infrastructure\Repository\TrendsRepository'

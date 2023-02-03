@@ -8,22 +8,16 @@ use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
-use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
-use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
 use function array_key_exists;
 use function max;
 use function min;
@@ -74,16 +68,16 @@ class TweetRepository extends ArchivedTweetRepository
         $tableAlias = 't';
         $queryBuilder = $this->createQueryBuilder($tableAlias);
         $queryBuilder
-            ->select("${tableAlias}.id as identifier")
-            ->andWhere("LOWER(${tableAlias}.screenName) = :screenName")
+            ->select("{$tableAlias}.id as identifier")
+            ->andWhere("LOWER({$tableAlias}.screenName) = :screenName")
             ->setMaxResults(1);
 
         if (is_array($orderBy)) {
             $column = key($orderBy);
             reset($orderBy);
 
-            $queryBuilder->addSelect("${tableAlias}.${column}");
-            $queryBuilder->orderBy("${tableAlias}.${column}", $orderBy[$column]);
+            $queryBuilder->addSelect("{$tableAlias}.{$column}");
+            $queryBuilder->orderBy("{$tableAlias}.{$column}", $orderBy[$column]);
         }
 
         $queryBuilder->setParameter('screenName', strtolower($screenName));
@@ -142,9 +136,9 @@ class TweetRepository extends ArchivedTweetRepository
     }
 
     /**
-     * @throws TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function updateLastStatusPublicationDate(string $screenName): MemberInterface
     {
@@ -339,7 +333,7 @@ class TweetRepository extends ArchivedTweetRepository
 
     /**
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     private function howManyStatusesForMemberHavingScreenName($screenName): array
     {
@@ -357,7 +351,7 @@ QUERY;
 
     /**
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
     {
@@ -383,9 +377,9 @@ QUERY;
     }
 
     /**
-     * @throws TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
      * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     private function getLastKnownStatusFor(string $screenName): TweetInterface {
         $result = $this->howManyStatusesForMemberHavingScreenName($screenName);

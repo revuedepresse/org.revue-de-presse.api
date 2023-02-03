@@ -47,7 +47,7 @@ class OwnershipCollection implements OwnershipCollectionInterface
         return new self($ownerships, $nextPage);
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->ownerships);
     }
