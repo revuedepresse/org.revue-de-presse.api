@@ -1548,7 +1548,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getFriendsOfMemberHavingScreenName(string $screenName)
+    public function getFriendsOfMemberHavingScreenName(string $screenName): array|stdClass|null
     {
         $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
 
