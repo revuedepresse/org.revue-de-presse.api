@@ -1532,9 +1532,6 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $screenName
-     *
-     * @return array|object|stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
