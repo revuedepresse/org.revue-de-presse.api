@@ -377,7 +377,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 );
 
                 $lightweightJSON['entities'] = [
-                    'media' => $upstreamDocument['entities']['media']
+                    'media' => $upstreamDocument['entities']['media'],
+                    'urls'  => $upstreamDocument['entities']['urls']
                 ];
             }
         }
@@ -459,11 +460,35 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         return $fixer;
     }
 
-    public function processText(mixed $text): string
+    public function processText(mixed $subject): string
     {
-        $text = LitEmoji::encodeUnicode($text);
+        $subject = LitEmoji::encodeUnicode($subject);
 
-        return $this->getTypographyFixer()->fixString($text);
+        $urls = [];
+        $counter = 0;
+        $subject = preg_replace_callback(
+            '#(?<url>http(?:s)?://[^\s]+)(?<comma>\.?)#m',
+            function ($matches) use (&$counter, &$urls) {
+                $urls[] = $matches['url'];
+                $replacement = '\\'.$counter;
+                $counter++;
+
+                return $replacement;
+            }, $subject);
+
+        $fixedSubject = $this->getTypographyFixer()->fixString($subject);
+
+        $counter = 0;
+
+        return array_reduce(
+            $urls,
+            function ($subject, $url) use (&$counter) {
+                $subject = str_replace('\\'.$counter, $url, $subject);
+                $counter++;
+                return $subject;
+            },
+            $fixedSubject
+        );
     }
 
     public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
