@@ -145,7 +145,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
             new ListsBatchSelector($memberUserName)
         );
 
-        $publishersListName = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
+        $publishersListIdentifier = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
 
         $filteredLists = [];
 
@@ -155,8 +155,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
         ) {
             $filteredLists = array_filter(
                 $ownershipsLists->toArray(),
-                static function (PublishersList $list) use ($publishersListName) {
-                    return $list->name() === $publishersListName;
+                static function (PublishersList $list) use ($publishersListIdentifier) {
                 }
             );
 
@@ -164,7 +163,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 $this->logger->error(
                     sprintf(
                         'Could not find list %s among {%s}.',
-                        $publishersListName,
+                        $publishersListIdentifier,
                         implode(', ', array_map(fn (PublishersList $p) => $p->name(), $ownershipsLists->toArray()))
                     )
                 );
