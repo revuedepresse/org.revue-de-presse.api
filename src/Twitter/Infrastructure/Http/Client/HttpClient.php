@@ -331,7 +331,7 @@ class HttpClient implements
         $message = $content->errors[0]->message;
         $code    = $content->errors[0]->code;
 
-        return new UnavailableResourceException($message, $code);
+        return new UnavailableResourceException($message, intval($code));
     }
 
     /**
