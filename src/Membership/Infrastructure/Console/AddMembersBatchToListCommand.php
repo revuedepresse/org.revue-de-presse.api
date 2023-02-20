@@ -193,8 +193,14 @@ class AddMembersBatchToListCommand extends AbstractCommand
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function addMembersToList(PublishersList $targetList): void {
-        $memberIds = $this->getListOfMembers();
-        $members = $this->ensureMembersExist($memberIds);
+        $memberIdentifiers = $this->getListOfMembers();
+        $members = $this->ensureMembersExist($memberIdentifiers);
+        $memberIds = array_filter(
+            array_map(
+                fn (MemberInterface $member) => $member->twitterId() === '0' ? false : $member->twitterId(),
+                $members
+            )
+        );
 
         if (count($memberIds) <= 100) {
             $this->membersBatchHttpClient->addUpTo100MembersAtOnceToList($memberIds, $targetList->id());
@@ -209,12 +215,6 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 }
             );
         } else {
-            $memberIds = array_filter(
-                array_map(
-                    fn (MemberInterface $member) => $member->twitterId() === '0' ? false : $member->twitterId(),
-                    $members
-                )
-            );
             $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
         }
 
