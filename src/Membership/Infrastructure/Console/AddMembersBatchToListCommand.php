@@ -228,23 +228,29 @@ class AddMembersBatchToListCommand extends AbstractCommand
 
     private function ensureMembersExist($memberList): array
     {
-        return array_map(
+        return array_filter(array_map(
             function (string $memberIdentifier) {
-
                 if (is_numeric($memberIdentifier)) {
                     $member = $this->memberRepository->findOneBy(['twitterID' => $memberIdentifier]);
                 } else {
                     $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
                 }
 
-                if (!($member instanceof MemberInterface)) {
-                    $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberIdentifier);
+                try {
+                    if (!($member instanceof MemberInterface)) {
+                        $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberIdentifier);
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->info(sprintf('Cannot find member having identifier %s', $memberIdentifier));
+                    $this->logger->error($e->getMessage());
+
+                    return false;
                 }
 
                 return $member;
             },
             $memberList
-        );
+        ));
     }
 
     private function getListOfMembers(): array
