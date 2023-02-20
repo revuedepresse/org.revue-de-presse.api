@@ -226,10 +226,6 @@ class AddMembersBatchToListCommand extends AbstractCommand
         $this->output->writeln('All members have been successfully added to the Twitter list.');
     }
 
-    /**
-     * @param $memberList
-     * @return array
-     */
     private function ensureMembersExist($memberList): array
     {
         return array_map(

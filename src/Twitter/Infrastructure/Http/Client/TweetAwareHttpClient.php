@@ -210,12 +210,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         return $status;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     *
-     * @return MemberInterface
-     */
     private function ensureMemberHasBio(
         MemberInterface $member,
         string $memberName
