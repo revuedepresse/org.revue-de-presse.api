@@ -6,6 +6,7 @@ namespace App\Twitter\Infrastructure\Http\Client;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Client\MembersBatchAwareHttpClientInterface;
 use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
+use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use Psr\Log\LoggerInterface;
 
 readonly class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareInterface, MembersBatchAwareHttpClientInterface
@@ -13,13 +14,27 @@ readonly class MembersBatchAwareHttpClient implements TwitterAPIEndpointsAwareIn
     public function __construct(private HttpClientInterface $httpClient, private LoggerInterface $logger) {
     }
 
-    public function addMembersToListSequentially(array $members, string $listId)
+    public function addMembersToListSequentially(array $members, string $listId): array
     {
         $endpoint = strtr($this->getAddMembersToListEndpoint(), [':list_id' => $listId]);
 
-        array_walk(
-            $members,
-            fn ($memberId) => $this->httpClient->contactEndpoint("{$endpoint}?user_id={$memberId}"),
+        return array_filter(
+            array_map(
+                function ($memberId) use ($endpoint) {
+                    $response = $this->httpClient->contactEndpoint("{$endpoint}?user_id={$memberId}");
+
+                    if (
+                        !property_exists( $response, 'data') ||
+                        !property_exists($response->data, 'is_member') ||
+                        $response->data->is_member !== true
+                    ) {
+                        return new MemberIdentity((string) $memberId, $memberId);
+                    }
+
+                    return false;
+                },
+                $members
+            )
         );
     }
 

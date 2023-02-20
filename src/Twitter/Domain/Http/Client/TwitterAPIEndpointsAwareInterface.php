@@ -12,6 +12,8 @@ interface TwitterAPIEndpointsAwareInterface
 
     public const API_ENDPOINT_MEMBERS_LISTS_VERSION_2 = '/lists/:list_id/members';
 
+    public const API_ENDPOINT_MEMBER_TIMELINE = '/statuses/user_timeline';
+
     public const API_ENDPOINT_REMOVE_MEMBERS_FROM_LISTS = '/lists/members/destroy_all';
 
     public const API_ENDPOINT_SEARCH_TWEETS = '/search/tweets.json';

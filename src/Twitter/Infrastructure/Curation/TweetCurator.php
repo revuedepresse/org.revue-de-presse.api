@@ -43,6 +43,7 @@ use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
+use App\Twitter\Infrastructure\Http\Repository\Exception\TweetNotFoundException as NotFoundException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -121,6 +122,8 @@ class TweetCurator implements TweetCuratorInterface
             }
 
             return true;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
         } finally {
             $this->updateLastStatusPublicationDate($options);
         }
@@ -298,7 +301,7 @@ class TweetCurator implements TweetCuratorInterface
             ['oauthToken' => $oauthTokens[TokenInterface::FIELD_TOKEN]]
         );
 
-        if (!$token instanceof Token) {
+        if (!($token instanceof Token)) {
             $token = $this->tokenRepository->findFirstUnfrozenToken();
         }
 
@@ -314,13 +317,29 @@ class TweetCurator implements TweetCuratorInterface
         $statuses
     ): void {
         $statusesIds   = $this->getExtremeStatusesIdsFor($options);
+
         $firstStatusId = $statusesIds['min_id'];
         $lastStatusId  = $statusesIds['max_id'];
+
+        try {
+            if ($firstStatusId > 0) {
+                $this->tweetRepository->byId($firstStatusId);
+            } else {
+                return;
+            }
+
+            if ($lastStatusId > 0) {
+                $this->tweetRepository->byId((int) $lastStatusId);
+            }
+        }
+        catch (NotFoundException $e) {
+            return;
+        }
 
         // When we didn't fetch publications between the last one saved and now,
         // both first and last status were declared
         // some publications were retrieved and
-        // no boundaries were crosse
+        // no boundaries were crossed
         if (
             !$betweenPublicationDateOfLastOneSavedAndNow
             && $firstStatusId !== null
@@ -449,7 +468,7 @@ class TweetCurator implements TweetCuratorInterface
      */
     protected function remainingStatuses($options): bool
     {
-        $serializedStatusCount = $this->tweetRepository->countHowManyStatusesFor(
+        $serializedStatusCount = $this->tweetRepository->howManyTweetsHaveBeenCollectedForMemberHavingUserName(
             $options[FetchAuthoredTweetInterface::SCREEN_NAME]
         );
         $existingStatus        = $this->translator->trans(
@@ -643,11 +662,6 @@ class TweetCurator implements TweetCuratorInterface
         $this->publishersListRepository->lockAggregate($publishersList);
     }
 
-    /**
-     * @param $options
-     *
-     * @return array
-     */
     private function getExtremeStatusesIdsFor($options): array
     {
         return $this->tweetRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
@@ -655,19 +669,11 @@ class TweetCurator implements TweetCuratorInterface
         );
     }
 
-    /**
-     * @return bool
-     */
     private function isCollectingStatusesForAggregate(): bool
     {
         return $this->selectors->membersListId() !== null;
     }
 
-    /**
-     * @param $options
-     *
-     * @return bool
-     */
     private function isLookingBetweenPublicationDateOfLastOneSavedAndNow($options): bool
     {
         if (array_key_exists('since_id', $options)) {
@@ -804,7 +810,7 @@ class TweetCurator implements TweetCuratorInterface
                     $options = $this->tweetAwareHttpClient->updateExtremum(
                         $this->selectors,
                         $options,
-                        $discoverPublicationsWithMaxId = false
+                        discoverPublicationsWithMaxId: false
                     );
                     $options = $this->httpClient->guessMaxId(
                         $options,

@@ -17,7 +17,7 @@ use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\PublishersListCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\TwitterListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -37,7 +37,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ImportMemberPublishersListsCommand extends AbstractCommand
 {
     use ListBatchCollectedEventRepositoryTrait;
-    use PublishersListCollectedEventRepositoryTrait;
+    use TwitterListCollectedEventRepositoryTrait;
 
     private HttpClientInterface $httpClient;
 
@@ -99,7 +99,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
             return false;
         }
 
-        $isListPreserved = $list->name() === $this->singleListFilter;
+        $isListPreserved = $list->name() === $this->singleListFilter || $list->id() === $this->singleListFilter;
 
         if ($isListPreserved) {
             $this->logger->info('filtering by list name', ['list_name' => $list->name()]);
@@ -175,6 +175,13 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                 );
 
                 return self::FAILURE;
+            }
+
+            if ($this->isSingleListFilterActive()) {
+                $filteredLists = array_filter($listsBatch->toArray(), fn ($list) => $list->id() === $this->singleListFilter);
+                if (count($filteredLists) === 1) {
+                    break;
+                }
             }
 
             $nextPage = $listsBatch->nextPage();

@@ -253,7 +253,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
             $options
         );
 
-        if ($whisperer instanceof Whisperer && count($tweets) > 0) {
+        if (($whisperer instanceof Whisperer) && count($tweets) > 0) {
             try {
                 $this->afterCountingCollectedStatuses(
                     $options,
@@ -373,7 +373,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         $whisperer = $this->whispererRepository->findOneBy(
             ['name' => $options[FetchAuthoredTweetInterface::SCREEN_NAME]]
         );
-        if (!$whisperer instanceof Whisperer) {
+        if (!($whisperer instanceof Whisperer)) {
             SkippableMessageException::continueMessageConsumption();
         }
 
@@ -384,7 +384,7 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->tweetRepository->countHowManyStatusesFor($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
+        $storedWhispers = $this->tweetRepository->howManyTweetsHaveBeenCollectedForMemberHavingUserName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

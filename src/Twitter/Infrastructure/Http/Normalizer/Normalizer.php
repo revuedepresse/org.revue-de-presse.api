@@ -45,7 +45,7 @@ class Normalizer implements NormalizerInterface
         return TaggedTweet::fromLegacyProps($normalizedProperties);
     }
 
-    public static function normalizeAll(
+    public static function normalizeTweets(
         array $tweets,
         callable $setter,
         LoggerInterface $logger

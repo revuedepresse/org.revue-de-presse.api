@@ -12,6 +12,11 @@ use Doctrine\ORM\EntityManagerInterface;
 
 interface TweetPersistenceLayerInterface
 {
+    public const PROPERTY_NORMALIZED_STATUS = 'normalized_status';
+    public const PROPERTY_SCREEN_NAME       = 'screen_name';
+    public const PROPERTY_SEARCH_QUERY      = 'search_query';
+    public const PROPERTY_TWEET            = 'status';
+
     public function persistSearchQueryBasedTweetsCollection(
         AccessToken $identifier,
         SavedSearch $savedSearch,

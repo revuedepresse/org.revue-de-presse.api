@@ -40,9 +40,9 @@ class OwnershipCollection implements OwnershipCollectionInterface
         return $this;
     }
 
-    public function map(Closure $closure): OwnershipCollectionInterface
+    public function map(Closure $callable): OwnershipCollectionInterface
     {
-        return self::fromArray(array_map($closure, $this->ownerships));
+        return self::fromArray(array_map($callable, $this->ownerships));
     }
 
     public static function fromArray(array $ownerships, int $nextPage = -1): OwnershipCollectionInterface

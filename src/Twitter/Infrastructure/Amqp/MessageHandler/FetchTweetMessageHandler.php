@@ -11,6 +11,7 @@ use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweet;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchSearchQueryMatchingTweetInterface;
+use App\Twitter\Infrastructure\Amqp\Message\FetchTweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -41,7 +42,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function __invoke(FetchAuthoredTweetInterface $message): bool
+    public function __invoke(FetchTweetInterface $message): bool
     {
         $success = false;
 

@@ -205,20 +205,16 @@ class AddMembersBatchToListCommand extends AbstractCommand
                     $this->listRepository->make($listSubscription, $member);
                 }
             );
-            array_walk(
-                $members,
-                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-            );
         } else {
             $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
 
             $members = $this->ensureMembersExist($memberIds);
-
-            array_walk(
-                $members,
-                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-            );
         }
+
+        array_walk(
+            $members,
+            fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+        );
 
         $this->output->writeln('All members have been successfully added to the Twitter list.');
     }

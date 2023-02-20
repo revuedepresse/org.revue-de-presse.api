@@ -104,10 +104,8 @@ function install_dockerize() {
 function install_php_extensions() {
     docker-php-ext-install \
         bcmath \
-        mysqli \
         intl \
         pcntl \
-        pdo_mysql \
         pdo_pgsql \
         sockets \
         sodium

@@ -8,38 +8,38 @@ use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 
-class StatusCollection implements StrictCollectionInterface
+class TweetCollection implements StrictCollectionInterface
 {
-    private array $status;
+    private array $tweet;
 
-    private function __construct(array $status = [])
+    private function __construct(array $tweet = [])
     {
-        $this->status = array_map(fn(TweetInterface $status) => $status, $status);
+        $this->tweet = array_map(fn(TweetInterface $tweet) => $tweet, $tweet);
     }
 
     public function count(): int
     {
-        return count($this->status);
+        return count($this->tweet);
     }
 
     public function map(Closure $callable): StrictCollectionInterface
     {
         return self::fromArray(array_map(
             $callable,
-            $this->status
+            $this->tweet
         ));
     }
 
-    public function add($status): self
+    public function add($item): self
     {
-        $this->status[] = $status;
+        $this->tweet[] = $item;
 
         return $this;
     }
 
     public function isEmpty(): bool
     {
-        return count($this->status) === 0;
+        return count($this->tweet) === 0;
     }
 
     public function isNotEmpty(): bool
@@ -50,9 +50,9 @@ class StatusCollection implements StrictCollectionInterface
     /**
      * @inheritDoc
      */
-    public static function fromArray(array $status): self
+    public static function fromArray(array $collection): self
     {
-        return new self($status);
+        return new self($collection);
     }
 
     /**
@@ -60,7 +60,7 @@ class StatusCollection implements StrictCollectionInterface
      */
     public function toArray(): array
     {
-        return $this->status;
+        return $this->tweet;
     }
 
     public function first(): ?TweetInterface
@@ -69,6 +69,6 @@ class StatusCollection implements StrictCollectionInterface
             return null;
         }
 
-        return $this->status[0];
+        return $this->tweet[0];
     }
 }

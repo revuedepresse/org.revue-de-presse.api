@@ -16,10 +16,12 @@ use Doctrine\Persistence\ObjectRepository;
 interface TweetRepositoryInterface extends ObjectRepository, ExtremumAwareInterface
 {
     public function findNextExtremum(
-        string $screenName,
-        string $direction = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER,
+        string  $memberUsername,
+        string  $direction = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER,
         ?string $before = null
     ): array;
+
+    public function byId(int $tweetId): TweetInterface;
 
     public function reviseDocument(TaggedTweet $taggedTweet): TweetInterface;
 

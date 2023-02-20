@@ -69,43 +69,36 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     /**
      * @throws NotFoundMemberException
      */
-    public function declareMaxStatusIdForMemberWithScreenName(string $maxStatusId, string $screenName)
+    public function declareMaxTweetIdForMemberHavingScreenName(string $maxStatusId, string $screenName): MemberInterface
     {
         $member = $this->ensureMemberExists($screenName);
 
-        if ($member->maxStatusId === null || ((int)$maxStatusId > (int)$member->maxStatusId)) {
-            $member->maxStatusId = $maxStatusId;
+        if ($member->maxTweetId() === 0 || ((int) $maxStatusId > $member->maxTweetId())) {
+            $member->setMaxTweetId((int) $maxStatusId);
         }
 
         return $this->saveMember($member);
     }
 
-    public function declareMemberAsFound(MemberInterface $user): MemberInterface
+    public function declareMemberAsFound(MemberInterface $member): MemberInterface
     {
-        $user->setNotFound(false);
+        $member->setNotFound(false);
 
-        return $this->saveMember($user);
+        return $this->saveMember($member);
     }
 
-    public function declareMemberAsNotFound(MemberInterface $user): MemberInterface
+    public function declareMemberAsNotFound(MemberInterface $member): MemberInterface
     {
-        $user->setNotFound(true);
+        $member->setNotFound(true);
 
-        return $this->saveMember($user);
+        return $this->saveMember($member);
     }
 
-    /**
-     * @param string $screenName
-     *
-     * @return MemberInterface|null
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function declareMemberAsSuspended(string $screenName): ?MemberInterface
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$member instanceof MemberInterface) {
+        if (!($member instanceof MemberInterface)) {
             return null;
         }
 
@@ -130,7 +123,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     /**
      * @throws NotFoundMemberException
      */
-    public function declareMinStatusIdForMemberWithScreenName(
+    public function declareMinTweetIdForMemberHavingScreenName(
         string $minStatusId,
         string $screenName
     ): MemberInterface
@@ -138,10 +131,10 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         $member = $this->ensureMemberExists($screenName);
 
         if (
-            $member->minStatusId === null
-            || ((int)$minStatusId < (int)$member->minStatusId)
+            $member->minTweetId() === 0
+            || ((int)$minStatusId < $member->minTweetId())
         ) {
-            $member->minStatusId = $minStatusId;
+            $member->setMinTweetId((int) $minStatusId);
         }
 
         return $this->saveMember($member);
@@ -171,7 +164,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$member instanceof MemberInterface) {
+        if (!($member instanceof MemberInterface)) {
             return null;
         }
 
@@ -184,7 +177,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     public function declareUserAsProtected(string $screenName, string $twitterId)
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
-        if (!$member instanceof MemberInterface) {
+        if (!($member instanceof MemberInterface)) {
             return $this->make(
                 $twitterId ?? (string)(int)microtime(true),
                 $screenName,
@@ -252,11 +245,11 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
             );
         }
 
-        return $member->getMinStatusId();
+        return $member->minTweetId();
     }
 
     /**
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function hasBeenUpdatedBetweenHalfAnHourAgoAndNow(string $screenName): bool
     {
@@ -395,7 +388,7 @@ QUERY;
 
             $member = $this->findOneBy(['id' => $memberIdentifier]);
 
-            if (!$member instanceof MemberInterface) {
+            if (!($member instanceof MemberInterface)) {
                 $this->logger
                     ->error(
                         'Mismatching member identifier and screen name or removal.',
@@ -650,7 +643,7 @@ QUERY;
 
         $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$member instanceof MemberInterface) {
+        if (!($member instanceof MemberInterface)) {
             NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($screenName, 'member-not-found');
         }
 

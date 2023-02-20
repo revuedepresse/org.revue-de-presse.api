@@ -22,6 +22,7 @@ namespace App\Twitter\Domain\Http;
  * error code 130 => Twitter is temporarily over capacity.
  * error code 131 => Internal error
  * error code 135 => Could not authenticate you
+ * error code 136 => You have been blocked from viewing this user's profile
  * error code 161 => Thrown when a user cannot follow another user due to some kind of limit
  * error code 179 => Thrown when a Tweet cannot be viewed by the authenticating user, usually due to the tweet's author having protected their tweets.
  * error code 185 => User is over daily status update limit
@@ -69,6 +70,8 @@ interface TwitterAPIAwareInterface
     public const ERROR_INTERNAL_ERROR = 131;
 
     public const ERROR_AUTHENTICATION_OAUTH = 135;
+
+    public const ERROR_BLOCKED_FROM_VIEWING_MEMBER_PROFILE = 136;
 
     public const ERROR_NO_STATUS_FOUND_WITH_THAT_ID = 144;
 

@@ -46,10 +46,6 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
     }
 
     /**
-     * @param stdClass|array $content
-     * @param string         $endpoint
-     * @param callable       $onApiLimitExceeded
-     *
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws NotFoundMemberException
@@ -59,6 +55,7 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
      * @throws ReadOnlyApplicationException
      * @throws SuspendedAccountException
      * @throws UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
      */
     public static function guardAgainstContentFetchingException(
         $content,
@@ -103,6 +100,13 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
             );
         }
 
+        if ($errorCode === self::ERROR_BLOCKED_FROM_VIEWING_MEMBER_PROFILE) {
+            throw new BlockedFromViewingMemberProfileException(
+                $error->message,
+                $error->code
+            );
+        }
+
         if ($errorCode === self::ERROR_BAD_AUTHENTICATION_DATA) {
             throw new BadAuthenticationDataException(
                 $error->message,
@@ -140,11 +144,6 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
         }
     }
 
-    /**
-     * @param $response
-     *
-     * @return bool
-     */
     public static function containErrors($response): bool
     {
         return is_object($response)
@@ -154,13 +153,6 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
                 || isset($response->error));
     }
 
-    /**
-     * @param LoggerInterface $logger
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @return string
-     */
     private static function logUnavailableMemberException(
         Exception $exception,
         LoggerInterface $logger,
@@ -192,12 +184,8 @@ class UnavailableResourceException extends Exception implements TwitterAPIAwareI
         return $message;
     }
 
-    /**
-     * @param string $endpoint
-     * @return bool
-     */
     private static function exceptWhenAccessingApiRateLimitStatus(string $endpoint): bool
     {
-        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) === false;
+        return !str_contains($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS);
     }
 }

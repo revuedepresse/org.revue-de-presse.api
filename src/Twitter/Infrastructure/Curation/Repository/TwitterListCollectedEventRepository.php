@@ -32,7 +32,7 @@ class TwitterListCollectedEventRepository extends ServiceEntityRepository implem
 
         try {
             $membershipCollection = $this->byListId($listId);
-        } catch (PublishersListNotFoundException $e) {
+        } catch (PublishersListNotFoundException) {
             $event                = $this->startCollectOfPublishersList(
                 $listId,
                 $listName

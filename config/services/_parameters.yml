@@ -24,6 +24,8 @@ parameters:
     level:      debug
     channels:   ["!event"]
 
+  api.twitter.bearer_token:           '%env(resolve:API_TWITTER_BEARER_TOKEN)%'
+
   app.twitter_api.consumer_key:       '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
   app.twitter_api.consumer_secret:    '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
   app.twitter.oauth_token.default:    '%env(resolve:API_TWITTER_USER_TOKEN)%'

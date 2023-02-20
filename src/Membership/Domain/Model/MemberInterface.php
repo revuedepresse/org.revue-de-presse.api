@@ -71,7 +71,13 @@ interface MemberInterface extends UserInterface
 
     public function setTotalTweets($totalTweets): MemberInterface;
 
-    public function getMinStatusId(): int;
+    public function maxTweetId(): int;
+
+    public function setMaxTweetId(?int $tweetId): MemberInterface;
+
+    public function minTweetId(): int;
+
+    public function setMinTweetId(?int $minTweetId): MemberInterface;
 
     public function addToken(TokenInterface $token): MemberInterface;
 

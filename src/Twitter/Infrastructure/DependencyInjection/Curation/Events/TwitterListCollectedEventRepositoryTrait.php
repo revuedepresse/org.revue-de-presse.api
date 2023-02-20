@@ -5,11 +5,11 @@ namespace App\Twitter\Infrastructure\DependencyInjection\Curation\Events;
 
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 
-trait PublishersListCollectedEventRepositoryTrait
+trait TwitterListCollectedEventRepositoryTrait
 {
     private ListCollectedEventRepositoryInterface $publishersListCollectedEventRepository;
 
-    public function setPublishersListCollectedEventRepository(
+    public function setTwitterListCollectedEventRepository(
         ListCollectedEventRepositoryInterface $publishersListCollectedEventRepository
     ): self {
         $this->publishersListCollectedEventRepository = $publishersListCollectedEventRepository;

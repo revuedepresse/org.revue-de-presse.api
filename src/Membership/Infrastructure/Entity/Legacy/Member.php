@@ -50,20 +50,39 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     public ?string $maxStatusId;
 
+    public function maxTweetId(): int
+    {
+        return intval($this->maxStatusId);
+    }
+
+    public function setMaxTweetId(?int $tweetId): MemberInterface
+    {
+        $this->maxStatusId = (string) $tweetId;
+
+        return $this;
+    }
+
     /**
      * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
      */
     public ?string $minStatusId;
 
+    public function minTweetId(): int
+    {
+        return (int) $this->minStatusId;
+    }
+
+    public function setMinTweetId(?int $minTweetId): MemberInterface
+    {
+        $this->minStatusId = (string) $minTweetId;
+
+        return $this;
+    }
+
     private ?string $rawDocument = '{}';
 
     public function rawDocument(): array {
         return json_decode($this->rawDocument, true);
-    }
-
-    public function getMinStatusId(): int
-    {
-        return (int) $this->minStatusId;
     }
 
     /**

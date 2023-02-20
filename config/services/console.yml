@@ -80,6 +80,24 @@ services:
         tags:
             - { name: 'console.command' }
 
+    App\Twitter\Infrastructure\Http\Client\Fallback\TwitterHttpApiClient:
+        class: 'App\Twitter\Infrastructure\Http\Client\Fallback\TwitterHttpApiClient'
+        arguments:
+            - '%api.twitter.bearer_token%'
+            - '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            - '@App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface'
+            - '@logger'
+
+    App\Twitter\Domain\Http\Client\Fallback\TwitterHttpApiClientInterface:
+        '@App\Twitter\Infrastructure\Http\Client\Fallback\TwitterHttpApiClient'
+
+    App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand:
+        class: 'App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand'
+        arguments:
+            - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
+        tags:
+            - { name: 'console.command' }
+
     command.import_media_relationships:
         class: 'App\FrenchMediaShareholders\Console\ImportFrenchMediaShareholdersCommand'
         properties:

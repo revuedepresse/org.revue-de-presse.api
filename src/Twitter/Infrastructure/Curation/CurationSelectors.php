@@ -57,20 +57,32 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private string $searchQuery = '';
 
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
         MemberRepositoryInterface $memberRepository
     ): bool {
-        $minPublicationId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
+        $minTweetId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
             $this->screenName()
         );
 
-        if ($minPublicationId) {
+        $totalTweets = $tweetRepository->howManyTweetsHaveBeenCollectedForMemberHavingUserName($this->screenName());
+
+        if ($minTweetId === 0 && $totalTweets > 0) {
+            $minTweetId = $tweetRepository->findNextExtremum(
+                $this->screenName(),
+                $tweetRepository::FINDING_IN_DESCENDING_ORDER
+            );
+        }
+
+        if ($minTweetId) {
             return true;
         }
 
-        return $tweetRepository->countHowManyStatusesFor($this->screenName())
-            > self::MAX_AVAILABLE_TWEETS_PER_USER;
+        return $totalTweets > self::MAX_AVAILABLE_TWEETS_PER_USER;
     }
 
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string

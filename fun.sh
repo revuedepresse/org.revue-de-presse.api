@@ -182,8 +182,6 @@ function clean() {
     fi
 
     remove_running_container_and_image_in_debug_mode 'app'
-    remove_running_container_and_image_in_debug_mode 'process-manager'
-    remove_running_container_and_image_in_debug_mode 'worker'
 }
 
 function clear_cache_warmup() {
@@ -198,6 +196,7 @@ function clear_cache_warmup() {
 
     if [ -z "${reuse_existing_container}" ];
     then
+
         remove_running_container_and_image_in_debug_mode 'app'
 
         docker compose \
@@ -206,6 +205,7 @@ function clear_cache_warmup() {
             up \
             --detach \
             app
+
     fi
 
     docker compose \
@@ -215,8 +215,6 @@ function clear_cache_warmup() {
         --user "${WORKER_OWNER_UID}:${WORKER_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
-
-    clean ''
 }
 
 function green() {
@@ -250,6 +248,8 @@ function install() {
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
     clear_cache_warmup --reuse-existing-container
+
+    clean ''
 }
 
 function load_configuration_parameters() {
@@ -405,6 +405,7 @@ docker compose \
       --file=./provisioning/containers/docker-compose.yaml \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
+			--no-build \
 			--detach \
 			--force-recreate \
 			process-manager

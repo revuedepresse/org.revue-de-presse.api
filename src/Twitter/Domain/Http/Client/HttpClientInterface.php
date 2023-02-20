@@ -10,14 +10,8 @@ use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use stdClass;
 
-interface HttpClientInterface extends TwitterAPIAwareInterface
+interface HttpClientInterface extends TwitterAPIAwareInterface, TwitterAPIEndpointsAwareInterface
 {
-    public const BASE_URL = 'https://api.twitter.com/';
-
-    public const TWITTER_API_VERSION_1_1 = '1.1';
-
-    public const TWITTER_API_VERSION_2 = '2';
-
     public function contactEndpoint(string $endpoint);
 
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface;

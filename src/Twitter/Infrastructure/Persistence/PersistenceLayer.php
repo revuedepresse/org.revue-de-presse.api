@@ -57,7 +57,7 @@ class PersistenceLayer implements PersistenceLayerInterface
 
         // Mark status as published
         $tweetCollection = new Collection(
-            $result[$tweetPersistenceLayer::PROPERTY_STATUS]->toArray()
+            $result[$tweetPersistenceLayer::PROPERTY_TWEET]->toArray()
         );
         $tweetCollection->map(fn(TweetInterface $tweet) => $tweet->markAsPublished());
 
@@ -107,7 +107,7 @@ class PersistenceLayer implements PersistenceLayerInterface
 
         // Mark status as published
         $tweetCollection = new Collection(
-            $result[$tweetPersistenceLayer::PROPERTY_STATUS]->toArray()
+            $result[$tweetPersistenceLayer::PROPERTY_TWEET]->toArray()
         );
         $tweetCollection->map(fn(TweetInterface $status) => $status->markAsPublished());
 

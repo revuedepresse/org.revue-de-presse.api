@@ -59,20 +59,20 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         MemberInterface $member,
         PublishersListResource $list
     ): PublishersListInterface {
-        $aggregate = $this->findOneBy(
+        $twitterList = $this->findOneBy(
             [
                 'name'       => $list->name(),
                 'screenName' => $member->twitterScreenName()
             ]
         );
 
-        if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->make($member->twitterScreenName(), $list->name());
+        if (!($twitterList instanceof PublishersList)) {
+            $twitterList = $this->make($member->twitterScreenName(), $list->name());
         }
 
-        $aggregate->listId = $list->id();
+        $twitterList->listId = $list->id();
 
-        return $this->save($aggregate);
+        return $this->save($twitterList);
     }
 
     public function bulkRemoveAggregates(array $aggregateIds)
@@ -195,12 +195,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $aggregate;
     }
 
-    /**
-     * @param PublishersListInterface $aggregate
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function lockAggregate(PublishersListInterface $aggregate)
     {
         $aggregate->lock();
@@ -209,10 +203,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     }
 
     /**
-     * @param string $screenName
-     * @param string $listName
-     *
-     * @return PublishersListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -238,11 +228,11 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $aggregate;
     }
 
-    public function unlockPublishersList(PublishersListInterface $aggregate): PublishersListInterface
+    public function unlockPublishersList(PublishersListInterface $twitterList): PublishersListInterface
     {
-        $aggregate->unlock();
+        $twitterList->unlock();
 
-        return $this->save($aggregate);
+        return $this->save($twitterList);
     }
 
     /**
