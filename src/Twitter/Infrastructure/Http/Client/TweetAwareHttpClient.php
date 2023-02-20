@@ -224,11 +224,11 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $fetchedMember = $this->collectMemberProfile($memberName);
 
             if ($shouldTryToSaveDescription) {
-                $member->description = $fetchedMember->description ?? '';
+                $member->description = $fetchedMember->description ?? '_';
             }
 
             if ($shouldTryToSaveUrl) {
-                $member->url = $fetchedMember->url ?? '';
+                $member->url = $fetchedMember->url ?? "https://twitter.com/{$memberName}";
             }
 
             $this->memberRepository->saveMember($member);
