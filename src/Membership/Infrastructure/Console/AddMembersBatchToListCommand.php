@@ -156,6 +156,11 @@ class AddMembersBatchToListCommand extends AbstractCommand
             $filteredLists = array_filter(
                 $ownershipsLists->toArray(),
                 static function (PublishersList $list) use ($publishersListIdentifier) {
+                    if (is_numeric($publishersListIdentifier)) {
+                        return $list->id() === $publishersListIdentifier;
+                    }
+
+                    return $list->name() === $publishersListIdentifier;
                 }
             );
 
