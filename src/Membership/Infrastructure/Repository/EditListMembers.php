@@ -115,7 +115,7 @@ class EditListMembers extends ServiceEntityRepository implements EditListMembers
 
                 $this->networkRepository->guardAgainstExceptionalMemberWhenLookingForOne(
                     function () use ($memberInList) {
-                        $this->httpClient->followMember($memberInList);
+                        return $this->httpClient->followMember($memberInList);
                     },
                     $memberInList->memberInList->twitterId()
                 );
