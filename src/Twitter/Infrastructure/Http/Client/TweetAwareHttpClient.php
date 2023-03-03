@@ -232,17 +232,50 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         ;
 
         $shouldTryToSaveDescription = $member->getDescription() === null && $memberBioIsAvailable;
-        $shouldTryToSaveUrl = $member->getUrl() === null && $memberBioIsAvailable;
+        $shouldTryToSaveUrl = ($member->getUrl() === null || str_contains($member->getUrl(), 't.co')) && $memberBioIsAvailable;
+        $shouldTryToSaveName = empty($member->getFullName());
 
-        if ($shouldTryToSaveDescription || $shouldTryToSaveUrl) {
+        if ($shouldTryToSaveDescription || $shouldTryToSaveUrl || $shouldTryToSaveName) {
             $fetchedMember = $this->collectMemberProfile($memberName);
+
+            if ($shouldTryToSaveName) {
+                $member->setName($fetchedMember->name);
+            }
 
             if ($shouldTryToSaveDescription) {
                 $member->description = $fetchedMember->description ?? '';
             }
 
             if ($shouldTryToSaveUrl) {
-                $member->url = $fetchedMember->url ?? '';
+                $member->url = '';
+
+                if ($fetchedMember->url !== null && str_contains($fetchedMember->url, 't.co')) {
+                    try {
+                        $handle = curl_init();
+
+                        curl_setopt($handle, CURLOPT_URL, $fetchedMember->url);
+                        curl_setopt($handle, CURLOPT_HTTPHEADER, ['Location:']);
+                        curl_exec($handle);
+
+                        $url = safeCurlGetInfo($handle, CURLINFO_REDIRECT_URL);
+
+                        // HTTP to HTTPS redirect
+                        if (str_contains($url, 'https://t.co')) {
+                            $handle = curl_init();
+                            $unsecureUrl = $url;
+
+                            curl_setopt($handle, CURLOPT_URL, $unsecureUrl);
+                            curl_setopt($handle, CURLOPT_HTTPHEADER, ['Location:']);
+                            curl_exec($handle);
+
+                            $url = safeCurlGetInfo($handle, CURLINFO_REDIRECT_URL);
+                        }
+
+                        $member->url = $url;
+                    } catch (\Exception) {
+                        $member->url = $fetchedMember->url;
+                    }
+                }
             }
 
             $this->memberRepository->saveMember($member);
