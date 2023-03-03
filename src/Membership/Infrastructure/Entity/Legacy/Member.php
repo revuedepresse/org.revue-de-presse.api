@@ -356,6 +356,10 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     public function getFullName(): string
     {
+        if ($this->fullName === null) {
+            return '';
+        }
+
         return $this->fullName;
     }
 
