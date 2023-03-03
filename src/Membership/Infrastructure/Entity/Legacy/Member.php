@@ -93,7 +93,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->totalLikes;
     }
 
-    public function setTotalLikes(int $totalLikes): MemberInterface
+    public function setTotalLikes(int $totalLikes): self
     {
         $this->totalLikes = $totalLikes;
 
@@ -115,7 +115,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     public ?\DateTimeInterface $lastStatusPublicationDate = null;
 
-    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): self
     {
         $this->lastStatusPublicationDate = $lastStatusPublicationDate;
 
@@ -148,7 +148,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     protected ?string $twitterID;
 
-    public function setTwitterID(string $twitterId): MemberInterface
+    public function setTwitterID(string $twitterId): self
     {
         $this->twitterID = $twitterId;
 
@@ -165,7 +165,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     protected ?string $twitter_username;
 
-    public function setTwitterScreenName(string $twitterScreenName): MemberInterface
+    public function setTwitterScreenName(string $twitterScreenName): self
     {
         $this->twitter_username = strtolower($twitterScreenName);
 
@@ -345,7 +345,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->description;
     }
 
-    public function getEnabled()
+    public function getEnabled(): bool
     {
         return $this->enabled;
     }
@@ -364,7 +364,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      * @deprecated in favor of ->setName
      *
      */
-    public function setFullName(string $fullName): MemberInterface
+    public function setFullName(string $fullName): self
     {
         return $this->setName($fullName);
     }
@@ -441,7 +441,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->hasBeenDeclaredAsNotFound();
     }
 
-    public function setNotFound(bool $notFound): MemberInterface
+    public function setNotFound(bool $notFound): self
     {
         $this->notFound = $notFound;
 
@@ -463,7 +463,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->protected;
     }
 
-    public function setProtected(bool $protected): MemberInterface
+    public function setProtected(bool $protected): self
     {
         $this->protected = $protected;
 
@@ -475,7 +475,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->suspended;
     }
 
-    public function setSuspended(bool $suspended): MemberInterface
+    public function setSuspended(bool $suspended): self
     {
         $this->suspended = $suspended;
 
@@ -501,7 +501,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function setName(string $name): MemberInterface
+    public function setName(string $name): self
     {
         $this->fullName = $name;
 
@@ -515,7 +515,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function setTotalTweets($totalTweets): MemberInterface
+    public function setTotalTweets($totalTweets): self
     {
         $this->totalStatuses = $totalTweets;
 
@@ -527,21 +527,21 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->totalStatuses;
     }
 
-    public function setRawDocument(string $rawDocument): MemberInterface
+    public function setRawDocument(string $rawDocument): self
     {
         $this->rawDocument = $rawDocument;
 
         return $this;
     }
 
-    public function setUrl(string $url): MemberInterface
+    public function setUrl(string $url): self
     {
         $this->url = $url;
 
         return $this;
     }
 
-    public function setDescription(string $description): MemberInterface
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 
