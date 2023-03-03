@@ -180,11 +180,9 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $this->memberRepository->make(
                 $id,
                 $member->screen_name,
-                $protected = false,
-                $suspended = false,
-                $member->description,
-                $member->friends_count,
-                $member->followers_count
+                description: $member->description,
+                totalSubscriptions: $member->friends_count,
+                totalSubscribees: $member->followers_count
             )
         );
     }
