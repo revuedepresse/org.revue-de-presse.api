@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Entity\Legacy;
 
-use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
+use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Serialization\JsonEncodingAwareInterface;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -79,8 +78,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     public ?string $minLikeId;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
     public int $totalStatuses = 0;
@@ -95,7 +92,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->totalLikes;
     }
 
-    public function setTotalLikes(int $totalLikes): MemberInterface
+    public function setTotalLikes(int $totalLikes): self
     {
         $this->totalLikes = $totalLikes;
 
@@ -117,7 +114,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     public ?\DateTimeInterface $lastStatusPublicationDate = null;
 
-    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): MemberInterface
+    public function setLastStatusPublicationDate(\DateTimeInterface $lastStatusPublicationDate): self
     {
         $this->lastStatusPublicationDate = $lastStatusPublicationDate;
 
@@ -150,19 +147,13 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     protected ?string $twitterID;
 
-    /**
-     * @return MemberInterface
-     */
-    public function setTwitterID(string $twitterId): MemberInterface
+    public function setTwitterID(string $twitterId): self
     {
         $this->twitterID = $twitterId;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function twitterId(): ?string
     {
         return $this->twitterID;
@@ -173,7 +164,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      */
     protected ?string $twitter_username;
 
-    public function setTwitterScreenName(string $twitterScreenName): MemberInterface
+    public function setTwitterScreenName(string $twitterScreenName): self
     {
         $this->twitter_username = strtolower($twitterScreenName);
 
@@ -336,19 +327,11 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->apiKey;
     }
 
-    /**
-     * @return string
-     */
     public function getAvatar(): string
     {
         return $this->avatar;
     }
 
-    /**
-     * @param string $avatar
-     *
-     * @return $this
-     */
     public function setAvatar(string $avatar): self
     {
         $this->avatar = $avatar;
@@ -356,75 +339,49 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    /**
-     * @return null|string
-     */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    /**
-     * Get enabled
-     *
-     * @return boolean
-     */
-    public function getEnabled()
+    public function getEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * Get expired
-     *
-     * @return boolean
-     */
     public function getExpired()
     {
         return $this->expired;
     }
 
-    /**
-     * @return string
-     */
     public function getFullName(): string
     {
+        if ($this->fullName === null) {
+            return '';
+        }
+
         return $this->fullName;
     }
 
     /**
-     * @param string $fullName
-     *
-     * @return MemberInterface
      * @deprecated in favor of ->setName
      *
      */
-    public function setFullName(string $fullName): MemberInterface
+    public function setFullName(string $fullName): self
     {
         return $this->setName($fullName);
     }
 
-    /**
-     * @return int|null
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @return bool
-     */
     public function getLocked(): bool
     {
         return $this->locked;
     }
 
-    /**
-     * @param $locked
-     *
-     * @return self
-     */
     public function setLocked($locked): self
     {
         $this->locked = $locked;
@@ -432,11 +389,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    /**
-     * Get password
-     *
-     * @return string
-     */
     public function getPassword(): string
     {
         return $this->password;
@@ -447,39 +399,30 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->tokens;
     }
 
-    /**
-     * @return string
-     */
     public function getUrl(): ?string
     {
         return $this->url;
     }
 
-    /**
-     * @return string|null
-     */
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    /**
-     * @return boolean
-     */
     public function hasBeenDeclaredAsNotFound(): bool
     {
         return $this->notFound;
     }
 
-    /**
-     * @return boolean
-     */
     public function hasNotBeenDeclaredAsNotFound(): bool
     {
         return !$this->hasBeenDeclaredAsNotFound();
     }
 
-    /** @deprecated */
+    /**
+     * @throws \Exception
+     * @deprecated in favor of ->isLowVolumeTweetWriter
+     */
     public function isAWhisperer(): bool
     {
         $oneMonthAgo = new DateTime('now', new \DateTimeZone('UTC'));
@@ -494,7 +437,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     }
 
     /**
-     * @return boolean
      * @deprecated in favor of ->hasBeenDeclaredAsNotFound
      */
     public function isNotFound(): bool
@@ -502,91 +444,52 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->hasBeenDeclaredAsNotFound();
     }
 
-    /**
-     * @param bool $notFound
-     *
-     * @return MemberInterface
-     */
-    public function setNotFound(bool $notFound): MemberInterface
+    public function setNotFound(bool $notFound): self
     {
         $this->notFound = $notFound;
 
         return $this;
     }
 
-    /**
-     * @return boolean
-     */
     public function isNotProtected(): bool
     {
         return !$this->isProtected();
     }
 
-    /**
-     * @return boolean
-     */
     public function isNotSuspended(): bool
     {
         return !$this->isSuspended();
     }
 
-    /**
-     * @return boolean
-     */
     public function isProtected(): bool
     {
         return $this->protected;
     }
 
-    /**
-     * @param boolean $protected
-     *
-     * @return MemberInterface
-     */
-    public function setProtected(bool $protected): MemberInterface
+    public function setProtected(bool $protected): self
     {
         $this->protected = $protected;
 
         return $this;
     }
 
-    /**
-     * @return boolean
-     */
     public function isSuspended(): bool
     {
         return $this->suspended;
     }
 
-    /**
-     * @param bool $suspended
-     *
-     * @return MemberInterface
-     */
-    public function setSuspended(bool $suspended): MemberInterface
+    public function setSuspended(bool $suspended): self
     {
         $this->suspended = $suspended;
 
         return $this;
     }
 
-    /**
-     * Remove tokens
-     *
-     * @param Token $tokens
-     */
     public function removeToken(Token $tokens)
     {
         $this->tokens->removeElement($tokens);
     }
 
-    /**
-     * Set confirmationToken
-     *
-     * @param string $confirmationToken
-     *
-     * @return MemberInterface
-     */
     public function setConfirmationToken($confirmationToken)
     {
         $this->confirmationToken = $confirmationToken;
@@ -594,11 +497,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    /**
-     * @param bool $expired
-     *
-     * @return $this
-     */
     public function setExpired(bool $expired): self
     {
         $this->expired = $expired;
@@ -606,20 +504,13 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function setName(string $name): MemberInterface
+    public function setName(string $name): self
     {
         $this->fullName = $name;
 
         return $this;
     }
 
-    /**
-     * Set password
-     *
-     * @param string $password
-     *
-     * @return Member
-     */
     public function setPassword(string $password): self
     {
         $this->password = $password;
@@ -627,7 +518,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function setTotalTweets($totalTweets): MemberInterface
+    public function setTotalTweets($totalTweets): self
     {
         $this->totalStatuses = $totalTweets;
 
@@ -639,21 +530,21 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->totalStatuses;
     }
 
-    public function setRawDocument(string $rawDocument): MemberInterface
+    public function setRawDocument(string $rawDocument): self
     {
         $this->rawDocument = $rawDocument;
 
         return $this;
     }
 
-    public function setUrl(string $url): MemberInterface
+    public function setUrl(string $url): self
     {
         $this->url = $url;
 
         return $this;
     }
 
-    public function setDescription(string $description): MemberInterface
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 

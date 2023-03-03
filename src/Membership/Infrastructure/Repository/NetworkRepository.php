@@ -217,7 +217,7 @@ class NetworkRepository implements NetworkRepositoryInterface
 
             throw $exception;
         } finally {
-            if (!isset($exception)) {
+            if (!isset($exception) && isset($existingMember)) {
                 return $existingMember;
             }
 

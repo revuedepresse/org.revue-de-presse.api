@@ -5,8 +5,8 @@ namespace App\Twitter\Infrastructure\Http\Client;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
+use App\Twitter\Domain\Http\Client\TweetAwareHttpClientInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
@@ -25,13 +25,12 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
-use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Repository\ArchivedTweetRepository;
-use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -40,6 +39,7 @@ use Exception;
 use ReflectionException;
 use function array_key_exists;
 use function count;
+use function Safe\curl_getinfo as safeCurlGetInfo;
 use function sprintf;
 
 class TweetAwareHttpClient implements TweetAwareHttpClientInterface
@@ -180,11 +180,9 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $this->memberRepository->make(
                 $id,
                 $member->screen_name,
-                $protected = false,
-                $suspended = false,
-                $member->description,
-                $member->friends_count,
-                $member->followers_count
+                description: $member->description,
+                totalSubscriptions: $member->friends_count,
+                totalSubscribees: $member->followers_count
             )
         );
     }
@@ -234,17 +232,50 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         ;
 
         $shouldTryToSaveDescription = $member->getDescription() === null && $memberBioIsAvailable;
-        $shouldTryToSaveUrl = $member->getUrl() === null && $memberBioIsAvailable;
+        $shouldTryToSaveUrl = ($member->getUrl() === null || str_contains($member->getUrl(), 't.co')) && $memberBioIsAvailable;
+        $shouldTryToSaveName = empty($member->getFullName());
 
-        if ($shouldTryToSaveDescription || $shouldTryToSaveUrl) {
+        if ($shouldTryToSaveDescription || $shouldTryToSaveUrl || $shouldTryToSaveName) {
             $fetchedMember = $this->collectMemberProfile($memberName);
+
+            if ($shouldTryToSaveName) {
+                $member->setName($fetchedMember->name);
+            }
 
             if ($shouldTryToSaveDescription) {
                 $member->description = $fetchedMember->description ?? '';
             }
 
             if ($shouldTryToSaveUrl) {
-                $member->url = $fetchedMember->url ?? '';
+                $member->url = '';
+
+                if ($fetchedMember->url !== null && str_contains($fetchedMember->url, 't.co')) {
+                    try {
+                        $handle = curl_init();
+
+                        curl_setopt($handle, CURLOPT_URL, $fetchedMember->url);
+                        curl_setopt($handle, CURLOPT_HTTPHEADER, ['Location:']);
+                        curl_exec($handle);
+
+                        $url = safeCurlGetInfo($handle, CURLINFO_REDIRECT_URL);
+
+                        // HTTP to HTTPS redirect
+                        if (str_contains($url, 'https://t.co')) {
+                            $handle = curl_init();
+                            $unsecureUrl = $url;
+
+                            curl_setopt($handle, CURLOPT_URL, $unsecureUrl);
+                            curl_setopt($handle, CURLOPT_HTTPHEADER, ['Location:']);
+                            curl_exec($handle);
+
+                            $url = safeCurlGetInfo($handle, CURLINFO_REDIRECT_URL);
+                        }
+
+                        $member->url = $url;
+                    } catch (\Exception) {
+                        $member->url = $fetchedMember->url;
+                    }
+                }
             }
 
             $this->memberRepository->saveMember($member);
