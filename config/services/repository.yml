@@ -114,6 +114,7 @@ services:
             - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Http\Repository\StatusRepository'] ]
         properties:
             mediaDirectory: '%media_directory%'
+            defaultList:    '%list_default%'
 
     repository.not_found_status:
         class: 'App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository'

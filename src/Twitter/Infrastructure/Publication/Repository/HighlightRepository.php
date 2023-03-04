@@ -10,7 +10,12 @@ use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
+use Cassandra\Date;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Result;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
@@ -25,6 +30,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use PaginationAwareTrait;
     use ConversationAwareTrait;
     use LoggerTrait;
+
+    public string $defaultList;
 
     public string $mediaDirectory;
 
@@ -206,11 +213,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      */
     private function assertSearchPeriodIsValid(SearchParams $searchParams): void {
         if (
-            !($searchParams->getParams()['startDate'] instanceof \DateTime)
-            || !($searchParams->getParams()['endDate'] instanceof \DateTime)
+            !($searchParams->getParams()['startDate'] instanceof DateTime)
+            || !($searchParams->getParams()['endDate'] instanceof DateTime)
         ) {
             throw new InvalidArgumentException(
-                'Expected end date and start date to be instances of ' . \DateTime::class
+                'Expected end date and start date to be instances of ' . DateTime::class
             );
         }
     }
@@ -345,8 +352,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             'created_at' => $upstreamDocument['created_at'],
             'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
             'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
-            $textIndex    => $this->processText($text),
-            'id_str'     => $upstreamDocument['id_str']
+            $textIndex   => $this->processText($text),
+            'id_str'     => $upstreamDocument['id_str'],
+            'metrics'    => $this->tweetMetrics($upstreamDocument['id_str'])
         ];
 
         if (isset($upstreamDocument['user']['profile_image_url_https'])) {
@@ -377,7 +385,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 );
 
                 $lightweightJSON['entities'] = [
-                    'media' => $upstreamDocument['entities']['media']
+                    'media' => $upstreamDocument['entities']['media'],
+                    'urls'  => $upstreamDocument['entities']['urls']
                 ];
             }
         }
@@ -459,11 +468,35 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         return $fixer;
     }
 
-    public function processText(mixed $text): string
+    public function processText(mixed $subject): string
     {
-        $text = LitEmoji::encodeUnicode($text);
+        $subject = LitEmoji::encodeUnicode($subject);
 
-        return $this->getTypographyFixer()->fixString($text);
+        $urls = [];
+        $counter = 0;
+        $subject = preg_replace_callback(
+            '#(?<url>http(?:s)?://[^\s]+)(?<comma>\.?)#m',
+            function ($matches) use (&$counter, &$urls) {
+                $urls[] = $matches['url'];
+                $replacement = '\\'.$counter;
+                $counter++;
+
+                return $replacement;
+            }, $subject);
+
+        $fixedSubject = $this->getTypographyFixer()->fixString($subject);
+
+        $counter = 0;
+
+        return array_reduce(
+            $urls,
+            function ($subject, $url) use (&$counter) {
+                $subject = str_replace('\\'.$counter, $url, $subject);
+                $counter++;
+                return $subject;
+            },
+            $fixedSubject
+        );
     }
 
     public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
@@ -496,5 +529,252 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         throw new InvalidArgumentException('Cannot extract media contents');
+    }
+
+    public function tweetMetrics(string $tweetId): array|false
+    {
+        try {
+            $statement = $this->queryMetrics($tweetId);
+        } catch (Exception $e) {
+            return ['retweets' => [], 'favorites' => []];
+        }
+
+        try {
+            $rawMetrics = $statement->fetchAssociative();
+        } catch (Exception $e) {
+            $rawMetrics = [];
+        }
+
+        if (!$rawMetrics || count($rawMetrics) === 0) {
+            return ['retweets' => [], 'favorites' => []];
+        }
+
+        $retweets = $this->foldRetweets($rawMetrics["retweets"]);
+        $favorites = $this->foldFavorites($rawMetrics["favorites"]);
+
+        return ['retweets' => $retweets, 'favorites' => $favorites];
+    }
+
+    public function queryMetrics(string $tweetId): Result
+    {
+        $queryTemplate = <<<QUERY
+            SELECT
+            highlight.status_id as tweetId,
+            array_to_json(
+                array_agg(
+                    concat(
+                        coalesce(status_popularity.checked_at, highlight.publication_date_time),
+                        '|',
+                        coalesce(status_popularity.total_retweets, highlight.total_retweets)
+                    )
+                    order by status_popularity.checked_at asc
+                )
+            ) as retweets,
+            array_to_json(
+                array_agg(
+                    concat(
+                        coalesce(status_popularity.checked_at, highlight.publication_date_time),
+                        '|',
+                        coalesce(status_popularity.total_favorites, highlight.total_favorites)
+                    )
+                    order by status_popularity.checked_at asc
+                )
+            ) as favorites
+            FROM highlight
+            INNER JOIN weaving_status s ON s.ust_status_id = ? and s.ust_id = highlight.status_id
+            LEFT JOIN status_popularity ON (
+                status_popularity.status_id = highlight.status_id AND
+                publication_date_time::date = status_popularity.checked_at::date
+            )
+            WHERE highlight.aggregate_id in (
+                select id from publishers_list
+                where name = ?
+                and deleted_at is null
+            )
+            AND is_retweet = false
+            GROUP BY highlight.status_id, highlight.id
+QUERY;
+
+        return $this->getEntityManager()->getConnection()->executeQuery(
+            $queryTemplate,
+            [
+                $tweetId,
+                $this->defaultList
+            ],
+            [
+                \PDO::PARAM_STR,
+                \PDO::PARAM_STR,
+            ]
+        );
+    }
+
+    public function foldRetweets($retweets): array
+    {
+        $template = array_fill(7, 23 - 7 + 1, [
+            'checkedAt' => null,
+            'delta' => 0,
+            'retweets' => null,
+        ]);
+
+        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($retweets));
+        $retweetsMetrics = array_map(
+            fn($rt) => ['retweets' => $rt[1],
+                        'checkedAt' => (
+                            new \DateTimeImmutable(
+                                $rt[0],
+                                new \DateTimeZone('Europe/Paris')
+                            )
+                        )->format(DateTime::ATOM)],
+            $parts
+        );
+
+        $reducedRetweets = array_reduce($retweetsMetrics, function ($acc, $item) {
+            if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
+                return $acc;
+            }
+
+            $item['delta'] = $item['retweets'] - $acc[count($acc) - 1]['retweets'];
+            $acc[] = $item;
+
+            return $acc;
+        }, [$retweetsMetrics[0]]);
+
+        try {
+            $mappedRetweets = array_map(
+                fn($r) => (new \DateTimeImmutable($r['checkedAt']))->format('G'),
+                $reducedRetweets
+            );
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+
+            return [];
+        }
+
+        $indexedRetweets = array_combine($mappedRetweets, $reducedRetweets);
+        $filledColl = array_replace($template, $indexedRetweets);
+
+        $date = $reducedRetweets[0]['checkedAt'];
+        $hour = 7;
+
+        $reducedRetweets = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date) {
+            if ($item['checkedAt'] === null) {
+                $date = new \DateTimeImmutable($date, new \DateTimeZone('Europe/Paris'));
+                $laterDate = $date->setTime($hour, 0);
+                $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
+
+                if (count($carry) > 2 && array_key_exists(count($carry) - 2, $carry)) {
+                    $item['retweets'] = (int) $carry[count($carry) - 2]['retweets'];
+                } else {
+                    $item['retweets'] = 0;
+                }
+
+                $item['delta'] = 0;
+            }
+
+            $hour++;
+
+            $carry[] = $item;
+
+            return $carry;
+        }, []);
+
+        usort($reducedRetweets, function ($left, $right) {
+            if ($left['checkedAt'] === $right['checkedAt']) {
+                return 0;
+            }
+
+            if ($left['checkedAt'] > $right['checkedAt']) {
+                return 1;
+            }
+
+            return -1;
+        });
+
+        return $reducedRetweets;
+    }
+
+    public function foldFavorites($favorites): array
+    {
+        $template = array_fill(7, 23 - 7 + 1, [
+            'checkedAt' => null,
+            'delta' => 0,
+            'favorites' => null,
+        ]);
+
+        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($favorites));
+        $favoritesMetrics = array_map(
+            fn($fav) => [
+                'favorites' => $fav[1],
+                'checkedAt' => (
+                    new \DateTimeImmutable(
+                        $fav[0],
+                        new \DateTimeZone('Europe/Paris'))
+                )->format(DateTime::ATOM)],
+            $parts
+        );
+
+        $reducedFavorites = array_reduce($favoritesMetrics, function ($acc, $item) {
+            if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
+                return $acc;
+            }
+
+            $item['delta'] = $item['favorites'] - $acc[count($acc) - 1]['favorites'];
+            $acc[] = $item;
+
+            return $acc;
+        }, [$favoritesMetrics[0]]);
+
+        try {
+            $mappedFavorites = array_map(
+                fn($r) => (new \DateTimeImmutable($r['checkedAt']))->format('G'),
+                $reducedFavorites
+            );
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+
+            return [];
+        }
+
+        $indexedFavorites = array_combine($mappedFavorites, $reducedFavorites);
+        $filledColl = array_replace($template, $indexedFavorites);
+
+        $date = $reducedFavorites[0]['checkedAt'];
+        $hour = 7;
+
+        $reducedFavorites = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date) {
+            if ($item['checkedAt'] === null) {
+                $date = new \DateTimeImmutable($date, new \DateTimeZone('Europe/Paris'));
+                $laterDate = $date->setTime($hour, 0);
+                $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
+
+                if (count($carry) > 2 && array_key_exists(count($carry) - 2, $carry)) {
+                    $item['favorites'] = (int) $carry[count($carry) - 2]['favorites'];
+                } else {
+                    $item['favorites'] = 0;
+                }
+
+                $item['delta'] = 0;
+            }
+
+            $hour++;
+
+            $carry[] = $item;
+
+            return $carry;
+        }, []);
+
+        usort($reducedFavorites, function ($left, $right) {
+            if ($left['checkedAt'] === $right['checkedAt']) {
+                return 0;
+            }
+
+            if ($left['checkedAt'] > $right['checkedAt']) {
+                return 1;
+            }
+
+            return -1;
+        });
+
+        return $reducedFavorites;
     }
 }
