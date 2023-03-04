@@ -10,5 +10,5 @@ highlight:
 
 metrics:
     path:       /api/tweet/{tweetId}/metrics
-    controller: App\Trends\Infrastructure\Controller\MetricsController::getTweetMetrics
+    controller: App\Trends\Infrastructure\Controller\TweetMetricsController::tweetMetrics
     methods:    GET|OPTIONS

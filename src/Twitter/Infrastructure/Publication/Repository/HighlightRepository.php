@@ -11,6 +11,7 @@ use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
@@ -525,17 +526,59 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         throw new InvalidArgumentException('Cannot extract media contents');
     }
 
-    public function tweetMetrics(string $tweetId)
+    public function tweetMetrics(string $tweetId): array|false
+    {
+        try {
+            $statement = $this->queryMetrics($tweetId);
+        } catch (Exception $e) {
+            return ['retweets' => [], 'favorites' => []];
+        }
+
+        try {
+            $rawMetrics = $statement->fetchAssociative();
+        } catch (Exception $e) {
+            $rawMetrics = [];
+        }
+
+        if (count($rawMetrics) === 0) {
+            return ['retweets' => [], 'favorites' => []];
+        }
+
+        $retweets = $this->foldRetweets($rawMetrics["retweets"]);
+        $favorites = $this->foldFavorites($rawMetrics["favorites"]);
+
+        return ['retweets' => $retweets, 'favorites' => $favorites];
+    }
+
+    public function queryMetrics(string $tweetId)
     {
         $queryTemplate = <<<QUERY
             SELECT
-            highlight.status_id,
-            array_agg(concat(status_popularity.checked_at, '|', status_popularity.total_retweets) order by status_popularity.checked_at asc),
-            array_agg(concat(status_popularity.checked_at, '|', status_popularity.total_favorites) order by status_popularity.checked_at asc)
+            highlight.status_id as tweetId,
+            array_to_json(
+                array_agg(
+                    concat(
+                        status_popularity.checked_at,
+                        '|',
+                        status_popularity.total_retweets
+                    )
+                    order by status_popularity.checked_at asc
+                )
+            ) as retweets,
+            array_to_json(
+                array_agg(
+                    concat(
+                        status_popularity.checked_at,
+                        '|',
+                        status_popularity.total_favorites
+                    )
+                    order by status_popularity.checked_at asc
+                )
+            ) as favorites
             FROM highlight
             INNER JOIN weaving_status s ON s.ust_status_id = ? and s.ust_id = highlight.status_id
             LEFT JOIN status_popularity on status_popularity.status_id = highlight.status_id
-            where publication_date_time::date = now()::date
+            where publication_date_time::date = status_popularity.checked_at::date
                 and highlight.aggregate_id in (
                     select id from publishers_list
                 where name = ?
@@ -543,19 +586,58 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             )
             AND is_retweet = false
             GROUP BY highlight.status_id, highlight.id
-QUERY
-        ;
+QUERY;
 
         return $this->getEntityManager()->getConnection()->executeQuery(
             $queryTemplate,
             [
-                $this->defaultList.
-                $tweetId
+                $tweetId,
+                $this->defaultList
             ],
             [
                 \PDO::PARAM_STR,
                 \PDO::PARAM_STR,
             ]
         );
+    }
+
+    public function foldRetweets($retweets): array
+    {
+        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($retweets));
+        $retweetsMetrics = array_map(
+            fn($rt) => ['retweets' => $rt[1], 'checkedAt' => new \DateTimeImmutable($rt[0], new \DateTimeZone('Europe/Paris'))],
+            $parts
+        );
+
+        return array_reduce($retweetsMetrics, function ($acc, $item) {
+            if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
+                return $acc;
+            }
+
+            $item['delta'] = $item['retweets'] - $acc[count($acc) - 1]['retweets'];
+            $acc[] = $item;
+
+            return $acc;
+        }, [$retweetsMetrics[0]]);
+    }
+
+    public function foldFavorites($favorites)
+    {
+        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($favorites));
+        $favoritesMetrics = array_map(
+            fn($rt) => ['favorites' => $rt[1], 'checkedAt' => new \DateTimeImmutable($rt[0], new \DateTimeZone('Europe/Paris'))],
+            $parts
+        );
+
+        return array_reduce($favoritesMetrics, function ($acc, $item) {
+            if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
+                return $acc;
+            }
+
+            $item['delta'] = $item['favorites'] - $acc[count($acc) - 1]['favorites'];
+            $acc[] = $item;
+
+            return $acc;
+        }, [$favoritesMetrics[0]]);
     }
 }

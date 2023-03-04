@@ -3,15 +3,13 @@ declare(strict_types=1);
 
 namespace App\Trends\Infrastructure\Controller;
 
-use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class MetricsController
+class TweetMetricsController
 {
     use CorsHeadersAwareTrait;
 
@@ -19,7 +17,7 @@ class MetricsController
 
     public LoggerInterface $logger;
 
-    public function getTweetMetrics(Request $request): JsonResponse
+    public function tweetMetrics(Request $request): JsonResponse
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse(

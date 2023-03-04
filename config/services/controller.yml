@@ -20,3 +20,13 @@ services:
             router:                         '@router'
             popularPublicationRepository:   '@App\Trends\Infrastructure\Repository\PopularPublicationRepository'
             tokenRepository:                '@repository.access_token'
+
+    App\Trends\Infrastructure\Controller\TweetMetricsController:
+        public: true
+        class: 'App\Trends\Infrastructure\Controller\TweetMetricsController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
+        properties:
+            logger:                         '@logger'
+            highlightRepository:            '@repository.highlight'
