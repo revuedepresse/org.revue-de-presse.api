@@ -26,6 +26,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
     use ConversationAwareTrait;
     use LoggerTrait;
 
+    public string $defaultList;
+
     public string $mediaDirectory;
 
     private const TABLE_ALIAS = 'h';
@@ -521,5 +523,39 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         }
 
         throw new InvalidArgumentException('Cannot extract media contents');
+    }
+
+    public function tweetMetrics(string $tweetId)
+    {
+        $queryTemplate = <<<QUERY
+            SELECT
+            highlight.status_id,
+            array_agg(concat(status_popularity.checked_at, '|', status_popularity.total_retweets) order by status_popularity.checked_at asc),
+            array_agg(concat(status_popularity.checked_at, '|', status_popularity.total_favorites) order by status_popularity.checked_at asc)
+            FROM highlight
+            INNER JOIN weaving_status s ON s.ust_status_id = ? and s.ust_id = highlight.status_id
+            LEFT JOIN status_popularity on status_popularity.status_id = highlight.status_id
+            where publication_date_time::date = now()::date
+                and highlight.aggregate_id in (
+                    select id from publishers_list
+                where name = ?
+                and deleted_at is null
+            )
+            AND is_retweet = false
+            GROUP BY highlight.status_id, highlight.id
+QUERY
+        ;
+
+        return $this->getEntityManager()->getConnection()->executeQuery(
+            $queryTemplate,
+            [
+                $this->defaultList.
+                $tweetId
+            ],
+            [
+                \PDO::PARAM_STR,
+                \PDO::PARAM_STR,
+            ]
+        );
     }
 }
