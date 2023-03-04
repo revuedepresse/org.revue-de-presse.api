@@ -10,6 +10,7 @@ use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Query\Expr\Join;
@@ -209,11 +210,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      */
     private function assertSearchPeriodIsValid(SearchParams $searchParams): void {
         if (
-            !($searchParams->getParams()['startDate'] instanceof \DateTime)
-            || !($searchParams->getParams()['endDate'] instanceof \DateTime)
+            !($searchParams->getParams()['startDate'] instanceof DateTime)
+            || !($searchParams->getParams()['endDate'] instanceof DateTime)
         ) {
             throw new InvalidArgumentException(
-                'Expected end date and start date to be instances of ' . \DateTime::class
+                'Expected end date and start date to be instances of ' . DateTime::class
             );
         }
     }
@@ -274,6 +275,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                     $tweetDocument,
                     $lightweightJSON
                 );
+
+                $tweetPropertiesToOverride['metrics'] = $this->tweetMetrics($tweet['twitterId']);
 
                 unset(
                     $tweetDocument['original_document'],
@@ -605,7 +608,9 @@ QUERY;
     {
         $parts = array_map(fn($rt) => explode('|', $rt), json_decode($retweets));
         $retweetsMetrics = array_map(
-            fn($rt) => ['retweets' => $rt[1], 'checkedAt' => new \DateTimeImmutable($rt[0], new \DateTimeZone('Europe/Paris'))],
+            fn($rt) => ['retweets' => $rt[1],
+                        'checkedAt' => (new \DateTimeImmutable($rt[0], new \DateTimeZone('Europe/Paris')))
+                            ->format(DateTime::ATOM)],
             $parts
         );
 
@@ -625,7 +630,9 @@ QUERY;
     {
         $parts = array_map(fn($rt) => explode('|', $rt), json_decode($favorites));
         $favoritesMetrics = array_map(
-            fn($rt) => ['favorites' => $rt[1], 'checkedAt' => new \DateTimeImmutable($rt[0], new \DateTimeZone('Europe/Paris'))],
+            fn($fav) => ['favorites' => $fav[1],
+                        'checkedAt' => (new \DateTimeImmutable($fav[0], new \DateTimeZone('Europe/Paris')))
+                            ->format(DateTime::ATOM)],
             $parts
         );
 

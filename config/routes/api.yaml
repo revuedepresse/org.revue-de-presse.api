@@ -7,8 +7,3 @@ highlight:
     path:       /api/twitter/highlights
     controller: App\Trends\Infrastructure\Controller\TrendsController::getHighlights
     methods:    GET|OPTIONS
-
-metrics:
-    path:       /api/tweet/{tweetId}/metrics
-    controller: App\Trends\Infrastructure\Controller\TweetMetricsController::tweetMetrics
-    methods:    GET|OPTIONS
