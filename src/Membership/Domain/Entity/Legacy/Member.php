@@ -312,7 +312,7 @@ class Member extends MemberModel
         return $this->description;
     }
 
-    public function getEnabled()
+    public function getEnabled(): bool
     {
         return $this->enabled;
     }
@@ -358,7 +358,7 @@ class Member extends MemberModel
         return $this->password;
     }
 
-    public function getTokens()
+    public function getTokens(): Selectable
     {
         return $this->tokens;
     }
@@ -452,7 +452,7 @@ class Member extends MemberModel
         return $this->protected;
     }
 
-    public function setProtected(bool $protected): MemberInterface
+    public function setProtected(bool $protected): self
     {
         $this->protected = $protected;
 
@@ -464,7 +464,7 @@ class Member extends MemberModel
         return $this->suspended;
     }
 
-    public function setSuspended(bool $suspended): MemberInterface
+    public function setSuspended(bool $suspended): self
     {
         $this->suspended = $suspended;
 
