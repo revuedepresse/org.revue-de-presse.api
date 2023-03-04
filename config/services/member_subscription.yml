@@ -4,10 +4,3 @@ services:
         arguments:
             - '@App\Twitter\Infrastructure\Http\Accessor'
             - '@logger'
-
-    App\Twitter\Infrastructure\Http\Mutator\FriendshipMutator:
-        class: 'App\Twitter\Infrastructure\Http\Mutator\FriendshipMutator'
-        calls:
-            - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Http\Accessor' ] ]
-            - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]

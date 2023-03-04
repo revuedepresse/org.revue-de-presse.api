@@ -1532,9 +1532,6 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $screenName
-     *
-     * @return array|object|stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -1548,7 +1545,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getFriendsOfMemberHavingScreenName(string $screenName)
+    public function getFriendsOfMemberHavingScreenName(string $screenName): array|stdClass|null
     {
         $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
 
