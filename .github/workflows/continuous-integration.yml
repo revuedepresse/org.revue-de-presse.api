@@ -49,7 +49,9 @@ jobs:
             ${{ runner.os }}-php-
 
       - name: Add HTTP basic auth credentials
-        run: echo '${{ secrets.COMPOSER_AUTH_JSON }}' > $GITHUB_WORKSPACE/auth.json
+        env:
+          AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
+        run: echo $AUTH_JSON > $GITHUB_WORKSPACE/auth.json
 
       - name: Install dependencies
         run: composer install --prefer-dist
