@@ -13,6 +13,7 @@ use App\Twitter\Infrastructure\Http\SearchParams;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Result;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use InvalidArgumentException;
@@ -276,8 +277,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                     $lightweightJSON
                 );
 
-                $tweetPropertiesToOverride['metrics'] = $this->tweetMetrics($tweet['twitterId']);
-
                 unset(
                     $tweetDocument['original_document'],
                     $tweetDocument['total_favorites'],
@@ -351,8 +350,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             'created_at' => $upstreamDocument['created_at'],
             'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
             'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
-            $textIndex    => $this->processText($text),
-            'id_str'     => $upstreamDocument['id_str']
+            $textIndex   => $this->processText($text),
+            'id_str'     => $upstreamDocument['id_str'],
+            'metrics'    => $this->tweetMetrics($upstreamDocument['id_str'])
         ];
 
         if (isset($upstreamDocument['user']['profile_image_url_https'])) {
@@ -553,7 +553,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         return ['retweets' => $retweets, 'favorites' => $favorites];
     }
 
-    public function queryMetrics(string $tweetId)
+    public function queryMetrics(string $tweetId): Result
     {
         $queryTemplate = <<<QUERY
             SELECT
