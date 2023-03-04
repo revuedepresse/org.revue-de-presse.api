@@ -324,6 +324,10 @@ class Member extends MemberModel
 
     public function getFullName(): string
     {
+        if ($this->fullName === null) {
+            return '';
+        }
+
         return $this->fullName;
     }
 
