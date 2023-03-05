@@ -624,7 +624,7 @@ QUERY;
                         'checkedAt'  => (
                         new \DateTimeImmutable(
                             $rt[0],
-                            new \DateTimeZone('Europe/Paris')
+                            new \DateTimeZone('UTC')
                         )
                         )->format(DateTime::ATOM)],
             $parts
@@ -662,7 +662,7 @@ QUERY;
 
         $reducedMetrics = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date, $metricsType) {
             if ($item['checkedAt'] === null) {
-                $date = new \DateTimeImmutable($date, new \DateTimeZone('Europe/Paris'));
+                $date = new \DateTimeImmutable($date, new \DateTimeZone('UTC'));
                 $laterDate = $date->setTime($hour, 0);
                 $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
 
