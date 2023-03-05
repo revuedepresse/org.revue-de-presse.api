@@ -14,9 +14,6 @@ All development is delivered under free and open-source software licence.
 API serving daily short lists (10 items) of top news in France sorted by popularity.  
 Said popularity is simply based on retweets fetched by calling Twitter APIs.
 
-A variant of this project generalizing the principle of providing briefs from [Twitter Lists](https://help.twitter.com/en/using-twitter/twitter-lists)  
-is also available from [snapshots.fr's git repository](https://github.com/thierrymarianne/snapshots.fr/tree/api)
-
 ## Installation
 
 The shell scripts written for bash   
