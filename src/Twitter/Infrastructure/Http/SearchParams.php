@@ -73,7 +73,13 @@ class SearchParams implements SearchParamsInterface
                 }
 
                 if ($params[$name] === 'datetime') {
-                    $filteredParams[$name] = new DateTime($value, new \DateTimeZone('Europe/Paris'));
+                    try {
+                        $filteredParams[$name] = (new DateTime($value, new \DateTimeZone('Europe/Paris')))
+                            ->setTime(0, 1);
+                    } catch (\Exception $e) {
+                        $filteredParams[$name] = (new DateTime('now', new \DateTimeZone('Europe/Paris')))
+                            ->setTime(0, 1);
+                    }
                 }
 
                 if ($params[$name] === 'array') {
