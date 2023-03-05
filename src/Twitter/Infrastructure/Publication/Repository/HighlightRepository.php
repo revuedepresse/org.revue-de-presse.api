@@ -666,8 +666,8 @@ QUERY;
                 $laterDate = $date->setTime($hour, 0);
                 $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
 
-                if (count($carry) > 2 && array_key_exists(count($carry) - 2, $carry)) {
-                    $item[$metricsType] = (int)$carry[count($carry) - 2][$metricsType];
+                if (count($carry) > 1 && array_key_exists(count($carry) - 1, $carry)) {
+                    $item[$metricsType] = (int)$carry[count($carry) - 1][$metricsType];
                 } else {
                     $item[$metricsType] = 0;
                 }
