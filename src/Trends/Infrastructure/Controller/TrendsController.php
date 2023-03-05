@@ -166,7 +166,13 @@ class TrendsController
             );
         }
 
-        $searchParams = SearchParams::fromRequest($request, $params);
+        try {
+            $searchParams = SearchParams::fromRequest($request, $params);
+        } catch (\Exception $e) {
+            $this->logger->notice($e->getMessage());
+
+            return new JsonResponse(status: 404);
+        }
 
         try {
             $totalPagesOrResponse = $counter($searchParams);
