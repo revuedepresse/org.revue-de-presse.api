@@ -263,13 +263,20 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                     return false;
                 }
 
+                $totalFavorites = $tweet['totalFavorites'];
+                $totalRetweets = $tweet['totalRetweets'];
+                if (isset($lightweightJSON['metrics']['favorites']) && count($lightweightJSON['metrics']['favorites'])) {
+                    $totalFavorites = $lightweightJSON['metrics']['favorites'][count($lightweightJSON['metrics']['favorites']) - 1]['favorites'];
+                    $totalRetweets = $lightweightJSON['metrics']['retweets'][count($lightweightJSON['metrics']['retweets']) - 1]['retweets'];
+                }
+
                 $tweetDocument = [
                     'id' => $tweet['id'],
                     'lastUpdate' => $tweet['checkedAt'],
                     'publicationDateTime' => $tweet['publishedAt'],
                     'screen_name' => $tweet['username'],
-                    'total_retweets' => $tweet['totalRetweets'],
-                    'total_favorites' => $tweet['totalFavorites'],
+                    'total_favorites' => $totalFavorites,
+                    'total_retweets' => $totalRetweets,
                     'original_document' => json_encode($lightweightJSON),
                 ];
 
