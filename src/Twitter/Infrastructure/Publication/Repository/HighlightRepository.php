@@ -549,10 +549,10 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             return ['retweets' => [], 'favorites' => []];
         }
 
-        $retweets = $this->foldRetweets($rawMetrics["retweets"]);
-        $favorites = $this->foldFavorites($rawMetrics["favorites"]);
-
-        return ['retweets' => $retweets, 'favorites' => $favorites];
+        return [
+            'favorites' => $this->foldMetrics('favorites', $rawMetrics),
+            'retweets' => $this->foldMetrics('retweets', $rawMetrics)
+        ];
     }
 
     public function queryMetrics(string $tweetId): Result
@@ -608,41 +608,45 @@ QUERY;
         );
     }
 
-    public function foldRetweets($retweets): array
+    public function foldMetrics(string $metricsType, array $rawMetrics): mixed
     {
+        $metrics = $rawMetrics[$metricsType];
+
         $template = array_fill(7, 23 - 7 + 1, [
-            'checkedAt' => null,
-            'delta' => 0,
-            'retweets' => null,
+            'checkedAt'  => null,
+            'delta'      => 0,
+            $metricsType => null,
         ]);
 
-        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($retweets));
+        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($metrics));
         $retweetsMetrics = array_map(
-            fn($rt) => ['retweets' => $rt[1],
-                        'checkedAt' => (
-                            new \DateTimeImmutable(
-                                $rt[0],
-                                new \DateTimeZone('Europe/Paris')
-                            )
+            fn($rt) => [$metricsType => $rt[1],
+                        'checkedAt'  => (
+                        new \DateTimeImmutable(
+                            $rt[0],
+                            new \DateTimeZone('Europe/Paris')
+                        )
                         )->format(DateTime::ATOM)],
             $parts
         );
 
-        $reducedRetweets = array_reduce($retweetsMetrics, function ($acc, $item) {
+        $reducedMetrics = array_reduce($retweetsMetrics, function ($acc, $item) use ($metricsType) {
             if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
+                $acc[count($acc) - 1]['delta'] = intval($item[$metricsType]);
+
                 return $acc;
             }
 
-            $item['delta'] = $item['retweets'] - $acc[count($acc) - 1]['retweets'];
+            $item['delta'] = $item[$metricsType] - $acc[count($acc) - 1][$metricsType];
             $acc[] = $item;
 
             return $acc;
         }, [$retweetsMetrics[0]]);
 
         try {
-            $mappedRetweets = array_map(
+            $mappedMetrics = array_map(
                 fn($r) => (new \DateTimeImmutable($r['checkedAt']))->format('G'),
-                $reducedRetweets
+                $reducedMetrics
             );
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
@@ -650,22 +654,22 @@ QUERY;
             return [];
         }
 
-        $indexedRetweets = array_combine($mappedRetweets, $reducedRetweets);
-        $filledColl = array_replace($template, $indexedRetweets);
+        $indexedMetrics = array_combine($mappedMetrics, $reducedMetrics);
+        $filledColl = array_replace($template, $indexedMetrics);
 
-        $date = $reducedRetweets[0]['checkedAt'];
+        $date = $reducedMetrics[0]['checkedAt'];
         $hour = 7;
 
-        $reducedRetweets = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date) {
+        $reducedMetrics = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date, $metricsType) {
             if ($item['checkedAt'] === null) {
                 $date = new \DateTimeImmutable($date, new \DateTimeZone('Europe/Paris'));
                 $laterDate = $date->setTime($hour, 0);
                 $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
 
                 if (count($carry) > 2 && array_key_exists(count($carry) - 2, $carry)) {
-                    $item['retweets'] = (int) $carry[count($carry) - 2]['retweets'];
+                    $item[$metricsType] = (int)$carry[count($carry) - 2][$metricsType];
                 } else {
-                    $item['retweets'] = 0;
+                    $item[$metricsType] = 0;
                 }
 
                 $item['delta'] = 0;
@@ -673,12 +677,14 @@ QUERY;
 
             $hour++;
 
+            $item[$metricsType] = intval($item[$metricsType]);
+
             $carry[] = $item;
 
             return $carry;
         }, []);
 
-        usort($reducedRetweets, function ($left, $right) {
+        usort($reducedMetrics, function ($left, $right) {
             if ($left['checkedAt'] === $right['checkedAt']) {
                 return 0;
             }
@@ -690,91 +696,6 @@ QUERY;
             return -1;
         });
 
-        return $reducedRetweets;
-    }
-
-    public function foldFavorites($favorites): array
-    {
-        $template = array_fill(7, 23 - 7 + 1, [
-            'checkedAt' => null,
-            'delta' => 0,
-            'favorites' => null,
-        ]);
-
-        $parts = array_map(fn($rt) => explode('|', $rt), json_decode($favorites));
-        $favoritesMetrics = array_map(
-            fn($fav) => [
-                'favorites' => $fav[1],
-                'checkedAt' => (
-                    new \DateTimeImmutable(
-                        $fav[0],
-                        new \DateTimeZone('Europe/Paris'))
-                )->format(DateTime::ATOM)],
-            $parts
-        );
-
-        $reducedFavorites = array_reduce($favoritesMetrics, function ($acc, $item) {
-            if ($acc[count($acc) - 1]['checkedAt'] === $item['checkedAt']) {
-                return $acc;
-            }
-
-            $item['delta'] = $item['favorites'] - $acc[count($acc) - 1]['favorites'];
-            $acc[] = $item;
-
-            return $acc;
-        }, [$favoritesMetrics[0]]);
-
-        try {
-            $mappedFavorites = array_map(
-                fn($r) => (new \DateTimeImmutable($r['checkedAt']))->format('G'),
-                $reducedFavorites
-            );
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return [];
-        }
-
-        $indexedFavorites = array_combine($mappedFavorites, $reducedFavorites);
-        $filledColl = array_replace($template, $indexedFavorites);
-
-        $date = $reducedFavorites[0]['checkedAt'];
-        $hour = 7;
-
-        $reducedFavorites = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date) {
-            if ($item['checkedAt'] === null) {
-                $date = new \DateTimeImmutable($date, new \DateTimeZone('Europe/Paris'));
-                $laterDate = $date->setTime($hour, 0);
-                $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
-
-                if (count($carry) > 2 && array_key_exists(count($carry) - 2, $carry)) {
-                    $item['favorites'] = (int) $carry[count($carry) - 2]['favorites'];
-                } else {
-                    $item['favorites'] = 0;
-                }
-
-                $item['delta'] = 0;
-            }
-
-            $hour++;
-
-            $carry[] = $item;
-
-            return $carry;
-        }, []);
-
-        usort($reducedFavorites, function ($left, $right) {
-            if ($left['checkedAt'] === $right['checkedAt']) {
-                return 0;
-            }
-
-            if ($left['checkedAt'] > $right['checkedAt']) {
-                return 1;
-            }
-
-            return -1;
-        });
-
-        return $reducedFavorites;
+        return $reducedMetrics;
     }
 }
