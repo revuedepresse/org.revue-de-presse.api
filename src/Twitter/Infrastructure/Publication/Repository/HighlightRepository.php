@@ -482,9 +482,14 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $urls = [];
         $counter = 0;
         $subject = preg_replace_callback(
-            '#(?<url>http(?:s)?://[^\s]+)(?<comma>\.?)#m',
+            '#(?<url>http(?:s)?://[^\s]+)(?<comma>[\.\),]?)|(?<mention>@\S+)#m',
             function ($matches) use (&$counter, &$urls) {
-                $urls[] = $matches['url'];
+                if ($matches['url'] === '') {
+                    $urls[] = $matches['mention'];
+                } else {
+                    $urls[] = $matches['url'];
+                }
+
                 $replacement = '\\'.$counter;
                 $counter++;
 
@@ -500,6 +505,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             function ($subject, $url) use (&$counter) {
                 $subject = str_replace('\\'.$counter, $url, $subject);
                 $counter++;
+
                 return $subject;
             },
             $fixedSubject

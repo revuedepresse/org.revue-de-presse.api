@@ -4,8 +4,8 @@
 
 All development is delivered under free and open-source software licence.
 
-:fr: [Revue-de-presse.org](https://github.com/revuedepresse) est un projet citoyen indépendant qui s'adresse aux journalistes et  
-à toute personne s'intéressant à l'actualité et à l'influence des médias sur l'opinion.
+:fr: [Revue-de-presse.org](https://github.com/revuedepresse) est un projet citoyen indépendant qui s'adresse à toute personne curieuse de l'actualité et de l'influence des médias sur l'opinion.
+
 
 ![revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
