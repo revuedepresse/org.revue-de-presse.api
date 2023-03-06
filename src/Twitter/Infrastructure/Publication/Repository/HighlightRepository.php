@@ -311,6 +311,16 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         return $fullMemberName;
     }
 
+    public function extractMemberIdentifier(mixed $decodedDocument): string
+    {
+        $memberIdentifier = '';
+        if (isset($decodedDocument['user']['id_str'])) {
+            $memberIdentifier = $decodedDocument['user']['id_str'];
+        }
+
+        return $memberIdentifier;
+    }
+
     public function extractEntitiesUrls(mixed $decodedDocument): array
     {
         $entitiesUrls = [];
@@ -357,7 +367,10 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
         $lightweightJSON = [
             'created_at' => $upstreamDocument['created_at'],
-            'user'       => ['name' => $this->extractMemberFullName($upstreamDocument)],
+            'user'       => [
+                'name' => $this->extractMemberFullName($upstreamDocument),
+                'id' => $this->extractMemberIdentifier($upstreamDocument)
+            ],
             'entities'   => ['urls' => $this->extractEntitiesUrls($upstreamDocument)],
             $textIndex   => $this->processText($text),
             'id_str'     => $upstreamDocument['id_str'],
