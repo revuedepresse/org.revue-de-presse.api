@@ -108,11 +108,9 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             $highlights = [];
         }
 
-        $tweets = $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights));
-
         return [
             'aggregates' => [],
-            'statuses' => $tweets,
+            'statuses' => $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights)),
         ];
     }
 }
