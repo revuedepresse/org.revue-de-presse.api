@@ -638,7 +638,7 @@ QUERY;
     {
         $metrics = $rawMetrics[$metricsType];
 
-        $template = array_fill(7, 23 - 7 + 1, [
+        $template = array_fill(4, 23 - 4 + 1, [
             'checkedAt'  => null,
             'delta'      => 0,
             $metricsType => null,
