@@ -643,7 +643,8 @@ QUERY;
     {
         $metrics = $rawMetrics[$metricsType];
 
-        $template = array_fill(4, 23 - 4 + 1, [
+        $metricsStartAtHour = 4;
+        $template = array_fill($metricsStartAtHour, 23 - $metricsStartAtHour + 1, [
             'checkedAt'  => null,
             'delta'      => 0,
             $metricsType => null,
@@ -689,12 +690,11 @@ QUERY;
         $filledColl = array_replace($template, $indexedMetrics);
 
         $date = $reducedMetrics[0]['checkedAt'];
-        $hour = 7;
 
-        $reducedMetrics = array_reduce($filledColl, function ($carry, $item) use (&$hour, $date, $metricsType) {
+        $reducedMetrics = array_reduce($filledColl, function ($carry, $item) use (&$metricsStartAtHour, $date, $metricsType) {
             if ($item['checkedAt'] === null) {
                 $date = new \DateTimeImmutable($date, new \DateTimeZone('UTC'));
-                $laterDate = $date->setTime($hour, 0);
+                $laterDate = $date->setTime($metricsStartAtHour, 0);
                 $item['checkedAt'] = $laterDate->format(DateTimeInterface::ATOM);
 
                 if (count($carry) > 1 && array_key_exists(count($carry) - 1, $carry)) {
@@ -706,7 +706,7 @@ QUERY;
                 $item['delta'] = 0;
             }
 
-            $hour++;
+            $metricsStartAtHour++;
 
             $item[$metricsType] = intval($item[$metricsType]);
 
