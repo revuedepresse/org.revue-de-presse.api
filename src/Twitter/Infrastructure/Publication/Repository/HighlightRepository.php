@@ -586,28 +586,32 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $queryTemplate = <<<QUERY
             SELECT
             highlight.status_id as tweetId,
-            array_to_json(
-                array_agg(
-                    concat(
-                        coalesce(status_popularity.checked_at, highlight.publication_date_time),
+            ARRAY_TO_JSON(
+                ARRAY_AGG(
+                    CONCAT(
+                        COALESCE(status_popularity.checked_at, highlight.publication_date_time),
                         '|',
-                        coalesce(status_popularity.total_retweets, highlight.total_retweets)
+                        COALESCE(status_popularity.total_retweets, highlight.total_retweets)
                     )
-                    order by status_popularity.checked_at asc
+                    ORDER BY COALESCE(status_popularity.checked_at, highlight.publication_date_time) asc
+
                 )
             ) as retweets,
-            array_to_json(
-                array_agg(
-                    concat(
-                        coalesce(status_popularity.checked_at, highlight.publication_date_time),
+            ARRAY_TO_JSON(
+                ARRAY_AGG(
+                    CONCAT(
+                        COALESCE(status_popularity.checked_at, highlight.publication_date_time),
                         '|',
-                        coalesce(status_popularity.total_favorites, highlight.total_favorites)
+                        COALESCE(status_popularity.total_favorites, highlight.total_favorites)
                     )
-                    order by status_popularity.checked_at asc
+                    ORDER BY status_popularity.checked_at asc
                 )
             ) as favorites
             FROM highlight
-            INNER JOIN weaving_status s ON s.ust_status_id = ? and s.ust_id = highlight.status_id
+            INNER JOIN weaving_status s ON (
+                s.ust_status_id = ? and s.ust_id = highlight.status_id
+                AND ust_created_at::date = highlight.publication_date_time::date
+            )
             LEFT JOIN status_popularity ON (
                 status_popularity.status_id = highlight.status_id AND
                 publication_date_time::date = status_popularity.checked_at::date
@@ -617,6 +621,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 where name = ?
                 and deleted_at is null
             )
+            
             AND is_retweet = false
             GROUP BY highlight.status_id, highlight.id
 QUERY;
