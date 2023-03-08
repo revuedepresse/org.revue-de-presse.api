@@ -252,6 +252,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
+     * @throws \Safe\Exceptions\FilesystemException
      */
     public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
@@ -424,6 +425,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
+     * @throws \Safe\Exceptions\FilesystemException
      */
     private function extractTweetPropertiesToOverride(
         SearchParamsInterface $searchParams,

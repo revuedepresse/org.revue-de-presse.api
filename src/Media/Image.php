@@ -45,7 +45,7 @@ class Image
     /**
      * @throws \App\Media\ImageProcessingException
      */
-    public static function fromJpegProfilePictureToResizedWebp(string $contents): string|false
+    public static function fromJpegProfilePictureToResizedWebp(string $contents, $destinationScaleFactor = 1): string|false
     {
         list($sourceWidth, $sourceHeight) = getimagesizefromstring($contents);
         $contents = imagecreatefromstring($contents);
@@ -57,7 +57,8 @@ class Image
         $scaledImage = self::scaleProfilePicture(
             $contents,
             $sourceWidth,
-            $sourceHeight
+            $sourceHeight,
+            $destinationScaleFactor
         );
 
         $successfulColorConversion = imagepalettetotruecolor($scaledImage);
@@ -94,16 +95,18 @@ class Image
     private static function scaleProfilePicture(
         GdImage|false $contents,
         int $sourceWidth,
-        int $sourceHeight
+        int $sourceHeight,
+        int $destinationScaleFactor = 1
     ): GdImage
     {
         return self::scaleMedia(
-            self::PROFILE_PICTURE_WIDTH,
+            self::PROFILE_PICTURE_WIDTH * $destinationScaleFactor,
             $sourceWidth,
             $sourceHeight,
             self::PROFILE_PICTURE_WIDTH,
             self::PROFILE_PICTURE_WIDTH,
-            $contents
+            $contents,
+            $destinationScaleFactor
         );
     }
 
@@ -155,11 +158,12 @@ class Image
      */
     public static function scaleMedia(
         int $targetWidth,
-            $sourceWidth,
-            $sourceHeight,
+        int $sourceWidth,
+        int $sourceHeight,
         int $width,
         int $height,
-        GdImage|false $contents
+        GdImage|false $contents,
+        int $destinationScaleFactor = 1
     ): GdImage|resource {
         $destinationWidth = $targetWidth;
         $destinationHeight = self::scaleImageHeight($width, $height, $targetWidth);
@@ -170,7 +174,7 @@ class Image
             throw new ImageProcessingException(ImageProcessingException::IMAGE_CREATION);
         }
 
-        imagecopyresampled(
+        $result = imagecopyresampled(
             $destinationImage,
             $contents,
             0,
@@ -183,7 +187,7 @@ class Image
             $sourceHeight
         );
 
-        if (!$destinationImage) {
+        if (!$result) {
             throw new ImageProcessingException(ImageProcessingException::IMAGE_SCALING);
         }
 
