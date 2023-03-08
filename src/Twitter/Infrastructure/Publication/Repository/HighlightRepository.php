@@ -378,7 +378,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         ];
 
         if (isset($upstreamDocument['user']['profile_image_url_https'])) {
-            $lightweightJSON['user']['profile_image_url_https'] = $upstreamDocument['user']['profile_image_url_https'];
+            $lightweightJSON['user']['profile_image_url_https'] = str_replace(
+                '_normal',
+                '',
+                $upstreamDocument['user']['profile_image_url_https']
+            );
         }
 
         if ($searchParams->includeMedia()) {

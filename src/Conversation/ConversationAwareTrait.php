@@ -217,7 +217,9 @@ trait ConversationAwareTrait
                 throw new Exception('Could not fetch member profile picture');
             }
 
-            $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode(Image::fromJpegToWebp($memberProfilePicture));
+            $tweet['base64_encoded_avatar'] = 'data:image/webp;base64,' . base64_encode(
+                Image::fromJpegProfilePictureToResizedWebp($memberProfilePicture)
+            );
         } catch (Exception|ImageProcessingException) {
             $tweet['base64_encoded_avatar'] = $this->getDefaultAvatarDataURI();
         }
