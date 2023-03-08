@@ -89,6 +89,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
+     * @throws \Safe\Exceptions\FilesystemException
      */
     public function findBy(SearchParamsInterface $searchParams): array {
         try {
