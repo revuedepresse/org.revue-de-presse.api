@@ -106,6 +106,7 @@ trait ConversationAwareTrait
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
+     * @throws \Safe\Exceptions\FilesystemException
      */
     private function extractConversationProperties(
         array $updatedStatus,
@@ -281,6 +282,7 @@ trait ConversationAwareTrait
      * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \JsonException
+     * @throws \Safe\Exceptions\FilesystemException
      */
     private function extractRetweetedStatus(
         array $tweet,
