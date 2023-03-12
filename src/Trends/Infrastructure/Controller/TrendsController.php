@@ -117,6 +117,7 @@ class TrendsController
     {
         $includeMedia = 'includeMedia=' . intval($searchParams->includeMedia());
         $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
+        $curatingFromDistinctSources = 'fromDistinctSources=' . $searchParams->curatingHighlightsFromDistinctSources();
 
         $sortedSelectedAggregates = [];
         if ($searchParams->hasParam('selectedAggregates')) {
@@ -138,6 +139,7 @@ class TrendsController
                 implode(',', $sortedSelectedAggregates),
                 $includedRetweets,
                 $includeMedia,
+                $curatingFromDistinctSources,
                 $term
             ]
         );
