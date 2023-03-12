@@ -42,8 +42,9 @@ class TrendsController
     /**
      * @throws \JsonException
      * @throws \RedisException
+     * @throws \Exception
      */
-    public function getHighlights(Request $request)
+    public function getHighlights(Request $request): JsonResponse
     {
         return $this->getCollection(
             $request,
@@ -55,9 +56,10 @@ class TrendsController
             },
             params: [
                 'aggregate'          => 'string',
+                'distinctSources'    => 'bool',
                 'endDate'            => 'datetime',
-                'includeRetweets'    => 'bool',
                 'excludeMedia'       => 'bool',
+                'includeRetweets'    => 'bool',
                 'routeName'          => 'string',
                 'selectedAggregates' => 'array',
                 'startDate'          => 'datetime',
