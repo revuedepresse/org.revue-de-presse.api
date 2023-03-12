@@ -615,7 +615,8 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             ) as favorites
             FROM highlight
             INNER JOIN weaving_status s ON (
-                s.ust_status_id = ? and s.ust_id = highlight.status_id
+                s.ust_status_id = ? 
+                AND s.ust_id = highlight.status_id
                 AND ust_created_at::date = highlight.publication_date_time::date
             )
             LEFT JOIN status_popularity ON (
@@ -623,9 +624,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 publication_date_time::date = status_popularity.checked_at::date
             )
             WHERE highlight.aggregate_id in (
-                select id from publishers_list
-                where name = ?
-                and deleted_at is null
+                SELECT id from publishers_list
+                WHERE name = ?
+                AND deleted_at is null
             )
             
             AND is_retweet = false

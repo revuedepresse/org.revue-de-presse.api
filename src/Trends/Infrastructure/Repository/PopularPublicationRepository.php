@@ -56,7 +56,8 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private function getFirebaseDatabaseSnapshot(
         DateTimeInterface $date,
-        bool $includeRetweets = false
+        bool $includeRetweets = false,
+        bool $curatingHighlightsFromDistinctSources = false
     ): Snapshot {
         $database = $this->getFirebaseDatabase();
 
@@ -66,13 +67,18 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             UnknownListException::throws();
         }
 
+        $suffix = '';
+        if ($curatingHighlightsFromDistinctSources) {
+            $suffix = 'FromDistinctSources';
+        }
+
         $path = '/'.implode(
             '/',
             [
                 'highlights',
                 $publishersList->publicId(),
                 $date->format('Y-m-d'),
-                $includeRetweets ? 'retweet' : 'status'
+                $includeRetweets ? "retweet{$suffix}" : "status{$suffix}"
             ]
         );
         $this->logger->info(sprintf('About to access Firebase Path: "%s"', $path));
@@ -95,7 +101,8 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         try {
             $snapshot = $this->getFirebaseDatabaseSnapshot(
                 $searchParams->getParams()['startDate'],
-                $searchParams->getParams()['includeRetweets']
+                $searchParams->getParams()['includeRetweets'],
+                $searchParams->curatingHighlightsFromDistinctSources(),
              );
         } catch (UnknownListException) {
             return [
