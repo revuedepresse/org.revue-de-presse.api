@@ -13,4 +13,6 @@ interface SearchParamsInterface
     public function paramIs(string $name, $value): bool;
 
     public function includeMedia(): bool;
+
+    public function curatingHighlightsFromDistinctSources(): bool;
 }

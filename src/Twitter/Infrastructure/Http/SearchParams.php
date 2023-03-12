@@ -156,4 +156,13 @@ class SearchParams implements SearchParamsInterface
 
         return true;
     }
+
+    public function curatingHighlightsFromDistinctSources(): bool
+    {
+        if ($this->hasParam('distinctSources') && $this->getParams()['distinctSources']) {
+            return $this->getParams()['distinctSources'];
+        }
+
+        return false;
+    }
 }
