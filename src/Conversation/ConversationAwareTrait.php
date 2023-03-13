@@ -389,10 +389,7 @@ trait ConversationAwareTrait
         }
 
         try {
-            $memberProfilePicture = file_get_contents($tweet['avatar_url']);
-            if ($memberProfilePicture === false) {
-                throw new Exception('Could not fetch member profile picture');
-            }
+            $memberProfilePicture = $this->getMemberProfilePicture($tweet);
 
             $profilePictures = [
                 'x1' => 'data:image/webp;base64,' . base64_encode(
@@ -414,5 +411,53 @@ trait ConversationAwareTrait
         $tweet['base64_encoded_avatar'] = $profilePictures;
 
         return $tweet;
+    }
+
+    public function queryMostRecentProfilePictureUrl(string $tweetId): string
+    {
+        $query = <<<QUERY
+            SELECT REPLACE((s.ust_api_document::json->'user')::json->>'profile_image_url_https', '_normal', '') as profile_picture_url
+            FROM weaving_status st, weaving_status s, weaving_user u
+            WHERE st.ust_status_id = ?
+            AND (st.ust_api_document::json->>'user')::json->>'id_str' = u.usr_twitter_id
+            AND s.ust_full_name = usr_twitter_username
+            ORDER BY s.ust_created_at desc
+            LIMIT 1
+QUERY
+        ;
+
+        try {
+            $statement = $this->getEntityManager()
+                ->getConnection()->executeQuery(
+                $query,
+                [$tweetId],
+                [\PDO::PARAM_STR]
+            );
+
+            $result = $statement->fetchAssociative();
+
+            return $result['profile_picture_url'];
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * @param array $tweet
+     * @return string
+     */
+    public function getMemberProfilePicture(array $tweet): string
+    {
+        try {
+            $memberProfilePicture = file_get_contents($tweet['avatar_url']);
+
+            if ($memberProfilePicture === false) {
+                throw new \ErrorException('Could not fetch profile picture');
+            }
+
+            return $memberProfilePicture;
+        } catch (\ErrorException) {
+            return file_get_contents($this->queryMostRecentProfilePictureUrl($tweet['status_id']));
+        }
     }
 }
