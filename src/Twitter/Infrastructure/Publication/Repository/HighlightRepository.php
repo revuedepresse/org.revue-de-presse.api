@@ -256,7 +256,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
      */
     public function mapStatuses(SearchParamsInterface $searchParams, $tweets): array
     {
-        return array_filter(array_map(
+        $filteredTweets = array_filter(array_map(
             function ($tweet) use ($searchParams) {
                 $lightweightJSON = $this->stripUpstreamTweetDocumentFromExtraProperties($searchParams, $tweet['json']);
 
@@ -300,6 +300,20 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             },
             $tweets
         ));
+
+        usort($filteredTweets, function ($left, $right) {
+            if ($left['status']['retweet_count'] === $right['status']['retweet_count']) {
+                return 0;
+            }
+
+            if ($right['status']['retweet_count'] < $left['status']['retweet_count']) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        return $filteredTweets;
     }
 
     public function extractMemberFullName(mixed $decodedDocument): string
