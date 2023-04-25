@@ -30,6 +30,9 @@ class ListsBatchCollectedEventRepository extends ServiceEntityRepository impleme
 {
     use LoggerTrait;
 
+    /**
+     * @throws \JsonException
+     */
     public function collectedListsBatch(
         ListAwareHttpClientInterface $accessor,
         ListSelectorInterface        $selector

@@ -75,61 +75,60 @@ function set_file_permissions() {
     chmod --verbose -R ug+rx  /scripts
     chmod --verbose -R  u+w   /scripts
 
-    local change_directory_permissions
-    change_directory_permissions=<<"EOF"
+    # shellcheck disable=SC2067
+    find "${project_dir}"  \
+    -maxdepth 1 \
+    -executable \
+    -readable \
+    -type d \
+    -not -path "${project_dir}"'/provisioning/volumes' \
+    -not -path "${project_dir}"'/public/emoji-data' \
+    -exec sh -c "$(cat <<"EOF"
         \chown --recursive $2:$3 "$1" && \
         \chmod --recursive og-rwx "$1" && \
         \chmod --recursive g+rx "$1"
 EOF
-
-    find "${project_dir}"  \
-        -maxdepth 1 \
-        -executable \
-        -readable \
-        -type d \
-        -not -path "${project_dir}"'/provisioning/volumes' \
-        -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_directory_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
-        printf '%s.%s' 'Successfully changed directories permissions' $'\n'
+    )" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
+    printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
-        -maxdepth 2 \
-        -type d \
-        -executable \
-        -readable \
-        -regex '.+/var.+' \
-        -regex '.+/src/Media/Resources/.+.b64' \
-        -not -path "${project_dir}"'/var/log' \
-        -exec sh -c '\chmod --recursive ug+w "${1}"' shell {} \; && \
-        printf '%s.%s' 'Successfully made var directories writable' $'\n'
+    -maxdepth 2 \
+    -type d \
+    -executable \
+    -readable \
+    -regex '.+/var.+' \
+    -regex '.+/src/Media/Resources/.+.b64' \
+    -not -path "${project_dir}"'/var/log' \
+    -exec sh -c '\chmod --recursive ug+w "$1"' shell {} \; && \
+    printf '%s.%s' 'Successfully made var directories writable' $'\n'
 
-    local change_file_permissions
-    change_file_permissions=<<"EOF"
+    # shellcheck disable=SC2067
+    find "${project_dir}" \
+    -type f \
+    -readable \
+    -not -path "${project_dir}"'/var' \
+    -not -path "${project_dir}"'/src/Media/Resources' \
+    -not -path "${project_dir}"'/provisioning/volumes' \
+    -not -path "${project_dir}"'/public/emoji-data' \
+    -exec sh -c "$(cat - <<"EOF"
         \chown $2:$3 "$1" && \
         \chmod og-rwx "$1" && \
         \chmod  g+r "$1"
 EOF
-
-    find "${project_dir}" \
-        -type f \
-        -readable \
-        -not -path "${project_dir}"'/provisioning/volumes' \
-        -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_file_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
+    )" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed files permissions' $'\n'
 
-    local change_binaries_permissions
-    change_binaries_permissions=<<"EOF"
+    # shellcheck disable=SC2067
+    find "${project_dir}"  \
+    -type f \
+    -not -path "${project_dir}"'/bin' \
+    -not -path "${project_dir}"'/provisioning/volumes' \
+    -not -path "${project_dir}"'/public/emoji-data' \
+    -exec sh -c "$(cat - <<"EOF"
         \chown --recursive $2:$3 "$1" && \
         \chmod --recursive ug+x "$1"
 EOF
-
-    find "${project_dir}"  \
-        -type f \
-        -not -path "${project_dir}"'/bin' \
-        -not -path "${project_dir}"'/provisioning/volumes' \
-        -not -path "${project_dir}"'/public/emoji-data' \
-        -exec sh -c "${change_binaries_permissions}" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
+    )" shell {} "${WORKER_OWNER_UID}" "${WORKER_OWNER_GID}" \; && \
         printf '%s.%s' 'Successfully changed binaries permissions' $'\n'
 }
 
@@ -165,7 +164,7 @@ function install_app_requirements() {
 
     else
 
-        source "${project_dir}/.env.local"
+    source "${project_dir}/.env.local"
 
     fi
 

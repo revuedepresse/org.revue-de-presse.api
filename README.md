@@ -1,12 +1,9 @@
-# Revue-de-presse worker
+# weaving-the-web worker
 
-![api.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
+![api.weaving-the-web continuous integration](https://github.com/thierrymarianne/org.weaving-the-web.api/actions/workflows/continuous-integration.yml/badge.svg)
 
-Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
-
-API serving daily short lists (10 items) of top news in France sorted by popularity.
-
-See [revue-de-presse.org](https://revue-de-presse.org).
+Worker collecting tweets from Twitter [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
+This project is developed from learnings acquired by building [revue-de-presse.org](https://revue-de-presse.org).
 
 ## Installation
 
@@ -58,5 +55,5 @@ communities, organizations and projects (in lexicographic order):
 
 ### Some of their logos
 
-[![Blackfire](../worker/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
-[![JetBrains](../worker/doc/images/jetbrains-logo.png?raw=true)](https://jb.gg/OpenSourceSupport)
+[![Blackfire](../http-api/doc/images/blackfire-io.png?raw=true)](https://blackfire.io)  
+[![JetBrains](../http-api/doc/images/jetbrains-logo.png?raw=true)](https://jb.gg/OpenSourceSupport)

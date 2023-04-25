@@ -145,7 +145,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
             new ListsBatchSelector($memberUserName)
         );
 
-        $publishersListName = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
+        $publishersListIdentifier = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
 
         $filteredLists = [];
 
@@ -155,8 +155,12 @@ class AddMembersBatchToListCommand extends AbstractCommand
         ) {
             $filteredLists = array_filter(
                 $ownershipsLists->toArray(),
-                static function (PublishersList $list) use ($publishersListName) {
-                    return $list->name() === $publishersListName;
+                static function (PublishersList $list) use ($publishersListIdentifier) {
+                    if (is_numeric($publishersListIdentifier)) {
+                        return $list->id() === $publishersListIdentifier;
+                    }
+
+                    return $list->name() === $publishersListIdentifier;
                 }
             );
 
@@ -164,7 +168,7 @@ class AddMembersBatchToListCommand extends AbstractCommand
                 $this->logger->error(
                     sprintf(
                         'Could not find list %s among {%s}.',
-                        $publishersListName,
+                        $publishersListIdentifier,
                         implode(', ', array_map(fn (PublishersList $p) => $p->name(), $ownershipsLists->toArray()))
                     )
                 );
@@ -189,12 +193,17 @@ class AddMembersBatchToListCommand extends AbstractCommand
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function addMembersToList(PublishersList $targetList): void {
-        $memberIds = $this->getListOfMembers();
+        $memberIdentifiers = $this->getListOfMembers();
+        $members = $this->ensureMembersExist($memberIdentifiers);
+        $memberIds = array_filter(
+            array_map(
+                fn (MemberInterface $member) => $member->twitterId() === '0' ? false : $member->twitterId(),
+                $members
+            )
+        );
 
         if (count($memberIds) <= 100) {
             $this->membersBatchHttpClient->addUpTo100MembersAtOnceToList($memberIds, $targetList->id());
-
-            $members = $this->ensureMembersExist($memberIds);
 
             array_walk(
                 $members,
@@ -205,47 +214,43 @@ class AddMembersBatchToListCommand extends AbstractCommand
                     $this->listRepository->make($listSubscription, $member);
                 }
             );
-            array_walk(
-                $members,
-                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-            );
         } else {
             $this->membersBatchHttpClient->addMembersToListSequentially($memberIds, $targetList->id());
-
-            $members = $this->ensureMembersExist($memberIds);
-
-            array_walk(
-                $members,
-                fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
-            );
         }
+
+        array_walk(
+            $members,
+            fn (MemberInterface $member) => $this->publishersListRepository->addMemberToList($member, $targetList)
+        );
 
         $this->output->writeln('All members have been successfully added to the Twitter list.');
     }
 
-    /**
-     * @param $memberList
-     * @return array
-     */
     private function ensureMembersExist($memberList): array
     {
-        return array_map(
+        return array_filter(array_map(
             function (string $memberIdentifier) {
-
                 if (is_numeric($memberIdentifier)) {
                     $member = $this->memberRepository->findOneBy(['twitterID' => $memberIdentifier]);
                 } else {
                     $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
                 }
 
-                if (!($member instanceof MemberInterface)) {
-                    $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberIdentifier);
+                try {
+                    if (!($member instanceof MemberInterface)) {
+                        $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($memberIdentifier);
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->info(sprintf('Cannot find member having identifier %s', $memberIdentifier));
+                    $this->logger->error($e->getMessage());
+
+                    return false;
                 }
 
                 return $member;
             },
             $memberList
-        );
+        ));
     }
 
     private function getListOfMembers(): array

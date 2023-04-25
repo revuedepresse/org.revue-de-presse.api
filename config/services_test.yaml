@@ -9,10 +9,16 @@ services:
 
     test.doctrine.dbal.connection: '@Doctrine\DBAL\Connection'
 
-    test.event_repository.member_profile_collected:
-        '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
+    test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
+
+    test.App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand:
+        class: 'App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand'
+        arguments:
+            - '@test.App\Twitter\Domain\Http\Client\HttpClientInterface'
+        tags:
+            - { name: 'console.command' }
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
@@ -21,10 +27,35 @@ services:
     test.App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand: '@App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand'
 
     App\Twitter\Domain\Http\Client\MemberProfileAwareHttpClientInterface:
-        factory: [ 'App\Tests\Twitter\Infrastructure\Http\Builder\Client\MemberProfileAwareHttpClientBuilder', 'build' ]
+        factory: ['App\Tests\Twitter\Infrastructure\Http\Builder\Client\MemberProfileAwareHttpClientBuilder', 'build']
 
     test.App\Membership\Domain\Repository\MemberRepositoryInterface: '@App\Membership\Domain\Repository\MemberRepositoryInterface'
+
     test.App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+
+    test.App\Twitter\Domain\Http\Client\HttpClientInterface:
+        class: 'App\Twitter\Infrastructure\Http\Client\HttpClient'
+        arguments:
+            - '%app.twitter_api.consumer_key%'
+            - '%app.twitter_api.consumer_secret%'
+            - '%app.twitter.oauth_token.default%'
+            - '%app.twitter.oauth_secret.default%'
+            - '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'
+            - '@monolog.logger.twitter_api'
+        properties:
+            environment:            '%kernel.environment%'
+            tweetAwareHttpClient:   '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'
+            twitterApiLogger:       '@monolog.logger.twitter_api'
+        calls:
+            - [ 'setConsumerKey',               [ '%app.twitter_api.consumer_key%' ] ]
+            - [ 'setConsumerSecret',            [ '%app.twitter_api.consumer_secret%' ] ]
+            - [ 'setMemberRepository',          [ '@user_manager' ] ]
+            - [ 'setAccessToken',               [ '%app.twitter.oauth_token.default%' ] ]
+            - [ 'setAccessTokenSecret',         [ '%app.twitter.oauth_secret.default%' ] ]
+            - [ 'setFallbackTwitterHttpClient', [ '@App\Twitter\Domain\Http\Client\Fallback\TwitterHttpApiClientInterface' ] ]
+            - [ 'setRateLimitCompliance',       [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
+            - [ 'setTranslator',                [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
+
     test.App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository: '@App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface'
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
@@ -37,7 +68,6 @@ services:
         arguments:
             - '@App\Membership\Domain\Repository\MemberRepositoryInterface'
             - '@logger'
-            - !php/const 'App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME'
 
     App\Twitter\Domain\Http\Client\ListAwareHttpClientInterface:
         factory: ['App\Tests\Twitter\Infrastructure\Http\Builder\Client\ListAwareHttpClientBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']

@@ -40,6 +40,7 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
 
         /** @var ListAwareHttpClient $ownershipAccessor */
         $ownershipAccessor = $this->prophesize(ListAwareHttpClient::class);
+
         $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
             Argument::type(AuthenticatedSelector::class),
             Argument::cetera()
@@ -75,6 +76,7 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
         $ruleset->whoseListSubscriptionsAreCurated()->willReturn('test_member');
         $ruleset->isSingleListFilterInactive()->willReturn(true);
         $ruleset->isCurationCursorActive()->willReturn(-1);
+        $ruleset->isCurationSearchQueryBased()->willReturn(false);
         $ruleset->correlationId()->willReturn(CorrelationId::generate());
 
         $dispatcher->dispatchFetchTweetsMessages(

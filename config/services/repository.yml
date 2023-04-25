@@ -1,4 +1,5 @@
 services:
+
     App\Membership\Infrastructure\Repository\MemberRepository:
         class: 'App\Membership\Infrastructure\Repository\MemberRepository'
         arguments:
@@ -22,7 +23,7 @@ services:
             - 'App\Twitter\Infrastructure\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setHttpClient',      [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+            - [ 'setHttpClient',       [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -65,7 +66,7 @@ services:
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setMemberRepository', [ '@App\Membership\Infrastructure\Repository\MemberRepository' ] ]
-            - [ 'setHttpClient',      [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+            - [ 'setHttpClient',       [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -75,8 +76,8 @@ services:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Curation\Entity\PublishersListCollectedEvent'
         calls:
-            - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setHttpClient',      [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+            - [ 'setLogger',     [ '@logger' ] ]
+            - [ 'setHttpClient', [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -91,7 +92,7 @@ services:
             - { name: 'doctrine.repository_service' }
 
     App\Twitter\Domain\Curation\Repository\ListsBatchCollectedEventRepositoryInterface:
-      '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository'
+        '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository'
 
     App\Twitter\Infrastructure\Http\Repository\PublishersListRepository:
         public: true
@@ -100,10 +101,10 @@ services:
             - '@doctrine'
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
-            - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setTweetRepository',          [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository' ] ]
-            - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
-            - [ 'setTokenRepository',           [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
+            - [ 'setLogger',                  [ '@logger' ] ]
+            - [ 'setTweetRepository',         [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface' ] ]
+            - [ 'setTimelyStatusRepository',  [ '@App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface' ] ]
+            - [ 'setTokenRepository',         [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -196,7 +197,7 @@ services:
         calls:
             - [ 'setLogger',                [ '@logger' ] ]
             - [ 'setTweetAwareHttpClient',  [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
+            - [ 'setTweetRepository',       [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
         properties:
             twitterList:                '%publishers_list_default%'
 
@@ -213,7 +214,7 @@ services:
             - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
             - [ 'setTweetAwareHttpClient', [ '@App\Twitter\Infrastructure\Http\Client\TweetAwareHttpClient'] ]
-            - [ 'setTweetRepository',      [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'] ]
+            - [ 'setTweetRepository',      [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'] ]
 
     App\Membership\Infrastructure\Repository\NetworkRepository:
         class: 'App\Membership\Infrastructure\Repository\NetworkRepository'

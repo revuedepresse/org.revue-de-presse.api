@@ -17,5 +17,7 @@ interface TimeRangeAwareInterface
 
     public const RANGE_OVER_1_WEEK_AGO = 5;
 
+    public function mapDateToTimeRange(\DateTimeInterface $tweetPublicationDate);
+
     public function updateTimeRange(): TimeRangeAwareInterface;
 }

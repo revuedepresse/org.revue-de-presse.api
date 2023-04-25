@@ -178,7 +178,7 @@ class ConversationStatusConsumer
     private function ensureStatusAuthorExists(Tweet $status): Member
     {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
-        if (!$member instanceof MemberInterface) {
+        if (!($member instanceof MemberInterface)) {
             $member = $this->tweetAwareHttpClient->ensureMemberHavingNameExists($status->getScreenName());
             $existingMember = $this->memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
 

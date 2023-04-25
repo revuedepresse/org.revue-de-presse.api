@@ -7,6 +7,6 @@ services:
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
         calls:
-            - [ 'setLogger',            [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger'  ] ]
-            - [ 'setPersistenceLayer',  [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface'  ] ]
-            - [ 'setTweetRepository',  [ '@App\Twitter\Infrastructure\Http\Repository\TweetRepository'  ] ]
+            - [ 'setLogger',           [ '@App\Twitter\Infrastructure\Log\TweetCurationLogger'  ] ]
+            - [ 'setPersistenceLayer', [ '@App\Twitter\Domain\Persistence\PersistenceLayerInterface'  ] ]
+            - [ 'setTweetRepository',  [ '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'  ] ]

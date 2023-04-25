@@ -81,9 +81,9 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
                 's.apiDocument original_document'
             ]
         )
-            ->leftJoin('t.status', 's')
-            ->orderBy('t.timeRange', 'asc')
-            ->orderBy('t.publicationDateTime', 'desc')
+            ->leftJoin(self::TABLE_ALIAS.'.tweet', 's')
+            ->orderBy(self::TABLE_ALIAS.'.timeRange', 'asc')
+            ->orderBy(self::TABLE_ALIAS.'.publicationDateTime', 'desc')
             ->setMaxResults(50)
         ;
 
@@ -91,11 +91,11 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     }
 
     public function fromTweetInList(
-        TweetInterface $status,
+        TweetInterface $tweet,
         PublishersList $list = null
     ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
-            'status' => $status
+            'tweet' => $tweet
         ]);
 
         if ($timelyStatus instanceof TimelyStatus) {
@@ -103,9 +103,9 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         }
 
         return new TimelyStatus(
-            $status,
+            $tweet,
             $list,
-            $status->getCreatedAt()
+            $tweet->getCreatedAt()
         );
     }
 
@@ -141,25 +141,25 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         $queryBuilder->orderBy(self::TABLE_ALIAS.'.publicationDateTime', 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
-        $statuses = array_map(
-            function ($status) {
+        $tweets = array_map(
+            function ($tweet) {
                 $extractedProperties = [
                     'status' => $this->extractStatusProperties(
-                        [$status],
+                        [$tweet],
                         false)[0]
                 ];
 
-                unset($status['original_document']);
-                unset($status['screen_name']);
-                unset($status['author_avatar']);
-                unset($status['status_id']);
+                unset($tweet['original_document']);
+                unset($tweet['screen_name']);
+                unset($tweet['author_avatar']);
+                unset($tweet['status_id']);
 
-                return array_merge($status, $extractedProperties);
+                return array_merge($tweet, $extractedProperties);
             },
             $results
         );
 
-        return $statuses;
+        return $tweets;
     }
 
     /**
@@ -170,9 +170,9 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         SearchParams $searchParams
     ) {
         $queryBuilder->select('s.apiDocument as original_document');
-        $queryBuilder->addSelect('t.memberName as screen_name');
-        $queryBuilder->addSelect('t.memberName as screenName');
-        $queryBuilder->addSelect('t.twitterListName as twitterListName');
+        $queryBuilder->addSelect(self::TABLE_ALIAS.'.memberName as screen_name');
+        $queryBuilder->addSelect(self::TABLE_ALIAS.'.memberName as screenName');
+        $queryBuilder->addSelect(self::TABLE_ALIAS.'.twitterListName as twitterListName');
         $queryBuilder->addSelect('a.id as aggregateId');
         $queryBuilder->addSelect('s.id as id');
         $queryBuilder->addSelect('s.statusId as twitterId');
@@ -188,12 +188,12 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             );
         }
 
-        $queryBuilder->innerJoin('t.status', 's');
-        $queryBuilder->innerJoin('t.aggregate', 'a');
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.tweet', 's');
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.publisherList', 'a');
 
         $params = $searchParams->getParams();
         if (array_key_exists('memberName', $params)) {
-            $queryBuilder->andWhere('t.memberName = :member_name');
+            $queryBuilder->andWhere(self::TABLE_ALIAS.'.memberName = :member_name');
             $queryBuilder->setParameter('member_name', $params['memberName']);
         }
     }

@@ -168,9 +168,26 @@ trait MemberTrait
         return $this;
     }
 
-    public function getMinStatusId(): int
+    public function minTweetId(): int
     {
         return 0;
+    }
+
+    public function maxTweetId(): int
+    {
+        return 0;
+    }
+
+    public function setMaxTweetId(?int $tweetId): MemberInterface {
+        // noop
+
+        return $this;
+    }
+
+    public function setMinTweetId(?string $minTweetId): MemberInterface {
+        // noop
+
+        return $this;
     }
 
     public function setTwitterID(string $twitterId): MemberInterface

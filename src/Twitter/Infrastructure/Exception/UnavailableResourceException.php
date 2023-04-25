@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
-use App\Twitter\Domain\Http\Client\ApiEndpointsAwareInterface;
+use App\Twitter\Domain\Http\Client\TwitterAPIEndpointsAwareInterface;
 use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
-use App\Twitter\Domain\Http\ApiErrorCodeAwareInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -16,19 +16,10 @@ use function is_array;
 use function is_object;
 use function sprintf;
 
-/**
- * @package App\Twitter\Infrastructure\Exception
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
-class UnavailableResourceException extends Exception implements ApiErrorCodeAwareInterface, ApiEndpointsAwareInterface
+class UnavailableResourceException extends Exception implements TwitterAPIAwareInterface, TwitterAPIEndpointsAwareInterface
 {
 
     /**
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @param LoggerInterface $logger
-     *
      * @throws ProtectedAccountException
      * @throws UnavailableResourceException
      */
@@ -55,10 +46,6 @@ class UnavailableResourceException extends Exception implements ApiErrorCodeAwar
     }
 
     /**
-     * @param stdClass|array $content
-     * @param string         $endpoint
-     * @param callable       $onApiLimitExceeded
-     *
      * @throws ApiAccessRateLimitException
      * @throws BadAuthenticationDataException
      * @throws NotFoundMemberException
@@ -68,6 +55,7 @@ class UnavailableResourceException extends Exception implements ApiErrorCodeAwar
      * @throws ReadOnlyApplicationException
      * @throws SuspendedAccountException
      * @throws UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
      */
     public static function guardAgainstContentFetchingException(
         $content,
@@ -112,6 +100,13 @@ class UnavailableResourceException extends Exception implements ApiErrorCodeAwar
             );
         }
 
+        if ($errorCode === self::ERROR_BLOCKED_FROM_VIEWING_MEMBER_PROFILE) {
+            throw new BlockedFromViewingMemberProfileException(
+                $error->message,
+                $error->code
+            );
+        }
+
         if ($errorCode === self::ERROR_BAD_AUTHENTICATION_DATA) {
             throw new BadAuthenticationDataException(
                 $error->message,
@@ -149,27 +144,15 @@ class UnavailableResourceException extends Exception implements ApiErrorCodeAwar
         }
     }
 
-    /**
-     * @param $response
-     *
-     * @return bool
-     */
     public static function containErrors($response): bool
     {
         return is_object($response)
             && (
                 (isset($response->errors, $response->errors[0]) &&
-                is_array($response->errors))
+                    is_array($response->errors))
                 || isset($response->error));
     }
 
-    /**
-     * @param LoggerInterface $logger
-     * @param Exception       $exception
-     * @param array           $options
-     *
-     * @return string
-     */
     private static function logUnavailableMemberException(
         Exception $exception,
         LoggerInterface $logger,
@@ -201,12 +184,8 @@ class UnavailableResourceException extends Exception implements ApiErrorCodeAwar
         return $message;
     }
 
-    /**
-     * @param string $endpoint
-     * @return bool
-     */
     private static function exceptWhenAccessingApiRateLimitStatus(string $endpoint): bool
     {
-        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) === false;
+        return !str_contains($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS);
     }
 }

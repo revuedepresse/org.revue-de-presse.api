@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
+use App\Search\Domain\Ruleset\SearchQueryRulesetProcessorAwareInterface;
+use App\Search\Infrastructure\DependencyInjection\SearchQueryProcessorTrait;
+use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Domain\Http\Client\HttpClientInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
-use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
-use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Curation\Events\ListBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Http\RateLimitComplianceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
@@ -39,32 +40,31 @@ use function implode;
 use function in_array;
 use function sprintf;
 
-class FetchTweetsAmqpMessagesDispatcher implements FetchTweetsAmqpMessagesDispatcherInterface, CorrelationIdAwareInterface
+class FetchTweetsAmqpMessagesDispatcher implements
+    CorrelationIdAwareInterface,
+    FetchTweetsAmqpMessagesDispatcherInterface,
+    SearchQueryRulesetProcessorAwareInterface
 {
     use RateLimitComplianceTrait;
     use ListBatchCollectedEventRepositoryTrait;
     use OwnershipAccessorTrait;
     use PublishersListProcessorTrait;
+    use SearchQueryProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 
     private LoggerInterface $logger;
-
     private HttpClientInterface $accessor;
-
     private Closure $writer;
-
     private CurationRulesetInterface $ruleset;
 
     public function __construct(
         HttpClientInterface              $accessor,
-        PublishersListProcessorInterface $publishersListProcessor,
         TokenChangeInterface             $tokenChange,
         LoggerInterface                  $logger,
         TranslatorInterface              $translator
     ) {
         $this->accessor                 = $accessor;
-        $this->publishersListProcessor  = $publishersListProcessor;
         $this->tokenChange              = $tokenChange;
         $this->translator               = $translator;
         $this->logger                   = $logger;
@@ -75,10 +75,24 @@ class FetchTweetsAmqpMessagesDispatcher implements FetchTweetsAmqpMessagesDispat
         TokenInterface           $token,
         Closure                  $writer
     ): void {
-        $this->writer   = $writer;
+        $this->writer  = $writer;
         $this->ruleset = $ruleset;
 
         $memberOwnerships = $this->fetchMemberOwnerships($token);
+
+        if ($this->ruleset->isCurationSearchQueryBased()) {
+            $this->logger->info(
+                'Started to process search query',
+                ['search_query' => $this->ruleset->searchQuery()]
+            );
+            $this->searchQueryProcessor->processSearchQuery($this->ruleset, $token);
+            $this->logger->info(
+                'Finished to process search query',
+                ['search_query' => $this->ruleset->searchQuery()]
+            );
+
+            return;
+        }
 
         /** @var PublishersList $list */
         foreach ($memberOwnerships->ownershipCollection()->toArray() as $list) {
@@ -113,6 +127,7 @@ class FetchTweetsAmqpMessagesDispatcher implements FetchTweetsAmqpMessagesDispat
                     $exception->getMessage(),
                     ['stacktrace' => $exception->getTraceAsString()]
                 );
+
                 UnexpectedOwnershipException::throws($exception->getMessage());
             }
         }

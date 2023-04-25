@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Persistence;
 
+use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Persistence\TweetPersistenceLayerInterface;
@@ -21,7 +22,7 @@ use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
 use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
-use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
+use App\Twitter\Infrastructure\Publication\Dto\TweetCollection;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use Closure;
@@ -29,7 +30,7 @@ use DateTime;
 use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\Exception\EntityManagerClosed;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -47,10 +48,6 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
     use TaggedTweetRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
-    public const PROPERTY_NORMALIZED_STATUS = 'normalized_status';
-    public const PROPERTY_SCREEN_NAME       = 'screen_name';
-    public const PROPERTY_STATUS            = 'status';
-
     public ManagerRegistry $registry;
 
     private LoggerInterface $appLogger;
@@ -67,50 +64,6 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
         $this->timelyStatusRepository = $timelyStatusRepository;
         $this->entityManager          = $entityManager;
         $this->appLogger              = $logger;
-    }
-
-    public function persistTweetsCollection(
-        array $statuses,
-        AccessToken $identifier,
-        PublishersList $twitterList = null
-    ): array {
-        $propertiesCollection = Normalizer::normalizeAll(
-            $statuses,
-            $this->tokenSetter($identifier),
-            $this->appLogger
-        );
-
-        $tweetsCollection = StatusCollection::fromArray([]);
-
-        /** @var TaggedTweet $taggedTweet */
-        foreach ($propertiesCollection->toArray() as $key => $taggedTweet) {
-            try {
-                $tweetsCollection = $this->persistStatus(
-                    $tweetsCollection,
-                    $taggedTweet,
-                    $twitterList
-                );
-            } catch (ORMException $exception) {
-                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
-                    $this->entityManager = $this->registry->resetManager('default');
-                }
-            } catch (Exception $exception) {
-                $this->appLogger->info($exception->getMessage());
-            }
-        }
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
-
-        $firstStatus = $tweetsCollection->first();
-        $screenName  = $firstStatus instanceof TweetInterface ?
-            $firstStatus->getScreenName() :
-            null;
-
-        return [
-            self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
-            self::PROPERTY_SCREEN_NAME       => $screenName,
-            self::PROPERTY_STATUS            => $tweetsCollection
-        ];
     }
 
     /**
@@ -138,7 +91,7 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
     private function persistStatus(
         CollectionInterface $tweetsCollection,
         TaggedTweet         $taggedTweet,
-        ?PublishersList     $twitterList
+        ?PublishersList     $twitterList = null
     ): CollectionInterface {
         $extract = $taggedTweet->toLegacyProps();
         $status  = $this->taggedTweetRepository->convertPropsToStatus($extract, $twitterList);
@@ -166,6 +119,88 @@ class TweetPersistenceLayer implements TweetPersistenceLayerInterface
             );
             $this->entityManager->persist($timelyStatus);
         }
+    }
+
+    public function persistSearchQueryBasedTweetsCollection(
+        AccessToken $identifier,
+        SavedSearch $savedSearch,
+        array $tweets
+    ): array {
+        $propertiesCollection = Normalizer::normalizeTweets(
+            $tweets,
+            $this->tokenSetter($identifier),
+            $this->appLogger
+        );
+
+        $tweetsCollection = TweetCollection::fromArray([]);
+
+        /** @var TaggedTweet $taggedTweet */
+        foreach ($propertiesCollection->toArray() as $_ => $taggedTweet) {
+            try {
+                $tweetsCollection = $this->persistStatus(
+                    $tweetsCollection,
+                    $taggedTweet
+                );
+            } catch (\Throwable $exception) {
+                $this->appLogger->error($exception->getMessage());
+
+                if ($exception instanceof EntityManagerClosed) {
+                    $this->entityManager = $this->registry->resetManager('default');
+                }
+            }
+        }
+
+        $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
+
+        return [
+            self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
+            self::PROPERTY_SEARCH_QUERY      => $savedSearch,
+            self::PROPERTY_TWEET => $tweetsCollection
+        ];
+    }
+
+    public function persistTweetsCollection(
+        array $statuses,
+        AccessToken $identifier,
+        PublishersList $twitterList = null
+    ): array {
+        $propertiesCollection = Normalizer::normalizeTweets(
+            $statuses,
+            $this->tokenSetter($identifier),
+            $this->appLogger
+        );
+
+        $tweetsCollection = TweetCollection::fromArray([]);
+
+        /** @var TaggedTweet $taggedTweet */
+        foreach ($propertiesCollection->toArray() as $_ => $taggedTweet) {
+            try {
+                $tweetsCollection = $this->persistStatus(
+                    $tweetsCollection,
+                    $taggedTweet,
+                    $twitterList
+                );
+            } catch (\Throwable $exception) {
+                $this->appLogger->error($exception->getMessage());
+
+                if ($exception instanceof EntityManagerClosed) {
+                    $this->entityManager = $this->registry->resetManager('default');
+                }
+            }
+        }
+
+        $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
+
+        $firstStatus = $tweetsCollection->first();
+        $screenName  = $firstStatus instanceof TweetInterface ?
+            $firstStatus->getScreenName() :
+            null;
+
+        return [
+            self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
+            self::PROPERTY_SCREEN_NAME       => $screenName,
+            self::PROPERTY_TWEET             => $tweetsCollection
+        ];
     }
 
     private function refreshUpdatedAt(TweetInterface $status): void

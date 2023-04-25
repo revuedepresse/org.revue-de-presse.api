@@ -21,7 +21,7 @@
         </id>
 
         <many-to-one
-                field="status"
+                field="tweet"
                 target-entity="App\Twitter\Infrastructure\Http\Entity\Tweet">
             <join-column
                 name="status_id"

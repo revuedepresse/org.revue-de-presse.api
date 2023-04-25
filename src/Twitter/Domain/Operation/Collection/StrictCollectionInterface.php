@@ -7,9 +7,6 @@ use Closure;
 
 interface StrictCollectionInterface extends CollectionInterface
 {
-    /**
-     * @return int
-     */
     public function count(): int;
 
     public function map(Closure $callable): self;

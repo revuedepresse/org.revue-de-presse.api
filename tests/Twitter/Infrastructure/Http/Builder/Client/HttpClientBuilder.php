@@ -19,7 +19,6 @@ use PDOException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Prophecy\Prophet;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use Throwable;
@@ -172,10 +171,10 @@ class HttpClientBuilder
 
     public function willEnsureMemberHavingNameExists(
         MemberRepositoryInterface $memberRepository,
-        LoggerInterface $logger,
-        string $screenName
+        LoggerInterface $logger
     ): self {
-        $member = MemberBuilder::build($screenName);
+        $memberUsername = ImportMemberPublishersListsCommandTest::SCREEN_NAME;
+        $member = MemberBuilder::build($memberUsername);
 
         try {
             $existingMember = $memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
@@ -193,7 +192,7 @@ class HttpClientBuilder
         }
 
         $this->prophecy
-            ->ensureMemberHavingNameExists($screenName)
+            ->ensureMemberHavingNameExists($memberUsername)
             ->willReturn($member);
 
         return $this;
@@ -210,7 +209,7 @@ class HttpClientBuilder
             $builder->makeOwnershipCollection(),
         );
 
-        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, ImportMemberPublishersListsCommandTest::SCREEN_NAME);
+        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger);
         $builder->willGetMembersInList(
             self::LIST_ID,
             MemberCollection::fromArray([

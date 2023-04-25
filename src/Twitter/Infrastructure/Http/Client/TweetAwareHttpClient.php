@@ -48,14 +48,12 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use PersistenceLayerTrait;
     use LoggerTrait;
-    use TweetRepositoryTrait;
     use MemberRepositoryTrait;
     use TweetBatchCollectedEventRepositoryTrait;
+    use TweetRepositoryTrait;
 
     public ArchivedTweetRepository $archivedTweetRepository;
-
     public EntityManagerInterface $entityManager;
-
     public NotFoundStatusRepository $notFoundTweetRepository;
 
     public function declareStatusNotFoundByIdentifier(string $identifier): void
@@ -90,11 +88,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
     }
 
     /**
-     * @param string $statusId
-     * @param bool   $skipExistingStatus
-     * @param bool   $extractProperties
-     *
-     * @return TweetInterface|TaggedStatus|NullStatus|array|null
      * @throws Exception
      */
     public function refreshStatusByIdentifier(
@@ -156,11 +149,9 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             $this->memberRepository->make(
                 (string) $fetchedMember->id,
                 $memberName,
-                $protected = false,
-                $suspended = false,
-                $fetchedMember->description,
-                $fetchedMember->friends_count,
-                $fetchedMember->followers_count
+                description: $fetchedMember->description,
+                totalSubscriptions: $fetchedMember->friends_count,
+                totalSubscribees: $fetchedMember->followers_count
             )
         );
     }
@@ -216,12 +207,6 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         return $status;
     }
 
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     *
-     * @return MemberInterface
-     */
     private function ensureMemberHasBio(
         MemberInterface $member,
         string $memberName
@@ -243,7 +228,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
             }
 
             if ($shouldTryToSaveDescription) {
-                $member->description = $fetchedMember->description ?? '';
+                $member->description = $fetchedMember->description ?? '_';
             }
 
             if ($shouldTryToSaveUrl) {
@@ -273,7 +258,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
 
                         $member->url = $url;
                     } catch (\Exception) {
-                        $member->url = $fetchedMember->url;
+                        $member->url = $fetchedMember->url ?? "https://twitter.com/{$memberName}";
                     }
                 }
             }

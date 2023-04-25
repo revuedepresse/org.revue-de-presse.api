@@ -20,6 +20,7 @@ start() {
         PROJECT_NAME='wildcard' \
         TIME_LIMIT=300
 
+    configure_blackfire_client
     php bin/console cache:clear --verbose
 
     if [ ! -e ./.pm2-installed ];

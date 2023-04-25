@@ -1,5 +1,4 @@
 services:
-
     App\Membership\Infrastructure\Console\AddMembersBatchToListCommand:
         class: 'App\Membership\Infrastructure\Console\AddMembersBatchToListCommand'
         arguments:
@@ -71,6 +70,6 @@ services:
             - '@logger'
         calls:
             - [ 'setListsBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\ListsBatchCollectedEventRepository' ] ]
-            - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository' ] ]
+            - [ 'setTwitterListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\TwitterListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }

@@ -1,0 +1,39 @@
+services:
+
+  App\Search\Infrastructure\Http\Client\SearchQueryAwareHttpClient:
+    class: 'App\Search\Infrastructure\Http\Client\SearchQueryAwareHttpClient'
+    calls:
+      - [ 'setHttpClient',                    [ '@App\Twitter\Domain\Http\Client\HttpClientInterface' ] ]
+      - [ 'setLogger',                        [ '@monolog.logger.twitter_api' ] ]
+      - [ 'setSavedSearchRepository',         [ '@App\Search\Infrastructure\Repository\SavedSearchRepository' ] ],
+      - [ 'setSearchMatchingTweetRepository', [ '@App\Search\Infrastructure\Repository\SearchMatchingTweetRepository' ] ],
+
+  App\Search\Domain\SearchQueryAwareHttpClientInterface:
+    '@App\Search\Infrastructure\Http\Client\SearchQueryAwareHttpClient'
+
+  App\Search\Infrastructure\Ruleset\SearchQueryRulesetProcessor:
+    class: 'App\Search\Infrastructure\Ruleset\SearchQueryRulesetProcessor'
+    arguments:
+      - '@messenger.default_bus'
+
+  App\Search\Domain\Ruleset\SearchQueryRulesetProcessorInterface:
+    '@App\Search\Infrastructure\Ruleset\SearchQueryRulesetProcessor'
+
+  App\Search\Infrastructure\Repository\SavedSearchRepository:
+    class: 'App\Search\Infrastructure\Repository\SavedSearchRepository'
+    arguments:
+      - '@doctrine'
+      - 'App\Search\Domain\Entity\SavedSearch'
+    tags:
+      - { name: 'doctrine.repository_service' }
+
+  App\Search\Infrastructure\Repository\SearchMatchingTweetRepository:
+    class: 'App\Search\Infrastructure\Repository\SearchMatchingTweetRepository'
+    arguments:
+      - '@doctrine'
+      - 'App\Search\Domain\Entity\SearchMatchingTweet'
+    properties:
+      logger: '@logger'
+      tweetRepository: '@App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface'
+    tags:
+      - { name: 'doctrine.repository_service' }

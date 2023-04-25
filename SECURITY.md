@@ -10,7 +10,7 @@
 
 ## Reporting a Vulnerability
 
-Vulnerabilities can be reported by sending a report to security at revue-de-presse dot org
+Vulnerabilities can be reported by sending a report to security at weaving-the-web dot org
 
 There is not much we can offer in case a vulnerability is reported,   
 except for doing our best to have it fixed soon after.

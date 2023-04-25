@@ -9,13 +9,19 @@ interface CurationSelectorsInterface
 
     public const MAX_BATCH_SIZE = 200;
 
+    public function curateTweetsBySearchQuery(string $searchQuery): self;
+
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string;
+
+    public function isSearchQuery(): bool;
 
     public function membersListId(): ?int;
 
     public function maxStatusId();
 
     public function minStatusId();
+
+    public function searchQuery(): string;
 
     public function screenName(): string;
 

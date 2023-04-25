@@ -3,17 +3,15 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Log;
 
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Infrastructure\Curation\TweetCurator;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use JsonException;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
 use function count;
-use function is_infinite;
 use function json_decode;
 use function json_last_error;
 use function sprintf;

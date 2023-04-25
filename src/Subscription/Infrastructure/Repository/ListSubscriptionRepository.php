@@ -6,6 +6,7 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Subscription\Domain\Repository\ListSubscriptionRepositoryInterface;
 use App\Subscription\Infrastructure\Entity\ListSubscription;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use JsonException;
 use const JSON_THROW_ON_ERROR;
 
 class ListSubscriptionRepository extends ServiceEntityRepository implements ListSubscriptionRepositoryInterface
@@ -13,7 +14,7 @@ class ListSubscriptionRepository extends ServiceEntityRepository implements List
     public const TABLE_ALIAS = 'member_aggregate_subscription';
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function make(
         MemberInterface $member,
@@ -26,31 +27,34 @@ class ListSubscriptionRepository extends ServiceEntityRepository implements List
             );
         }
 
-        $memberAggregateSubscription = $this->findOneBy([
-            'listName' => $list['name'],
+        $twitterList = $this->findOneBy([
             'listId' => $list['id'],
             'member' => $member
         ]);
 
-        if ($memberAggregateSubscription instanceof ListSubscription) {
-            $memberAggregateSubscription->setDocument(
-                json_encode($list, JSON_THROW_ON_ERROR)
+        if ($twitterList instanceof ListSubscription) {
+            $twitterList->setDocument(
+                json_encode(
+                    $list,
+                    JSON_THROW_ON_ERROR
+                )
             );
+            $twitterList->setName($list['name']);
         }
 
-        if (!($memberAggregateSubscription instanceof ListSubscription)) {
-            $memberAggregateSubscription = new ListSubscription($member, $list);
+        if (!($twitterList instanceof ListSubscription)) {
+            $twitterList = new ListSubscription($member, $list);
         }
 
-        return $this->saveMemberAggregateSubscription($memberAggregateSubscription);
+        return $this->saveMemberAggregateSubscription($twitterList);
     }
 
     public function saveMemberAggregateSubscription(
-        ListSubscription $memberAggregateSubscription
+        ListSubscription $twitterList
     ): ListSubscription {
-        $this->getEntityManager()->persist($memberAggregateSubscription);
+        $this->getEntityManager()->persist($twitterList);
         $this->getEntityManager()->flush();
 
-        return $memberAggregateSubscription;
+        return $twitterList;
     }
 }

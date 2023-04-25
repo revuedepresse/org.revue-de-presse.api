@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Publication;
 
-use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
+use App\Twitter\Domain\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 
 trait PublishersListProcessorTrait
 {

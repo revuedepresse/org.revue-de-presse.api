@@ -33,8 +33,6 @@ class Tweet implements TweetInterface
     use TweetTrait;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="ust_id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -42,8 +40,6 @@ class Tweet implements TweetInterface
     protected ?int $id = null;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="ust_hash", type="string", length=40, nullable=true)
      */
     protected ?string $hash;
@@ -106,8 +102,6 @@ class Tweet implements TweetInterface
     }
 
     /**
-     * @var DateTimeInterface|null
-     *
      * @ORM\Column(name="ust_created_at", type="datetime")
      */
     protected DateTimeInterface $createdAt;

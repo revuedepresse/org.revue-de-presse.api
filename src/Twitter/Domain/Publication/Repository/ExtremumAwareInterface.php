@@ -14,31 +14,16 @@ interface ExtremumAwareInterface
     public const EXTREMUM_FROM_MEMBER = 'fromMember';
     public const EXTREMUM_STATUS_ID = 'statusId';
 
-    /**
-     * @param string      $memberName
-     * @param string|null $before
-     * @return array
-     */
     public function findLocalMaximum(
-        string $memberName,
+        string  $memberUsername,
         ?string $before = null
     ): array;
 
-    /**
-     * @param string         $screenName
-     * @param string         $direction
-     * @param string|null $before
-     * @return mixed
-     */
     public function findNextExtremum(
-        string $screenName,
-        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        string  $memberUsername,
+        string  $direction = self::FINDING_IN_ASCENDING_ORDER,
         ?string $before = null
     ): array;
 
-    /**
-     * @param string $memberName
-     * @return array
-     */
     public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array;
 }
