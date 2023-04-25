@@ -125,25 +125,16 @@ function install_php_extensions() {
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.83.1.tar.gz \
+    wget https://github.com/DataDog/dd-trace-php/archive/0.86.3.tar.gz \
     --output-document=/tmp/datadog-php-tracer.tar.gz
 
     cd /tmp || exit
     tar -xvzf /tmp/datadog-php-tracer.tar.gz
-    cd dd-trace-php-0.83.1 || exit
+    cd dd-trace-php-0.86.3 || exit
         phpize .
         ./configure --with-php-config="$(which php-config)"
         make
         make install
-
-    wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
-    --tries=40 \
-    --output-document=/tmp/datadog-setup.php
-    cd /tmp || exit
-    php datadog-setup.php \
-    --php-bin all \
-    --enable-appsec \
-    --enable-profiling
 
     wget https://pecl.php.net/get/amqp-1.11.0.tgz \
     --output-document /tmp/amqp-1.11.0.tgz && \
