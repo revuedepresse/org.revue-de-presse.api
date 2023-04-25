@@ -169,6 +169,21 @@ class FetchTweetsAmqpMessagesDispatcher implements
                 continue;
             }
 
+            if ($memberOwnership) {
+                $previousOwnership = implode(
+                    '|',
+                    $memberOwnership->ownershipCollection()
+                        ->toArray()
+                );
+
+                $ownership = implode('|', $nextMemberOwnership->ownershipCollection()
+                    ->toArray());
+
+                if ($previousOwnership === $ownership) {
+                    break;
+                }
+            }
+
             $memberOwnership = $nextMemberOwnership;
 
             /** @var MemberOwnerships $memberOwnership */
@@ -336,11 +351,10 @@ class FetchTweetsAmqpMessagesDispatcher implements
         }
     }
 
-    private function keepDispatching($memberOwnership): bool
+    private function keepDispatching(?MemberOwnerships $memberOwnership): bool
     {
         return $memberOwnership === null
-            || ($memberOwnership instanceof MemberOwnerships
-                && $memberOwnership->ownershipCollection()->isNotEmpty());
+            || $memberOwnership->ownershipCollection()->isNotEmpty();
     }
 
     private function mapOwnershipsLists(OwnershipCollectionInterface $ownerships): array
@@ -355,8 +369,7 @@ class FetchTweetsAmqpMessagesDispatcher implements
     {
         return $cursor !== -1
             && ($memberOwnership === null
-                || ($memberOwnership instanceof MemberOwnerships
-                    && $memberOwnership->ownershipCollection()->nextPage() !== $cursor));
+                || $memberOwnership->ownershipCollection()->nextPage() !== $cursor);
     }
 
     private function targetListHasBeenFound($ownerships, string $listRestriction): bool

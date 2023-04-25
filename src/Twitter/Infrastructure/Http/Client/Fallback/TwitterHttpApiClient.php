@@ -123,6 +123,8 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
      */
     public function getMemberTimeline(MemberIdentity $memberIdentity): CollectionInterface
     {
+        $this->logEndpointAccess(self::API_ENDPOINT_MEMBER_TIMELINE);
+
         $response = $this->get(sprintf(
             '%s%s.json?tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0&screen_name=%s',
             $this->getApiBaseUrl(),
@@ -156,6 +158,8 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
      */
     public function getMemberOwnerships(ListSelectorInterface $selector): OwnershipCollectionInterface {
 
+        $this->logEndpointAccess(self::API_ENDPOINT_OWNERSHIPS);
+
         $response = $this->get(sprintf(
             '%s%s.json?screen_name=%s&count=1000&cursor=%d',
             $this->getApiBaseUrl(),
@@ -176,5 +180,41 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
         } catch (\Throwable $e) {
             throw new FallbackHttpAccessException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \JsonException
+     * @throws \Safe\Exceptions\ZlibException
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     */
+    public function getMemberProfile(MemberIdentity $memberIdentity): \stdClass {
+
+        $endpoint = self::API_ENDPOINT_GET_MEMBER_PROFILE;
+
+        $this->logEndpointAccess($endpoint);
+
+        $response = $this->get(sprintf(
+            '%s%s.json?screen_name=%s',
+            $this->getApiBaseUrl(),
+            $endpoint,
+            $memberIdentity->screenName(),
+        ));
+
+        $content = $response->getContent();
+
+        try {
+            return json_decode(safeGzipDecode($content), flags: JSON_THROW_ON_ERROR);
+        } catch (\Throwable $e) {
+            throw new FallbackHttpAccessException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    public function logEndpointAccess(string $endpoint): void
+    {
+        $this->logger->info("[ accessing Twitter API endpoint via fallback: \"{$endpoint}\" ]");
     }
 }

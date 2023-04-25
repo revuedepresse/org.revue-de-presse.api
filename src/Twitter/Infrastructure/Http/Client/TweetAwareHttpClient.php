@@ -315,7 +315,7 @@ class TweetAwareHttpClient implements TweetAwareHttpClientInterface
         if (
             count($statuses) > 0
             && $this->tweetRepository->findOneBy(
-                ['statusId' => $statuses[0]->id]
+                ['statusId' => $statuses[0]->id()]
             ) instanceof TweetInterface
         ) {
             $discoverMoreRecentStatuses = true;

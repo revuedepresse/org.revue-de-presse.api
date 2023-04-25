@@ -54,7 +54,7 @@ class OwnershipCollection implements OwnershipCollectionInterface
 
     public function isEmpty(): bool
     {
-        return count($this->ownerships) === 0 || $this->nextPage === 0;
+        return count($this->ownerships) === 0;
     }
 
     public function isNotEmpty(): bool

@@ -280,6 +280,15 @@ class TweetRepository extends ArchivedTweetRepository
      */
     public function declareMaximumStatusId($status): MemberInterface
     {
+        if ($status instanceof TweetInterface) {
+            $maxStatus = $status->statusId();
+
+            return $this->memberRepository->declareMaxTweetIdForMemberHavingScreenName(
+                $maxStatus,
+                $status->getScreenName()
+            );
+        }
+
         $maxStatus = $status->id_str;
 
         return $this->memberRepository->declareMaxTweetIdForMemberHavingScreenName(
@@ -293,6 +302,15 @@ class TweetRepository extends ArchivedTweetRepository
      */
     public function declareMinimumStatusId($status): MemberInterface
     {
+        if ($status instanceof TweetInterface) {
+            $minStatus = $status->statusId();
+
+            return $this->memberRepository->declareMinTweetIdForMemberHavingScreenName(
+                $minStatus,
+                $status->screenName()
+            );
+        }
+
         $minStatus = $status->id_str;
 
         return $this->memberRepository->declareMinTweetIdForMemberHavingScreenName(

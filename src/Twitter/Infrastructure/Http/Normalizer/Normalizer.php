@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http\Normalizer;
 
+use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
@@ -22,9 +23,30 @@ class Normalizer implements NormalizerInterface
      * @throws Exception
      */
     public static function normalizeStatusProperties(
-        stdClass $properties,
+        stdClass|TweetInterface $properties,
         Closure $onFinish = null
     ): TaggedTweet {
+        if ($properties instanceof TweetInterface) {
+            return TaggedTweet::fromLegacyProps(
+                $onFinish(
+                    [
+                        'hash'         => $properties->getHash(),
+                        'text'         => $properties->getText(),
+                        'screen_name'  => $properties->getScreenName(),
+                        'name'         => $properties->getName(),
+                        'user_avatar'  => $properties->getUserAvatar(),
+                        'status_id'    => $properties->getStatusId(),
+                        'api_document' => $properties->getApiDocument(),
+                        'created_at'   => $properties->getCreatedAt(),
+                    ]
+                )
+            );
+        }
+
+        if (! ($properties instanceof stdClass)) {
+            throw new \Exception('Not Implemented');
+        }
+
         $text = $properties->full_text ?? $properties->text;
 
         $normalizedProperties = $onFinish(

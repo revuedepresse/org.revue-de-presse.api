@@ -14,7 +14,15 @@ use Doctrine\Common\Collections\Collection;
  */
 trait TweetTrait
 {
+    /**
+     * @deprecated in favor of TweetTrait->id()
+     */
     public function getId(): ?int
+    {
+        return $this->id();
+    }
+
+    public function id(): ?int
     {
         return $this->id;
     }
@@ -50,7 +58,15 @@ trait TweetTrait
         return $this;
     }
 
+    /**
+     * @deprecated in favor of TweetTrait->screenName()
+     */
     public function getScreenName(): string
+    {
+        return $this->screenName();
+    }
+
+    public function screenName(): string
     {
         return $this->screenName;
     }
@@ -110,7 +126,15 @@ trait TweetTrait
         return $this;
     }
 
+    /**
+     * @deprecated in favor of TweetTrait->statusId()
+     */
     public function getStatusId(): string
+    {
+        return $this->statusId();
+    }
+
+    public function statusId(): string
     {
         return $this->statusId;
     }
