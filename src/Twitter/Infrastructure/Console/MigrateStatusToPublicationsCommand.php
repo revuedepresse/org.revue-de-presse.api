@@ -8,10 +8,6 @@ use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
 
-/**
- * @package App\Twitter\Command
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
 class MigrateStatusToPublicationsCommand extends Command
 {
     private TweetPublicationPersistenceLayerInterface $publicationRepository;

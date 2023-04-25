@@ -26,4 +26,13 @@ class NotFoundStatus
     {
         return (string) $this->id;
     }
+
+    public function getStatus(): TweetInterface
+    {
+        if ($this->status === null) {
+            return $this->archivedStatus;
+        }
+
+        return $this->status;
+    }
 }

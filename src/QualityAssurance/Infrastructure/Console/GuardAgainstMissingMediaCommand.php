@@ -16,7 +16,6 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use DateTimeImmutable;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use GdImage;

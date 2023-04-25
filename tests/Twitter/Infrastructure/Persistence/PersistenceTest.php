@@ -15,9 +15,7 @@ use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * @group publication
- */
+/** @group tweet_persistence */
 class PersistenceTest extends KernelTestCase
 {
     protected function tearDown(): void
@@ -42,7 +40,7 @@ class PersistenceTest extends KernelTestCase
      *
      * @throws
      */
-    public function it_should_persist_status_publications(): void
+    public function it_should_persist_tweets(): void
     {
         // Arrange
 
@@ -63,7 +61,7 @@ class PersistenceTest extends KernelTestCase
 
         // Act
 
-        $normalizedStatus = $publicationPersistence->persistTweetsCollection(
+        $normalizedTweets = $publicationPersistence->persistTweetsCollection(
             [
                 (object)[
                     'user' => (object)[
@@ -71,14 +69,14 @@ class PersistenceTest extends KernelTestCase
                         'name' => 'Marie Curie',
                         'profile_image_url' => 'https://gravatar.com/mariec',
                     ],
-                    'full_text' => 'This is a long status.',
+                    'full_text' => 'This is a long tweet, or is it really?',
                     'api_document' => '{}',
                     'id_str' => '42',
                     'created_at' => (
-                        new \DateTime(
-                            'now',
-                            new DateTimeZone('UTC')
-                        )
+                    new \DateTime(
+                        'now',
+                        new DateTimeZone('UTC')
+                    )
                     )->format(DateTimeInterface::RFC7231)
                 ]
             ],
@@ -89,15 +87,15 @@ class PersistenceTest extends KernelTestCase
 
         self::assertInstanceOf(
             CollectionInterface::class,
-            $normalizedStatus
+            $normalizedTweets
         );
         self::assertCount(
             1,
-            $normalizedStatus->toArray()
+            $normalizedTweets->toArray()
         );
         self::assertInstanceOf(
             TaggedTweet::class,
-            $normalizedStatus->first()
+            $normalizedTweets->first()
         );
     }
 }

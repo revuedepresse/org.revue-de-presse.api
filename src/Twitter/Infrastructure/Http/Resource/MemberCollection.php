@@ -34,9 +34,6 @@ class MemberCollection implements MemberCollectionInterface
         return $this->count() === 0;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function count(): int
     {
         return count($this->members);

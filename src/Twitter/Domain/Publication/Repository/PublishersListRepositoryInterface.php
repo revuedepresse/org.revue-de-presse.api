@@ -24,7 +24,7 @@ interface PublishersListRepositoryInterface
 
     public function make(string $screenName, string $listName);
 
-    public function unlockPublishersList(PublishersListInterface $publishersList);
+    public function unlockPublishersList(PublishersListInterface $twitterList);
 
     public function updateTotalStatuses(
         array $aggregate,

@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace App;
 
 use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
-use App\Twitter\Infrastructure\Amqp\Console\FetchTweetsAmqpMessagesDispatcherCommand;
+use App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand;
+use App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMemberProfilePictureCommand;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand;
 use App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
+use App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -14,9 +17,6 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
-/**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
 class Kernel extends BaseKernel implements CompilerPassInterface
 {
     private const CONFIG_EXTS = '.{yaml,xml}';
@@ -36,18 +36,20 @@ class Kernel extends BaseKernel implements CompilerPassInterface
             function ($_, $id) use ($container) {
                 $definition = $container->findDefinition($id);
 
-
                 if (!in_array(
                     $id,
                     [
                         AddMembersBatchToListCommand::class,
                         AuthorizeApplicationCommand::class,
                         FetchTweetsAmqpMessagesDispatcherCommand::class,
-                        ImportMemberPublishersListsCommand::class
+                        GuardAgainstMissingMediaCommand::class,
+                        GuardAgainstMissingMemberProfilePictureCommand::class,
+                        ImportMemberPublishersListsCommand::class,
+                        RequestTwitterApiAccessTokenCommand::class
                     ],
                     true
                 )) {
-//                    $definition->addMethodCall('setHidden', [true]);
+                    $definition->addMethodCall('setHidden', [true]);
                 }
             }
         );

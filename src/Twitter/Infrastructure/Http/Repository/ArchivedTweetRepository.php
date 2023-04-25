@@ -5,23 +5,26 @@ namespace App\Twitter\Infrastructure\Http\Repository;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
-use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
-use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
-use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
 use App\Twitter\Infrastructure\DependencyInjection\Persistence\PersistenceLayerTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Persistence\TweetPersistenceLayerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\TweetPublicationPersistenceLayerTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Status\TweetCurationLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedTweetRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
+use App\Twitter\Infrastructure\Http\Entity\Tweet;
+use App\Twitter\Infrastructure\Http\Exception\InsertDuplicatesException;
+use App\Twitter\Infrastructure\Http\Normalizer\Normalizer;
+use App\Twitter\Infrastructure\Http\Repository\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
@@ -31,12 +34,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
-use JsonException;
 use Psr\Log\LoggerInterface;
 use function array_key_exists;
 use function count;
@@ -48,7 +50,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
 {
     use MemberRepositoryTrait;
     use PersistenceLayerTrait;
-    use PublicationRepositoryTrait;
+    use TweetPublicationPersistenceLayerTrait;
     use TweetCurationLoggerTrait;
     use TweetPersistenceLayerTrait;
     use TaggedTweetRepositoryTrait;
@@ -63,8 +65,28 @@ class ArchivedTweetRepository extends ResourceRepository implements
     public bool $shouldExtractProperties;
 
     /**
-     * @throws JsonException
+     * @throws \App\Twitter\Infrastructure\Http\Repository\Exception\TweetNotFoundException
      */
+    public function byId(int $tweetId): TweetInterface
+    {
+        try {
+            $tweet = $this->findOneBy(['statusId' => $tweetId]);
+
+            if (!($tweet instanceof TweetInterface)) {
+                throw new TweetNotFoundException(
+                    sprintf(
+                        'Tweet having id %s cannot be found in database.',
+                        $tweetId
+                    )
+                );
+            }
+
+            return $tweet;
+        } catch (\Exception $e) {
+            throw new TweetNotFoundException($e->getMessage());
+        }
+    }
+
     public function extractTweetReach(TweetInterface $tweet): array
     {
         return $this->collectStatusLogger->extractTweetReach($tweet);
@@ -72,12 +94,12 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
     public function countCollectedStatuses(
         string $screenName,
-        $extremumId,
+               $extremumId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
     ): ?int {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
-                     ->andWhere('s.screenName = :screenName');
+            ->andWhere('s.screenName = :screenName');
 
         $queryBuilder->setParameter('screenName', $screenName);
 
@@ -105,11 +127,11 @@ class ArchivedTweetRepository extends ResourceRepository implements
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function countHowManyStatusesFor(string $screenName): int
+    public function howManyTweetsHaveBeenCollectedForMemberHavingUserName(string $screenName): int
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')
-                     ->andWhere('s.screenName = :screenName');
+            ->andWhere('s.screenName = :screenName');
 
         $queryBuilder->setParameter('screenName', $screenName);
 
@@ -119,14 +141,10 @@ class ArchivedTweetRepository extends ResourceRepository implements
     }
 
     /**
-     * @param string        $screenName
-     * @param string|null $before
-     *
-     * @return array
      * @throws NonUniqueResultException
      */
     public function findLocalMaximum(
-        string $screenName,
+        string  $memberUsername,
         ?string $before = null
     ): array {
         $direction = self::FINDING_IN_ASCENDING_ORDER;
@@ -134,38 +152,33 @@ class ArchivedTweetRepository extends ResourceRepository implements
             $direction = self::FINDING_IN_DESCENDING_ORDER;
         }
 
-        return $this->findNextExtremum($screenName, $direction, $before);
+        return $this->findNextExtremum($memberUsername, $direction, $before);
     }
 
     /**
-     * @param string        $screenName
-     * @param string        $direction
-     * @param string $before
-     *
-     * @return array
      * @throws NonUniqueResultException
      */
     public function findNextExtremum(
-        string $screenName,
-        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        string  $memberUsername,
+        string  $direction = self::FINDING_IN_ASCENDING_ORDER,
         ?string $before = null
     ): array {
         $member = $this->memberRepository->findOneBy([
-            'twitter_username' => $screenName
+            'twitter_username' => $memberUsername
         ]);
         if ($member instanceof MemberInterface) {
             if ($direction === self::FINDING_IN_DESCENDING_ORDER &&
-                $member->maxStatusId !== null) {
+                $member->maxTweetId() > 0) {
                 return [
-                    self::EXTREMUM_STATUS_ID => $member->maxStatusId,
+                    self::EXTREMUM_STATUS_ID => $member->maxTweetId(),
                     self::EXTREMUM_FROM_MEMBER => true
                 ];
             }
 
             if ($direction === self::FINDING_IN_ASCENDING_ORDER &&
-                $member->minStatusId !== null) {
+                $member->minTweetId() > 0) {
                 return [
-                    self::EXTREMUM_STATUS_ID => $member->minStatusId,
+                    self::EXTREMUM_STATUS_ID => $member->minTweetId(),
                     self::EXTREMUM_FROM_MEMBER => true
                 ];
             }
@@ -173,12 +186,12 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
-                     ->andWhere('s.screenName = :screenName')
-                     ->andWhere('s.apiDocument is not null')
-                     ->orderBy('CAST(s.statusId AS bigint)', $direction)
-                     ->setMaxResults(1);
+            ->andWhere('s.screenName = :screenName')
+            ->andWhere('s.apiDocument is not null')
+            ->orderBy('CAST(s.statusId AS bigint)', $direction)
+            ->setMaxResults(1);
 
-        $queryBuilder->setParameter('screenName', $screenName);
+        $queryBuilder->setParameter('screenName', $memberUsername);
 
         if ($before) {
             $queryBuilder->andWhere('DATE(s.createdAt) <= :date');
@@ -226,7 +239,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
             JSON_THROW_ON_ERROR
         );
 
-        return Normalizer::normalizeAll(
+        return Normalizer::normalizeTweets(
             [$statusDocument],
             function ($properties) use ($status) {
                 return array_merge(
@@ -246,25 +259,17 @@ class ArchivedTweetRepository extends ResourceRepository implements
         return 'archived_status';
     }
 
-    /**
-     * @param string $memberName
-     *
-     * @return array
-     */
     public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array
     {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
 
         return [
-            'min_id' => $member->minStatusId,
-            'max_id' => $member->maxStatusId
+            'min_id' => $member->minTweetId(),
+            'max_id' => $member->maxTweetId()
         ];
     }
 
     /**
-     * @param array $statuses
-     *
-     * @return bool
      * @throws Exception
      */
     public function hasBeenSavedBefore(array $statuses): bool
@@ -274,7 +279,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
         }
 
         $identifier         = '';
-        $statusesProperties = Normalizer::normalizeAll(
+        $statusesProperties = Normalizer::normalizeTweets(
             [$statuses[0]],
             function ($extract) use ($identifier) {
                 $extract['identifier'] = $identifier;
@@ -310,7 +315,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
     public function saveLikes(
         array $statuses,
-        $identifier,
+              $identifier,
         ?PublishersList $aggregate,
         LoggerInterface $logger,
         MemberInterface $likedBy,
@@ -322,7 +327,7 @@ class ArchivedTweetRepository extends ResourceRepository implements
 
         $indexedStatus = $this->createIndexOfExistingStatus($statusIds);
 
-        $extracts = Normalizer::normalizeAll(
+        $extracts = Normalizer::normalizeTweets(
             $statuses,
             function ($extract) use ($identifier, $indexedStatus) {
                 $extract['identifier'] = $identifier;
@@ -428,9 +433,6 @@ class ArchivedTweetRepository extends ResourceRepository implements
         return $indexedStatuses;
     }
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     */
     private function flushAndResetManagerOnUniqueConstraintViolation(
         EntityManagerInterface $entityManager
     ): void {
@@ -443,11 +445,6 @@ class ArchivedTweetRepository extends ResourceRepository implements
         }
     }
 
-    /**
-     * @param array $statuses
-     *
-     * @return array
-     */
     private function getStatusIdentities(array $statuses): array
     {
         return array_map(
@@ -465,6 +462,18 @@ class ArchivedTweetRepository extends ResourceRepository implements
         return $statuses->map(function (Tweet $status) use ($service) {
             return $service->apply($status);
         });
+    }
+
+    public function persistSearchBasedTweetsCollection(
+        AccessToken $identifier,
+        SavedSearch $savedSearch,
+        array $rawTweets,
+    ): CollectionInterface {
+        return $this->persistenceLayer->persistSearchBasedTweetsCollection(
+            $identifier,
+            $savedSearch,
+            $rawTweets
+        );
     }
 
     public function queryPublicationCollection(

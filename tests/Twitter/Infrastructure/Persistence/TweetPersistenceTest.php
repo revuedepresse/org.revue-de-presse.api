@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Http\Entity\ArchivedTweet;
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
 use App\Twitter\Domain\Publication\Repository\TaggedTweetRepositoryInterface;
-use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
+use App\Twitter\Infrastructure\Publication\Dto\TweetCollection;
 use App\Twitter\Domain\Publication\TweetInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedTweet;
 use App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer;
@@ -79,7 +79,7 @@ class StatusPersistenceTest extends KernelTestCase
         self::assertArrayHasKey('screen_name', $normalizedStatus);
         self::assertArrayHasKey('status', $normalizedStatus);
 
-        self::assertInstanceOf(StatusCollection::class, $normalizedStatus['status']);
+        self::assertInstanceOf(TweetCollection::class, $normalizedStatus['status']);
         self::assertCount(0, $normalizedStatus['status']->toArray());
         self::assertCount(0, $normalizedStatus['normalized_status']);
     }
@@ -148,7 +148,7 @@ class StatusPersistenceTest extends KernelTestCase
         );
 
         self::assertInstanceOf(
-            StatusCollection::class,
+            TweetCollection::class,
             $normalizedStatus['status']
         );
         self::assertCount(
@@ -211,7 +211,7 @@ class StatusPersistenceTest extends KernelTestCase
         // Assert
 
         self::assertInstanceOf(
-            StatusCollection::class,
+            TweetCollection::class,
             $normalizedStatus['status']
         );
         self::assertCount(

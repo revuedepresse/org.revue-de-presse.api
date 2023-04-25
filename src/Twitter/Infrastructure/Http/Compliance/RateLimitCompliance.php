@@ -7,9 +7,6 @@ use App\Twitter\Infrastructure\Http\Throttling\RateLimitComplianceInterface;
 use Psr\Log\LoggerInterface;
 use function strtr;
 
-/**
- * @author revue-de-presse.org <thierrymarianne@users.noreply.github.com>
- */
 class RateLimitCompliance implements RateLimitComplianceInterface
 {
     protected LoggerInterface $logger;

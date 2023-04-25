@@ -18,10 +18,10 @@ class MemberIdentity
         Assert::lazy()
             ->tryAll()
             ->that($id)
-                ->numeric('Member id should be numeric.')
-                ->notEmpty('Member id should not be empty.')
+            ->numeric('Member id should be numeric.')
+            ->notEmpty('Member id should not be empty.')
             ->that($screenName)
-                ->notEmpty('Member screen name should not be empty.')
+            ->notEmpty('Member screen name should not be empty.')
             ->verifyNow();
 
         $this->screenName = strtolower(trim($screenName));

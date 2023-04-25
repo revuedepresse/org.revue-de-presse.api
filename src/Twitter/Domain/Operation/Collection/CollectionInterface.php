@@ -7,9 +7,6 @@ use Closure;
 
 interface CollectionInterface
 {
-    /**
-     * @return int
-     */
     public function count();
 
     public function map(Closure $callable);
@@ -20,16 +17,8 @@ interface CollectionInterface
 
     public function isNotEmpty(): bool;
 
-    /**
-     * @param array $collection
-     *
-     * @return mixed
-     */
     public static function fromArray(array $collection): self;
 
-    /**
-     * @return array
-     */
     public function toArray();
 
     public function first();

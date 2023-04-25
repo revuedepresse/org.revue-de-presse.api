@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation;
 
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Search\Domain\Entity\SavedSearch;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Publication\Repository\TweetRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchAuthoredTweetInterface;
@@ -12,6 +13,13 @@ use function array_key_exists;
 
 class CurationSelectors implements CurationSelectorsInterface
 {
+    public function curateTweetsBySearchQuery(string $searchQuery): CurationSelectorsInterface
+    {
+        $this->searchQuery = $searchQuery;
+
+        return $this;
+    }
+
     public static function fromArray(array $options): self
     {
         $selectors = new self();
@@ -30,6 +38,10 @@ class CurationSelectors implements CurationSelectorsInterface
             $selectors->selectTweetsByMemberScreenName($options[FetchAuthoredTweetInterface::SCREEN_NAME]);
         }
 
+        if (array_key_exists(SavedSearch::SEARCH_QUERY, $options) && strlen(trim($options[SavedSearch::SEARCH_QUERY])) > 0) {
+            $selectors->curateTweetsBySearchQuery($options[SavedSearch::SEARCH_QUERY]);
+        }
+
         return $selectors;
     }
 
@@ -43,25 +55,47 @@ class CurationSelectors implements CurationSelectorsInterface
 
     private int $minTweetId = PHP_INT_MIN;
 
+    private string $searchQuery = '';
+
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function shouldLookUpPublicationsWithMinId(
         TweetRepositoryInterface  $tweetRepository,
         MemberRepositoryInterface $memberRepository
     ): bool {
-        $minPublicationId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
+        $minTweetId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
             $this->screenName()
         );
 
-        if ($minPublicationId) {
+        $totalTweets = $tweetRepository->howManyTweetsHaveBeenCollectedForMemberHavingUserName($this->screenName());
+
+        if ($minTweetId === 0 && $totalTweets > 0) {
+            $minTweetId = $tweetRepository->findNextExtremum(
+                $this->screenName(),
+                $tweetRepository::FINDING_IN_DESCENDING_ORDER
+            );
+        }
+
+        if ($minTweetId) {
             return true;
         }
 
-        return $tweetRepository->countHowManyStatusesFor($this->screenName())
-            > self::MAX_AVAILABLE_TWEETS_PER_USER;
+        return $totalTweets > self::MAX_AVAILABLE_TWEETS_PER_USER;
     }
 
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string
     {
         return $this->dateBeforeWhichStatusAreCollected;
+    }
+
+    public function isSearchQuery(): bool {
+        return strlen(trim($this->searchQuery)) > 0;
+    }
+
+    public function searchQuery(): string {
+        return $this->searchQuery;
     }
 
     public function maxStatusId(): int
@@ -84,7 +118,7 @@ class CurationSelectors implements CurationSelectorsInterface
     {
         Assert::lazy()
             ->that($screenName)
-                ->notEmpty()
+            ->notEmpty()
             ->verifyNow();
 
         $this->memberSelectorByScreenName = strtolower($screenName);

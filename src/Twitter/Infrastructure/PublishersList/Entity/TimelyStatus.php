@@ -17,19 +17,19 @@ class TimelyStatus implements TimeRangeAwareInterface
     private UuidInterface     $id;
     private string            $memberName;
     private DateTimeInterface $publicationDateTime;
-    private TweetInterface    $status;
+    private TweetInterface    $tweet;
     private PublishersList    $twitterList;
     private int               $timeRange;
     private string            $twitterListName;
 
     public function __construct(
-        TweetInterface     $status,
+        TweetInterface     $tweet,
         PublishersList     $twitterList,
         \DateTimeInterface $publicationDateTime
     ) {
-        $this->memberName = $status->getScreenName();
+        $this->memberName = $tweet->getScreenName();
         $this->publicationDateTime = $publicationDateTime;
-        $this->status = $status;
+        $this->tweet = $tweet;
         $this->twitterList = $twitterList;
         $this->twitterListName = $this->twitterList->name();
 

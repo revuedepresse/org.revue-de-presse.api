@@ -26,19 +26,10 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
     use TwitterListAwareTrait;
     use MemberProfileAccessorTrait;
 
-    /**
-     * @var MessageBusInterface
-     */
     private MessageBusInterface $dispatcher;
 
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
 
-    /**
-     * @var PublishersListRepositoryInterface
-     */
     private PublishersListRepositoryInterface $aggregateRepository;
 
     public function __construct(

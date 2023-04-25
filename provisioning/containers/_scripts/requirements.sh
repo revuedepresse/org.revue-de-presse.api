@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 
 function add_system_user_group() {
+    # shellcheck disable=SC2046
     if [ $(cat /etc/group | grep "${WORKER_OWNER_GID}" -c) -eq 0 ]; then
         groupadd \
             --gid "${WORKER_OWNER_GID}" \
@@ -34,7 +35,7 @@ function configure_blackfire_client() {
     | sed -E 's#__CLIENT_TOKEN__#'"${BLACKFIRE_CLIENT_TOKEN}"'#g' \
     > "${HOME}/.blackfire.ini"
 
-    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini"
+    chown "$WORKER_OWNER_UID.${WORKER_OWNER_GID}" "${HOME}/.blackfire.ini" || echo 'Could not change blackfire configuration file permissions' 1>&2
 }
 
 function create_log_files_when_non_existing() {
@@ -103,10 +104,8 @@ function install_dockerize() {
 function install_php_extensions() {
     docker-php-ext-install \
         bcmath \
-        mysqli \
         intl \
         pcntl \
-        pdo_mysql \
         pdo_pgsql \
         sockets \
         sodium
@@ -128,18 +127,18 @@ function install_php_extensions() {
 
     wget https://github.com/DataDog/dd-trace-php/archive/0.83.1.tar.gz \
     --output-document=/tmp/datadog-php-tracer.tar.gz
+
     cd /tmp || exit
     tar -xvzf /tmp/datadog-php-tracer.tar.gz
     cd dd-trace-php-0.83.1 || exit
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
+        phpize .
+        ./configure --with-php-config="$(which php-config)"
+        make
+        make install
 
     wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
     --tries=40 \
     --output-document=/tmp/datadog-setup.php
-
     cd /tmp || exit
     php datadog-setup.php \
     --php-bin all \
@@ -187,7 +186,7 @@ function install_process_manager() {
     if [ $(asdf plugin list | grep -c 'nodejs') -eq 0 ];
     then
 
-        asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 
     else
 

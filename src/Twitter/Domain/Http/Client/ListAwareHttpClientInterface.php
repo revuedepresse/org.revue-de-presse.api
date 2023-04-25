@@ -8,7 +8,7 @@ use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Http\Resource\MemberOwnerships;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 
-interface ListAwareHttpClientInterface extends ApiEndpointsAwareInterface
+interface ListAwareHttpClientInterface extends TwitterAPIEndpointsAwareInterface
 {
     public const MAX_OWNERSHIPS = 800;
 
