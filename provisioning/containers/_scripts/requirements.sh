@@ -150,10 +150,11 @@ function install_process_manager() {
       git checkout "$(git describe --abbrev=0 --tags --match "v[0-9]*" "$(git rev-list --tags --max-count=1)")"
     ) && \. "$NVM_DIR/nvm.sh"
 
-    echo 'export NVM_DIR='"${NVM_DIR}"'/.nvm'                                 >> "${HOME}/.bashrc"
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm'  >> "${HOME}/.bashrc"
-    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> "${HOME}/.bashrc"
-    echo '16.15.1'                                                            >> "${HOME}/.nvmrc"
+    echo 'export NVM_DIR='"${NVM_DIR}"'/.nvm'                                >> "${HOME}/.bashrc"
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm'  >> "${HOME}/.bashrc"
+    echo '[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"' >> "${HOME}/.bashrc"
+    echo '16.15.1'                                                           >> "${HOME}/.nvmrc"
+    echo '16.15.1'                                                           >> "${HOME}/org.revue-de-presse.worker/.nvmrc"
 
     source "${HOME}/.bashrc"
 
