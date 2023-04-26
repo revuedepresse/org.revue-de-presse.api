@@ -283,11 +283,6 @@ class TweetCurator implements TweetCuratorInterface
         return $options;
     }
 
-    /**
-     * @param array $oauthTokens
-     *
-     * @return $this
-     */
     public function setupAccessor(array $oauthTokens): self
     {
         $token = new Token();
@@ -296,7 +291,7 @@ class TweetCurator implements TweetCuratorInterface
 
         $this->httpClient->fromToken($token);
 
-        /** @var Token token */
+        /** @var TokenInterface token */
         $token = $this->tokenRepository->findOneBy(
             ['oauthToken' => $oauthTokens[TokenInterface::FIELD_TOKEN]]
         );
@@ -305,8 +300,8 @@ class TweetCurator implements TweetCuratorInterface
             $token = $this->tokenRepository->findFirstUnfrozenToken();
         }
 
-        $this->httpClient->setConsumerKey($token->consumerKey);
-        $this->httpClient->setConsumerSecret($token->consumerSecret);
+        $this->httpClient->setConsumerKey($token->getConsumerKey());
+        $this->httpClient->setConsumerSecret($token->getConsumerSecret());
 
         return $this;
     }
@@ -385,16 +380,17 @@ class TweetCurator implements TweetCuratorInterface
         return $availableApi;
     }
 
-    protected function isApiAvailableForToken(TokenInterface $token): bool
+    protected function isApiAvailableForToken(TokenInterface $_): bool
     {
-        $this->setupAccessor(
-            [
-                TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
-                TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret()
-            ]
-        );
-
-        return $this->isApiAvailable();
+        return true;
+//        $this->setupAccessor(
+//            [
+//                TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
+//                TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret()
+//            ]
+//        );
+//
+//        return $this->isApiAvailable();
     }
 
     /**
@@ -717,14 +713,10 @@ class TweetCurator implements TweetCuratorInterface
     }
 
     /**
-     * @param Token $token
-     * @param array $options
-     *
-     * @return array
      * @throws Exception
      */
     private function setUpAccessorWithFirstAvailableToken(
-        Token $token,
+        TokenInterface $token,
         array $options
     ): array {
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getAccessToken();

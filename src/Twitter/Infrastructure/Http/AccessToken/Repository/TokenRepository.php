@@ -7,6 +7,7 @@ use App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Domain\Http\Repository\TokenTypeRepositoryInterface;
 use App\Twitter\Domain\Http\Security\Authorization\AccessTokenInterface;
+use App\Twitter\Infrastructure\Http\Client\Fallback\FallbackToken;
 use App\Twitter\Infrastructure\Http\Entity\NullToken;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Http\Entity\TokenType;
@@ -135,13 +136,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $matchingTokens[0];
     }
 
-    /**
-     * @param Token $token
-     *
-     * @return bool
-     * @throws Exception
-     */
-    protected function isTokenFrozen(Token $token): bool
+    protected function isTokenFrozen(TokenInterface $token): bool
     {
         return $token->getFrozenUntil() !== null &&
             $token->getFrozenUntil()->getTimestamp() >
@@ -150,12 +145,9 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param Token $token
-     *
-     * @return bool
      * @throws Exception
      */
-    protected function isTokenNotFrozen(Token $token): bool
+    protected function isTokenNotFrozen(TokenInterface $token): bool
     {
         return !$this->isTokenFrozen($token);
     }
@@ -272,10 +264,6 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $token;
     }
 
-    /**
-     * @return mixed|null
-     * @throws NonUniqueResultException
-     */
     public function findFirstUnfrozenToken(): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
@@ -284,8 +272,8 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
         try {
             return $queryBuilder->getQuery()->getSingleResult();
-        } catch (NoResultException $exception) {
-            return null;
+        } catch (NoResultException) {
+            return new FallbackToken();
         }
     }
 

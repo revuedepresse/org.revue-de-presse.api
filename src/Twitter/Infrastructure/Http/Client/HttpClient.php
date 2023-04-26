@@ -30,6 +30,7 @@ use App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
 use App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException;
 use App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Http\Client\Fallback\FallbackToken;
 use App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance;
 use App\Twitter\Infrastructure\Http\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Http\Entity\NullToken;
@@ -244,7 +245,7 @@ class HttpClient implements
      */
     public function contactEndpointUsingConsumerKey(
         string $endpoint,
-        Token $token
+        TokenInterface $token
     ): object|array
     {
         $this->setUpTwitterClient(
@@ -449,7 +450,7 @@ class HttpClient implements
             $members = $sendRequest();
         } catch (UnavailableResourceException) {
             /**
-             * @var Token $token
+             * @var TokenInterface $token
              */
             $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->userToken]);
             $this->waitUntilTokenUnfrozen($token);
@@ -564,9 +565,8 @@ class HttpClient implements
      * @param bool $findNextAvailableToken
      *
      * @return Token|null
-     * @throws ApiAccessRateLimitException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function guardAgainstApiLimit(
         string $endpoint,
@@ -607,7 +607,7 @@ class HttpClient implements
             }
 
             if ($token === null) {
-                InconsistentTokenRepository::onEmptyAvailableTokenList();
+                return new FallbackToken();
             }
 
             $this->waitUntilTokenUnfrozen($token);
@@ -648,15 +648,11 @@ class HttpClient implements
     }
 
     /**
-     * @param Exception $exception
-     * @param Token     $token
-     *
-     * @return object
      * @throws Exception
      */
     public function handleResponseContentWithEmptyErrorCode(
         Exception $exception,
-        Token $token
+        TokenInterface $token
     ) {
         if ($exception instanceof \ErrorException && $exception->getSeverity() === E_WARNING) {
             $this->logger->warning($exception->getMessage(), ['exception' => $exception]);
@@ -721,8 +717,8 @@ class HttpClient implements
         $this->tokenRepository->freezeToken($token);
 
         if (
-            strpos($endpoint, '/statuses/user_timeline') === false
-            && strpos($endpoint, '/favorites/list') === false
+            !str_contains($endpoint, '/statuses/user_timeline')
+            && !str_contains($endpoint, '/favorites/list')
         ) {
             $this->throwException($exception);
         }
@@ -741,98 +737,97 @@ class HttpClient implements
     }
 
     /**
-     * @param string $endpoint
-     *
-     * @return bool
      * @throws Exception
      */
-    public function isApiRateLimitReached($endpoint = '/statuses/show/:id')
+    public function isApiRateLimitReached($endpoint = '/statuses/show/:id'): bool
     {
-        $rateLimitStatus = $this->fetchRateLimitStatus();
+        return false;
 
-        if (UnavailableResourceException::containErrors($rateLimitStatus)) {
-            $message = $rateLimitStatus->errors[0]->message;
-
-            $this->logger->error($message);
-            throw new Exception($message, $rateLimitStatus->errors[0]->code);
-        } else {
-            $token = new Token();
-            $token->setAccessToken($this->userToken);
-
-            $fullEndpoint = $endpoint;
-            $resourceType = 'statuses';
-
-            if (!isset($rateLimitStatus->resources->$resourceType)) {
-                return false;
-            }
-
-            $availableEndpoints = get_object_vars($rateLimitStatus->resources->$resourceType);
-            if (!array_key_exists($endpoint, $availableEndpoints)) {
-                $endpoint = null;
-
-                if (false !== strpos($fullEndpoint, '/users/show')) {
-                    $endpoint     = '/users/show/:id';
-                    $resourceType = 'users';
-                }
-
-                if (false !== strpos($fullEndpoint, '/statuses/user_timeline')) {
-                    $endpoint = '/statuses/user_timeline';
-                }
-
-                if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
-                    $endpoint     = '/lists/ownerships';
-                    $resourceType = 'lists';
-                }
-
-                if (false !== strpos($fullEndpoint, '/favorites/list')) {
-                    $endpoint     = '/favorites/list';
-                    $resourceType = 'favorites';
-                }
-
-                if (false !== strpos($fullEndpoint, '/friends/ids')) {
-                    $endpoint     = '/friends/ids';
-                    $resourceType = 'friends';
-                }
-
-                if (false !== strpos($fullEndpoint, '/followers/ids')) {
-                    $endpoint     = '/followers/ids';
-                    $resourceType = 'followers';
-                }
-
-                if (false !== strpos($fullEndpoint, '/friendships/create')) {
-                    $endpoint     = '/friendships/create';
-                    $resourceType = 'friendships';
-                }
-            }
-
-            if (!is_null($endpoint) && isset($rateLimitStatus->resources->$resourceType)) {
-                $limit = $rateLimitStatus->resources->$resourceType->$endpoint->limit;
-
-                if (is_null($limit)) {
-                    return false;
-                }
-
-                $remainingCalls = $rateLimitStatus->resources->$resourceType->$endpoint->remaining;
-
-                $remainingCallsMessage = $this->translator->trans(
-                    'logs.info.calls_remaining',
-                    [
-                        'count'           => $remainingCalls,
-                        'remaining_calls' => $remainingCalls,
-                        'endpoint'        => $endpoint,
-                        'identifier'      => $this->takeFirstTokenCharacters($token),
-                    ],
-                    'logs'
-                );
-                $this->logger->info($remainingCallsMessage);
-
-                return $this->lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit);
-            } else {
-                $this->logger->info(sprintf('Could not compute remaining calls for "%s"', $fullEndpoint));
-
-                return false;
-            }
-        }
+//        $rateLimitStatus = $this->fetchRateLimitStatus();
+//
+//        if (UnavailableResourceException::containErrors($rateLimitStatus)) {
+//            $message = $rateLimitStatus->errors[0]->message;
+//
+//            $this->logger->error($message);
+//            throw new Exception($message, $rateLimitStatus->errors[0]->code);
+//        } else {
+//            $token = new Token();
+//            $token->setAccessToken($this->userToken);
+//
+//            $fullEndpoint = $endpoint;
+//            $resourceType = 'statuses';
+//
+//            if (!isset($rateLimitStatus->resources->$resourceType)) {
+//                return false;
+//            }
+//
+//            $availableEndpoints = get_object_vars($rateLimitStatus->resources->$resourceType);
+//            if (!array_key_exists($endpoint, $availableEndpoints)) {
+//                $endpoint = null;
+//
+//                if (false !== strpos($fullEndpoint, '/users/show')) {
+//                    $endpoint     = '/users/show/:id';
+//                    $resourceType = 'users';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/statuses/user_timeline')) {
+//                    $endpoint = '/statuses/user_timeline';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
+//                    $endpoint     = '/lists/ownerships';
+//                    $resourceType = 'lists';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/favorites/list')) {
+//                    $endpoint     = '/favorites/list';
+//                    $resourceType = 'favorites';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/friends/ids')) {
+//                    $endpoint     = '/friends/ids';
+//                    $resourceType = 'friends';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/followers/ids')) {
+//                    $endpoint     = '/followers/ids';
+//                    $resourceType = 'followers';
+//                }
+//
+//                if (false !== strpos($fullEndpoint, '/friendships/create')) {
+//                    $endpoint     = '/friendships/create';
+//                    $resourceType = 'friendships';
+//                }
+//            }
+//
+//            if (!is_null($endpoint) && isset($rateLimitStatus->resources->$resourceType)) {
+//                $limit = $rateLimitStatus->resources->$resourceType->$endpoint->limit;
+//
+//                if (is_null($limit)) {
+//                    return false;
+//                }
+//
+//                $remainingCalls = $rateLimitStatus->resources->$resourceType->$endpoint->remaining;
+//
+//                $remainingCallsMessage = $this->translator->trans(
+//                    'logs.info.calls_remaining',
+//                    [
+//                        'count'           => $remainingCalls,
+//                        'remaining_calls' => $remainingCalls,
+//                        'endpoint'        => $endpoint,
+//                        'identifier'      => $this->takeFirstTokenCharacters($token),
+//                    ],
+//                    'logs'
+//                );
+//                $this->logger->info($remainingCallsMessage);
+//
+//                return $this->lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit);
+//            } else {
+//                $this->logger->info(sprintf('Could not compute remaining calls for "%s"', $fullEndpoint));
+//
+//                return false;
+//            }
+//        }
     }
 
     /**
@@ -848,12 +843,7 @@ class HttpClient implements
         return $remainingCalls < floor($limit * 1 / 10);
     }
 
-    /**
-     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function logExceptionForToken(string $endpoint, stdClass $content, Token $token = null): UnavailableResourceException
+    public function logExceptionForToken(string $endpoint, stdClass $content, ?TokenInterface $token = null): UnavailableResourceException
     {
         $exception = $this->extractContentErrorAsException($content);
 
@@ -861,9 +851,7 @@ class HttpClient implements
         $this->twitterApiLogger->info('[code] ' . $exception->getCode());
 
         $token = $this->maybeGetToken($endpoint, $token);
-        if ($token instanceof TokenInterface) {
-            $this->twitterApiLogger->info('[token] ' . $token->getAccessToken());
-        }
+        $this->twitterApiLogger->info('[token] ' . $token->getAccessToken());
 
         return $exception;
     }
@@ -890,24 +878,20 @@ class HttpClient implements
         return in_array($exception->getCode(), $this->getTwitterErrorCodes());
     }
 
-    /**
-     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Exception
-     */
-    public function preEndpointContact(string $endpoint): ?TokenInterface
+    public function preEndpointContact(string $_): ?TokenInterface
     {
-        $tokens = $this->getTokens();
+        return new FallbackToken();
 
-        /** @var Token $token */
-        $token = $this->tokenRepository->findByUserToken($tokens['oauth']);
-
-        if (!$token->isFrozen()) {
-            return $token;
-        }
-
-        return $this->guardAgainstApiLimit($endpoint);
+//        $tokens = $this->getTokens();
+//
+//        /** @var Token $token */
+//        $token = $this->tokenRepository->findByUserToken($tokens['oauth']);
+//
+//        if (!$token->isFrozen()) {
+//            return $token;
+//        }
+//
+//        return $this->guardAgainstApiLimit($endpoint);
     }
 
     /**
@@ -1699,10 +1683,7 @@ class HttpClient implements
     }
 
     /**
-     * @param string $endpoint
-     * @return object|array
      * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
-     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
      * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \JsonException
@@ -1932,11 +1913,6 @@ class HttpClient implements
         $this->logger->info($suspendedMessageMessage);
     }
 
-    /**
-     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     private function maybeGetToken(string $endpoint, TokenInterface $token = null): TokenInterface
     {
         if ($this->whichHttpMethod($this->intendingToAddMemberToList($endpoint), $endpoint) === self::HTTP_METHOD_GET) {

@@ -146,7 +146,7 @@ class FetchTweetMessageHandler implements MessageSubscriberInterface
             ];
         }
 
-        /** @var Token $token */
+        /** @var TokenInterface $token */
         $token = $this->tokenRepository->findFirstUnfrozenToken();
 
         return [

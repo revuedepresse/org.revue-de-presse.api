@@ -85,7 +85,15 @@ class Token implements TokenInterface
      */
     public ?string $consumerKey = null;
 
+    /**
+     * @deprecated in favor of Token->consumerKey()
+     */
     public function getConsumerKey(): string
+    {
+        return $this->consumerKey();
+    }
+
+    public function consumerKey(): string
     {
         return $this->consumerKey;
     }
@@ -107,7 +115,15 @@ class Token implements TokenInterface
      */
     public ?string $consumerSecret = null;
 
+    /**
+     * @deprecated in favor of Token->consumerSecret()
+     */
     public function getConsumerSecret(): string
+    {
+        return $this->consumerSecret();
+    }
+
+    public function consumerSecret(): string
     {
         return $this->consumerSecret;
     }
