@@ -83,24 +83,6 @@ function install_blackfire() {
     apt install blackfire blackfire-php --assume-yes
 }
 
-function install_dockerize() {
-    local dockerize_version
-    dockerize_version='v0.6.1'
-
-    # [dockerize's git repository](https://github.com/jwilder/dockerize)
-    local releases_url
-    releases_url="https://github.com/jwilder/dockerize/releases"
-
-    local archive
-    archive="dockerize-linux-amd64-${dockerize_version}.tar.gz"
-
-    wget "${releases_url}/download/${dockerize_version}/${archive}" -O "${archive}"
-
-    tar -C /usr/local/bin -xzv --file "${archive}"
-
-    rm "${archive}"
-}
-
 function install_php_extensions() {
     docker-php-ext-install \
         bcmath \
@@ -146,10 +128,10 @@ function install_php_extensions() {
 }
 
 function install_process_manager() {
-    local asdf_dir
-    asdf_dir="${1}"
+    local nvm_dir
+    nvm_dir="${1}"
 
-    if [ -z "${asdf_dir}" ];
+    if [ -z "${nvm_dir}" ];
     then
 
         printf 'A %s is expected as %s (%s).%s' 'non-empty string' '1st argument' 'extendable version manager (asdf dir)' $'\n'
@@ -158,38 +140,30 @@ function install_process_manager() {
 
     else
 
-        rm -rf "${asdf_dir}"
+        rm -rf "${nvm_dir}"
 
     fi
 
-    export ASDF_DIR="${asdf_dir}"
+    export NVM_DIR="$nvm_dir/.nvm" && (
+      git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+      cd "$NVM_DIR"
+      git checkout "$(git describe --abbrev=0 --tags --match "v[0-9]*" "$(git rev-list --tags --max-count=1)")"
+    ) && \. "$NVM_DIR/nvm.sh"
 
-    git config --global advice.detachedHead false
-    git clone https://github.com/asdf-vm/asdf.git --branch v0.10.0 "${asdf_dir}"
-
-    echo 'export ASDF_DIR='"${asdf_dir}"        >> "${HOME}/.bashrc"
-    echo '. ${ASDF_DIR}/asdf.sh'                >> "${HOME}/.bashrc"
-    echo '. ${ASDF_DIR}/completions/asdf.bash'  >> "${HOME}/.bashrc"
-    echo 'nodejs 16.15.1'                       >> "${HOME}/.tool-versions"
+    echo 'export NVM_DIR='"${NVM_DIR}"'/.nvm'                                >> "${HOME}/.bashrc"
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm'  >> "${HOME}/.bashrc"
+    echo '[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"' >> "${HOME}/.bashrc"
+    echo '16.15.1'                                                           >> "${HOME}/.nvmrc"
+    echo '16.15.1'                                                           >> "${HOME}/org.revue-de-presse.worker/.nvmrc"
 
     source "${HOME}/.bashrc"
 
-    if [ $(asdf plugin list | grep -c 'nodejs') -eq 0 ];
-    then
-
-    asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-
-    else
-
-        printf '`%s` plugin for asdf has been installed already.%s' 'nodejs' '%s' 1>&2
-
-    fi
-
-    asdf install nodejs 16.15.1
-    asdf global nodejs 16.15.1
+    nvm install 16.15.1
+    nvm which 16.15.1
+    nvm use node
 
     # [npm Config Setting](https://docs.npmjs.com/cli/v8/using-npm/config#cache)
-    npm config set cache "${asdf_dir}/../npm" --global
+    npm config set cache "${nvm_dir}/../npm" --global
     npm install pm2
     ./node_modules/.bin/pm2 install pm2-logrotate
 
@@ -218,7 +192,6 @@ function install_process_manager_packages() {
 }
 
 function install_process_manager_requirements() {
-    install_dockerize
     install_process_manager_packages
     clear_package_management_system_cache
 }
@@ -288,5 +261,5 @@ function set_permissions() {
     fi
 }
 
-set -Eeuo pipefail
+set +Eeuo pipefail
 

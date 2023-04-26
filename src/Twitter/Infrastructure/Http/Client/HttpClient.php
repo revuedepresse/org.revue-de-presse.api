@@ -129,6 +129,8 @@ class HttpClient implements
         array $parameters = []
     ): object|array
     {
+        $this->logger->info("[ accessing Twitter API endpoint: {$endpoint} ]");
+
         $intendingToToAddMemberToList = $this->intendingToAddMemberToList($endpoint);
 
         $version = $this->whichTwitterAPIVersionToCall($intendingToToAddMemberToList);
@@ -348,19 +350,24 @@ class HttpClient implements
     }
 
     /**
-     * @throws ApiAccessRateLimitException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws TweetNotFoundException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
+     * @param array $options
+     * @return array
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \App\Twitter\Infrastructure\Exception\UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
      */
     public function fetchStatuses(array $options): array
     {
@@ -370,19 +377,24 @@ class HttpClient implements
     }
 
     /**
-     * @throws ApiAccessRateLimitException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws TweetNotFoundException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
+     * @param array $parameters
+     * @return array|\stdClass|null
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \App\Twitter\Infrastructure\Exception\UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
      */
     public function fetchTimelineStatuses(array $parameters)
     {
@@ -435,7 +447,7 @@ class HttpClient implements
 
         try {
             $members = $sendRequest();
-        } catch (UnavailableResourceException $exception) {
+        } catch (UnavailableResourceException) {
             /**
              * @var Token $token
              */
@@ -1325,7 +1337,11 @@ class HttpClient implements
     }
 
     /**
+     * @param \App\Twitter\Infrastructure\Http\Resource\MemberIdentity $memberIdentity
+     * @return \stdClass|array|null
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
      * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
      * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
      * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
      * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
@@ -1683,7 +1699,18 @@ class HttpClient implements
     }
 
     /**
+     * @param string $endpoint
+     * @return object|array
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
      * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \JsonException
+     * @throws \Safe\Exceptions\ZlibException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws \Exception
      */
     private function fetchContent(string $endpoint): object|array
@@ -1691,6 +1718,14 @@ class HttpClient implements
         $intendingToAddMemberToList = $this->intendingToAddMemberToList($endpoint);
 
         if ($this->whichHttpMethod($intendingToAddMemberToList, $endpoint) === self::HTTP_METHOD_GET) {
+            if (str_contains($endpoint, self::API_ENDPOINT_GET_MEMBER_PROFILE)) {
+                $parameters = $this->reduceParameters($endpoint, []);
+
+                return $this->fallbackHttpClient->getMemberProfile(
+                    new MemberIdentity($parameters['screen_name'], MemberIdentity::NOT_PERSISTED_MEMBER_NUMERIC_ID)
+                );
+            }
+
             if (str_contains($endpoint, self::API_ENDPOINT_MEMBER_TIMELINE)) {
                 $parameters = $this->reduceParameters($endpoint, []);
 

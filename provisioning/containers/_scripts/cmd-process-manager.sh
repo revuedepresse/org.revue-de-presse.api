@@ -25,10 +25,11 @@ start() {
 
     if [ ! -e ./.pm2-installed ];
     then
-        local asdf_dir
-        asdf_dir="${project_dir}/var/home/asdf"
 
-        install_process_manager "${asdf_dir}"
+        local nvm_dir
+        nvm_dir="${project_dir}/var/home/nvm"
+
+        install_process_manager "${nvm_dir}"
     fi
 
     local total_workers
