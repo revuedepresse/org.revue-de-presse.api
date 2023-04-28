@@ -66,7 +66,9 @@ function set_file_permissions() {
 
     if [ ! -d "${project_dir}/.git" ];
     then
+
         rm --recursive --force --verbose "${project_dir}/.git"
+
     fi
 
     chown --verbose -R "${WORKER_OWNER_UID}:${WORKER_OWNER_GID}" /scripts
@@ -81,8 +83,8 @@ function set_file_permissions() {
     -executable \
     -readable \
     -type d \
-    -not -path "${project_dir}"'/provisioning/volumes' \
-    -not -path "${project_dir}"'/public/emoji-data' \
+    -not -path "${project_dir}"'/provisioning/volumes*' \
+    -not -path "${project_dir}"'/public/emoji-data*' \
     -exec sh -c "$(cat <<"EOF"
         \chown --recursive $2:$3 "$1" && \
         \chmod --recursive og-rwx "$1" && \
@@ -98,8 +100,8 @@ EOF
     -readable \
     -regex '.+/var.+' \
     -regex '.+/src/Media/Resources/.+.b64' \
-    -not -path "${project_dir}"'/provisioning/volumes' \
-    -not -path "${project_dir}"'/var/log' \
+    -not -path "${project_dir}"'/provisioning/volumes*' \
+    -not -path "${project_dir}"'/var/log*' \
     -exec sh -c '\chmod --recursive ug+w "$1"' shell {} \; && \
     printf '%s.%s' 'Successfully made var directories writable' $'\n'
 
@@ -107,10 +109,10 @@ EOF
     find "${project_dir}" \
     -type f \
     -readable \
-    -not -path "${project_dir}"'/var' \
-    -not -path "${project_dir}"'/src/Media/Resources' \
-    -not -path "${project_dir}"'/provisioning/volumes' \
-    -not -path "${project_dir}"'/public/emoji-data' \
+    -not -path "${project_dir}"'/var*' \
+    -not -path "${project_dir}"'/src/Media/Resources*' \
+    -not -path "${project_dir}"'/provisioning/volumes*' \
+    -not -path "${project_dir}"'/public/emoji-data*' \
     -exec sh -c "$(cat - <<"EOF"
         \chown $2:$3 "$1" && \
         \chmod og-rwx "$1" && \

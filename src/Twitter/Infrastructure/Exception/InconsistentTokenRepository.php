@@ -8,6 +8,9 @@ namespace App\Twitter\Infrastructure\Exception;
  */
 class InconsistentTokenRepository extends \Exception
 {
+    /**
+     * @throws InconsistentTokenRepository
+     */
     public static function onEmptyAvailableTokenList()
     {
         throw new self(implode([

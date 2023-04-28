@@ -96,7 +96,6 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
         // Leave the loop as soon as there are some ownerships to process
         // or there is no token left to access the Twitter API
         while (
-            $totalUnfrozenToken > 0 &&
             $ownershipCollection->isEmpty()
             && $nextPage !== 0
         ) {

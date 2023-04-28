@@ -5,6 +5,7 @@ namespace App\Membership\Infrastructure\Entity\Legacy;
 
 use App\Membership\Domain\Model\Member as MemberModel;
 use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Http\Model\TokenInterface;
 use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Twitter\Infrastructure\Serialization\JsonEncodingAwareInterface;
 use DateTime;
@@ -503,7 +504,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this;
     }
 
-    public function removeToken(Token $tokens)
+    public function removeToken(TokenInterface $tokens)
     {
         $this->tokens->removeElement($tokens);
     }
