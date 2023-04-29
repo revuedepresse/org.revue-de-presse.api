@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
 /**
- * @group api_access
+ * @group api_access_token
  */
 class TokenChangeTest extends TestCase
 {
