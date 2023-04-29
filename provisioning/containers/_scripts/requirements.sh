@@ -204,6 +204,7 @@ function install_process_manager_packages() {
         --assume-yes \
         --no-install-recommends \
         curl \
+        less \
         gawk \
         git \
         gpg \

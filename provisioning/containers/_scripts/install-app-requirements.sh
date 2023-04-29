@@ -85,7 +85,7 @@ function set_file_permissions() {
     -type d \
     -not -path "${project_dir}"'/provisioning/volumes*' \
     -not -path "${project_dir}"'/public/emoji-data*' \
-    -exec sh -c "$(cat <<"EOF"
+    -exec sh -c "$(cat - <<"EOF"
         \chown --recursive $2:$3 "$1" && \
         \chmod --recursive og-rwx "$1" && \
         \chmod --recursive g+rx "$1"

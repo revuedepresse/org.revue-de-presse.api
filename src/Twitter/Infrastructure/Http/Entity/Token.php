@@ -51,6 +51,13 @@ class Token implements TokenInterface
      */
     protected string $oauthToken;
 
+    protected int $howManyRetries = 1;
+
+    public function howManyRetries(): int
+    {
+        return $this->howManyRetries;
+    }
+
     public function setAccessToken(string $accessToken): TokenInterface
     {
         $this->oauthToken = $accessToken;
@@ -339,6 +346,13 @@ class Token implements TokenInterface
         if (array_key_exists('consumer_secret', $accessTokenProps)) {
             $consumerSecret = $accessTokenProps['consumer_secret'];
         }
+
+        $howManyRetries = 0;
+        if (array_key_exists('how_many_retries', $accessTokenProps)) {
+            $howManyRetries = $accessTokenProps['how_many_retries'];
+        }
+
+        $accessToken->howManyRetries = $howManyRetries;
 
         $accessToken->setAccessToken($accessTokenProps[self::FIELD_TOKEN]);
         $accessToken->setAccessTokenSecret($accessTokenProps[self::FIELD_SECRET]);
