@@ -6,9 +6,9 @@ export service_pid=$$
 
 function build() {
     local DEBUG
-    local SERVICE
-    local SERVICE_OWNER_UID
-    local SERVICE_OWNER_GID
+    local PROJECT
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
 
     load_configuration_parameters
 
@@ -20,9 +20,9 @@ function build() {
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
             --no-cache \
-            --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
-            --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
-            --build-arg "SERVICE=${SERVICE}" \
+            --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
+            --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
+            --build-arg "PROJECT=${PROJECT}" \
             app \
             cache \
             service
@@ -33,9 +33,9 @@ function build() {
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
-            --build-arg "OWNER_UID=${SERVICE_OWNER_UID}" \
-            --build-arg "OWNER_GID=${SERVICE_OWNER_GID}" \
-            --build-arg "SERVICE=${SERVICE}" \
+            --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
+            --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
+            --build-arg "PROJECT=${PROJECT}" \
             app \
             cache \
             service
@@ -62,8 +62,8 @@ function clean() {
 }
 
 function clear_cache_warmup() {
-    local SERVICE_OWNER_UID
-    local SERVICE_OWNER_GID
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
 
     load_configuration_parameters
 
@@ -88,7 +88,7 @@ function clear_cache_warmup() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        --user "${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}" \
+        --user "${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-app-cache.sh'
 }
@@ -105,10 +105,10 @@ function guard_against_missing_variables() {
 
     fi
 
-    if [ -z "${SERVICE}" ];
+    if [ -z "${PROJECT}" ];
     then
 
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'service name e.g. org.example.api' 'SERVICE' $'\n'
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'service name e.g. org.example.api' 'PROJECT' $'\n'
 
         kill -s TERM $service_pid
 
@@ -116,10 +116,10 @@ function guard_against_missing_variables() {
 
     fi
 
-    if [ "${SERVICE}" = 'org.example.api' ];
+    if [ "${PROJECT}" = 'org.example.api' ];
     then
 
-        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'SERVICE' 'org.example.api' $'\n'
+        printf 'Have you picked a satisfying worker name ("%s" environment variable - "%s" as default value is not accepted).%s' 'PROJECT' 'org.example.api' $'\n'
 
         kill -s TERM $service_pid
 
@@ -127,10 +127,10 @@ function guard_against_missing_variables() {
 
     fi
 
-    if [ -z "${SERVICE_OWNER_UID}" ];
+    if [ -z "${PROJECT_OWNER_UID}" ];
     then
 
-        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'SERVICE_OWNER_UID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'PROJECT_OWNER_UID' $'\n'
 
         kill -s TERM $service_pid
 
@@ -138,10 +138,10 @@ function guard_against_missing_variables() {
 
     fi
 
-    if [ -z "${SERVICE_OWNER_GID}" ];
+    if [ -z "${PROJECT_OWNER_GID}" ];
     then
 
-        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'SERVICE_OWNER_GID' $'\n'
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'PROJECT_OWNER_GID' $'\n'
 
         kill -s TERM $service_pid
 
@@ -155,9 +155,9 @@ function green() {
 }
 
 function install() {
-    local SERVICE
-    local SERVICE_OWNER_UID
-    local SERVICE_OWNER_GID
+    local PROJECT
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
 
     load_configuration_parameters
 
@@ -208,9 +208,9 @@ function load_configuration_parameters() {
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                ' "$(reset_color)" "${DEBUG}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE:              ' "$(reset_color)" "${SERVICE}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_UID:    ' "$(reset_color)" "${SERVICE_OWNER_UID}" $'\n'
-    printf '%b%s%b"%s"%s' "$(green)" 'SERVICE_OWNER_GID:    ' "$(reset_color)" "${SERVICE_OWNER_GID}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'PROJECT:              ' "$(reset_color)" "${PROJECT}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'PROJECT_OWNER_UID:    ' "$(reset_color)" "${PROJECT_OWNER_UID}" $'\n'
+    printf '%b%s%b"%s"%s' "$(green)" 'PROJECT_OWNER_GID:    ' "$(reset_color)" "${PROJECT_OWNER_GID}" $'\n'
     printf '%s'           $'\n'
 }
 
@@ -228,9 +228,9 @@ function remove_running_container_and_image_in_debug_mode() {
     fi
 
     local DEBUG
-    local SERVICE_OWNER_UID
-    local SERVICE_OWNER_GID
-    local SERVICE
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
+    local PROJECT
 
     load_configuration_parameters
 

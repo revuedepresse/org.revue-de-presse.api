@@ -15,8 +15,10 @@ use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use JsonException;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
+use RedisException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
@@ -39,10 +41,43 @@ class TrendsController
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
+    public function callback(Request $request): JsonResponse
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse(
+                $this->environment,
+                $this->allowedOrigin
+            );
+        }
+
+        $structuredResponse = array_map(
+            function ($val) use ($request) {
+                return $request->get($val, '');
+            },
+            [
+                'expires_in',
+                'access_token',
+                'scope',
+                'refresh_token',
+                'refresh_expires_in',
+                'token_type open_id'
+            ]
+        );
+
+        $this->logger->error(
+            print_r($structuredResponse, true)
+        );
+
+        return new JsonResponse(<<<DATA
+    That's all folks! 🤙
+DATA
+);
+    }
+
     /**
-     * @throws \JsonException
-     * @throws \RedisException
-     * @throws \Exception
+     * @throws JsonException
+     * @throws RedisException
+     * @throws Exception
      */
     public function getHighlights(Request $request): JsonResponse
     {
@@ -91,8 +126,8 @@ class TrendsController
     }
 
     /**
-     * @throws \JsonException
-     * @throws \RedisException
+     * @throws JsonException
+     * @throws RedisException
      */
     private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -155,7 +190,7 @@ class TrendsController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function getCollection(
         Request $request,
@@ -172,7 +207,7 @@ class TrendsController
 
         try {
             $searchParams = SearchParams::fromRequest($request, $params);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->notice($e->getMessage());
 
             return new JsonResponse(status: 404);

@@ -7,15 +7,11 @@ use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
+use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Domain\Http\ApiAccessorInterface;
 use App\Twitter\Domain\Http\TwitterErrorAwareInterface;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Http\Moderator\ApiLimitModerator;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\EmptyErrorCodeException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -26,19 +22,22 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
-use App\Twitter\Infrastructure\Translation\Translator;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Http\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Http\Accessor\StatusAccessor;
+use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Infrastructure\Http\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\Moderator\ApiLimitModerator;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Translation\Translator;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Goutte\Client;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
@@ -333,16 +332,13 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $endpoint
-     * @param Token  $token
-     *
-     * @return stdClass|array
      * @throws Exception
      */
     public function contactEndpointUsingConsumerKey(
         string $endpoint,
         Token $token
-    ) {
+    ): object|array
+    {
         $this->setUpTwitterClient(
             $token->getConsumerKey(),
             $token->getConsumerSecret(),
@@ -806,12 +802,10 @@ class Accessor implements ApiAccessorInterface,
 
     /**
      * @param string $endpoint
-     * @param bool   $findNextAvailableToken
+     * @param bool $findNextAvailableToken
      *
      * @return Token|null
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws OptimisticLockException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
      */
     public function guardAgainstApiLimit(
         string $endpoint,
@@ -1147,12 +1141,7 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $endpoint
-     *
-     * @return Token|null
-     * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
-     * @throws OptimisticLockException
      */
     public function preEndpointContact(string $endpoint): ?Token
     {
@@ -2051,14 +2040,10 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $endpoint
-     *
-     * @return array|stdClass
-     * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
-     * @throws OptimisticLockException
+     * @throws Exception
      */
-    private function fetchContent(string $endpoint)
+    private function fetchContent(string $endpoint): object|array
     {
         if ($this->shouldUseBearerToken()) {
             $this->setupClient();
@@ -2072,17 +2057,19 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $endpoint
-     * @param callable $fetchContent
-     *
-     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
+     * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      * @throws UnknownApiAccessException
      */
     private function fetchContentWithRetries(
