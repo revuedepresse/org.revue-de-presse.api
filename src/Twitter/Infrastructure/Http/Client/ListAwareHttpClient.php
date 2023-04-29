@@ -84,7 +84,6 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
         MemberOwnerships $memberOwnership = null
     ): MemberOwnerships {
         $activeToken = $selector->authenticationToken();
-        $totalUnfrozenToken = $this->tokenRepository->howManyUnfrozenTokenAreThere();
         $ownershipCollection = OwnershipCollection::fromArray([]);
 
         $correlationId = $selector->correlationId();
@@ -114,6 +113,8 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
                 );
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());
+                $activeTokenConsumerKey = $activeToken->consumerKey();
+
                 if ($ownershipCollection->isEmpty()) {
                     $activeToken = $this->tokenChange->replaceAccessToken(
                         $selector->authenticationToken(),
@@ -121,7 +122,13 @@ class ListAwareHttpClient implements ListAwareHttpClientInterface
                     );
                 }
 
-                $totalUnfrozenToken--;
+                if ($activeTokenConsumerKey !== $activeToken->consumerKey()) {
+                    if ($activeToken->howManyRetries() > 0) {
+                        continue;
+                    }
+
+                    break;
+                }
             }
         }
 

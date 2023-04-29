@@ -99,7 +99,7 @@ class ListAwareHttpClientTest extends KernelTestCase
         $ownershipAccessor = new ListAwareHttpClient(
             $accessor,
             $this->makeTokenRepository(2),
-            $this->makeTokenChange(),
+            $this->makeTokenChange(retries: 1),
             new NullLogger()
         );
 
@@ -124,6 +124,9 @@ class ListAwareHttpClientTest extends KernelTestCase
             [
                 'token' => self::REPLACEMENT_TOKEN,
                 'secret' => self::REPLACEMENT_SECRET,
+                'consumer_key' => 'consumer_'.self::REPLACEMENT_TOKEN,
+                'consumer_secret' => 'consumer_'.self::REPLACEMENT_SECRET,
+                'how_many_retries' => 1,
             ]
         );
 
@@ -133,7 +136,7 @@ class ListAwareHttpClientTest extends KernelTestCase
 
     /**
      * @test
-     *
+     * @group   member_ownership
      * @throws
      */
     public function it_can_not_get_member_ownerships(): void
@@ -186,11 +189,13 @@ class ListAwareHttpClientTest extends KernelTestCase
             [
                 'token'  => self::TOKEN,
                 'secret' => self::SECRET,
+                'consumer_key' => 'consumer_'.self::TOKEN,
+                'consumer_secret' => 'consumer_'.self::SECRET,
             ]
         );
     }
 
-    private function makeTokenChange(): TokenChangeInterface
+    private function makeTokenChange(int $retries = 0): TokenChangeInterface
     {
         $tokenChangeBuilder = new TokenChangeBuilder();
         $tokenChangeBuilder = $tokenChangeBuilder->willReplaceAccessToken(
@@ -198,6 +203,9 @@ class ListAwareHttpClientTest extends KernelTestCase
                 [
                     'token'  => self::REPLACEMENT_TOKEN,
                     'secret' => self::REPLACEMENT_SECRET,
+                    'consumer_key' => 'consumer_'.self::REPLACEMENT_TOKEN,
+                    'consumer_secret' => 'consumer_'.self::REPLACEMENT_SECRET,
+                    'how_many_retries' =>  $retries
                 ]
             )
         );

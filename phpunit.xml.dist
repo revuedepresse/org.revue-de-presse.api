@@ -47,6 +47,7 @@
       <group>conversation</group>
       <group>curating_member_ownerships</group>
       <group>diffing</group>
+      <group>fetch_missing_media</group>
       <group>formatter</group>
       <group>interruptible_collect_decider</group>
       <group>status_accessor</group>
@@ -55,7 +56,6 @@
       <group>member_subscription</group>
       <group>ownership</group>
       <group>persistence</group>
-      <group>tweet_persistence</group>
       <group>production_fixtures</group>
       <group>publication</group>
       <group>fetch_tweets_message_dispatcher</group>
@@ -63,6 +63,7 @@
       <group>repository_publishers_list</group>
       <group>status_decoration</group>
       <group>tagged_status</group>
+      <group>tweet_persistence</group>
       <group>unavailable_resource</group>
     </include>
   </groups>
