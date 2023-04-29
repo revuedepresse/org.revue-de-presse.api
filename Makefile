@@ -19,8 +19,11 @@ TMP_DIR ?= '/tmp/tmp_${WORKER}'
 help: doc
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-build: ## Build worker image
+build: ## Build worker container image
 	@/bin/bash -c 'source fun.sh && build'
+
+build-amqp: ## Build amqp container image
+	@/bin/bash -c 'source fun.sh && build_amqp_container_image'
 
 clean: ## Remove worker container
 	@/bin/bash -c 'source fun.sh && clean "${TMP_DIR}"'

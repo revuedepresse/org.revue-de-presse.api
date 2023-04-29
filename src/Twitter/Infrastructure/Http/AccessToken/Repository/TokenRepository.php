@@ -351,13 +351,21 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     {
         $token->setUpdatedAt(new DateTime('now', new DateTimeZone('UTC')));
 
-        $entityManager = $this->getEntityManager();
-
         try {
             $this->guardAgainstNullToken($token);
 
-            $entityManager->persist($token);
-            $entityManager->flush();
+            $exception = new \Exception(
+                "TODO: Figuring which class is responsible for trying to record tokens"
+            );
+
+            // NOOP
+            $this->logger->error(
+                $exception->getMessage(),
+                [
+                    'token' => $token->getOAuthToken(),
+                    'stacktrace' => $exception->getTraceAsString()
+                ]
+            );
 
             return $token;
         } catch (Throwable $exception) {

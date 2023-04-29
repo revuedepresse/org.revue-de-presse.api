@@ -23,4 +23,6 @@ interface TwitterAPIEndpointsAwareInterface
     public const API_ENDPOINT_OWNERSHIPS = '/lists/ownerships';
 
     public const API_ENDPOINT_RATE_LIMIT_STATUS = '/application/rate_limit_status';
+
+    public const API_GRAPHQL_ENDPOINT_MEMBER_TIMELINE = '/graphql/-AY51QoFpVf-w7TxjQ6lpw/UserTweets';
 }

@@ -20,7 +20,11 @@ x-worker: &worker
 services:
 
   amqp:
-    build: './amqp'
+    build:
+      context: .
+      dockerfile: './amqp/Dockerfile'
+    env_file:
+      - '../../.env.local'
     expose:
       - "5672"
     restart: 'always'

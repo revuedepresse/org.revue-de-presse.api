@@ -1,6 +1,68 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+function build_amqp_container_image() {
+    local DEBUG
+    local DD_AMQP_PASSWORD
+    local DD_AMQP_USER
+    local DD_AMQP_TAG
+
+    load_configuration_parameters
+
+    if [ -z "${DD_AMQP_USER}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'worker name' 'DD_AMQP_USER' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -z "${DD_AMQP_PASSWORD}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'DD_AMQP_PASSWORD' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -z "${DD_AMQP_TAG}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'DD_AMQP_TAG' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -n "${DEBUG}" ];
+    then
+
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            build \
+            --no-cache \
+            --build-arg "DD_AMQP_PASSWORD=${DD_AMQP_PASSWORD}" \
+            --build-arg "DD_AMQP_TAG=${DD_AMQP_TAG}" \
+            --build-arg "DD_AMQP_USER=${DD_AMQP_USER}" \
+            amqp
+
+    else
+
+        docker compose \
+            --file=./provisioning/containers/docker-compose.yaml \
+            --file=./provisioning/containers/docker-compose.override.yaml \
+            build \
+            --build-arg "DD_AMQP_PASSWORD=${DD_AMQP_PASSWORD}" \
+            --build-arg "DD_AMQP_TAG=${DD_AMQP_TAG}" \
+            --build-arg "DD_AMQP_USER=${DD_AMQP_USER}" \
+            amqp
+
+    fi
+}
+
 function build() {
     local DEBUG
     local WORKER
@@ -35,6 +97,8 @@ function build() {
       return 1
 
     fi
+
+    build_amqp_container_image
 
     if [ -n "${DEBUG}" ];
     then
@@ -384,18 +448,6 @@ function set_file_permissions() {
 
 function start() {
     guard_against_missing_variables
-
-    local command
-    command=$(cat <<-SCRIPT
-docker compose \
-      --file=./provisioning/containers/docker-compose.yaml \
-      --file=./provisioning/containers/docker-compose.override.yaml \
-			up \
-			--detach \
-			--no-recreate \
-			amqp
-SCRIPT
-)
 
     rm -f ./.pm2-installed
 
