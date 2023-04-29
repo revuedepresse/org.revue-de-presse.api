@@ -257,7 +257,7 @@ function load_configuration_parameters() {
         cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
     fi
 
-    if [ ! -e ./.env.local ]; then
+    if [ ! -e ./.env.local ] && [ ! -e ./.env.test ]; then
         cp --verbose ./.env.local{.dist,}
     fi
 
