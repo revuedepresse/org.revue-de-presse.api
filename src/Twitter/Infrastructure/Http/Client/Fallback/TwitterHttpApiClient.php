@@ -115,44 +115,6 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
     }
 
     /**
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\ZlibException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
-    public function fetch(string $endpoint, $params): ResponseInterface
-    {
-        $accessToken = $this->requestAccessToken();
-
-        return $this->client->request(
-            'GET',
-            $endpoint,
-            [
-                'headers' => [
-                    "accept-encoding"           => "gzip",
-                    "accept-language"           => "en-US,en;q=0.5",
-                    "connection"                => "keep-alive",
-                    "authorization"             => "Bearer {$this->twitterAPIBearerToken}",
-                    "content-type"              => "application/json",
-                    "x-guest-token"             => "{$accessToken}",
-                    "x-twitter-active-user"     => "yes",
-                    "authority"                 => "api.twitter.com",
-                    'accept'                    => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                    "DNT"                       => "1",
-                    'upgrade-insecure-requests' => '1',
-                    'sec-fetch-dest'            => 'document',
-                    'sec-fetch-mode'            => 'navigate',
-                    'sec-fetch-site'            => 'none',
-                    'sec-fetch-user'            => '?1',
-                    'TE'                        => 'trailers',
-                ]
-            ]
-        );
-    }
-
-    /**
      * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
