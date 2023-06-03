@@ -42,7 +42,7 @@
   </php>
   <groups>
     <include>
-      <group>api_access</group>
+      <group>api_access_token</group>
       <group>command</group>
       <group>conversation</group>
       <group>curating_member_ownerships</group>

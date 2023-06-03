@@ -97,34 +97,33 @@ function install_php_extensions() {
 
     docker-php-ext-enable opcache
 
-    wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
-    --output-document /tmp/3.2.0.zip
-    cd /tmp || exit
-    unzip /tmp/3.2.0.zip
-    cd xdebug-3.2.0 || exit
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
-
-    wget https://github.com/DataDog/dd-trace-php/archive/0.86.3.tar.gz \
-    --output-document=/tmp/datadog-php-tracer.tar.gz
-
-    cd /tmp || exit
-    tar -xvzf /tmp/datadog-php-tracer.tar.gz
-    cd dd-trace-php-0.86.3 || exit
+    (
+        wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
+        --output-document /tmp/3.2.0.zip
+        cd /tmp || exit
+        unzip /tmp/3.2.0.zip
+        cd xdebug-3.2.0 || exit
         phpize .
         ./configure --with-php-config="$(which php-config)"
         make
         make install
+    ) >> /dev/null || printf '%s%s' '⚠️ Could not install XDebug extension' $'\n' 1>&2
 
-    wget https://pecl.php.net/get/amqp-1.11.0.tgz \
-    --output-document /tmp/amqp-1.11.0.tgz && \
-    cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0 && \
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
+    (
+      wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
+        --output-document=/tmp/datadog-setup.php
+
+      php /tmp/datadog-setup.php --php-bin=all --enable-appsec --enable-profiling
+    ) >> /dev/null || printf '%s%s' '⚠️ Could not install APM extension' $'\n' 1>&2
+    (
+      wget https://pecl.php.net/get/amqp-1.11.0.tgz \
+      --output-document /tmp/amqp-1.11.0.tgz && \
+      cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0 && \
+      phpize .
+      ./configure --with-php-config="$(which php-config)"
+      make
+      make install
+    ) >> /dev/null || printf '%s%s' '⚠️ Could not install AMQP extension' $'\n' 1>&2
 }
 
 function install_process_manager() {

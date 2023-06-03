@@ -7,9 +7,14 @@ trait HttpSearchParamReducerTrait
 {
     public function reduceParameters(string $endpoint, array $parameters): array
     {
-        $queryString = parse_url($endpoint, PHP_URL_QUERY);
+        $queryString = parse_url(
+            str_replace('?&', '?', $endpoint),
+            PHP_URL_QUERY
+        );
 
-        if (!is_string($queryString)) {
+        $callingGraphqlServer = preg_match('#^https://api.twitter.com/graphql#', $endpoint) > 0;
+
+        if (!is_string($queryString) && !$callingGraphqlServer) {
             throw new \Exception('Invalid query param');
         }
 

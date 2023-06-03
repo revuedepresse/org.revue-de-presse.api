@@ -1,5 +1,7 @@
 FROM        php:8.2.5-cli-bullseye
 
+HEALTHCHECK CMD /bin/bash -c "test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0"
+
 ARG         OWNER_UID
 ARG         OWNER_GID
 ARG         WORKER
@@ -13,8 +15,6 @@ ENV         WORKER_OWNER_GID=${OWNER_GID}
 
 ARG         WORKER_DIR="${WORKER}"
 
-HEALTHCHECK CMD /bin/bash -c "test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0"
-
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts                 /scripts
 
 COPY        --chown=${WORKER_OWNER_UID}:${WORKER_OWNER_GID} ./_scripts/cmd-worker.sh   /start.sh
@@ -27,7 +27,7 @@ RUN         /bin/bash -c 'source /scripts/install-shared-requirements.sh' && \
 
 USER        ${WORKER_OWNER_UID}:${WORKER_OWNER_GID}
 
-VOLUME      ["/scripts", "/var/www/${WORKER_DIR}", "/var/www/shared"]
+VOLUME      ["/scripts", "/var/www/shared", "/var/www/${WORKER_DIR}"]
 
 WORKDIR     "/var/www/${WORKER_DIR}"
 

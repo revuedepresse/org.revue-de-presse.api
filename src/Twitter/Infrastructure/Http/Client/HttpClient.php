@@ -1094,20 +1094,24 @@ class HttpClient implements
     }
 
     /**
-     * @throws ApiAccessRateLimitException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     * @throws InvalidMemberIdentifier
-     * @throws ORMException
+     * @throws \App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier
+     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
+     * @throws \App\Twitter\Infrastructure\Exception\BlockedFromViewingMemberProfileException
+     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
+     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
+     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
+     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
+     * @throws \App\Twitter\Infrastructure\Exception\UnknownApiAccessException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
+     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
      */
     public function getMemberProfile(string $identifier): stdClass
     {
@@ -1380,6 +1384,7 @@ class HttpClient implements
             || str_contains($endpoint, 'create_all.json')
             || str_contains($endpoint, 'destroy.json')
             || str_contains($endpoint, 'destroy_all.json')
+            || str_contains($endpoint, '/graphql')
         ) {
             return self::HTTP_METHOD_POST;
         }
@@ -1698,7 +1703,10 @@ class HttpClient implements
     {
         $intendingToAddMemberToList = $this->intendingToAddMemberToList($endpoint);
 
-        if ($this->whichHttpMethod($intendingToAddMemberToList, $endpoint) === self::HTTP_METHOD_GET) {
+        if (
+            str_contains($endpoint, '/graphql') ||
+            $this->whichHttpMethod($intendingToAddMemberToList, $endpoint) === self::HTTP_METHOD_GET
+        ) {
             if (str_contains($endpoint, self::API_ENDPOINT_GET_MEMBER_PROFILE)) {
                 $parameters = $this->reduceParameters($endpoint, []);
 
@@ -1707,7 +1715,7 @@ class HttpClient implements
                 );
             }
 
-            if (str_contains($endpoint, self::API_ENDPOINT_MEMBER_TIMELINE)) {
+            if (str_contains($endpoint, self::API_ENDPOINT_MEMBER_TIMELINE) || str_contains($endpoint, '/graphql')) {
                 $parameters = $this->reduceParameters($endpoint, []);
 
                 return $this->fallbackHttpClient->getMemberTimeline(
