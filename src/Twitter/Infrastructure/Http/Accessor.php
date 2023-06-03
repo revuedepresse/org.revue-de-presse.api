@@ -179,12 +179,16 @@ class Accessor implements ApiAccessorInterface,
 
         $this->tokenRepository = $tokenRepository;
 
-        $this->tokenRepository->ensureTokenExists(
-            $accessTokenKey,
-            $accessTokenSecret,
-            $consumerKey,
-            $consumerSecret
-        );
+        ////
+        //// Preventing attempt to persist dummy token on Twitter API accessing service construction
+        ////
+
+        //$this->tokenRepository->ensureTokenExists(
+        //  $accessTokenKey,
+        //  $accessTokenSecret,
+        //  $consumerKey,
+        //  $consumerSecret
+        //);
 
         $this->setLogger($logger);
     }
