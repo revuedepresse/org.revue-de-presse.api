@@ -119,6 +119,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         return [
             'aggregates' => [],
             'statuses' => $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights)),
+            'version' => 'v3.7.1',
         ];
     }
 }

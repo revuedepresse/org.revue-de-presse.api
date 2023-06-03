@@ -12,7 +12,7 @@ use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\NoResultException;
 
@@ -98,12 +98,9 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param string          $oauthToken
-     * @param LoggerInterface $logger
-     *
-     * @return TokenInterface
      * @throws ORMException
      * @throws OptimisticLockException
+     * @throws Exception
      */
     public function refreshFreezeCondition(
         string $oauthToken,
@@ -269,8 +266,6 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param string $token
-     * @return mixed
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -290,14 +285,16 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
     private function save(Token $token): void
     {
-        $entityManager = $this->getEntityManager();
+        $exception = new \Exception("TODO: Figuring which class is responsible for trying to record tokens");
 
-        try {
-            $entityManager->persist($token);
-            $entityManager->flush();
-        } catch (\Throwable $exception) {
-            $this->logger->error($exception->getMessage(), ['token' => $token->getOAuthToken()]);
-        }
+        // NOOP
+        $this->logger->error(
+            $exception->getMessage(),
+            [
+                'token' => $token->getOAuthToken(),
+                'stacktrace' => $exception->getTraceAsString()
+            ]
+        );
     }
 
     public function reconnect(): void {
