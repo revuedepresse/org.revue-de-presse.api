@@ -2,7 +2,7 @@ SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache install restart start stop test
 
-COMPOSE_PROJECT_NAME = ?= 'org_example_api'
+COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
 TMP_DIR ?= '/tmp/tmp_${SERVICE}'
 

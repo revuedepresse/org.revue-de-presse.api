@@ -1,3 +1,8 @@
+callback:
+    path:       /api/callback
+    controller: App\Trends\Infrastructure\Controller\TrendsController::callback
+    methods:    GET|POST|OPTIONS
+
 healthcheck:
     path:       /api/healthcheck
     controller: App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController::areServicesHealthy

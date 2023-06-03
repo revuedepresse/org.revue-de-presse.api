@@ -1,33 +1,34 @@
-FROM    php:8.2.2-cli-bullseye
+FROM    php:8.2-cli-bullseye
 
-ARG     OWNER_UID
 ARG     OWNER_GID
-ARG     SERVICE
+ARG     OWNER_UID
+ARG     PROJECT
 
-RUN     test -n "${OWNER_UID}" && \
-        test -n "${OWNER_GID}" && \
-        test -n "${SERVICE}"
+RUN     test -n "${OWNER_GID}" && \
+        test -n "${OWNER_UID}" && \
+        test -n "${PROJECT}"
 
-ENV     SERVICE_DIR=${SERVICE}
-ENV     SERVICE_OWNER_UID=${OWNER_UID}
-ENV     SERVICE_OWNER_GID=${OWNER_GID}
+ENV     PROJECT_OWNER_GID=${OWNER_GID}
+ENV     PROJECT_OWNER_UID=${OWNER_UID}
 
-COPY    --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
+ARG     PROJECT_DIR="${PROJECT:-org.example.api}"
+
+COPY    --chown=${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID} \
         ./_scripts \
         /scripts
 
-COPY    --chown=${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID} \
+COPY    --chown=${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID} \
         ./service/templates \
         /templates
 
-RUN     /bin/bash -c 'source /scripts/install-service-requirements.sh'
-
 COPY    --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
-USER    ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
+RUN     /bin/bash -c 'source /scripts/install-service-requirements.sh'
 
-VOLUME  ["/scripts", "/var/www/shared", "/var/www/${SERVICE_DIR}"]
+USER    ${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID}
 
-WORKDIR "/var/www/${SERVICE_DIR}"
+VOLUME  ["/scripts", "/var/www/shared", "/var/www/${PROJECT_DIR}"]
+
+WORKDIR "/var/www/${PROJECT_DIR}"
 
 CMD     ["tail", "-F", "/dev/null"]

@@ -352,6 +352,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
             return false;
         }
 
+        if (!isset($lightweightJSON['extended_entities'])) {
+            $lightweightJSON['extended_entities']['media'][0]['media_url'] = $lightweightJSON['entities']['media'][0]['media_url_https'];
+            $lightweightJSON['extended_entities']['media'][0]['sizes'] = $lightweightJSON['entities']['media'][0]['sizes'];
+        }
+
         $smallMediaUrl = $lightweightJSON['extended_entities']['media'][0]['media_url'] . ':large';
 
         try {
@@ -547,7 +552,9 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
     public function guardAgainstNonExistingMedia(array $lightweightJSON): bool
     {
-        return !isset($lightweightJSON['extended_entities']['media'][0]['media_url']);
+        return
+            !isset($lightweightJSON['extended_entities']['media'][0]['media_url']) &&
+            !isset($lightweightJSON['entities']['media'][0]['media_url_https']);
     }
 
     /**
