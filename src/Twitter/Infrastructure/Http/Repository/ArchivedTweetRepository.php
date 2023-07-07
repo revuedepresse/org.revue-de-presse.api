@@ -124,8 +124,8 @@ class ArchivedTweetRepository extends ResourceRepository implements
     }
 
     /**
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function howManyTweetsHaveBeenCollectedForMemberHavingUserName(string $screenName): int
     {

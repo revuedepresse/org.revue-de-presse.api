@@ -140,10 +140,10 @@ services:
         calls:
             - [ 'setConsumerKey',               [ '%app.twitter_api.consumer_key%' ] ]
             - [ 'setConsumerSecret',            [ '%app.twitter_api.consumer_secret%' ] ]
-            - [ 'setMemberRepository',          [ '@user_manager' ] ]
             - [ 'setAccessToken',               [ '%app.twitter.oauth_token.default%' ] ]
             - [ 'setAccessTokenSecret',         [ '%app.twitter.oauth_secret.default%' ] ]
             - [ 'setFallbackTwitterHttpClient', [ '@App\Twitter\Domain\Http\Client\Fallback\TwitterHttpApiClientInterface' ] ]
+            - [ 'setMemberRepository',          [ '@App\Membership\Domain\Repository\MemberRepositoryInterface' ] ]
             - [ 'setRateLimitCompliance',       [ '@App\Twitter\Infrastructure\Http\Compliance\RateLimitCompliance' ] ]
             - [ 'setTranslator',                [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
 

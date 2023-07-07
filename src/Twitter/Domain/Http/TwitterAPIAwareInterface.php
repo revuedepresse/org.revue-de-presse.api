@@ -93,6 +93,8 @@ interface TwitterAPIAwareInterface
 
     public const ERROR_UNAUTHORIZED_ACTIONS = 261;
 
+    public const ERROR_HTTP_NOT_FOUND = 404;
+
     public const ERROR_PROTECTED_ACCOUNT = 2048;
 
     public const ERROR_CODES = [
@@ -145,6 +147,8 @@ interface TwitterAPIAwareInterface
         self::ERROR_RETIRED_URL,
 
         self::ERROR_UNAUTHORIZED_ACTIONS,
+
+        self::ERROR_HTTP_NOT_FOUND,
 
         self::ERROR_PROTECTED_ACCOUNT,
     ];

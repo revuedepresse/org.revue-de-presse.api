@@ -8,6 +8,7 @@ use App\Membership\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Search\Infrastructure\DependencyInjection\SearchQueryAwareHttpClientTrait;
 use App\Twitter\Domain\Curation\CurationSelectorsInterface;
 use App\Twitter\Domain\Curation\Curator\InterruptibleCuratorInterface;
+use App\Twitter\Domain\Http\TwitterAPIAwareInterface;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
@@ -88,11 +89,13 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
                 throw new SkippedCurationException(self::OPERATION_SKIPPED_AS_EXPECTED);
             }
         } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
-            UnavailableResourceException::handleUnavailableMemberException(
-                $exception,
-                $this->logger,
-                $options
-            );
+            if ($exception->getCode() !== TwitterAPIAwareInterface::ERROR_HTTP_NOT_FOUND) {
+                UnavailableResourceException::handleUnavailableMemberException(
+                    $exception,
+                    $this->logger,
+                    $options
+                );
+            }
         } catch (SkippedCurationException $exception) {
             $this->logger->info(
                 sprintf(
@@ -206,20 +209,20 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Exception\BadAuthenticationDataException
-     * @throws \App\Twitter\Infrastructure\Exception\InconsistentTokenRepository
-     * @throws \App\Twitter\Infrastructure\Exception\NotFoundMemberException
-     * @throws \App\Twitter\Infrastructure\Exception\ProtectedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ApiAccessRateLimitException
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\ReadOnlyApplicationException
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\TweetNotFoundException
-     * @throws \App\Twitter\Infrastructure\Http\Client\Exception\UnexpectedApiResponseException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \ReflectionException
+     * @throws ApiAccessRateLimitException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws TweetNotFoundException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     private function shouldSkipCuration(
         array $options
@@ -365,9 +368,9 @@ class InterruptibleCurator implements InterruptibleCuratorInterface
     }
 
     /**
-     * @throws \App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws SkippableMessageException
      */
     private function beforeFetchingTweets($options): ?Whisperer {
         $whisperer = $this->whispererRepository->findOneBy(
