@@ -76,7 +76,7 @@
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^5.4",
-        "symfony/css-selector": "^5.4",
+        "symfony/css-selector": "^6.3",
         "symfony/maker-bundle": "1.43",
         "symfony/phpunit-bridge": "^5.4",
         "symfony/stopwatch": "^5.4"
