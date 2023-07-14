@@ -182,6 +182,7 @@ function install_process_manager() {
 
     # [npm Config Setting](https://docs.npmjs.com/cli/v8/using-npm/config#cache)
     npm config set cache "${nvm_dir}/../npm" --global
+    npm install -g npm@9.8.0
     npm install pm2
     ./node_modules/.bin/pm2 install pm2-logrotate
 
