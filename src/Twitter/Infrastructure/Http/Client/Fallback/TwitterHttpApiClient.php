@@ -9,12 +9,19 @@ use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Http\TwitterHttpApiAwareTrait;
 use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Client\Exception\InvalidMemberTimelineException;
 use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer;
+use JsonException;
 use Psr\Log\LoggerInterface;
+use Safe\Exceptions\ZlibException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use function Safe\gzdecode as safeGzipDecode;
@@ -37,12 +44,12 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
     }
 
     /**
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\ZlibException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws JsonException
+     * @throws ZlibException
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      * @throws \Exception
      */
     private function requestAccessToken(): string
@@ -83,13 +90,13 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
 
     /**
      * @param string $endpoint
-     * @return \Symfony\Contracts\HttpClient\ResponseInterface
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\ZlibException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @return ResponseInterface
+     * @throws JsonException
+     * @throws ZlibException
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function get(string $endpoint): ResponseInterface
     {
@@ -116,7 +123,7 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
     }
 
     /**
-     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
+     * @throws FallbackHttpAccessException
      */
     public function getMemberProfile(MemberIdentity $memberIdentity): \stdClass {
         $endpoint = self::API_GRAPHQL_ENDPOINT_MEMBER_PROFILE;
@@ -160,7 +167,10 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
             );
 
             if (empty($memberProfile['data']['user']['result']['legacy'])) {
-                throw new FallbackHttpAccessException('Could not fetch legacy member profile', FallbackHttpAccessException::INVALID_MEMBER_PROFILE, $e);
+                throw new FallbackHttpAccessException(
+                    'Could not fetch legacy member profile',
+                    FallbackHttpAccessException::INVALID_MEMBER_PROFILE,
+                );
             }
 
             return (object) $memberProfile['data']['user']['result']['legacy'];
@@ -248,10 +258,18 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
                 flags: JSON_THROW_ON_ERROR
             );
 
-            if (!isset($tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'])) {
-                throw new \Exception('Invalid tweets');
+            if (
+                empty($tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2]['entries']) &&
+                empty($tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'])
+            ) {
+                InvalidMemberTimelineException::throws($memberIdentity->screenName());
             }
-            $tweets = $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'];
+
+            if (array_key_exists('entries', $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2])) {
+                $tweets = $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2]['entries'];
+            } else {
+                $tweets = $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'];
+            }
 
             $memberProfile = $this->memberProfileLegacyGetter($memberIdentity);
 
@@ -281,13 +299,13 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
     }
 
     /**
-     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\ZlibException
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws FallbackHttpAccessException
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws ZlibException
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
      */
     public function getMemberOwnerships(ListSelectorInterface $selector): OwnershipCollectionInterface {
 
@@ -316,13 +334,13 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
     }
 
     /**
-     * @throws \App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\ZlibException
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws FallbackHttpAccessException
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws JsonException
+     * @throws ZlibException
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
      */
     public function memberProfileLegacyGetter(MemberIdentity $memberIdentity): \stdClass {
 

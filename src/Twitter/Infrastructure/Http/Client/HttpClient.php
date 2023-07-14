@@ -126,7 +126,7 @@ class HttpClient implements
 
     /**
      * @throws \Abraham\TwitterOAuth\TwitterOAuthException
-     * @throws \Exception
+     * @throws Exception
      */
     public function connectToEndpoint(
         string $endpoint,
@@ -1696,7 +1696,7 @@ class HttpClient implements
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function fetchContent(string $endpoint): object|array
     {
