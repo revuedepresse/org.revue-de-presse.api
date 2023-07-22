@@ -162,11 +162,11 @@ parameters:
 
     redis_cache.class:              'App\Twitter\Infrastructure\Cache\RedisCache'
 
-    twitter.consumer_key:           '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
-    twitter.consumer_secret:        '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
-    twitter.oauth_token.default:    '%env(resolve:API_TWITTER_USER_TOKEN)%'
-    twitter.oauth_secret.default:   '%env(resolve:API_TWITTER_USER_SECRET)%'
-    twitter.version:                '%env(resolve:API_TWITTER_VERSION)%'
+    twitter.consumer_key:           'deprecated'
+    twitter.consumer_secret:        'deprecated'
+    twitter.oauth_token.default:    'deprecated'
+    twitter.oauth_secret.default:   'deprecated'
+    twitter.version:                'deprecated'
 
     allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 

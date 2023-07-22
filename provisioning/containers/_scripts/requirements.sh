@@ -58,19 +58,7 @@ function install_system_packages() {
           unzip \
           wget
 
-      # Install application profiling agent
-      install_blackfire
     ) >> /dev/null 2>&1 || printf '⚠️ Could not install required system packages. 📦'
-}
-
-function install_blackfire() {
-    wget -q -O - https://packages.blackfire.io/gpg.key | \
-    dd of=/usr/share/keyrings/blackfire-archive-keyring.asc
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | \
-    tee /etc/apt/sources.list.d/blackfire.list
-
-    apt update
-    apt install blackfire blackfire-php --assume-yes
 }
 
 function install_php_extensions() {
@@ -106,18 +94,6 @@ function install_php_extensions() {
     ) >> /dev/null 2>&1 && \
         printf '%s%s' '✅ Installed XDebug extension successfully.' $'\n' 1>&2 || \
         printf '%s%s' '⚠️ Could not install XDebug extension.' $'\n' 1>&2
-
-    (
-        wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
-        --output-document=/tmp/datadog-setup.php
-        cd /tmp || exit
-        php datadog-setup.php \
-        --php-bin all \
-        --enable-appsec \
-        --enable-profiling
-    ) >> /dev/null 2>&1 && \
-        printf '%s%s' '✅ Installed APM extension successfully.' $'\n' 1>&2 || \
-        printf '%s%s' '⚠️ Could not install APM extension.' $'\n' 1>&2
 }
 
 function install_service_requirements() {

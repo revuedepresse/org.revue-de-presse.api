@@ -34,6 +34,28 @@ Install Docker compose by following instructions from the [official documentatio
 make help
 ```
 
+Build application
+
+```
+export COMPOSE_PROJECT_NAME='org_revue-de-presse_api' \
+SERVICE='org.revue-de-presse.api' && \
+make build
+```
+
+Start application
+
+```
+export COMPOSE_PROJECT_NAME='org_revue-de-presse_api' \
+SERVICE='org.revue-de-presse.api' && \
+make start
+```
+
+Execute shell in service container
+
+```
+docker exec -ti $(docker ps -a | grep 'api[-]service' | awk '{print $1}') bash
+```
+
 ## License
 
 GNU General Public License v3.0 or later

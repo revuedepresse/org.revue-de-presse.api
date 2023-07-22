@@ -25,14 +25,9 @@ trait TimeRangeAwareTrait
         return $this;
     }
 
-    /**
-     * @param DateTime $statusPublicationDate
-     * @return int
-     * @throws Exception
-     */
-    public function mapDateToTimeRange(DateTime $statusPublicationDate)
+    public function mapDateToTimeRange(\DateTimeInterface $publicationDate): int
     {
-        $now = new DateTime('now', new \DateTimeZone('UTC'));
+        $now = new \DateTime('now', new \DateTimeZone('UTC'));
 
         $fiveMinutesAgo = (clone $now)->sub(new \DateInterval('PT5M'));
         $tenMinutesAgo = (clone $now)->sub(new \DateInterval('PT10M'));
@@ -40,38 +35,26 @@ trait TimeRangeAwareTrait
         $oneDayAgo = (clone $now)->sub(new \DateInterval('P1D'));
         $oneWeekAgo = (clone $now)->sub(new \DateInterval('P1W'));
 
-        if ($statusPublicationDate > $fiveMinutesAgo) {
-            $timeRange = self::RANGE_SINCE_5_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate > $fiveMinutesAgo && $publicationDate <= $now) {
+            return self::RANGE_SINCE_5_MIN_AGO;
         }
 
-        if ($statusPublicationDate > $fiveMinutesAgo && $statusPublicationDate > $tenMinutesAgo) {
-            $timeRange = self::RANGE_FROM_10_MIN_AGO_TO_5_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $fiveMinutesAgo && $publicationDate > $tenMinutesAgo) {
+            return self::RANGE_FROM_10_MIN_AGO_TO_5_MIN_AGO;
         }
 
-        if ($statusPublicationDate < $tenMinutesAgo && $statusPublicationDate > $thirtyMinutesAgo) {
-            $timeRange = self::RANGE_FROM_30_MIN_AGO_TO_10_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $tenMinutesAgo && $publicationDate > $thirtyMinutesAgo) {
+            return self::RANGE_FROM_30_MIN_AGO_TO_10_MIN_AGO;
         }
 
-        if ($statusPublicationDate < $thirtyMinutesAgo && $statusPublicationDate > $oneDayAgo) {
-            $timeRange = self::RANGE_FROM_1_DAY_AGO_TO_30_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $thirtyMinutesAgo && $publicationDate > $oneDayAgo) {
+            return self::RANGE_FROM_1_DAY_AGO_TO_30_MIN_AGO;
         }
 
-        if ($statusPublicationDate < $oneDayAgo && $statusPublicationDate > $oneWeekAgo) {
-            $timeRange = self::RANGE_FROM_1_WEEK_AGO_TO_1_DAY_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $oneDayAgo && $publicationDate > $oneWeekAgo) {
+            return self::RANGE_FROM_1_WEEK_AGO_TO_1_DAY_AGO;
         }
 
-        $timeRange = self::RANGE_OVER_1_WEEK_AGO;
-
-        return $timeRange;
+        return self::RANGE_OVER_1_WEEK_AGO;
     }
 }

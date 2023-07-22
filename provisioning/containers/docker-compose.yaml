@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
     app:
@@ -15,7 +13,7 @@ services:
             - '../../../shared/:/var/www/shared/'
 
     cache:
-        image: redis:7-bullseye
+        image: redis:7-bookworm
         command: redis-server --appendonly yes
         restart: always
         volumes:
