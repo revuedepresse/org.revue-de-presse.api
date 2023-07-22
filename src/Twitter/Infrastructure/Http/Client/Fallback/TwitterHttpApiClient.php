@@ -15,6 +15,7 @@ use App\Twitter\Infrastructure\Http\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Http\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Persistence\TweetPersistenceLayer;
+use Exception;
 use JsonException;
 use Psr\Log\LoggerInterface;
 use Safe\Exceptions\ZlibException;
@@ -51,10 +52,14 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function requestAccessToken(): string
     {
+        if (count($this->tokensPool) === 10) {
+            return $this->tokensPool[0];
+        }
+
         $response = $this->client->request(
             'POST',
             'https://api.twitter.com/1.1/guest/activate.json',
@@ -75,7 +80,13 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
         );
 
         if ($response->getStatusCode() !== Response::HTTP_OK) {
-            throw new \Exception('Invalid response received when requesting access token');
+            if (count($this->tokensPool) > 2) {
+                array_shift($this->tokensPool);
+                return $this->tokensPool[0];
+            }  else {
+                return '';
+            }
+
         }
 
         $accessToken = json_decode(safeGzipDecode($response->getContent()), associative: true, flags: JSON_THROW_ON_ERROR)['guest_token'];
@@ -111,7 +122,7 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
                     'connection'            => 'keep-alive',
                     'authorization'         => vsprintf('Bearer %s',  [$this->twitterAPIBearerToken]),
                     'content-type'          => 'application/json',
-                    'x-guest-token'         => '', // "{$this->requestAccessToken()}",
+                    'x-guest-token'         => "{$this->requestAccessToken()}",
                     'x-twitter-active-user' => 'yes',
                     'authority'             => 'api.twitter.com',
                     'accept'                => '*/*',
