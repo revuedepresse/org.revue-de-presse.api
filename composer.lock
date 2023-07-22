@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c291fc7991bdb070e3799135d881f2d7",
+    "content-hash": "cdaba9d2ee0a80009326da238b74bdfa",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -4248,25 +4248,27 @@
         },
         {
             "name": "scienta/doctrine-json-functions",
-            "version": "4.4.0",
+            "version": "5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ScientaNL/DoctrineJsonFunctions.git",
-                "reference": "64c3f8875a46d4f33f807a2d3260335c2f5f2eea"
+                "reference": "0c1aa4f8ecd96608ee5f4c9cbb33f687d15c6b8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ScientaNL/DoctrineJsonFunctions/zipball/64c3f8875a46d4f33f807a2d3260335c2f5f2eea",
-                "reference": "64c3f8875a46d4f33f807a2d3260335c2f5f2eea",
+                "url": "https://api.github.com/repos/ScientaNL/DoctrineJsonFunctions/zipball/0c1aa4f8ecd96608ee5f4c9cbb33f687d15c6b8c",
+                "reference": "0c1aa4f8ecd96608ee5f4c9cbb33f687d15c6b8c",
                 "shasum": ""
             },
             "require": {
+                "doctrine/dbal": "^3.0",
+                "doctrine/orm": "^2.0",
                 "ext-pdo": "*",
-                "php": "^7.1 || ^8.0"
+                "php": "^7.3 || ^8.0"
             },
             "require-dev": {
+                "doctrine/annotations": "^1.13",
                 "doctrine/coding-standard": "^8.0 || ^9.0",
-                "doctrine/orm": "^2.7",
                 "phpunit/phpunit": "^8.0 || ^9.0"
             },
             "suggest": {
@@ -4308,9 +4310,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ScientaNL/DoctrineJsonFunctions/issues",
-                "source": "https://github.com/ScientaNL/DoctrineJsonFunctions/tree/4.4.0"
+                "source": "https://github.com/ScientaNL/DoctrineJsonFunctions/tree/5.3.0"
             },
-            "time": "2021-09-17T11:20:14+00:00"
+            "time": "2023-03-20T12:05:26+00:00"
         },
         {
             "name": "stella-maris/clock",
