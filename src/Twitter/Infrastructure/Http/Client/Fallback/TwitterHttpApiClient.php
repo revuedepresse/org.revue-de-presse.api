@@ -101,8 +101,6 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
      */
     public function get(string $endpoint): ResponseInterface
     {
-        $accessToken = $this->requestAccessToken();
-
         return $this->client->request(
             'GET',
             $endpoint,
@@ -113,7 +111,7 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
                     'connection'            => 'keep-alive',
                     'authorization'         => vsprintf('Bearer %s',  [$this->twitterAPIBearerToken]),
                     'content-type'          => 'application/json',
-                    'x-guest-token'         => "{$accessToken}",
+                    'x-guest-token'         => '', // "{$this->requestAccessToken()}",
                     'x-twitter-active-user' => 'yes',
                     'authority'             => 'api.twitter.com',
                     'accept'                => '*/*',
