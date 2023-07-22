@@ -24,6 +24,8 @@ interface TwitterAPIEndpointsAwareInterface
 
     public const API_ENDPOINT_RATE_LIMIT_STATUS = '/application/rate_limit_status';
 
+    public const API_ENDPOINT_UNIVERSAL_SEARCH = '/1.1/search/universal.json';
+
     public const API_GRAPHQL_ENDPOINT_MEMBER_PROFILE = '/graphql/oUZZZ8Oddwxs8Cd3iW3UEA/UserByScreenName';
 
     public const API_GRAPHQL_ENDPOINT_MEMBER_TIMELINE = '/graphql/2GIWTr7XwadIixZDtyXd4A/UserTweets';

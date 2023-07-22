@@ -3,6 +3,7 @@
 namespace App\Twitter\Infrastructure\Http\Client\Fallback;
 
 use App\Membership\Domain\Repository\MemberRepositoryInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Twitter\Domain\Http\Client\Fallback\Exception\FallbackHttpAccessException;
 use App\Twitter\Domain\Http\Client\Fallback\TwitterHttpApiClientInterface;
 use App\Twitter\Domain\Http\Selector\ListSelectorInterface;
@@ -186,65 +187,32 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
         MemberIdentity $memberIdentity,
         MemberRepositoryInterface $memberRepository
     ): CollectionInterface {
-        $endpoint = self::API_GRAPHQL_ENDPOINT_MEMBER_TIMELINE;
+        $endpoint = self::API_ENDPOINT_UNIVERSAL_SEARCH;
 
         $this->logEndpointAccess($endpoint);
 
         if (array_key_exists(strtolower($memberIdentity->screenName()), $this->memberProfiles) === false) {
-            /** @var \App\Membership\Infrastructure\Entity\Legacy\Member $member */
+            /** @var Member $member */
             $member = $memberRepository->findOneBy(['twitter_username' => $memberIdentity->screenName()]);
             $this->memberProfiles[strtolower($memberIdentity->screenName())] = [
                 'id_str' => $member->twitterId()
             ];
         }
 
-        $memberProfile = (array) $this->memberProfiles[strtolower($memberIdentity->screenName())];
-
         $params = [
-            'variables' => json_encode([
-                'userId' => $memberProfile['id_str'],
-                'count' => 20,
-                'includePromotedContent' => true,
-                'withQuickPromoteEligibilityTweetFields' => true,
-                'withVoice' => true,
-                'withV2Timeline' => true
-            ]),
-            'features' => json_encode([
-                'rweb_lists_timeline_redesign_enabled' => true,
-                'responsive_web_graphql_exclude_directive_enabled' => true,
-                'verified_phone_label_enabled' => false,
-                'creator_subscriptions_tweet_preview_api_enabled' => true,
-                'responsive_web_graphql_timeline_navigation_enabled' => true,
-                'responsive_web_graphql_skip_user_profile_image_extensions_enabled' => false,
-                'tweetypie_unmention_optimization_enabled' => true,
-                'responsive_web_edit_tweet_api_enabled' => true,
-                'graphql_is_translatable_rweb_tweet_is_translatable_enabled' => true,
-                'view_counts_everywhere_api_enabled' => true,
-                'longform_notetweets_consumption_enabled' => true,
-                'responsive_web_twitter_article_tweet_consumption_enabled' => false,
-                'tweet_awards_web_tipping_enabled' => false,
-                'freedom_of_speech_not_reach_fetch_enabled' => true,
-                'standardized_nudges_misinfo' => true,
-                'tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled' => true,
-                'longform_notetweets_rich_text_read_enabled' => true,
-                'longform_notetweets_inline_media_enabled' => true,
-                'responsive_web_media_download_video_enabled' => false,
-                'responsive_web_enhance_cards_enabled' => false
-            ]),
-            'fieldToggles' => json_encode([
-                'withAuxiliaryUserLabels' => false,
-                'withArticleRichContentState' => false
-            ])
+            'q' => "from:{$memberIdentity->screenName()} filter:self_threads OR-filter:replies include:nativeretweets",
+            'modules' => 'status',
+            'result_type' => 'recent',
         ];
 
         $endpoint = sprintf(
             'https://api.twitter.com%s%s',
             $endpoint,
             sprintf(
-                '?variables=%s&features=%s&fieldToggles=%s',
-                urlencode($params['variables']),
-                urlencode($params['features']),
-                urlencode($params['fieldToggles']),
+                '?q=%s&modules=%s&result_type=%s',
+                urlencode($params['q']),
+                urlencode($params['modules']),
+                urlencode($params['result_type']),
             ),
         );
 
@@ -258,34 +226,20 @@ class TwitterHttpApiClient implements TwitterHttpApiClientInterface
                 flags: JSON_THROW_ON_ERROR
             );
 
-            if (
-                empty($tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2]['entries']) &&
-                empty($tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'])
-            ) {
-                InvalidMemberTimelineException::throws($memberIdentity->screenName());
-            }
-
-            if (array_key_exists('entries', $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2])) {
-                $tweets = $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][2]['entries'];
-            } else {
-                $tweets = $tweets['data']['user']['result']['timeline_v2']['timeline']['instructions'][1]['entries'];
-            }
-
             $memberProfile = $this->memberProfileLegacyGetter($memberIdentity);
 
-            $tweets = array_map(
-                function ($tweet) use ($memberProfile) {
-                    $tweet['content']['itemContent']['tweet_results']['result']['legacy']['user'] = $memberProfile;
+            if (empty($tweets['modules'][0]['status']['data'])) {
+                InvalidMemberTimelineException::throws($memberIdentity->screenName());
+            } else {
+                $tweets = array_map(
+                    function ($t) use ($memberProfile) {
+                        $t['status']['data']['user'] = $memberProfile;
 
-                    return (object) $tweet['content']['itemContent']['tweet_results']['result']['legacy'];
-                },
-                array_filter(
-                    $tweets,
-                    function ($tweet) {
-                        return isset($tweet['content']['itemContent']['tweet_results']['result']['legacy']);
-                    }
-                )
-            );
+                        return (object) $t['status']['data'];
+                    },
+                    $tweets['modules']
+                );
+            }
 
             $persistedTweetCollection = $this->persistenceLayer->persistTweetsCollection(
                 $tweets,

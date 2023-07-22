@@ -19,13 +19,6 @@ trait ConversationAwareTrait
     use TweetAwareHttpClientTrait;
     use TweetRepositoryTrait;
 
-    /**
-     * @param array $status
-     * @param array $decodedDocument
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
-     */
     public function updateFromDecodedDocument(
         array $status,
         array $decodedDocument,
@@ -99,13 +92,6 @@ trait ConversationAwareTrait
         );
     }
 
-    /**
-     * @param array $updatedStatus
-     * @param array $decodedDocument
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
-     */
     private function extractConversationProperties(
         array $updatedStatus,
         array $decodedDocument,
@@ -139,12 +125,6 @@ trait ConversationAwareTrait
         return $updatedStatus;
     }
 
-    /**
-     * @param array $statuses
-     * @param bool  $includeRepliedToStatuses
-     *
-     * @return array
-     */
     private function extractStatusProperties(
         array $statuses,
         bool $includeRepliedToStatuses = false
