@@ -1,5 +1,5 @@
 parameters:
-    main_log_level: debug
+    main_log_level: error
 
     monolog_stream_logging_handler:
         type:     stream
@@ -25,7 +25,7 @@ parameters:
 
         main:
             type:           group
-            action_level:   debug
+            action_level:   error
             members:        [json, flat]
             buffer_size:    50 # How many messages should be saved? Prevent memory leaks
 
