@@ -43,7 +43,6 @@ communities, organizations and projects (in lexicographic order):
 
 - [Blackfire](https://blackfire.io)
 - [Composer](http://getcomposer.org/)
-- [Datadog](https://datadoghq.eu/)
 - [Debian](https://www.debian.org/)
 - [Docker](docker.com)
 - [Doctrine](https://www.doctrine-project.org/)
