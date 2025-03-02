@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
-use App\Twitter\Infrastructure\Amqp\Console\TwitterListAwareCommand;
+use App\Twitter\Infrastructure\Amqp\Console\ListAwareCommand;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchTweetsAmqpMessagesDispatcherTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\FetchAmqpMessagesDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\Http\Entity\Token;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
+class FetchAmqpMessagesDispatcherCommand extends ListAwareCommand
 {
     private const ARGUMENT_SCREEN_NAME                  = CurationRulesetInterface::RULE_SCREEN_NAME;
 
@@ -37,7 +37,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
     private const OPTION_OAUTH_SECRET                   = 'oauth_secret';
 
     use OwnershipAccessorTrait;
-    use FetchTweetsAmqpMessagesDispatcherTrait;
+    use FetchAmqpMessagesDispatcherTrait;
     use TranslatorTrait;
 
     private CurationRulesetInterface $ruleset;
@@ -125,7 +125,7 @@ class FetchTweetsAmqpMessagesDispatcherCommand extends TwitterListAwareCommand
         $returnStatus = self::FAILURE;
 
         try {
-            $this->fetchTweetsAmqpMessagesDispatcher->dispatchFetchTweetsMessages(
+            $this->fetchAmqpMessagesDispatcher->dispatchFetchAMQPMessages(
                 InputToCurationRuleset::convertInputToCurationRuleset($input),
                 Token::fromProps($this->getTokensFromInputOrFallback()),
                 function ($message) {

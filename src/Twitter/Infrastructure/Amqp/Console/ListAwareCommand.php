@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\PublishersList\TwitterListAwareTrait;
 use Doctrine\ORM\EntityManager;
 
-abstract class TwitterListAwareCommand extends TwitterApiAwareCommand
+abstract class ListAwareCommand extends ApiAwareCommand
 {
     use TwitterListAwareTrait;
 

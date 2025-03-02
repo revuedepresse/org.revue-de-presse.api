@@ -11,7 +11,7 @@ services:
 
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
-    test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher'
 
     test.App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand:
         class: 'App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand'

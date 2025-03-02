@@ -63,6 +63,7 @@
       <group>repository_publishers_list</group>
       <group>status_decoration</group>
       <group>tagged_status</group>
+      <group>time_range</group>
       <group>tweet_persistence</group>
       <group>unavailable_resource</group>
     </include>

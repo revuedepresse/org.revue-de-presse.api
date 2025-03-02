@@ -40,9 +40,9 @@ use function implode;
 use function in_array;
 use function sprintf;
 
-class FetchTweetsAmqpMessagesDispatcher implements
+class FetchAmqpMessagesDispatcher implements
     CorrelationIdAwareInterface,
-    FetchTweetsAmqpMessagesDispatcherInterface,
+    FetchAmqpMessagesDispatcherInterface,
     SearchQueryRulesetProcessorAwareInterface
 {
     use RateLimitComplianceTrait;
@@ -70,7 +70,7 @@ class FetchTweetsAmqpMessagesDispatcher implements
         $this->logger                   = $logger;
     }
 
-    public function dispatchFetchTweetsMessages(
+    public function dispatchFetchAMQPMessages(
         CurationRulesetInterface $ruleset,
         TokenInterface           $token,
         Closure                  $writer

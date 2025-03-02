@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Clock\TimeRange;
 
 use App\Twitter\Infrastructure\Http\Entity\Tweet;
-use DateTime;
-use Exception;
 
 trait TimeRangeAwareTrait
 {
@@ -20,9 +18,9 @@ trait TimeRangeAwareTrait
         return $this;
     }
 
-    public function mapDateToTimeRange(\DateTimeInterface $tweetPublicationDate)
+    public function mapDateToTimeRange(\DateTimeInterface $publicationDate): int
     {
-        $now = new DateTime('now', new \DateTimeZone('UTC'));
+        $now = new \DateTime('now', new \DateTimeZone('UTC'));
 
         $fiveMinutesAgo = (clone $now)->sub(new \DateInterval('PT5M'));
         $tenMinutesAgo = (clone $now)->sub(new \DateInterval('PT10M'));
@@ -30,38 +28,26 @@ trait TimeRangeAwareTrait
         $oneDayAgo = (clone $now)->sub(new \DateInterval('P1D'));
         $oneWeekAgo = (clone $now)->sub(new \DateInterval('P1W'));
 
-        if ($tweetPublicationDate > $fiveMinutesAgo) {
-            $timeRange = self::RANGE_SINCE_5_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate > $fiveMinutesAgo && $publicationDate <= $now) {
+            return self::RANGE_SINCE_5_MIN_AGO;
         }
 
-        if ($tweetPublicationDate > $fiveMinutesAgo && $tweetPublicationDate > $tenMinutesAgo) {
-            $timeRange = self::RANGE_FROM_10_MIN_AGO_TO_5_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $fiveMinutesAgo && $publicationDate > $tenMinutesAgo) {
+            return self::RANGE_FROM_10_MIN_AGO_TO_5_MIN_AGO;
         }
 
-        if ($tweetPublicationDate < $tenMinutesAgo && $tweetPublicationDate > $thirtyMinutesAgo) {
-            $timeRange = self::RANGE_FROM_30_MIN_AGO_TO_10_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $tenMinutesAgo && $publicationDate > $thirtyMinutesAgo) {
+            return self::RANGE_FROM_30_MIN_AGO_TO_10_MIN_AGO;
         }
 
-        if ($tweetPublicationDate < $thirtyMinutesAgo && $tweetPublicationDate > $oneDayAgo) {
-            $timeRange = self::RANGE_FROM_1_DAY_AGO_TO_30_MIN_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $thirtyMinutesAgo && $publicationDate > $oneDayAgo) {
+            return self::RANGE_FROM_1_DAY_AGO_TO_30_MIN_AGO;
         }
 
-        if ($tweetPublicationDate < $oneDayAgo && $tweetPublicationDate > $oneWeekAgo) {
-            $timeRange = self::RANGE_FROM_1_WEEK_AGO_TO_1_DAY_AGO;
-
-            return $timeRange;
+        if ($publicationDate <= $oneDayAgo && $publicationDate > $oneWeekAgo) {
+            return self::RANGE_FROM_1_WEEK_AGO_TO_1_DAY_AGO;
         }
 
-        $timeRange = self::RANGE_OVER_1_WEEK_AGO;
-
-        return $timeRange;
+        return self::RANGE_OVER_1_WEEK_AGO;
     }
 }

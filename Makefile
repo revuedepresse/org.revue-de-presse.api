@@ -6,6 +6,8 @@ SHELL:=/bin/bash
 
 .PHONY: consume-fetch-publication-messages dispatch-fetch-tweets-amqp-messages
 
+.PHONY: dispatch-fetch-publications-amqp-messages
+
 .PHONY: purge-amqp-queue set-up-amqp-queues
 
 .PHONY: shell-process-manager shell-worker
@@ -31,7 +33,11 @@ clean: ## Remove worker container
 clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
+# @deprecated
 dispatch-fetch-tweets-amqp-messages: ## Dispatch AMQP Fetch publications messages
+	@/bin/bash -c 'source fun.sh && dispatch_amqp_messages'
+
+dispatch-fetch-publications-amqp-messages: ## Dispatch AMQP Fetch publications messages
 	@/bin/bash -c 'source fun.sh && dispatch_amqp_messages'
 
 consume-fetch-publication-messages: ## Consume AMQP Fetch publication messages

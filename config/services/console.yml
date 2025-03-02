@@ -57,18 +57,18 @@ services:
             - [ 'setSubscribeesRepository',         ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
             - [ 'setSubscriptionsRepository',       ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand'
+    App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcherCommand:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcherCommand'
         calls:
-            - [ 'setAggregateRepository',               [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'] ]
-            - [ 'setDefaultSecret',                     [ '%app.twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',                      [ '%app.twitter.oauth_token.default%'] ]
-            - [ 'setHttpClient',                        [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
-            - [ 'setTokenRepository',                   [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'] ]
-            - [ 'setFetchTweetsAmqpMessagesDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'] ]
-            - [ 'setTranslator',                        [ '@App\Twitter\Infrastructure\Translation\Translator'] ]
-            - [ 'setEntityManager',                     [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                            [ '@logger'] ]
+            - [ 'setAggregateRepository',         [ '@App\Twitter\Infrastructure\Http\Repository\PublishersListRepository'] ]
+            - [ 'setDefaultSecret',               [ '%app.twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',                [ '%app.twitter.oauth_token.default%'] ]
+            - [ 'setHttpClient',                  [ '@App\Twitter\Domain\Http\Client\HttpClientInterface'] ]
+            - [ 'setTokenRepository',             [ '@App\Twitter\Domain\Http\AccessToken\Repository\TokenRepositoryInterface'] ]
+            - [ 'setFetchAmqpMessagesDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher'] ]
+            - [ 'setTranslator',                  [ '@App\Twitter\Infrastructure\Translation\Translator'] ]
+            - [ 'setEntityManager',               [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                      [ '@logger'] ]
         tags:
             - { name: 'console.command' }
         public: true

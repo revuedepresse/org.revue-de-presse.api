@@ -73,8 +73,8 @@ services:
             connection:             '@doctrine.dbal.default_connection'
             registry:               '@doctrine'
 
-    App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher:
-        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher'
+    App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher'
         arguments:
             - '@App\Twitter\Domain\Http\Client\HttpClientInterface'
             - '@App\Twitter\Infrastructure\Http\AccessToken\TokenChange'

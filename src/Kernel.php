@@ -6,7 +6,7 @@ namespace App;
 use App\Membership\Infrastructure\Console\AddMembersBatchToListCommand;
 use App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMediaCommand;
 use App\QualityAssurance\Infrastructure\Console\GuardAgainstMissingMemberProfilePictureCommand;
-use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcherCommand;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcherCommand;
 use App\Twitter\Infrastructure\Http\Security\Authorization\Console\AuthorizeApplicationCommand;
 use App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand;
 use App\Twitter\Infrastructure\Security\Console\RequestTwitterApiAccessTokenCommand;
@@ -41,7 +41,7 @@ class Kernel extends BaseKernel implements CompilerPassInterface
                     [
                         AddMembersBatchToListCommand::class,
                         AuthorizeApplicationCommand::class,
-                        FetchTweetsAmqpMessagesDispatcherCommand::class,
+                        FetchAmqpMessagesDispatcherCommand::class,
                         GuardAgainstMissingMediaCommand::class,
                         GuardAgainstMissingMemberProfilePictureCommand::class,
                         ImportMemberPublishersListsCommand::class,

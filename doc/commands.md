@@ -44,6 +44,15 @@ USERNAME="w3c" \
 make dispatch-fetch-tweets-amqp-messages
 ```
 
+Sub-command
+
+```shell
+./bin/console \
+--env=$ENV app:dispatch-fetch-tweets-amqp-messages \
+--lists="${LIST_URI}" \
+${HANDLE}
+```
+
 ## How to import a Twitter list in command-line?
 
 ```shell

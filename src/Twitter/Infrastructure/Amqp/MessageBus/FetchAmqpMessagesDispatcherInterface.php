@@ -8,12 +8,12 @@ use App\Twitter\Domain\Curation\CurationRulesetInterface;
 use Closure;
 use Doctrine\DBAL\Exception;
 
-interface FetchTweetsAmqpMessagesDispatcherInterface
+interface FetchAmqpMessagesDispatcherInterface
 {
     /**
      * @throws Exception
      */
-    public function dispatchFetchTweetsMessages(
+    public function dispatchFetchAMQPMessages(
         CurationRulesetInterface $ruleset,
         TokenInterface           $token,
         Closure                  $writer

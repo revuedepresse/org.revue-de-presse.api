@@ -73,16 +73,6 @@ function create_log_files_when_non_existing() {
     fi
 }
 
-function install_blackfire() {
-    wget -q -O - https://packages.blackfire.io/gpg.key | \
-    dd of=/usr/share/keyrings/blackfire-archive-keyring.asc
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | \
-    tee /etc/apt/sources.list.d/blackfire.list
-
-    apt update
-    apt install blackfire blackfire-php --assume-yes
-}
-
 function install_php_extensions() {
     docker-php-ext-install \
         bcmath \
@@ -109,12 +99,6 @@ function install_php_extensions() {
         make install
     ) >> /dev/null || printf '%s%s' '⚠️ Could not install XDebug extension' $'\n' 1>&2
 
-    (
-      wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
-        --output-document=/tmp/datadog-setup.php
-
-      php /tmp/datadog-setup.php --php-bin=all --enable-appsec --enable-profiling
-    ) >> /dev/null || printf '%s%s' '⚠️ Could not install APM extension' $'\n' 1>&2
     (
       wget https://pecl.php.net/get/amqp-1.11.0.tgz \
       --output-document /tmp/amqp-1.11.0.tgz && \
@@ -240,9 +224,6 @@ function install_shared_system_packages() {
         tini \
         unzip \
         wget
-
-    # Install blackfire profiling agent
-    install_blackfire
 }
 
 function install_worker_system_packages() {

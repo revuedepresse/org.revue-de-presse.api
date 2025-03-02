@@ -3,38 +3,8 @@ set -Eeuo pipefail
 
 function build_amqp_container_image() {
     local DEBUG
-    local DD_AMQP_PASSWORD
-    local DD_AMQP_USER
-    local DD_AMQP_TAG
 
     load_configuration_parameters
-
-    if [ -z "${DD_AMQP_USER}" ];
-    then
-
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'worker name' 'DD_AMQP_USER' $'\n'
-
-      return 1
-
-    fi
-
-    if [ -z "${DD_AMQP_PASSWORD}" ];
-    then
-
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'DD_AMQP_PASSWORD' $'\n'
-
-      return 1
-
-    fi
-
-    if [ -z "${DD_AMQP_TAG}" ];
-    then
-
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'DD_AMQP_TAG' $'\n'
-
-      return 1
-
-    fi
 
     if [ -n "${DEBUG}" ];
     then
@@ -44,9 +14,6 @@ function build_amqp_container_image() {
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
             --no-cache \
-            --build-arg "DD_AMQP_PASSWORD=${DD_AMQP_PASSWORD}" \
-            --build-arg "DD_AMQP_TAG=${DD_AMQP_TAG}" \
-            --build-arg "DD_AMQP_USER=${DD_AMQP_USER}" \
             amqp
 
     else
@@ -55,9 +22,6 @@ function build_amqp_container_image() {
             --file=./provisioning/containers/docker-compose.yaml \
             --file=./provisioning/containers/docker-compose.override.yaml \
             build \
-            --build-arg "DD_AMQP_PASSWORD=${DD_AMQP_PASSWORD}" \
-            --build-arg "DD_AMQP_TAG=${DD_AMQP_TAG}" \
-            --build-arg "DD_AMQP_USER=${DD_AMQP_USER}" \
             amqp
 
     fi
@@ -169,6 +133,7 @@ function dispatch_amqp_messages() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
+        --env DRY_MODE="${DRY_MODE}" \
         --env WORKER="${WORKER}" \
         -T worker \
         /bin/bash -c '. ./bin/console.sh && dispatch_fetch_publications_messages'

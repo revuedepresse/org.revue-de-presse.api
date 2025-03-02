@@ -5,9 +5,12 @@ namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\TweetInterface;
+use DateTime;
 use DateTimeInterface;
+use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Twitter\Domain\Curation\Entity\NullStatus;
 
 /**
  * @package App\Twitter\Infrastructure\Curation\Entity
@@ -63,6 +66,10 @@ trait TweetTrait
      */
     public function getScreenName(): string
     {
+        if ($this instanceof NullStatus) {
+            $this->setScreenName('');
+        }
+
         return $this->screenName();
     }
 

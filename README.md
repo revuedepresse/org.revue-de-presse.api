@@ -26,8 +26,45 @@ Install [jq](https://stedolan.github.io/jq/download/).
 
 ### Documentation
 
-```
+```shell
 make help
+```
+
+Build application
+
+```shell
+export COMPOSE_PROJECT_NAME='org_revue-de-presse_worker' \
+WORKER='org.revue-de-presse.worker' && \
+make build
+```
+
+Start application
+
+```shell
+export COMPOSE_PROJECT_NAME='org_revue-de-presse_worker' \
+WORKER='org.revue-de-presse.worker' && \
+make start
+```
+
+Start message broker
+
+```shell
+make start-amqp-broker
+```
+
+Dispatch messages to fetch publications
+
+```shell
+# TODO: Dispatch AMQP messages to fetch micro-publications
+export DRY_MODE=1
+make dispatch-fetch-tweets-amqp-messages
+```
+
+Consume messages to fetch publications
+
+```shell
+# TODO: Fetch feed posts
+make consume-fetch-publication-messages
 ```
 
 ## License
@@ -46,11 +83,6 @@ communities, organizations and projects (in lexicographic order):
 - [Docker](docker.com)
 - [Doctrine](https://www.doctrine-project.org/)
 - [GitHub](https://github.com/)
-- [JetBrains](https://jb.gg/OpenSourceSupport)
 - [PHP](https://www.php.net/)
 - [Symfony](https://symfony.com/)
 - [Ubuntu](https://ubuntu.com/)
-
-### Some of their logos
-
-[![JetBrains](../http-api/doc/images/jetbrains-logo.png?raw=true)](https://jb.gg/OpenSourceSupport)

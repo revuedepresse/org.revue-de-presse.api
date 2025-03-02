@@ -20,6 +20,12 @@ class TimelyStatus implements TimeRangeAwareInterface
     private TweetInterface    $tweet;
     private PublishersList    $twitterList;
     private int               $timeRange;
+
+    public function timeRange(): int
+    {
+        return $this->timeRange;
+    }
+
     private string            $twitterListName;
 
     public function __construct(

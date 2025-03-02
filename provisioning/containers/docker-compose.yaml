@@ -1,5 +1,3 @@
-version: '3.8'
-
 x-vol: &shared-volumes
   volumes:
     - './_scripts/:/scripts'

@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Tests\Twitter\Infrastructure\Http\Builder\Entity\Token;
 use App\Twitter\Domain\Curation\CurationRulesetInterface;
-use App\Twitter\Infrastructure\Amqp\MessageBus\FetchTweetsAmqpMessagesDispatcher;
+use App\Twitter\Infrastructure\Amqp\MessageBus\FetchAmqpMessagesDispatcher;
 use App\Twitter\Infrastructure\Http\Client\ListAwareHttpClient;
 use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Http\Selector\AuthenticatedSelector;
@@ -33,8 +33,8 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
     {
         self::$kernel = self::bootKernel();
 
-        /** @var FetchTweetsAmqpMessagesDispatcher $dispatcher */
-        $dispatcher = static::getContainer()->get('test.'.FetchTweetsAmqpMessagesDispatcher::class);
+        /** @var FetchAmqpMessagesDispatcher $dispatcher */
+        $dispatcher = static::getContainer()->get('test.'.FetchAmqpMessagesDispatcher::class);
 
         $calls = 0;
 
@@ -79,7 +79,7 @@ class DispatchAmqpMessagesToFetchTweetsTest extends KernelTestCase
         $ruleset->isCurationSearchQueryBased()->willReturn(false);
         $ruleset->correlationId()->willReturn(CorrelationId::generate());
 
-        $dispatcher->dispatchFetchTweetsMessages(
+        $dispatcher->dispatchFetchAMQPMessages(
             $ruleset->reveal(),
             (new Token())->unfreeze(),
             function ($message) {}
