@@ -67,7 +67,7 @@
         "symfony/var-dumper": "^5.4",
         "symfony/var-exporter": "^5.4",
         "symfony/yaml": "^5.4",
-        "thecodingmachine/safe": "^2.2.0",
+        "thecodingmachine/safe": "^3.0.2",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0"
     },
