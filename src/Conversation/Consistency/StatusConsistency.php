@@ -2,6 +2,7 @@
 
 namespace App\Conversation\Consistency;
 
+use Safe\Exceptions\JsonException;
 use function array_key_exists;
 use function Safe\json_decode;
 
@@ -11,13 +12,13 @@ use function Safe\json_decode;
 class StatusConsistency
 {
     /**
-     * @throws \Safe\Exceptions\JsonException
+     * @throws JsonException
      */
     public static function fillMissingStatusProps(
         string $json,
         array $status
     ): array {
-        $decodedJson = json_decode($json, $asAssociativeArray = true);
+        $decodedJson = json_decode($json, assoc: true);
 
         $status['status_id'] = $decodedJson['id_str'];
 
