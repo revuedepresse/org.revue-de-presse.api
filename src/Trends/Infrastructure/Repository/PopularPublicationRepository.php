@@ -9,16 +9,13 @@ use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
 use App\Ownership\Domain\Entity\MembersListInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
+use DateTime;
 use DateTimeInterface;
-use Kreait\Firebase\Database;
-use Kreait\Firebase\Database\Snapshot;
-use Kreait\Firebase\Factory;
 use Psr\Log\LoggerInterface;
 
 class PopularPublicationRepository implements PopularPublicationRepositoryInterface
 {
-    private string $serviceAccountConfig;
-    private string $databaseUri;
+    private string $projectDir;
 
     private LoggerInterface $logger;
 
@@ -29,64 +26,45 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     private string $defaultPublishersList;
 
     public function __construct(
-        string $serviceAccountConfig,
-        string $databaseUri,
+        string $projectDir,
         string $defaultPublishersList,
         HighlightRepository $highlightRepository,
         MembersListRepositoryInterface $publishersListRepository,
         LoggerInterface $logger
     )
     {
-        $this->serviceAccountConfig = $serviceAccountConfig;
-        $this->databaseUri = $databaseUri;
+        $this->projectDir = $projectDir;
         $this->defaultPublishersList = $defaultPublishersList;
-
         $this->highlightRepository = $highlightRepository;
         $this->listRepository = $publishersListRepository;
         $this->logger = $logger;
     }
 
-    private function getFirebaseDatabase(): Database
+    private function getFirebaseDatabase(string $searchDate): array
     {
-        return (new Factory)
-            ->withServiceAccount($this->serviceAccountConfig)
-            ->withDatabaseUri($this->databaseUri)
-            ->createDatabase();
+        $todayHighlights = $this->projectDir.'/src/Bluesky/Resources/'.$searchDate.'.json';
+        
+        if (file_exists($todayHighlights)) {
+            return [
+                $searchDate => file_get_contents($todayHighlights)
+            ];
+        }
+         
+        return [
+            $searchDate => json_encode([])
+        ];            
     }
 
     private function getFirebaseDatabaseSnapshot(
         DateTimeInterface $date,
         bool $includeRetweets = false,
         bool $curatingHighlightsFromDistinctSources = false
-    ): Snapshot {
-        $database = $this->getFirebaseDatabase();
+    ): array {
+        $searchDate = $date->format('Y-m-d');
+        $database = $this->getFirebaseDatabase($searchDate);
+        $this->logger->info(sprintf('About to access Firebase Path: "%s"', $searchDate));
 
-        $publishersList = $this->listRepository->findOneBy(['name' => $this->defaultPublishersList]);
-
-        if (!($publishersList instanceof MembersListInterface)) {
-            UnknownListException::throws();
-        }
-
-        $suffix = '';
-        if ($curatingHighlightsFromDistinctSources) {
-            $suffix = 'FromDistinctSources';
-        }
-
-        $path = '/'.implode(
-            '/',
-            [
-                'highlights',
-                $publishersList->publicId(),
-                $date->format('Y-m-d'),
-                $includeRetweets ? "retweet{$suffix}" : "status{$suffix}"
-            ]
-        );
-        $this->logger->info(sprintf('About to access Firebase Path: "%s"', $path));
-        $reference = $database->getReference($path);
-
-        return $reference
-            ->orderByChild('totalRetweets')
-            ->getSnapshot();
+        return $database;
     }
 
     /**
@@ -98,9 +76,11 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
      * @throws \Safe\Exceptions\FilesystemException
      */
     public function findBy(SearchParamsInterface $searchParams): array {
+        $searchDate = $searchParams->getParams()['startDate'];
+
         try {
             $snapshot = $this->getFirebaseDatabaseSnapshot(
-                $searchParams->getParams()['startDate'],
+                $searchDate,
                 $searchParams->getParams()['includeRetweets'],
                 $searchParams->curatingHighlightsFromDistinctSources(),
              );
@@ -110,15 +90,34 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 'statuses' => [],
             ];
         }
+        
+        $formattedSearchDate = $searchDate->format('Y-m-d');
 
-        $highlights = $snapshot->getValue();
-        if ($highlights === null) {
+        if (array_key_exists($formattedSearchDate, $snapshot)) {
+            $highlights = json_decode($snapshot[$formattedSearchDate], true);
+        } else {
             $highlights = [];
         }
 
         return [
             'aggregates' => [],
-            'statuses' => $this->highlightRepository->mapStatuses($searchParams, array_reverse($highlights)),
+            'statuses' => array_map(
+                function ($status) {
+                    $parts =explode('/', $status['publication_id']);
+                    
+                    $status['url'] = implode([
+                        'https://bsky.app/profile/',
+                        $status['screen_name'],
+                        '/post/',
+                        $parts[4],
+                    ]);
+
+                    $status['status'] = $status;
+                    
+                    return $status;
+                },
+                $highlights
+            ),
             'version' => 'v3.7.1',
         ];
     }

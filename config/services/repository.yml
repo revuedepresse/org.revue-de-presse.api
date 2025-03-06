@@ -155,8 +155,7 @@ services:
     App\Trends\Infrastructure\Repository\PopularPublicationRepository:
         class: 'App\Trends\Infrastructure\Repository\PopularPublicationRepository'
         arguments:
-            - "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
-            - "%env(resolve:FIREBASE_DATABASE_URI)%"
+            - '%kernel.project_dir%'
             - '%list_default%'
             - '@repository.highlight'
             - '@App\Ownership\Domain\Repository\MembersListRepositoryInterface'

@@ -13,8 +13,13 @@ use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Domain\Publication\Repository\PublicationInterface;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use GdImage;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\JsonException;
 use function array_key_exists;
 use function Exception;
 use function json_decode;
@@ -30,10 +35,10 @@ trait ConversationAwareTrait
 
     /**
      * @throws InvalidStatusException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException|\JsonException
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException|\JsonException
+     * @throws FilesystemException
      */
     public function updateFromDecodedDocument(
         array $status,
@@ -102,11 +107,11 @@ trait ConversationAwareTrait
 
     /**
      * @throws InvalidStatusException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
      * @throws \JsonException
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws FilesystemException
      */
     private function extractConversationProperties(
         array $updatedStatus,
@@ -143,11 +148,11 @@ trait ConversationAwareTrait
 
     /**
      * @throws InvalidStatusException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
      * @throws \JsonException
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws FilesystemException
      */
     private function extractTweetProperties(
         array $statuses,
@@ -203,7 +208,7 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws FilesystemException
      * @throws \JsonException
      */
     public function addEncodedAvatarToTweetDocument(array $tweetRawDocument, array $tweet): array
@@ -235,8 +240,8 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @throws \App\Conversation\Exception\InvalidStatusException
-     * @throws \Safe\Exceptions\JsonException
+     * @throws InvalidStatusException
+     * @throws JsonException
      */
     private function convertTweetToArray($tweet): array
     {
@@ -277,12 +282,12 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @throws \App\Conversation\Exception\InvalidStatusException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws InvalidStatusException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
      * @throws \JsonException
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws FilesystemException
      */
     private function extractRetweetedStatus(
         array $tweet,
@@ -366,7 +371,7 @@ trait ConversationAwareTrait
     }
 
     /**
-     * @throws \Safe\Exceptions\FilesystemException
+     * @throws FilesystemException
      * @throws \JsonException
      */
     public function getExistingProfilePicturesOrFetchThem(array $tweet): array
