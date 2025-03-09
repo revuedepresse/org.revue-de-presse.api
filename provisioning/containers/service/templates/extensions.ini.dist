@@ -10,10 +10,10 @@ html_errors                 = on
 output_buffering            = on
 short_open_tag              = off
 
-; xdebug.client_host          = host.docker.internal:9003
-xdebug.client_host          = 100.64.0.3
-xdebug.discover_client_host = yes
-xdebug.log                  = /var/www/org.revue-de-presse.api/var/log/xdebug.log
-xdebug.mode                 = debug
-xdebug.start_with_request   = yes
-zend_extension              = /usr/local/lib/php/extensions/no-debug-non-zts-20220829/xdebug.so
+;xdebug.client_host          = host.docker.internal
+;xdebug.idekey               = 'PHPSTORM'
+;xdebug.discover_client_host = yes
+;xdebug.log                  = /var/www/org.revue-de-presse.api/var/log/xdebug.log
+;xdebug.mode                 = debug
+;xdebug.start_with_request   = yes
+;zend_extension              = /usr/local/lib/php/extensions/no-debug-non-zts-20220829/xdebug.so

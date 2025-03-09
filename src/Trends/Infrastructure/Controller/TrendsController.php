@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace App\Trends\Infrastructure\Controller;
 
-use App\Trends\Infrastructure\Controller\Exception\InvalidRequestException;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
-use App\Twitter\Infrastructure\Http\Entity\Token;
-use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
@@ -16,7 +13,7 @@ use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use JsonException;
-use Predis\Client;
+use Predis\Connection\ConnectionException;
 use Psr\Log\LoggerInterface;
 use RedisException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -120,7 +117,14 @@ DATA
 
         $client = $this->redisCache->getClient();
         $totalPages = 1;
-        $client->setex($key, 3600, $totalPages);
+        
+        try {
+            $client->setex($key, 3600, $totalPages);
+        } catch (ConnectionException $exception) {
+            $this->logger->error($exception->getMessage());
+
+            return $totalPages;
+        }
 
         return $totalPages;
     }
@@ -136,16 +140,23 @@ DATA
 
         $key = $this->getCacheKey('highlights.items', $searchParams);
         $client = $this->redisCache->getClient();
-        $cachedHighlights = $client->get($key);
 
-        if (!$cachedHighlights) {
+        try {
+            $cachedHighlights = $client->get($key);
+
+            if ($cachedHighlights) {
+                return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
+            }
+
             $highlights = $this->popularPublicationRepository->findBy($searchParams);
             $client->setex($key, 3600, json_encode($highlights, JSON_THROW_ON_ERROR));
 
             return $highlights;
+        } catch (ConnectionException $exception) {
+            $this->logger->error($exception->getMessage());
+            
+            return $this->popularPublicationRepository->findBy($searchParams);
         }
-
-        return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
     }
 
     public function getCacheKey(string $prefix, SearchParams $searchParams): string

@@ -3,3 +3,4 @@ services:
         class: 'App\Twitter\Infrastructure\Security\Authentication\TokenAuthenticator'
         calls:
             - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setLogger', [ '@logger'] ]
