@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Security\Authentication;
 
+use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Model\Member;
@@ -18,6 +19,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     use MemberRepositoryTrait;
+    use LoggerTrait;
 
     public function supports(Request $request): bool
     {
@@ -58,10 +60,14 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         }
 
         /** @var Member $member */
-        $member = $userProvider->loadUserByUsername($apiKey);
 
-        if ($member instanceof MemberInterface) {
-            return $member;
+        try {
+            $member = $userProvider->loadUserByIdentifier($apiKey);
+            if ($member instanceof MemberInterface) {
+                return $member;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error($e->getMessage());
         }
     }
 
