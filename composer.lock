@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bf20f3025993cfcb9c32b18f902296d5",
+    "content-hash": "a7d26e7293ed8b9a4a471bd9ff355364",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -1932,24 +1932,24 @@
         },
         {
             "name": "elvanto/litemoji",
-            "version": "4.3.0",
+            "version": "5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/elvanto/litemoji.git",
-                "reference": "f13cf10686f7110a3b17d09de03050d0708840b8"
+                "reference": "42a3e73f5b17ef93980c484e3630b0eb1ed0a9cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elvanto/litemoji/zipball/f13cf10686f7110a3b17d09de03050d0708840b8",
-                "reference": "f13cf10686f7110a3b17d09de03050d0708840b8",
+                "url": "https://api.github.com/repos/elvanto/litemoji/zipball/42a3e73f5b17ef93980c484e3630b0eb1ed0a9cf",
+                "reference": "42a3e73f5b17ef93980c484e3630b0eb1ed0a9cf",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=7.3"
+                "php": ">=7.4"
             },
             "require-dev": {
-                "milesj/emojibase": "7.0.*",
+                "milesj/emojibase": "15.3.*",
                 "phpunit/phpunit": "^9.0"
             },
             "type": "library",
@@ -1969,9 +1969,9 @@
             ],
             "support": {
                 "issues": "https://github.com/elvanto/litemoji/issues",
-                "source": "https://github.com/elvanto/litemoji/tree/4.3.0"
+                "source": "https://github.com/elvanto/litemoji/tree/5.1.0"
             },
-            "time": "2022-10-28T02:32:19+00:00"
+            "time": "2024-09-11T21:55:58+00:00"
         },
         {
             "name": "fig/http-message-util",
