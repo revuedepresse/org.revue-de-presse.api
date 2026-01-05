@@ -2977,33 +2977,33 @@
         },
         {
             "name": "jolicode/jolitypo",
-            "version": "v1.4.0",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jolicode/JoliTypo.git",
-                "reference": "d85b1076486b6886f1a16943d032d11b9c06c78d"
+                "reference": "9c222bac116af9cdefbf27a8673089ba1f469fcd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jolicode/JoliTypo/zipball/d85b1076486b6886f1a16943d032d11b9c06c78d",
-                "reference": "d85b1076486b6886f1a16943d032d11b9c06c78d",
+                "url": "https://api.github.com/repos/jolicode/JoliTypo/zipball/9c222bac116af9cdefbf27a8673089ba1f469fcd",
+                "reference": "9c222bac116af9cdefbf27a8673089ba1f469fcd",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
                 "lib-libxml": "*",
                 "org_heigl/hyphenator": "^2.6 || ^3.0",
-                "php": ">=7.4"
+                "php": ">=8.1"
             },
             "conflict": {
                 "ext-apc": "3.1.11"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.3.2",
-                "symfony/framework-bundle": "^4.4 || ^5.0 || ^6.0",
-                "symfony/phpunit-bridge": "^5.4.8 || ^6.0",
-                "symfony/twig-bundle": "^4.4 || ^5.0 || ^6.0",
-                "symfony/yaml": "^4.4 || ^5.0 || ^6.0"
+                "friendsofphp/php-cs-fixer": "^v3.92.0",
+                "symfony/framework-bundle": "^6.4 || ^7.3 || ^8.0",
+                "symfony/phpunit-bridge": "^7.3 || ^8.0",
+                "symfony/twig-bundle": "^6.4 || ^7.3 || ^8.0",
+                "symfony/yaml": "^6.4 || ^7.3 || ^8.0"
             },
             "type": "library",
             "autoload": {
@@ -3033,9 +3033,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jolicode/JoliTypo/issues",
-                "source": "https://github.com/jolicode/JoliTypo/tree/v1.4.0"
+                "source": "https://github.com/jolicode/JoliTypo/tree/v1.6.0"
             },
-            "time": "2022-12-22T08:29:45+00:00"
+            "time": "2025-12-15T14:14:43+00:00"
         },
         {
             "name": "kreait/firebase-bundle",
@@ -13067,9 +13067,9 @@
         "ext-pdo": "*",
         "ext-sodium": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "8.1.6"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
