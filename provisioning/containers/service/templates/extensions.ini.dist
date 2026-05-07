@@ -10,6 +10,7 @@ html_errors                 = on
 output_buffering            = on
 short_open_tag              = off
 
+;; Uncomment to enable xdebug in development environment  
 ;xdebug.client_host          = host.docker.internal
 ;xdebug.idekey               = 'PHPSTORM'
 ;xdebug.discover_client_host = yes
