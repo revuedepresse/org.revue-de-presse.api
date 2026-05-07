@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Trends\Infrastructure\Controller;
 
+use App\Membership\Domain\Entity\Legacy\Member;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
@@ -10,12 +14,42 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 class TrendsControllerTest extends WebTestCase
 {
+    private const DUMMY_TOKEN = 'dummy-test-token';
+
+    private KernelBrowser $client;
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine')->getManager();
+
+        $schemaTool = new SchemaTool($em);
+        $metadata = $em->getMetadataFactory()->getAllMetadata();
+        if (!empty($metadata)) {
+            $schemaTool->dropSchema($metadata);
+            $schemaTool->createSchema($metadata);
+        }
+
+        $member = new Member();
+        $member->apiKey = self::DUMMY_TOKEN;
+        $member->setEmail('dummy@test.local');
+        $member->setTwitterID('1');
+        $member->setTwitterUsername('dummy_user');
+        $member->setScreenName('dummy_user');
+        $member->setFullName('Dummy User');
+        $member->setEnabled(true);
+        $em->persist($member);
+        $em->flush();
+    }
+
     public function test_callback_returns_acknowledgement_payload(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/api/callback');
+        // /api/callback is IS_AUTHENTICATED_ANONYMOUSLY — no token needed.
+        $this->client->request('GET', '/api/callback');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
 
         self::assertSame(200, $response->getStatusCode());
         self::assertJson($response->getContent());
@@ -25,18 +59,27 @@ class TrendsControllerTest extends WebTestCase
         self::assertStringContainsString("That's all folks!", $body);
     }
 
-    public function test_get_highlights_returns_collection_shape_on_cache_miss(): void
+    public function test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/api/twitter/highlights', [
-            'startDate'       => '2024-01-01 00:00:00',
-            'endDate'         => '2024-01-01 23:59:59',
-            'includeRetweets' => '0',
-        ]);
+        $this->client->request(
+            'GET',
+            '/api/twitter/highlights',
+            [
+                'startDate'       => '2024-01-01 00:00:00',
+                'endDate'         => '2024-01-01 23:59:59',
+                'includeRetweets' => '0',
+            ],
+            [],
+            ['HTTP_X_AUTH_TOKEN' => self::DUMMY_TOKEN]
+        );
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
 
-        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(
+            200,
+            $response->getStatusCode(),
+            'Authenticated /api/twitter/highlights request must succeed with a Member fixture and a matching x-auth-token header'
+        );
         self::assertTrue($response->headers->has('x-total-pages'));
         self::assertTrue($response->headers->has('x-page-index'));
 
@@ -46,17 +89,19 @@ class TrendsControllerTest extends WebTestCase
         self::assertArrayHasKey('statuses', $body);
     }
 
-    public function test_get_highlights_rejects_request_without_required_params(): void
+    public function test_get_highlights_rejects_unauthenticated_request(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/api/twitter/highlights');
-
-        $response = $client->getResponse();
-
-        self::assertContains(
-            $response->getStatusCode(),
-            [403, 404],
-            'Highlights endpoint must reject requests missing required search params'
+        // No x-auth-token header — firewall must reject before reaching the controller.
+        $this->client->request(
+            'GET',
+            '/api/twitter/highlights',
+            [
+                'startDate'       => '2024-01-01 00:00:00',
+                'endDate'         => '2024-01-01 23:59:59',
+                'includeRetweets' => '0',
+            ]
         );
+
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 }
