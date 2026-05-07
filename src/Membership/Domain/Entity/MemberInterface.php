@@ -20,6 +20,13 @@ interface MemberInterface extends UserInterface
     /**
      * @return string|null
      */
+    public function getUserIdentifier(): ?string;
+
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier() instead
+     *
+     * @return string|null
+     */
     public function getUsername(): ?string;
 
     /**

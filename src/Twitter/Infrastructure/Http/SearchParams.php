@@ -22,20 +22,8 @@ class SearchParams implements SearchParamsInterface
 {
     public const PARAM_AGGREGATE_IDS = 'aggregateIds';
 
-    private PaginationParams $paginationParams;
-
-    private ?string $keyword;
-
-    private array $params;
-
-    public function __construct(
-        PaginationParams $paginationParams,
-        string $keyword = null,
-        array $filteredParams = []
-    ) {
-        $this->paginationParams = $paginationParams;
-        $this->keyword = $keyword;
-        $this->params = $filteredParams;
+    public function __construct(private readonly PaginationParams $paginationParams, private readonly ?string $keyword = null, private array $params = [])
+    {
     }
 
     /**
@@ -51,7 +39,7 @@ class SearchParams implements SearchParamsInterface
 
         array_walk(
             $paramsNames,
-            function ($name) use ($request, $params, &$filteredParams) {
+            function ($name) use ($request, $params, &$filteredParams): void {
                 $value = $request->get($name);
 
                 if ($value === null) {
@@ -76,7 +64,7 @@ class SearchParams implements SearchParamsInterface
                     try {
                         $filteredParams[$name] = (new DateTime($value, new \DateTimeZone('Europe/Paris')))
                             ->setTime(0, 1);
-                    } catch (\Exception $e) {
+                    } catch (\Exception) {
                         $filteredParams[$name] = (new DateTime('now', new \DateTimeZone('Europe/Paris')))
                             ->setTime(0, 1);
                     }

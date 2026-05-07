@@ -10,16 +10,8 @@ use Psr\Log\LoggerInterface;
 
 class PopularPublicationRepository implements PopularPublicationRepositoryInterface
 {
-    private string $projectDir;
-
-    private LoggerInterface $logger;
-
-    public function __construct(
-        string $projectDir,
-        LoggerInterface $logger
-    ) {
-        $this->projectDir = $projectDir;
-        $this->logger = $logger;
+    public function __construct(private readonly string $projectDir, private readonly LoggerInterface $logger)
+    {
     }
 
     private function loadHighlightsSnapshot(string $searchDate): array
@@ -61,23 +53,21 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $formattedSearchDate = $searchDate->format('Y-m-d');
 
         if (array_key_exists($formattedSearchDate, $snapshot)) {
-            $highlights = json_decode($snapshot[$formattedSearchDate], true);
+            $highlights = json_decode((string) $snapshot[$formattedSearchDate], true);
         } else {
             $highlights = [];
         }
         
-        $publications = isset($highlights['statuses']) 
-            ? $highlights['statuses'] 
-            : $highlights;
+        $publications = $highlights['statuses'] ?? $highlights;
 
         return [
             'aggregates' => [],
             'statuses' => array_map(
                 function ($status) {
                     if (array_key_exists('publication_id', $status)) {
-                        $parts = explode('/', $status['publication_id']);
+                        $parts = explode('/', (string) $status['publication_id']);
                         
-                        $status['url'] = implode([
+                        $status['url'] = implode('', [
                             'https://bsky.app/profile/',
                             $status['screen_name'],
                             '/post/',
@@ -93,7 +83,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                         ];
                         if (array_key_exists('original_document', $publication)) {
                             $originalDocument = json_decode(
-                                $publication['original_document'],
+                                (string) $publication['original_document'],
                                 true
                             );
                         }

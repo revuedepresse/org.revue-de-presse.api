@@ -8,27 +8,27 @@ use function mt_rand;
 use function sha1;
 use function uniqid;
 
-abstract class Member implements MemberInterface
+abstract class Member implements MemberInterface, \Stringable
 {
     /**
      * @var
      */
-    protected ?int $id;
+    protected ?int $id = null;
 
     /**
      * @var string
      */
-    protected ?string $emailCanonical;
+    protected ?string $emailCanonical = null;
 
     /**
      * @var string
      */
-    protected ?string $username;
+    protected ?string $username = null;
 
     /**
      * @var string
      */
-    protected ?string $usernameCanonical;
+    protected ?string $usernameCanonical = null;
 
     /**
      * @var boolean
@@ -59,7 +59,7 @@ abstract class Member implements MemberInterface
      *
      * @var string
      */
-    protected ?string $plainPassword;
+    protected ?string $plainPassword = null;
 
     /**
      * @var string
@@ -130,9 +130,19 @@ abstract class Member implements MemberInterface
     /**
      * @return string|null
      */
-    public function getUsername(): ?string
+    public function getUserIdentifier(): ?string
     {
         return $this->username;
+    }
+
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier() instead
+     *
+     * @return string|null
+     */
+    public function getUsername(): ?string
+    {
+        return $this->getUserIdentifier();
     }
 
     /**
@@ -234,9 +244,9 @@ abstract class Member implements MemberInterface
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return (string) $this->getUsername();
+        return (string) $this->getUserIdentifier();
     }
 
     /**

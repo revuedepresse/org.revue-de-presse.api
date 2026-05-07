@@ -8,7 +8,7 @@ use App\Trends\Domain\Repository\SearchParamsInterface;
 
 class InMemoryPopularPublicationRepository implements PopularPublicationRepositoryInterface
 {
-    private array $highlights;
+    private readonly array $highlights;
 
     public function __construct()
     {
