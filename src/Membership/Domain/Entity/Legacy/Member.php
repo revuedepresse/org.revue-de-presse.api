@@ -3,13 +3,11 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Entity\Legacy;
 
-use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
 
@@ -191,23 +189,6 @@ class Member extends MemberModel
     protected int $positionInHierarchy;
 
     /**
-     * @ORM\ManyToMany(
-     *      targetEntity="\App\Twitter\Infrastructure\Http\Entity\Token",
-     *      inversedBy="users",
-     *      fetch="EAGER"
-     * )
-     * @ORM\JoinTable(name="weaving_user_token",
-     *      joinColumns={
-     *          @ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")
-     *      },
-     *      inverseJoinColumns={
-     *          @ORM\JoinColumn(name="token_id", referencedColumnName="id")
-     *      }
-     * )
-     */
-    protected Selectable $tokens;
-
-    /**
      * Protected status according to Twitter
      *
      * @var boolean
@@ -231,33 +212,9 @@ class Member extends MemberModel
 
     private bool $locked;
 
-    /**
-     * @ORM\OneToMany(
-     *      targetEntity="\App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent",
-     *      mappedBy="member"
-     * )
-     */
-    protected Collection $publicationBatchCollectedEvents;
-
     public function __construct()
     {
         parent::__construct();
-
-        $this->tokens = new ArrayCollection();
-    }
-
-    /**
-     * Add tokens
-     *
-     * @param Token $tokens
-     *
-     * @return MemberInterface
-     */
-    public function addToken(Token $tokens)
-    {
-        $this->tokens[] = $tokens;
-
-        return $this;
     }
 
     /**
@@ -360,11 +317,6 @@ class Member extends MemberModel
     public function getPassword(): string
     {
         return $this->password;
-    }
-
-    public function getTokens(): Selectable
-    {
-        return $this->tokens;
     }
 
     public function getTwitterID(): ?string
@@ -473,11 +425,6 @@ class Member extends MemberModel
         $this->suspended = $suspended;
 
         return $this;
-    }
-
-    public function removeToken(Token $tokens)
-    {
-        $this->tokens->removeElement($tokens);
     }
 
     public function setConfirmationToken($confirmationToken)
