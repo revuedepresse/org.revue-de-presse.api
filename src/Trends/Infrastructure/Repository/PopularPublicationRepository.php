@@ -3,13 +3,8 @@ declare (strict_types=1);
 
 namespace App\Trends\Infrastructure\Repository;
 
-use App\Ownership\Domain\Exception\UnknownListException;
-use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Trends\Domain\Repository\SearchParamsInterface;
-use App\Ownership\Domain\Entity\MembersListInterface;
-use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use DateTime;
 use DateTimeInterface;
 use Psr\Log\LoggerInterface;
 
@@ -19,24 +14,11 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private LoggerInterface $logger;
 
-    private HighlightRepository $highlightRepository;
-
-    private MembersListRepositoryInterface $listRepository;
-
-    private string $defaultPublishersList;
-
     public function __construct(
         string $projectDir,
-        string $defaultPublishersList,
-        HighlightRepository $highlightRepository,
-        MembersListRepositoryInterface $publishersListRepository,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->projectDir = $projectDir;
-        $this->defaultPublishersList = $defaultPublishersList;
-        $this->highlightRepository = $highlightRepository;
-        $this->listRepository = $publishersListRepository;
         $this->logger = $logger;
     }
 
@@ -78,19 +60,12 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
     public function findBy(SearchParamsInterface $searchParams): array {
         $searchDate = $searchParams->getParams()['startDate'];
 
-        try {
-            $snapshot = $this->getHighlightsSnapshot(
-                $searchDate,
-                $searchParams->getParams()['includeRetweets'],
-                $searchParams->curatingHighlightsFromDistinctSources(),
-             );
-        } catch (UnknownListException) {
-            return [
-                'aggregates' => [],
-                'statuses' => [],
-            ];
-        }
-        
+        $snapshot = $this->getHighlightsSnapshot(
+            $searchDate,
+            $searchParams->getParams()['includeRetweets'],
+            $searchParams->curatingHighlightsFromDistinctSources(),
+         );
+
         $formattedSearchDate = $searchDate->format('Y-m-d');
 
         if (array_key_exists($formattedSearchDate, $snapshot)) {
