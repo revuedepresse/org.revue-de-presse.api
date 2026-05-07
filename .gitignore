@@ -36,3 +36,4 @@ public/graphs
 .phpunit
 
 
+*.tar.gz
