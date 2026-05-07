@@ -98,25 +98,64 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         } else {
             $highlights = [];
         }
+        
+        $publications = isset($highlights['statuses']) 
+            ? $highlights['statuses'] 
+            : $highlights;
 
         return [
             'aggregates' => [],
             'statuses' => array_map(
                 function ($status) {
-                    $parts =explode('/', $status['publication_id']);
-                    
-                    $status['url'] = implode([
-                        'https://bsky.app/profile/',
-                        $status['screen_name'],
-                        '/post/',
-                        $parts[4],
-                    ]);
+                    if (array_key_exists('publication_id', $status)) {
+                        $parts = explode('/', $status['publication_id']);
+                        
+                        $status['url'] = implode([
+                            'https://bsky.app/profile/',
+                            $status['screen_name'],
+                            '/post/',
+                            $parts[4],
+                        ]);
+                    } else {
+                        $publication = $status;
+                        if (array_key_exists('status', $status)) {
+                            $publication = $status['status'];
+                        }
+                        $originalDocument = [
+                            'full_text' => $publication['text'],
+                        ];
+                        if (array_key_exists('original_document', $publication)) {
+                            $originalDocument = json_decode(
+                                $publication['original_document'],
+                                true
+                            );
+                        }
+
+                        $status = [
+                            'date' => $status['publicationDateTime'],
+                            'screen_name' => $publication['username'],
+                            'reposts' => $publication['retweet_count'],
+                            'likes' => $publication['favorite_count'],
+                            'text' => $originalDocument['full_text'],
+                            'publication_id' => $publication['status_id'],
+                            'avatar_url' => $publication['avatar_url'],
+                            'url' => implode(
+                                '/',
+                                [
+                                    'https://twitter.com',
+                                    $publication['username'],
+                                    'status',
+                                    $publication['status_id']
+                                ],
+                            )
+                        ];
+                    }
 
                     $status['status'] = $status;
                     
                     return $status;
                 },
-                $highlights
+                $publications
             ),
             'version' => 'v3.7.1',
         ];
