@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache install restart start stop test
+.PHONY: help build clean clear-app-cache clear-cache install restart start stop test
 
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
@@ -17,6 +17,9 @@ clean: ## Remove service container
 
 clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
+
+clear-cache: ## Flush Redis cache
+	@/bin/bash -c 'source fun.sh && clear_cache'
 
 install: build ## Install requirements
 	@/bin/bash -c 'source fun.sh && install'
