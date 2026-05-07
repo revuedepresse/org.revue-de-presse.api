@@ -1,6 +1,0 @@
-services:
-    App\Twitter\Infrastructure\Http\Accessor\FollowersListAccessor:
-        class: 'App\Twitter\Infrastructure\Http\Accessor\FollowersListAccessor'
-        arguments:
-            - '@App\Twitter\Infrastructure\Http\Accessor'
-            - '@logger'
