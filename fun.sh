@@ -161,6 +161,9 @@ function install() {
 
     load_configuration_parameters
 
+    docker network inspect org-revue-de-presse >/dev/null 2>&1 || \
+    docker network create org-revue-de-presse
+
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
