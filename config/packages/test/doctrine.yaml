@@ -1,0 +1,8 @@
+doctrine:
+    dbal:
+        connections:
+            default:
+                url: '%env(resolve:DATABASE_URL)%'
+                server_version: ~
+                charset: ~
+                logging: false
