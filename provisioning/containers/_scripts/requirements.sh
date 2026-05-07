@@ -33,7 +33,6 @@ function clear_package_management_system_cache() {
 
 function install_system_packages() {
     (
-      echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sources.list.d/symfony-cli.list
       apt-get update --quiet
       apt-get install \
           --assume-yes \
@@ -53,11 +52,9 @@ function install_system_packages() {
           libsodium-dev \
           parallel \
           procps \
-          symfony-cli \
           tini \
           unzip \
           wget
-
     ) >> /dev/null 2>&1 || printf '⚠️ Could not install required system packages. 📦'
 }
 
