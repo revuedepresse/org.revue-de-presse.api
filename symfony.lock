@@ -1,10 +1,4 @@
 {
-    "abraham/twitteroauth": {
-        "version": "dev-master"
-    },
-    "beberlei/doctrineextensions": {
-        "version": "dev-master"
-    },
     "behat/behat": {
         "version": "3.8.x-dev"
     },
@@ -19,15 +13,6 @@
     },
     "beste/json": {
         "version": "1.0.0"
-    },
-    "brick/math": {
-        "version": "0.8.12"
-    },
-    "composer/ca-bundle": {
-        "version": "1.x-dev"
-    },
-    "composer/package-versions-deprecated": {
-        "version": "1.x-dev"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -174,18 +159,6 @@
     "incenteev/composer-parameter-handler": {
         "version": "2.1.x-dev"
     },
-    "jolicode/jolitypo": {
-        "version": "1.4",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.0",
-            "ref": "e6b3307304d3829993635408736601e5a1d25f72"
-        },
-        "files": [
-            "config/packages/joli_typo.yaml"
-        ]
-    },
     "kreait/firebase-bundle": {
         "version": "4.0.0"
     },
@@ -296,24 +269,6 @@
     "ralouphie/getallheaders": {
         "version": "3.0.3"
     },
-    "ramsey/collection": {
-        "version": "1.1.1"
-    },
-    "ramsey/uuid": {
-        "version": "4.x-dev"
-    },
-    "ramsey/uuid-doctrine": {
-        "version": "1.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "master",
-            "version": "1.3",
-            "ref": "471aed0fbf5620b8d7f92b7a5ebbbf6c0945c27a"
-        },
-        "files": [
-            "config/packages/ramsey_uuid_doctrine.yaml"
-        ]
-    },
     "riverline/multipart-parser": {
         "version": "2.0.8"
     },
@@ -322,9 +277,6 @@
     },
     "roave/security-advisories": {
         "version": "dev-latest"
-    },
-    "scienta/doctrine-json-functions": {
-        "version": "4.1-dev"
     },
     "sebastian/cli-parser": {
         "version": "1.0.1"
@@ -657,23 +609,6 @@
     "symfony/translation-contracts": {
         "version": "2.0-dev"
     },
-    "symfony/twig-bridge": {
-        "version": "5.1-dev"
-    },
-    "symfony/twig-bundle": {
-        "version": "5.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "5.0",
-            "ref": "fab9149bbaa4d5eca054ed93f9e1b66cc500895d"
-        },
-        "files": [
-            "config/packages/test/twig.yaml",
-            "config/packages/twig.yaml",
-            "templates/base.html.twig"
-        ]
-    },
     "symfony/validator": {
         "version": "4.3",
         "recipe": {
@@ -701,12 +636,6 @@
     },
     "theseer/tokenizer": {
         "version": "1.1.3"
-    },
-    "twig/extra-bundle": {
-        "version": "3.x-dev"
-    },
-    "twig/twig": {
-        "version": "3.x-dev"
     },
     "webmozart/assert": {
         "version": "1.6.0"
