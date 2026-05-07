@@ -1,4 +1,4 @@
-# How tweets are collected?
+# How tweets used to be collected?
 
  - Decide whether collect should be skipped when
     - the member is protected,
