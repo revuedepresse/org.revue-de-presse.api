@@ -37,8 +37,8 @@ jobs:
 
       - name: Copy test environment variables configuration file
         run: |
-          cp $GITHUB_WORKSPACE/.env.test.dist $GITHUB_WORKSPACE/.env.test
-          cat $GITHUB_WORKSPACE/.env.test
+          cp $GITHUB_WORKSPACE/.env.test.dist $GITHUB_WORKSPACE/.env.test.local
+          cat $GITHUB_WORKSPACE/.env.test.local
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
@@ -74,11 +74,6 @@ jobs:
 
       - name: Create test database schema
         run: php bin/console doctrine:schema:create -n
-
-      - name: Debug env state
-        run: |
-          ls -la .env* 2>/dev/null
-          php -r 'require "vendor/autoload.php"; require "config/bootstrap.php"; var_dump($_SERVER["ALLOWED_ORIGIN"] ?? "MISSING_SERVER", $_ENV["ALLOWED_ORIGIN"] ?? "MISSING_ENV");'
 
       - name: Run unit tests
         timeout-minutes: 5

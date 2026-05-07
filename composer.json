@@ -54,8 +54,7 @@
         "symfony/validator": "^7.4",
         "symfony/var-dumper": "^7.4",
         "symfony/var-exporter": "^7.4",
-        "symfony/yaml": "^7.4",
-        "thecodingmachine/safe": "^2.2.0"
+        "symfony/yaml": "^7.4"
     },
     "require-dev": {
         "phpspec/prophecy-phpunit": "^2.0",
