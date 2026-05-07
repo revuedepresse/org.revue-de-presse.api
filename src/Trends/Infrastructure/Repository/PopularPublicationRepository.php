@@ -49,14 +49,6 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         return $database;
     }
 
-    /**
-     * @throws \App\Conversation\Exception\InvalidStatusException
-     * @throws \App\Twitter\Infrastructure\Exception\SuspendedAccountException
-     * @throws \App\Twitter\Infrastructure\Exception\UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \JsonException
-     * @throws \Safe\Exceptions\FilesystemException
-     */
     public function findBy(SearchParamsInterface $searchParams): array {
         $searchDate = $searchParams->getParams()['startDate'];
 
@@ -64,7 +56,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             $searchDate,
             $searchParams->getParams()['includeRetweets'],
             $searchParams->curatingHighlightsFromDistinctSources(),
-         );
+        );
 
         $formattedSearchDate = $searchDate->format('Y-m-d');
 
