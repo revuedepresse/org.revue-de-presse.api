@@ -14,9 +14,5 @@ services:
             - '%kernel.environment%'
         properties:
             logger:                         '@logger'
-            highlightRepository:            '@repository.highlight'
-            memberRepository:               '@user_manager'
             redisCache:                     '@app.cache.redis'
-            router:                         '@router'
             popularPublicationRepository:   '@App\Trends\Infrastructure\Repository\PopularPublicationRepository'
-            tokenRepository:                '@repository.access_token'

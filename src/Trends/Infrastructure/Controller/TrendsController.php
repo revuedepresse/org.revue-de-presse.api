@@ -5,10 +5,7 @@ namespace App\Trends\Infrastructure\Controller;
 
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Twitter\Infrastructure\Cache\RedisCache;
-use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Http\SearchParams;
-use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -18,23 +15,14 @@ use Psr\Log\LoggerInterface;
 use RedisException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouterInterface;
 
 class TrendsController
 {
     use CorsHeadersAwareTrait;
 
-    public TokenRepository $tokenRepository;
-
-    public MemberRepository $memberRepository;
-
-    public HighlightRepository $highlightRepository;
-
     public LoggerInterface $logger;
 
     public RedisCache $redisCache;
-
-    public RouterInterface $router;
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
