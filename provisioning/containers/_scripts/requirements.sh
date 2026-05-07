@@ -24,7 +24,7 @@ function add_system_user_group() {
 
 function clear_package_management_system_cache() {
     # Remove packages installed with apt except for tini
-    apt-get remove --assume-yes build-essential gcc build-essential wget
+    apt-get remove --assume-yes build-essential gcc wget
     apt-get autoremove --assume-yes &&
     apt-get purge --assume-yes
     apt-get clean &&
