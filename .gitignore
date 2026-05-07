@@ -38,3 +38,5 @@ public/graphs
 *.tar.gz
 
 tmp
+
+docs/superpowers/
