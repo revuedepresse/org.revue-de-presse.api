@@ -19,18 +19,6 @@ parameters:
 			path: src/Membership/Domain/Entity/Legacy/Member.php
 
 		-
-			message: '#^Property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$avatar type mapping mismatch\: database can contain int\|null but property expects string\|null\.$#'
-			identifier: doctrine.columnType
-			count: 1
-			path: src/Membership/Domain/Entity/Legacy/Member.php
-
-		-
-			message: '#^Property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$avatar type mapping mismatch\: property can contain string\|null but database expects int\|null\.$#'
-			identifier: doctrine.columnType
-			count: 1
-			path: src/Membership/Domain/Entity/Legacy/Member.php
-
-		-
 			message: '#^PHPDoc tag @var has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 15 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
