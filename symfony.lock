@@ -14,26 +14,11 @@
     "beste/json": {
         "version": "1.0.0"
     },
-    "doctrine/annotations": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "1.0",
-            "ref": "a2759dd6123694c8d901d0ec80006e044c2e6457"
-        },
-        "files": [
-            "config/routes/annotations.yaml"
-        ]
-    },
     "doctrine/cache": {
         "version": "1.10.x-dev"
     },
     "doctrine/collections": {
         "version": "1.7.x-dev"
-    },
-    "doctrine/common": {
-        "version": "2.12.x-dev"
     },
     "doctrine/data-fixtures": {
         "version": "1.4.x-dev"
@@ -524,12 +509,6 @@
     },
     "symfony/polyfill-mbstring": {
         "version": "1.14-dev"
-    },
-    "symfony/polyfill-php72": {
-        "version": "1.21-dev"
-    },
-    "symfony/polyfill-php80": {
-        "version": "1.21-dev"
     },
     "symfony/property-access": {
         "version": "5.1-dev"
