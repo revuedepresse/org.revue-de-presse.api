@@ -1,6 +1,0 @@
-services:
-    App\Twitter\Infrastructure\Http\AccessToken\TokenChange:
-        class: 'App\Twitter\Infrastructure\Http\AccessToken\TokenChange'
-        arguments:
-            - '@repository.access_token'
-            - '@logger'
