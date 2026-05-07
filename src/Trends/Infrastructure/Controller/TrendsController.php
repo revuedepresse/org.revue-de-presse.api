@@ -36,9 +36,7 @@ class TrendsController
         }
 
         $structuredResponse = array_map(
-            function ($val) use ($request) {
-                return $request->get($val, '');
-            },
+            fn($val) => $request->get($val, ''),
             [
                 'expires_in',
                 'access_token',
@@ -68,12 +66,8 @@ DATA
     {
         return $this->getCollection(
             $request,
-            counter: function (SearchParams $searchParams) {
-                return $this->getTotalPages($searchParams);
-            },
-            finder: function (SearchParams $searchParams) {
-                return $this->getHighlightsFromSearchParams($searchParams);
-            },
+            counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams),
+            finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams),
             params: [
                 'aggregate'          => 'string',
                 'distinctSources'    => 'bool',

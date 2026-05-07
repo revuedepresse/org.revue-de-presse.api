@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Symfony\Set\SymfonySetList;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -11,6 +12,10 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__ . '/src/Bluesky/Resources',
         __DIR__ . '/tests/Resources',
+        __DIR__ . '/src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php',
+    ])
+    ->withSets([
+        SymfonySetList::SYMFONY_60,
     ])
     ->withPhpSets()
     ->withTypeCoverageLevel(0);

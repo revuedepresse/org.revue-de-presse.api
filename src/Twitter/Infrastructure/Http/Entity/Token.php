@@ -17,7 +17,7 @@ use function array_key_exists;
  * @ORM\Table(name="weaving_access_token")
  * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface")
  */
-class Token implements TokenInterface
+class Token implements TokenInterface, \Stringable
 {
     use TokenTrait;
 
@@ -70,7 +70,7 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
-    protected ?string $oauthTokenSecret;
+    protected ?string $oauthTokenSecret = null;
 
     /**
      * @var string
@@ -118,17 +118,17 @@ class Token implements TokenInterface
     /**
      * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
      */
-    protected ?DateTimeInterface $frozenUntil;
+    protected ?DateTimeInterface $frozenUntil = null;
 
     /**
      * @ORM\Column(name="created_at", type="datetime")
      */
-    protected ?DateTimeInterface $createdAt;
+    protected ?DateTimeInterface $createdAt = null;
 
     /**
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      */
-    protected ?DateTimeInterface $updatedAt;
+    protected ?DateTimeInterface $updatedAt = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="tokens")
@@ -138,7 +138,7 @@ class Token implements TokenInterface
     /**
      * @var boolean
      */
-    protected ?bool $frozen;
+    protected ?bool $frozen = null;
 
     /**
      * @return integer
@@ -269,7 +269,7 @@ class Token implements TokenInterface
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getOAuthToken();
     }

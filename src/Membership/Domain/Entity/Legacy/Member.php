@@ -47,12 +47,12 @@ class Member extends MemberModel
     /**
      * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
      */
-    public ?string $maxStatusId;
+    public ?string $maxStatusId = null;
 
     /**
      * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
      */
-    public ?string $minStatusId;
+    public ?string $minStatusId = null;
 
     public function getMinStatusId(): int
     {
@@ -62,12 +62,12 @@ class Member extends MemberModel
     /**
      * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
      */
-    public ?string $maxLikeId;
+    public ?string $maxLikeId = null;
 
     /**
      * @ORM\Column(name="min_like_id", type="string", length=255, nullable=true)
      */
-    public ?string $minLikeId;
+    public ?string $minLikeId = null;
 
     /**
      * @var integer
@@ -119,35 +119,35 @@ class Member extends MemberModel
      * @ORM\Column(name="usr_id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected ?int $id;
+    protected ?int $id = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
      */
-    protected ?string $twitterID;
+    protected ?string $twitterID = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="usr_twitter_username", type="string", nullable=true)
      */
-    protected ?string $twitter_username;
+    protected ?string $twitter_username = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="usr_avatar", type="integer", nullable=true)
      */
-    protected ?string $avatar;
+    protected ?string $avatar = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="usr_full_name", type="string", length=255, nullable=true)
      */
-    protected ?string $fullName;
+    protected ?string $fullName = null;
 
     /**
      * @var boolean
@@ -161,14 +161,14 @@ class Member extends MemberModel
      *
      * @ORM\Column(name="usr_user_name", type="string", length=255, nullable=true)
      */
-    protected ?string $username;
+    protected ?string $username = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="usr_username_canonical", type="string", length=255, nullable=true)
      */
-    protected ?string $usernameCanonical;
+    protected ?string $usernameCanonical = null;
 
     /**
      * @var string
@@ -181,7 +181,7 @@ class Member extends MemberModel
      * @var string
      * @ORM\Column(name="usr_email_canonical", type="string", length=255, nullable=true)
      */
-    protected ?string $emailCanonical;
+    protected ?string $emailCanonical = null;
 
     /**
      * @var int
