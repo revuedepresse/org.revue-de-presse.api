@@ -11,6 +11,8 @@
     <server name="APP_ENV" value="test" force="true"/>
     <server name="SHELL_VERBOSITY" value="-1"/>
     <server name="KERNEL_CLASS" value="App\Kernel"/>
+    <server name="DATABASE_URL" value="sqlite:///:memory:" force="true"/>
+    <server name="DATABASE_WRITE_URL" value="sqlite:///:memory:" force="true"/>
   </php>
   <groups>
     <include>

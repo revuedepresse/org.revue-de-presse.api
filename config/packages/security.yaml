@@ -27,21 +27,21 @@ security:
 when@prod:
     security:
         access_control:
-            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
-            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
+            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
 
 when@dev:
     security:
         access_control:
-            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
-            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
+            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
 
 when@test:
     security:
         access_control:
-            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
-            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
+            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
 

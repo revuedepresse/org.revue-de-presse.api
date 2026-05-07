@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Symfony\Set\SymfonySetList;
 
 return RectorConfig::configure()
@@ -15,7 +16,7 @@ return RectorConfig::configure()
         __DIR__ . '/src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php',
     ])
     ->withSets([
-        SymfonySetList::SYMFONY_64,
+        DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
     ])
     ->withPhpSets()
     ->withTypeCoverageLevel(0);

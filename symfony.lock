@@ -350,9 +350,6 @@
     "stella-maris/clock": {
         "version": "0.1.4"
     },
-    "symfony/amqp-messenger": {
-        "version": "5.1-dev"
-    },
     "symfony/browser-kit": {
         "version": "5.1-dev"
     },
@@ -387,9 +384,6 @@
         "version": "2.1-dev"
     },
     "symfony/doctrine-bridge": {
-        "version": "5.1-dev"
-    },
-    "symfony/doctrine-messenger": {
         "version": "5.1-dev"
     },
     "symfony/dom-crawler": {
@@ -534,14 +528,8 @@
     "symfony/polyfill-php72": {
         "version": "1.21-dev"
     },
-    "symfony/polyfill-php73": {
-        "version": "1.14-dev"
-    },
     "symfony/polyfill-php80": {
         "version": "1.21-dev"
-    },
-    "symfony/polyfill-php81": {
-        "version": "1.26-dev"
     },
     "symfony/property-access": {
         "version": "5.1-dev"
@@ -550,9 +538,6 @@
         "version": "5.1-dev"
     },
     "symfony/proxy-manager-bridge": {
-        "version": "5.1-dev"
-    },
-    "symfony/redis-messenger": {
         "version": "5.1-dev"
     },
     "symfony/routing": {
@@ -587,9 +572,6 @@
     "symfony/security-csrf": {
         "version": "5.1-dev"
     },
-    "symfony/security-guard": {
-        "version": "5.1-dev"
-    },
     "symfony/security-http": {
         "version": "5.1-dev"
     },
@@ -617,6 +599,18 @@
     },
     "symfony/translation-contracts": {
         "version": "2.0-dev"
+    },
+    "symfony/uid": {
+        "version": "6.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.2",
+            "ref": "d294ad4add3e15d7eb1bae0221588ca89b38e558"
+        },
+        "files": [
+            "config/packages/uid.yaml"
+        ]
     },
     "symfony/validator": {
         "version": "4.3",

@@ -17,10 +17,7 @@ interface MemberInterface extends UserInterface
      */
     public function getId(): ?int;
 
-    /**
-     * @return string|null
-     */
-    public function getUserIdentifier(): ?string;
+    public function getUserIdentifier(): string;
 
     /**
      * @deprecated since Symfony 5.3, use getUserIdentifier() instead

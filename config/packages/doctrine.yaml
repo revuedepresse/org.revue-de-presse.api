@@ -26,4 +26,4 @@ doctrine:
                         dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
                         is_bundle:  false
                         prefix:     'App\Membership\Domain\Entity\Legacy'
-                        type:       annotation
+                        type:       attribute

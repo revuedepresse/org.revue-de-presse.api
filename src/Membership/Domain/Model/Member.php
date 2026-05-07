@@ -127,10 +127,7 @@ abstract class Member implements MemberInterface, \Stringable
         return $this->id;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getUserIdentifier(): ?string
+    public function getUserIdentifier(): string
     {
         return $this->username;
     }
