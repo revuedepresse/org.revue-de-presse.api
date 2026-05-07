@@ -1,4 +1,6 @@
 security:
+    enable_authenticator_manager: true
+
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
 
@@ -16,17 +18,11 @@ security:
 
     firewalls:
         main:
-            anonymous: ~
-
-            logout: ~
-
             provider: user_provider
-
-            guard:
-                authenticators:
-                    - app.token_authenticator
-
             stateless: true
+            custom_authenticators:
+                - app.token_authenticator
+            entry_point: app.token_authenticator
 
 when@prod:
     security:
