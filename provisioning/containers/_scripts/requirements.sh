@@ -38,7 +38,9 @@ function install_system_packages() {
           --assume-yes \
           --quiet \
           apt-utils \
+          build-essential \
           ca-certificates \
+          gcc \
           git \
           libcurl4-gnutls-dev \
           libicu-dev \
