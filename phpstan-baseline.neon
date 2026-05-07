@@ -1,0 +1,103 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$confirmationToken\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Membership/Domain/Entity/Legacy/Member.php
+
+		-
+			message: '#^Access to an undefined property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$expired\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Membership/Domain/Entity/Legacy/Member.php
+
+		-
+			message: '#^PHPDoc tag @return with type string\|false is not subtype of native type string\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Membership/Domain/Entity/Legacy/Member.php
+
+		-
+			message: '#^Property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$avatar type mapping mismatch\: database can contain int\|null but property expects string\|null\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Membership/Domain/Entity/Legacy/Member.php
+
+		-
+			message: '#^Property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$avatar type mapping mismatch\: property can contain string\|null but database expects int\|null\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Membership/Domain/Entity/Legacy/Member.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 15 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Membership/Domain/Model/Member.php
+
+		-
+			message: '#^Property App\\Twitter\\Infrastructure\\Cache\\RedisCache\:\:\$client \(Predis\\Client\) does not accept Predis\\ClientInterface\|Redis\|RedisArray\|RedisCluster\|Symfony\\Component\\Cache\\Traits\\RedisClusterProxy\|Symfony\\Component\\Cache\\Traits\\RedisProxy\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Twitter/Infrastructure/Cache/RedisCache.php
+
+		-
+			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:fromArray\(\) should return static\(App\\Twitter\\Infrastructure\\Http\\Entity\\Token\) but returns App\\Twitter\\Infrastructure\\Http\\Entity\\Token\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:getCreatedAt\(\) should return DateTime but returns DateTimeInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:getUpdatedAt\(\) should return DateTime but returns DateTimeInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Property App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:\$type \(string\) does not accept App\\Twitter\\Infrastructure\\Http\\Entity\\TokenType\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Result of && is always true\.$#'
+			identifier: booleanAnd.alwaysTrue
+			count: 1
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: src/Twitter/Infrastructure/Http/SearchParams.php
+
+		-
+			message: '#^Method App\\Twitter\\Infrastructure\\Security\\Authentication\\TokenAuthenticator\:\:getUser\(\) should return App\\Membership\\Domain\\Entity\\MemberInterface\|null but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php
+
+		-
+			message: '#^Variable \$member in PHPDoc tag @var does not exist\.$#'
+			identifier: varTag.variableNotFound
+			count: 1
+			path: src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php
+
+		-
+			message: '#^Method class@anonymous/tests/Twitter/Infrastructure/Cache/InMemoryRedisCache\.php\:16\:\:get\(\) never returns string so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: tests/Twitter/Infrastructure/Cache/InMemoryRedisCache.php
