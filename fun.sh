@@ -318,10 +318,11 @@ function start() {
 docker compose \
       --file=./provisioning/containers/docker-compose.yaml \
       --file=./provisioning/containers/docker-compose.override.yaml \
-			up \
-			--force-recreate \
-			--detach \
-			service
+      --env-file ./.env.local \
+      up \
+	--force-recreate \
+	--detach \
+	service
 SCRIPT
 )
 
