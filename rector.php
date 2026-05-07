@@ -16,7 +16,11 @@ return RectorConfig::configure()
         __DIR__ . '/src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php',
     ])
     ->withSets([
-        DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
+        SymfonySetList::SYMFONY_70,
+        SymfonySetList::SYMFONY_71,
+        SymfonySetList::SYMFONY_72,
+        SymfonySetList::SYMFONY_73,
+        SymfonySetList::SYMFONY_74,
     ])
     ->withPhpSets()
     ->withTypeCoverageLevel(0);
