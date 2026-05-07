@@ -604,9 +604,6 @@
     "symfony/yaml": {
         "version": "5.1-dev"
     },
-    "thecodingmachine/safe": {
-        "version": "0.1-dev"
-    },
     "theseer/tokenizer": {
         "version": "1.1.3"
     },
