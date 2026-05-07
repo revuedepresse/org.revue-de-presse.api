@@ -85,18 +85,6 @@ parameters:
 			path: src/Twitter/Infrastructure/Http/SearchParams.php
 
 		-
-			message: '#^Method App\\Twitter\\Infrastructure\\Security\\Authentication\\TokenAuthenticator\:\:getUser\(\) should return App\\Membership\\Domain\\Entity\\MemberInterface\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php
-
-		-
-			message: '#^Variable \$member in PHPDoc tag @var does not exist\.$#'
-			identifier: varTag.variableNotFound
-			count: 1
-			path: src/Twitter/Infrastructure/Security/Authentication/TokenAuthenticator.php
-
-		-
 			message: '#^Method class@anonymous/tests/Twitter/Infrastructure/Cache/InMemoryRedisCache\.php\:16\:\:get\(\) never returns string so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
