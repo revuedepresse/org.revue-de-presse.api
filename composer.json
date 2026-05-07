@@ -60,7 +60,11 @@
     },
     "require-dev": {
         "phpspec/prophecy-phpunit": "^2.0",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-doctrine": "^2.0",
+        "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^9.5",
+        "rector/rector": "^2.0",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^5.4",
         "symfony/css-selector": "^5.4",
@@ -80,7 +84,7 @@
     "config": {
         "bin-dir": "bin",
         "platform": {
-            "php": "8.1.6"
+            "php": "8.2.0"
         },
         "sort-packages": true,
         "allow-plugins": {

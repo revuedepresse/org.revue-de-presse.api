@@ -1,0 +1,999 @@
+Remaining self deprecation notices (3)
+
+  1x: App\Membership\Domain\Model\Member::isSameMemberThan(): Implicitly marking parameter $user as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: App\Twitter\Infrastructure\Security\Authentication\TokenAuthenticator::start(): Implicitly marking parameter $authException as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: App\Twitter\Infrastructure\Http\SearchParams::__construct(): Implicitly marking parameter $keyword as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+
+Remaining indirect deprecation notices (497)
+
+  108x: Method SplObjectStorage::attach() is deprecated since 8.5, use method SplObjectStorage::offsetSet() instead
+    22x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    22x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    22x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    22x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    20x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+
+  83x: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1
+    75x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+    2x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    2x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    2x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    2x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  9x: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead
+    9x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  3x: Since symfony/security-core 5.4: The "Symfony\Component\Security\Core\Authentication\Token\AnonymousToken" class is deprecated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  3x: Since symfony/security-core 5.4: Using an object that is not an instance of "Symfony\Component\Security\Core\User\UserInterface" as $user in "Symfony\Component\Security\Core\Authentication\Token\AnonymousToken" is deprecated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  3x: Since symfony/security-core 5.4: The "Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver::isAnonymous()" method is deprecated, use "isAuthenticated()" or "isFullFledged()" if you want to check if the request is (fully) authenticated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  3x: Since symfony/security-core 5.4: The "IS_AUTHENTICATED_ANONYMOUSLY" security attribute is deprecated, use "PUBLIC_ACCESS" for public resources, otherwise use "IS_AUTHENTICATED" or "IS_AUTHENTICATED_FULLY" instead if you want to check if the request is (fully) authenticated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  2x: Constant E_STRICT is deprecated since 8.4, the error level was removed
+    2x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  2x: Since symfony/security-core 5.4: Method "Symfony\Component\Security\Core\Authentication\Token\AbstractToken::setAuthenticated()" is deprecated
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Safe\gmdate(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mktime(): Implicitly marking parameter $minute as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mktime(): Implicitly marking parameter $second as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mktime(): Implicitly marking parameter $month as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mktime(): Implicitly marking parameter $day as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mktime(): Implicitly marking parameter $year as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\password_hash(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_connect(): Implicitly marking parameter $servername as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_connect(): Implicitly marking parameter $username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_connect(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_pconnect(): Implicitly marking parameter $servername as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_pconnect(): Implicitly marking parameter $username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mssql_pconnect(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\substr(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\preg_replace(): Implicitly marking parameter $count as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\fgetcsv(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\bzwrite(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\unixtojd(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\com_print_typeinfo(): Implicitly marking parameter $dispatch_interface as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_bind(): Implicitly marking parameter $bind_value_type as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_connect_with_url(): Implicitly marking parameter $userid as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_connect_with_url(): Implicitly marking parameter $passwd as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_connect(): Implicitly marking parameter $userid as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_connect(): Implicitly marking parameter $passwd as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_lob2_bind(): Implicitly marking parameter $bind_value_type as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_pconnect_with_url(): Implicitly marking parameter $userid as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_pconnect_with_url(): Implicitly marking parameter $passwd as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_pconnect(): Implicitly marking parameter $userid as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_pconnect(): Implicitly marking parameter $passwd as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_put(): Implicitly marking parameter $attr as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_schema(): Implicitly marking parameter $class_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\cubrid_schema(): Implicitly marking parameter $attr_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\curl_getinfo(): Implicitly marking parameter $option as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\curl_init(): Implicitly marking parameter $url as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunrise(): Implicitly marking parameter $latitude as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunrise(): Implicitly marking parameter $longitude as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunrise(): Implicitly marking parameter $zenith as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunrise(): Implicitly marking parameter $utcOffset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunset(): Implicitly marking parameter $latitude as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunset(): Implicitly marking parameter $longitude as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunset(): Implicitly marking parameter $zenith as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date_sunset(): Implicitly marking parameter $utcOffset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\date(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmmktime(): Implicitly marking parameter $minute as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmmktime(): Implicitly marking parameter $second as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmmktime(): Implicitly marking parameter $month as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmmktime(): Implicitly marking parameter $day as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmmktime(): Implicitly marking parameter $year as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gmstrftime(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\idate(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\strftime(): Implicitly marking parameter $timestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\strtotime(): Implicitly marking parameter $baseTimestamp as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_busy(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_chmod(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_chown(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_close(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_dup2(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_fallocate(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_fchmod(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_fchown(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_fdatasync(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_fsync(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_ftruncate(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_futime(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_grp(): Implicitly marking parameter $data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_mkdir(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_mknod(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_nop(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_readahead(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_readdir(): Implicitly marking parameter $data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_readlink(): Implicitly marking parameter $data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_rename(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_rmdir(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_seek(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_sendfile(): Implicitly marking parameter $pri as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_sendfile(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_sendfile(): Implicitly marking parameter $data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_symlink(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_sync_file_range(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_sync(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_syncfs(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_truncate(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_unlink(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_utime(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\eio_write(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\error_log(): Implicitly marking parameter $destination as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\error_log(): Implicitly marking parameter $additional_headers as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\finfo_open(): Implicitly marking parameter $magic_database as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\file_get_contents(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\fwrite(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\touch(): Implicitly marking parameter $mtime as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\touch(): Implicitly marking parameter $atime as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gnupg_addsignkey(): Implicitly marking parameter $passphrase as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_add_user(): Implicitly marking parameter $first_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_add_user(): Implicitly marking parameter $middle_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_add_user(): Implicitly marking parameter $last_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $database as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $charset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $buffers as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $dialect as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $role as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_connect(): Implicitly marking parameter $sync as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_modify_user(): Implicitly marking parameter $first_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_modify_user(): Implicitly marking parameter $middle_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_modify_user(): Implicitly marking parameter $last_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $database as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $charset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $buffers as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $dialect as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $role as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ibase_pconnect(): Implicitly marking parameter $sync as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\db2_autocommit(): Implicitly marking parameter $value as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\db2_bind_param(): Implicitly marking parameter $parameter_type as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\db2_execute(): Implicitly marking parameter $parameters as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\image2wbmp(): Implicitly marking parameter $foreground as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imageaffine(): Implicitly marking parameter $clip as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imageresolution(): Implicitly marking parameter $resolution_x as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imageresolution(): Implicitly marking parameter $resolution_y as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imagewbmp(): Implicitly marking parameter $foreground_color as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imagexbm(): Implicitly marking parameter $foreground_color as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_append(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_append(): Implicitly marking parameter $internal_date as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_mail(): Implicitly marking parameter $additional_headers as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_mail(): Implicitly marking parameter $cc as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_mail(): Implicitly marking parameter $bcc as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_mail(): Implicitly marking parameter $return_path as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_sort(): Implicitly marking parameter $search_criteria as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\imap_sort(): Implicitly marking parameter $charset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_add(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_delete(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_exop_passwd(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_exop(): Implicitly marking parameter $request_data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_mod_add(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_mod_del(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_mod_replace(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_modify_batch(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_rename(): Implicitly marking parameter $controls as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $dn as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $mech as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $realm as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $authc_id as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $authz_id as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ldap_sasl_bind(): Implicitly marking parameter $props as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mailparse_msg_extract_part_file(): Implicitly marking parameter $callbackfunc as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_chr(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_replace_callback(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_replace(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_search_init(): Implicitly marking parameter $pattern as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_search_init(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_search_regs(): Implicitly marking parameter $pattern as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ereg_search_regs(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_eregi_replace(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_http_output(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_internal_encoding(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_ord(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_regex_encoding(): Implicitly marking parameter $encoding as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mb_send_mail(): Implicitly marking parameter $additional_params as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sapi_windows_vt100_support(): Implicitly marking parameter $enable as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mysql_connect(): Implicitly marking parameter $server as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mysql_connect(): Implicitly marking parameter $username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\mysql_connect(): Implicitly marking parameter $password as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\fsockopen(): Implicitly marking parameter $timeout as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pfsockopen(): Implicitly marking parameter $timeout as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\oci_connect(): Implicitly marking parameter $connection_string as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\oci_new_collection(): Implicitly marking parameter $schema as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\oci_new_connect(): Implicitly marking parameter $connection_string as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\oci_pconnect(): Implicitly marking parameter $connection_string as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_csr_new(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_csr_new(): Implicitly marking parameter $extra_attributes as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_csr_sign(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_decrypt(): Implicitly marking parameter $tag as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_open(): Implicitly marking parameter $iv as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_pkcs7_sign(): Implicitly marking parameter $untrusted_certificates_filename as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_pkey_export_to_file(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_pkey_export(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\openssl_pkey_new(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pcntl_getpriority(): Implicitly marking parameter $process_id as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pcntl_setpriority(): Implicitly marking parameter $process_id as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_execute(): Implicitly marking parameter $stmtname as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_execute(): Implicitly marking parameter $params as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_lo_export(): Implicitly marking parameter $oid as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_lo_export(): Implicitly marking parameter $pathname as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_lo_import(): Implicitly marking parameter $pathname as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_lo_write(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_parameter_status(): Implicitly marking parameter $param_name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_prepare(): Implicitly marking parameter $stmtname as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_prepare(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_put_line(): Implicitly marking parameter $data as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_query_params(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_query_params(): Implicitly marking parameter $params as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\pg_query(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ps_get_parameter(): Implicitly marking parameter $modifier as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ps_open_file(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\readline_read_history(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\readline_write_history(): Implicitly marking parameter $filename as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\rrd_restore(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\shm_attach(): Implicitly marking parameter $size as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\session_id(): Implicitly marking parameter $id as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\session_module_name(): Implicitly marking parameter $module as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\session_name(): Implicitly marking parameter $name as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\session_save_path(): Implicitly marking parameter $path as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\socket_connect(): Implicitly marking parameter $port as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\socket_sendto(): Implicitly marking parameter $port as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\spl_autoload_register(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sqlsrv_get_field(): Implicitly marking parameter $getAsType as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sqlsrv_prepare(): Implicitly marking parameter $params as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sqlsrv_prepare(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sqlsrv_query(): Implicitly marking parameter $params as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\sqlsrv_query(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_auth_hostbased_file(): Implicitly marking parameter $passphrase as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_auth_hostbased_file(): Implicitly marking parameter $local_username as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_auth_pubkey_file(): Implicitly marking parameter $passphrase as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_connect(): Implicitly marking parameter $methods as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_connect(): Implicitly marking parameter $callbacks as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_exec(): Implicitly marking parameter $pty as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_exec(): Implicitly marking parameter $env as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_forward_listen(): Implicitly marking parameter $host as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_publickey_add(): Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\ssh2_shell(): Implicitly marking parameter $env as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_copy_to_stream(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_filter_append(): Implicitly marking parameter $read_write as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_filter_prepend(): Implicitly marking parameter $read_write as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_get_contents(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_socket_accept(): Implicitly marking parameter $timeout as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\stream_socket_client(): Implicitly marking parameter $timeout as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\swoole_async_write(): Implicitly marking parameter $offset as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\swoole_async_write(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\swoole_async_writefile(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_columns(): Implicitly marking parameter $catalog as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_columns(): Implicitly marking parameter $schema as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_columns(): Implicitly marking parameter $table as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_columns(): Implicitly marking parameter $column as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedurecolumns(): Implicitly marking parameter $catalog as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedurecolumns(): Implicitly marking parameter $schema as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedurecolumns(): Implicitly marking parameter $procedure as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedurecolumns(): Implicitly marking parameter $column as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedures(): Implicitly marking parameter $catalog as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedures(): Implicitly marking parameter $schema as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_procedures(): Implicitly marking parameter $procedure as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_tables(): Implicitly marking parameter $catalog as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_tables(): Implicitly marking parameter $schema as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_tables(): Implicitly marking parameter $table as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\odbc_tables(): Implicitly marking parameter $types as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\xdiff_string_patch(): Implicitly marking parameter $flags as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\yaml_parse_file(): Implicitly marking parameter $callbacks as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\yaml_parse_url(): Implicitly marking parameter $callbacks as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\yaml_parse(): Implicitly marking parameter $callbacks as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\yaz_wait(): Implicitly marking parameter $options as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gzgets(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gzgetss(): Implicitly marking parameter $allowable_tags as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Safe\gzwrite(): Implicitly marking parameter $length as nullable is deprecated, the explicit nullable type must be used instead
+    1x in ComposerAutoloaderInit72e92edc905ab3db82f48bc3671aad83::getLoader
+
+  1x: Symfony\Component\DependencyInjection\ContainerAwareTrait::setContainer(): Implicitly marking parameter $container as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\DependencyInjection\ContainerAwareInterface::setContainer(): Implicitly marking parameter $container as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ApcuAdapter::__construct(): Implicitly marking parameter $version as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ApcuAdapter::__construct(): Implicitly marking parameter $marshaller as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\AbstractAdapter::createSystemCache(): Implicitly marking parameter $logger as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Traits\ContractsTrait::doGet(): Implicitly marking parameter $metadata as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ArrayAdapter::get(): Implicitly marking parameter $beta as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ArrayAdapter::get(): Implicitly marking parameter $metadata as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ChainAdapter::get(): Implicitly marking parameter $beta as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\ChainAdapter::get(): Implicitly marking parameter $metadata as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: {closure:Symfony\Component\Cache\Adapter\ChainAdapter::get():106}(): Implicitly marking parameter $item as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\PhpArrayAdapter::get(): Implicitly marking parameter $beta as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\PhpArrayAdapter::get(): Implicitly marking parameter $metadata as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Adapter\PhpFilesAdapter::__construct(): Implicitly marking parameter $directory as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Traits\FilesystemCommonTrait::write(): Implicitly marking parameter $expiresAt as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\Cache\Traits\FilesystemCommonTrait::getFile(): Implicitly marking parameter $directory as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\DependencyInjection\Container::__construct(): Implicitly marking parameter $parameterBag as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\DependencyInjection\Argument\ServiceLocator::__construct(): Implicitly marking parameter $serviceTypes as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\DependencyInjection\ServiceLocator::formatAlternatives(): Implicitly marking parameter $alternatives as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/monolog-bridge 6.4: The "Symfony\Bridge\Monolog\Logger" class is deprecated, use HttpKernel's DebugLoggerConfigurator instead.
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Symfony\Component\DependencyInjection\EnvVarProcessor::__construct(): Implicitly marking parameter $loaders as nullable is deprecated, the explicit nullable type must be used instead
+    1x in TrendsControllerTest::setUp from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-core 5.3: The "Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface" interface is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\Token\PreAuthenticationGuardToken" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\Token\GuardTokenInterface" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+
+Other deprecation notices (59)
+
+  5x: Since symfony/security-bundle 5.3: The "security.authentication.listener.guard.main" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/security-bundle 5.3: The "security.authentication.guard_handler" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/security-bundle 5.3: The "security.authentication.manager" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/security-bundle 5.3: The "security.authentication.provider.guard.main" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/framework-bundle 5.3: The "session.storage.factory.service" service is deprecated, use "session.storage.factory.native", "session.storage.factory.php_bridge" or "session.storage.factory.mock_file" instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/framework-bundle 5.3: The "session.storage.mock_file" service is deprecated, use "session.storage.factory.mock_file" instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  5x: Since symfony/framework-bundle 5.3: The "session.storage.metadata_bag" service is deprecated, create your own "session.storage.factory" instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  4x: Since symfony/security-bundle 5.3: The "security.authentication.listener.anonymous.main" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  4x: Since symfony/security-bundle 5.3: The "security.authentication.provider.anonymous.main" service is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_rejects_unauthenticated_request from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  4x: Since symfony/security-http 5.4: The $authManager argument of "Symfony\Component\Security\Http\Firewall\AccessListener::__construct" is deprecated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  4x: Since symfony/security-http 5.4: Not setting the $exceptionOnNoToken argument of "Symfony\Component\Security\Http\Firewall\AccessListener::__construct" to "false" is deprecated.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+    1x in TrendsControllerTest::test_get_highlights_authenticates_with_dummy_token_and_returns_collection_shape from App\Tests\Trends\Infrastructure\Controller
+    1x in HealthcheckControllerTest::test_get_returns_empty_json_payload_with_200 from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+    1x in HealthcheckControllerTest::test_options_preflight_returns_cors_response from App\Tests\Twitter\Infrastructure\Healthcheck\Controller
+
+  1x: Since symfony/dotenv 5.1: Passing a boolean to the constructor of "Symfony\Component\Dotenv\Dotenv" is deprecated, use "Dotenv::usePutenv()".
+    1x in Dotenv::__construct from Symfony\Component\Dotenv
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\GuardAuthenticatorHandler" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-core 5.3: The "Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-core 5.3: The "Symfony\Component\Security\Core\Event\AuthenticationFailureEvent" class is deprecated, use "Symfony\Component\Security\Http\Event\LoginFailureEvent" with the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\Firewall\GuardAuthenticationListener" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-http 5.3: The "Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-guard 5.3: The "Symfony\Component\Security\Guard\Provider\GuardAuthenticationProvider" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
+  1x: Since symfony/security-core 5.3: The "Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider" class is deprecated, use the new authenticator system instead.
+    1x in TrendsControllerTest::test_callback_returns_acknowledgement_payload from App\Tests\Trends\Infrastructure\Controller
+
