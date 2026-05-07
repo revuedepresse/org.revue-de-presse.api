@@ -275,11 +275,11 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param TokenType $type
+     * @param TokenType|null $type
      *
      * @return Token
      */
-    public function setType(TokenType $type = null)
+    public function setType(?TokenType $type = null)
     {
         $this->type = $type;
 
