@@ -35,5 +35,6 @@ public/graphs
 .phpunit.result.cache
 .phpunit
 
-
 *.tar.gz
+
+tmp
