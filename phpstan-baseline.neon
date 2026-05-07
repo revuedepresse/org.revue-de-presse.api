@@ -37,7 +37,7 @@ parameters:
 			path: src/Membership/Domain/Model/Member.php
 
 		-
-			message: '#^Property App\\Twitter\\Infrastructure\\Cache\\RedisCache\:\:\$client \(Predis\\Client\) does not accept Predis\\ClientInterface\|Redis\|RedisArray\|RedisCluster\|Symfony\\Component\\Cache\\Traits\\RedisClusterProxy\|Symfony\\Component\\Cache\\Traits\\RedisProxy\.$#'
+			message: '#^Property App\\Twitter\\Infrastructure\\Cache\\RedisCache\:\:\$client \(Predis\\Client\) does not accept Predis\\ClientInterface\|Redis\|RedisArray\|RedisCluster\|Relay\\Cluster\|Relay\\Relay\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Twitter/Infrastructure/Cache/RedisCache.php

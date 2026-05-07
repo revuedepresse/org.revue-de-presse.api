@@ -13,45 +13,24 @@ use const JSON_THROW_ON_ERROR;
 
 /**
  *
- * @ORM\Table(
- *      name="weaving_user",
- *      uniqueConstraints={
- *          @ORM\UniqueConstraint(name="unique_twitter_id", columns={"usr_twitter_id"}),
- *      },
- *      indexes={
- *          @ORM\Index(name="membership", columns={
- *              "usr_id",
- *              "usr_twitter_id",
- *              "usr_twitter_username",
- *              "not_found",
- *              "protected",
- *              "suspended",
- *              "total_subscribees",
- *              "total_subscriptions"
- *          })
- *      }
- * )
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Repository\Membership\MemberRepository")
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
- * @ORM\DiscriminatorMap({"1" = "Member"})
  * @package App\Membership\Domain\Entity
  */
+#[ORM\Table(name: 'weaving_user')]
+#[ORM\Index(name: 'membership', columns: ['usr_id', 'usr_twitter_id', 'usr_twitter_username', 'not_found', 'protected', 'suspended', 'total_subscribees', 'total_subscriptions'])]
+#[ORM\UniqueConstraint(name: 'unique_twitter_id', columns: ['usr_twitter_id'])]
+#[ORM\Entity(repositoryClass: \App\Twitter\Infrastructure\Repository\Membership\MemberRepository::class)]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'usr_position_in_hierarchy', type: 'integer')]
+#[ORM\DiscriminatorMap(['1' => 'Member'])]
 class Member extends MemberModel
 {
-    /**
-     * @ORM\Column(name="usr_api_key", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'usr_api_key', type: 'string', nullable: true)]
     public ?string $apiKey = null;
 
-    /**
-     * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'max_status_id', type: 'string', length: 255, nullable: true)]
     public ?string $maxStatusId = null;
 
-    /**
-     * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'min_status_id', type: 'string', length: 255, nullable: true)]
     public ?string $minStatusId = null;
 
     public function getMinStatusId(): int
@@ -59,128 +38,108 @@ class Member extends MemberModel
         return (int) $this->minStatusId;
     }
 
-    /**
-     * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'max_like_id', type: 'string', length: 255, nullable: true)]
     public ?string $maxLikeId = null;
 
-    /**
-     * @ORM\Column(name="min_like_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'min_like_id', type: 'string', length: 255, nullable: true)]
     public ?string $minLikeId = null;
 
     /**
      * @var integer
-     *
-     * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
+    #[ORM\Column(name: 'total_statuses', type: 'integer', options: ['default' => 0])]
     public int $totalStatuses = 0;
 
     /**
      * @var integer
-     *
-     * @ORM\Column(name="total_likes", type="integer", options={"default": 0})
      */
+    #[ORM\Column(name: 'total_likes', type: 'integer', options: ['default' => 0])]
     public $totalLikes = 0;
 
-    /**
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     public ?string $description = '';
 
-    /**
-     * @ORM\Column(name="url", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'url', type: 'text', nullable: true)]
     public ?string $url = null;
 
     /**
      * @var DateTime
-     *
-     * @ORM\Column(name="last_status_publication_date", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'last_status_publication_date', type: 'datetime', nullable: true)]
     public ?DateTime $lastStatusPublicationDate = null;
 
     /**
      * @var integer
-     * @ORM\Column(name="total_subscribees", type="integer", options={"default": 0})
      */
+    #[ORM\Column(name: 'total_subscribees', type: 'integer', options: ['default' => 0])]
     public $totalSubscribees = 0;
 
     /**
      * @var integer
-     * @ORM\Column(name="total_subscriptions", type="integer", options={"default": 0})
      */
+    #[ORM\Column(name: 'total_subscriptions', type: 'integer', options: ['default' => 0])]
     public $totalSubscriptions = 0;
 
     /**
      * @var integer
-     *
-     * @ORM\Id
-     * @ORM\Column(name="usr_id", type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Id]
+    #[ORM\Column(name: 'usr_id', type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected ?int $id = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'usr_twitter_id', type: 'string', length: 255, nullable: true)]
     protected ?string $twitterID = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_twitter_username", type="string", nullable=true)
      */
+    #[ORM\Column(name: 'usr_twitter_username', type: 'string', nullable: true)]
     protected ?string $twitter_username = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_avatar", type="integer", nullable=true)
      */
+    #[ORM\Column(name: 'usr_avatar', type: 'integer', nullable: true)]
     protected ?string $avatar = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_full_name", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'usr_full_name', type: 'string', length: 255, nullable: true)]
     protected ?string $fullName = null;
 
     /**
      * @var boolean
-     *
-     * @ORM\Column(name="usr_status", type="boolean", nullable=false)
      */
+    #[ORM\Column(name: 'usr_status', type: 'boolean', nullable: false)]
     protected bool $enabled;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_user_name", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'usr_user_name', type: 'string', length: 255, nullable: true)]
     protected ?string $username = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_username_canonical", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'usr_username_canonical', type: 'string', length: 255, nullable: true)]
     protected ?string $usernameCanonical = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="usr_email", type="string", length=255)
      */
+    #[ORM\Column(name: 'usr_email', type: 'string', length: 255)]
     protected string $email;
 
     /**
      * @var string
-     * @ORM\Column(name="usr_email_canonical", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'usr_email_canonical', type: 'string', length: 255, nullable: true)]
     protected ?string $emailCanonical = null;
 
     /**
@@ -192,22 +151,20 @@ class Member extends MemberModel
      * Protected status according to Twitter
      *
      * @var boolean
-     * @ORM\Column(name="protected", type="boolean", options={"default": false}, nullable=true)
      */
+    #[ORM\Column(name: 'protected', type: 'boolean', options: ['default' => false], nullable: true)]
     protected ?bool $protected = false;
 
     /**
      * Suspended status according to Twitter
-     *
-     * @ORM\Column(name="suspended", type="boolean", options={"default": false})
      */
+    #[ORM\Column(name: 'suspended', type: 'boolean', options: ['default' => false])]
     protected bool $suspended = false;
 
     /**
      * NotFound status according to Twitter
-     *
-     * @ORM\Column(name="not_found", type="boolean", options={"default": false})
      */
+    #[ORM\Column(name: 'not_found', type: 'boolean', options: ['default' => false])]
     protected bool $notFound = false;
 
     private bool $locked;

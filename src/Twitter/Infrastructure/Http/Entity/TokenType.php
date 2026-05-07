@@ -6,10 +6,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="weaving_token_type")
- * @ORM\Entity()
- */
+#[ORM\Table(name: 'weaving_token_type')]
+#[ORM\Entity]
 class TokenType
 {
     const USER = 'user';
@@ -23,18 +21,16 @@ class TokenType
 
     /**
      * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $id;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255)
      */
+    #[ORM\Column(name: 'name', type: 'string', length: 255)]
     protected $name;
 
     /**
@@ -72,8 +68,8 @@ class TokenType
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Token", mappedBy="type")
      */
+    #[ORM\OneToMany(targetEntity: Token::class, mappedBy: 'type')]
     protected $tokens;
 
     public function getTokens()

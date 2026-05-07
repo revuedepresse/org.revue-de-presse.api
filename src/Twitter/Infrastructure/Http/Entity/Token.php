@@ -13,36 +13,32 @@ use function array_key_exists;
 
 /**
  * @package App\Twitter\Infrastructure\Http\Entity
- *
- * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface")
  */
+#[ORM\Table(name: 'weaving_access_token')]
+#[ORM\Entity(repositoryClass: \App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface::class)]
 class Token implements TokenInterface, \Stringable
 {
     use TokenTrait;
 
     /**
      * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $id;
 
     /**
      * @var string
-     *
-     * @ORM\ManyToOne(targetEntity="TokenType", inversedBy="tokens", cascade={"all"})
-     * @ORM\JoinColumn(name="type", referencedColumnName="id")
      */
+    #[ORM\JoinColumn(name: 'type', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: TokenType::class, inversedBy: 'tokens', cascade: ['all'])]
     protected $type;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="token", type="string", length=255)
      */
+    #[ORM\Column(name: 'token', type: 'string', length: 255)]
     protected $oauthToken;
 
     /**
@@ -67,16 +63,14 @@ class Token implements TokenInterface, \Stringable
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'secret', type: 'string', length: 255, nullable: true)]
     protected ?string $oauthTokenSecret = null;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'consumer_key', type: 'string', length: 255, nullable: true)]
     public ?string $consumerKey = null;
 
     public function getConsumerKey(): string
@@ -98,9 +92,8 @@ class Token implements TokenInterface, \Stringable
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'consumer_secret', type: 'string', length: 255, nullable: true)]
     public ?string $consumerSecret = null;
 
     public function getConsumerSecret(): string
@@ -115,24 +108,16 @@ class Token implements TokenInterface, \Stringable
         return $this;
     }
 
-    /**
-     * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
-     */
+    #[ORM\Column(name: 'frozen_until', type: 'datetime', nullable: true)]
     protected ?DateTimeInterface $frozenUntil = null;
 
-    /**
-     * @ORM\Column(name="created_at", type="datetime")
-     */
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
     protected ?DateTimeInterface $createdAt = null;
 
-    /**
-     * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-     */
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
     protected ?DateTimeInterface $updatedAt = null;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="tokens")
-     */
+    #[ORM\ManyToMany(targetEntity: \App\Membership\Domain\Entity\Legacy\Member::class, mappedBy: 'tokens')]
     protected Collection $users;
 
     /**

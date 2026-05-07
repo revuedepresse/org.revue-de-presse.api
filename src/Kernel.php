@@ -36,18 +36,12 @@ class Kernel extends HttpKernel
         return \dirname(__DIR__);
     }
 
-    /**
-     * @return string
-     */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return dirname(__DIR__).'/var/cache/'.$this->getEnvironment();
     }
 
-    /**
-     * @return string
-     */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return dirname(__DIR__).'/var/log';
     }
