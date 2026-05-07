@@ -153,9 +153,6 @@
     "lcobucci/jwt": {
         "version": "3.4.x-dev"
     },
-    "masterminds/html5": {
-        "version": "2.7-dev"
-    },
     "monolog/monolog": {
         "version": "2.x-dev"
     },

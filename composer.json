@@ -14,7 +14,7 @@
         "psr-4": { "App\\Tests\\": "tests/" }
     },
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "ext-bcmath": "*",
         "ext-curl": "*",
         "ext-intl": "*",
@@ -82,7 +82,7 @@
     "config": {
         "bin-dir": "bin",
         "platform": {
-            "php": "8.2.20"
+            "php": "8.4.0"
         },
         "sort-packages": true,
         "allow-plugins": {
