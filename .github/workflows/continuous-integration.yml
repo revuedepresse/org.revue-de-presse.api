@@ -8,6 +8,7 @@ jobs:
 
     env:
       APP_ENV: test
+      ALLOWED_ORIGIN: "*"
       DATABASE_URL: "postgresql://test:test@127.0.0.1:5433/test?serverVersion=14&charset=utf8"
 
     services:
@@ -73,6 +74,11 @@ jobs:
 
       - name: Create test database schema
         run: php bin/console doctrine:schema:create -n
+
+      - name: Debug env state
+        run: |
+          ls -la .env* 2>/dev/null
+          php -r 'require "vendor/autoload.php"; require "config/bootstrap.php"; var_dump($_SERVER["ALLOWED_ORIGIN"] ?? "MISSING_SERVER", $_ENV["ALLOWED_ORIGIN"] ?? "MISSING_ENV");'
 
       - name: Run unit tests
         timeout-minutes: 5

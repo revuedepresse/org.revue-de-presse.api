@@ -200,7 +200,7 @@ abstract class Member implements MemberInterface, \Stringable
      * @param MemberInterface|null $user
      * @return bool
      */
-    public function isSameMemberThan(MemberInterface $user = null): bool
+    public function isSameMemberThan(?MemberInterface $user = null): bool
     {
         return null !== $user && $this->getId() === $user->getId();
     }
