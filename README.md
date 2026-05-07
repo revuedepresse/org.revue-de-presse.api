@@ -17,7 +17,7 @@ Said popularity is simply based on retweets fetched by calling Twitter APIs.
 ## Installation
 
 The shell scripts written for bash   
-have been tested extensively with [Ubuntu 22.10 (`Kinetic Kudu`)](https://releases.ubuntu.com/kinetic/)  
+have been tested extensively with [Ubuntu 24.04 (`Noble Numbat`)](https://documentation.ubuntu.com/release-notes/24.04/4/)  
 and [Debian 11 (`Bullseye`)](https://www.debian.org/releases/bullseye/)
 
 ### Requirements
