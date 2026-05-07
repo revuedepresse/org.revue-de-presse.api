@@ -14,9 +14,6 @@
     "beste/json": {
         "version": "1.0.0"
     },
-    "doctrine/cache": {
-        "version": "1.10.x-dev"
-    },
     "doctrine/collections": {
         "version": "1.7.x-dev"
     },
@@ -117,9 +114,6 @@
             "tests/Behat/DemoContext.php"
         ]
     },
-    "friendsofphp/proxy-manager-lts": {
-        "version": "1.x-dev"
-    },
     "google/auth": {
         "version": "v1.6.1"
     },
@@ -152,9 +146,6 @@
     },
     "kreait/firebase-tokens": {
         "version": "1.10.0"
-    },
-    "laminas/laminas-code": {
-        "version": "3.5.x-dev"
     },
     "lcobucci/clock": {
         "version": "2.3.x-dev"
