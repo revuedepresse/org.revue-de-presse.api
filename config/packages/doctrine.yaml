@@ -3,12 +3,12 @@ doctrine:
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
-                server_version: '5.7'
+                server_version: '14'
                 charset: utf8mb4
                 logging: false
             write:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
-                server_version: '5.7'
+                server_version: '14'
                 charset: utf8mb4
                 logging: false
 
