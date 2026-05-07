@@ -6,8 +6,6 @@ services:
             - 'App\Membership\Domain\Entity\Legacy\Member'
         calls:
             - [ 'setLogger', [ '@logger'] ]
-        properties:
-            membersListRepository: '@App\Ownership\Infrastructure\Repository\MembersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
