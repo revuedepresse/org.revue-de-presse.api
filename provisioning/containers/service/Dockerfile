@@ -1,4 +1,4 @@
-FROM        php:8.2-fpm-bullseye
+FROM        php:8.4-fpm-bookworm
 
 HEALTHCHECK CMD /bin/bash -c "pgrep php-fpm || ( test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0 )"
 

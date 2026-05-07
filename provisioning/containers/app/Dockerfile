@@ -1,4 +1,4 @@
-FROM    php:8.2-cli-bullseye
+FROM    php:8.4-cli-bookworm
 
 ARG     OWNER_GID
 ARG     OWNER_UID
