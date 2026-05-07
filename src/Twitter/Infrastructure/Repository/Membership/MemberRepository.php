@@ -6,7 +6,6 @@ namespace App\Twitter\Infrastructure\Repository\Membership;
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
-use App\Trends\Infrastructure\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Ownership\Domain\Repository\MembersListRepositoryInterface;
@@ -39,19 +38,6 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     private const TABLE_ALIAS = 'm';
 
     public MembersListRepositoryInterface $membersListRepository;
-
-    use PaginationAwareTrait;
-
-    /**
-     * @param SearchParams $searchParams
-     *
-     * @return int
-     * @throws NonUniqueResultException
-     */
-    public function countTotalPages(SearchParams $searchParams): int
-    {
-        return $this->howManyPages($searchParams, self::TABLE_ALIAS);
-    }
 
     /**
      * @param string $maxLikeId
