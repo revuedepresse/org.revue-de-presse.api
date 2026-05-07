@@ -8,10 +8,6 @@
         <service id="user_manager" class="App\Twitter\Infrastructure\Repository\Membership\MemberRepository">
             <argument type="service" id="Doctrine\Common\Persistence\ManagerRegistry" />
             <argument type="string">App\Membership\Domain\Entity\Legacy\Member</argument>
-            <property
-                name="membersListRepository"
-                type="service"
-                id="App\Ownership\Infrastructure\Repository\MembersListRepository" />
         </service>
     </services>
 </container>
