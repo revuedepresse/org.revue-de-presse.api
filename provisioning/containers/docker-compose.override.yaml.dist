@@ -9,6 +9,11 @@ services:
     volumes:
       - '../../:/var/www/org.example.api/'
       - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
+      - 'service-run:/var/www/org.example.api/var/run'
+
+volumes:
+  service-run:
+    name: org_example_api_service-run
 
 networks:
   default:
