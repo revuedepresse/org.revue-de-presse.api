@@ -24,6 +24,7 @@
     <include>
       <group>api_access</group>
       <group>command</group>
+      <group>controller</group>
       <group>conversation</group>
       <group>diffing</group>
       <group>formatter</group>
