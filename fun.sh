@@ -271,7 +271,7 @@ function run_php_unit_tests() {
     if [ -z "${DEBUG}" ];
     then
 
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
+        bin/phpunit -c ./phpunit.xml.dist --stop-on-failure --stop-on-error
 
         return
 
