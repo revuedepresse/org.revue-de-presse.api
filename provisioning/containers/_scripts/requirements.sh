@@ -81,11 +81,12 @@ function install_php_extensions() {
         printf '%s%s' '⚠️ Could not install PHP extension.' $'\n' 1>&2
 
     (
-      wget https://github.com/xdebug/xdebug/archive/3.2.0.zip \
-      --output-document /tmp/3.2.0.zip
+      version=3.4.2
+      wget https://github.com/xdebug/xdebug/archive/${version}.zip \
+      --output-document /tmp/${version}.zip
       cd /tmp || exit
-      unzip /tmp/3.2.0.zip
-      cd xdebug-3.2.0 || exit
+      unzip /tmp/${version}.zip
+      cd xdebug-${version} || exit
       phpize .
       ./configure --with-php-config="$(which php-config)"
       make
