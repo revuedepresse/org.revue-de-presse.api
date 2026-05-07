@@ -44,9 +44,8 @@ when@dev:
 
 when@test:
     security:
-        firewalls:
-            main:
-                security: false
         access_control:
-            - { path: ^/api, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api,             role: ROLE_USER }
 

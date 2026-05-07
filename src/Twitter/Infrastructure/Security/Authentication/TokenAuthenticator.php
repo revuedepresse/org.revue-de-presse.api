@@ -23,6 +23,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     public function supports(Request $request): bool
     {
+        $path = $request->getPathInfo();
+
+        // Let the anonymous firewall handle paths that are IS_AUTHENTICATED_ANONYMOUSLY.
+        if (str_starts_with($path, '/api/callback') || str_starts_with($path, '/api/healthcheck')) {
+            return false;
+        }
+
         return true;
     }
 
