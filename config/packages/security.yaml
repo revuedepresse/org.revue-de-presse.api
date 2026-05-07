@@ -28,8 +28,25 @@ security:
 
             stateless: true
 
-    access_control:
-        - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api,             role: ROLE_USER }
+when@prod:
+    security:
+        access_control:
+            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api,             role: ROLE_USER }
+
+when@dev:
+    security:
+        access_control:
+            - { path: ^/api/callback,    role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/healthcheck, role: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api,             role: ROLE_USER }
+
+when@test:
+    security:
+        firewalls:
+            main:
+                security: false
+        access_control:
+            - { path: ^/api, role: IS_AUTHENTICATED_ANONYMOUSLY }
 
