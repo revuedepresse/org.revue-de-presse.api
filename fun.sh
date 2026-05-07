@@ -61,6 +61,23 @@ function clean() {
     remove_running_container_and_image_in_debug_mode 'app'
 }
 
+function clear_cache() {
+    load_configuration_parameters
+
+    export COMPOSE_PROJECT_NAME
+
+    printf '%s.%s' 'About to flush Redis cache' $'\n'
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        cache \
+        redis-cli FLUSHALL
+
+    printf '%s.%s' 'Finished flushing Redis cache' $'\n'
+}
+
 function clear_cache_warmup() {
     local PROJECT_OWNER_UID
     local PROJECT_OWNER_GID
