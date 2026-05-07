@@ -40,29 +40,29 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $this->logger = $logger;
     }
 
-    private function getFirebaseDatabase(string $searchDate): array
+    private function loadHighlightsSnapshot(string $searchDate): array
     {
         $todayHighlights = $this->projectDir.'/src/Bluesky/Resources/'.$searchDate.'.json';
-        
+
         if (file_exists($todayHighlights)) {
             return [
                 $searchDate => file_get_contents($todayHighlights)
             ];
         }
-         
+
         return [
             $searchDate => json_encode([])
-        ];            
+        ];
     }
 
-    private function getFirebaseDatabaseSnapshot(
+    private function getHighlightsSnapshot(
         DateTimeInterface $date,
         bool $includeRetweets = false,
         bool $curatingHighlightsFromDistinctSources = false
     ): array {
         $searchDate = $date->format('Y-m-d');
-        $database = $this->getFirebaseDatabase($searchDate);
-        $this->logger->info(sprintf('About to access Firebase Path: "%s"', $searchDate));
+        $database = $this->loadHighlightsSnapshot($searchDate);
+        $this->logger->info(sprintf('About to access highlights snapshot path: "%s"', $searchDate));
 
         return $database;
     }
@@ -79,7 +79,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $searchDate = $searchParams->getParams()['startDate'];
 
         try {
-            $snapshot = $this->getFirebaseDatabaseSnapshot(
+            $snapshot = $this->getHighlightsSnapshot(
                 $searchDate,
                 $searchParams->getParams()['includeRetweets'],
                 $searchParams->curatingHighlightsFromDistinctSources(),
