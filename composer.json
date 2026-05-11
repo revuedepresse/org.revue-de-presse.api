@@ -65,7 +65,7 @@
         "rector/rector": "^2.0",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^7.4",
-        "symfony/css-selector": "^7.4",
+        "symfony/css-selector": "^8.0",
         "symfony/maker-bundle": "^1.55",
         "symfony/phpunit-bridge": "^7.4",
         "symfony/stopwatch": "^7.4"
