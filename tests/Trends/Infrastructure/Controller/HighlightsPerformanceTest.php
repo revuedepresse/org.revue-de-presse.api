@@ -40,8 +40,8 @@ class HighlightsPerformanceTest extends TestCase
         $base = str_contains($host, '://') ? $host : 'https://' . $host;
         $url  = rtrim($base, '/') . '/api/twitter/highlights';
 
-        $iterations = (int) ($_ENV['BENCH_ITERATIONS'] ?? 50);
-        $warmup     = (int) ($_ENV['BENCH_WARMUP']     ?? 3);
+        $iterations = (int) (getenv('BENCH_ITERATIONS') ?: $_SERVER['BENCH_ITERATIONS'] ?? $_ENV['BENCH_ITERATIONS'] ?? 50);
+        $warmup     = (int) (getenv('BENCH_WARMUP')     ?: $_SERVER['BENCH_WARMUP']     ?? $_ENV['BENCH_WARMUP']     ?? 3);
 
         $client = HttpClient::create([
             'timeout' => 30.0,
@@ -68,9 +68,12 @@ class HighlightsPerformanceTest extends TestCase
             }
         }
 
-        $samples = [];
-        $errors  = 0;
-        $wallStart = hrtime(true);
+        $samples         = [];
+        $errors          = 0;
+        $statusHistogram = [];
+        $firstErrorIter  = null;
+        $firstErrorStatus = null;
+        $wallStart       = hrtime(true);
 
         for ($i = 0; $i < $iterations; $i++) {
             $start = hrtime(true);
@@ -79,14 +82,25 @@ class HighlightsPerformanceTest extends TestCase
                 // Force the body read so the timing reflects end-to-end work.
                 $response->getContent(false);
                 $status = $response->getStatusCode();
-            } catch (TransportExceptionInterface) {
+            } catch (TransportExceptionInterface $e) {
                 $errors++;
+                $statusHistogram['transport_error'] = ($statusHistogram['transport_error'] ?? 0) + 1;
+                if ($firstErrorIter === null) {
+                    $firstErrorIter = $i;
+                    $firstErrorStatus = 'transport: ' . $e->getMessage();
+                }
                 continue;
             }
             $elapsedMs = (hrtime(true) - $start) / 1_000_000.0;
 
-            if ($status !== 200) {
+            $statusHistogram[$status] = ($statusHistogram[$status] ?? 0) + 1;
+
+            if ($status < 200 || $status >= 300) {
                 $errors++;
+                if ($firstErrorIter === null) {
+                    $firstErrorIter = $i;
+                    $firstErrorStatus = (string) $status;
+                }
                 continue;
             }
             $samples[] = $elapsedMs;
@@ -94,10 +108,25 @@ class HighlightsPerformanceTest extends TestCase
 
         $wallSeconds = (hrtime(true) - $wallStart) / 1_000_000_000.0;
 
+        ksort($statusHistogram);
+        $histogramStr = implode(', ', array_map(
+            static fn($k, $v) => "$k=$v",
+            array_keys($statusHistogram),
+            array_values($statusHistogram)
+        ));
+
         self::assertSame(
             0,
             $errors,
-            sprintf('%d of %d timed requests failed against %s', $errors, $iterations, $url)
+            sprintf(
+                '%d of %d requests failed against %s; first non-2xx at iteration %s (status %s); status histogram: %s',
+                $errors,
+                $iterations,
+                $url,
+                $firstErrorIter ?? 'n/a',
+                $firstErrorStatus ?? 'n/a',
+                $histogramStr
+            )
         );
         self::assertNotEmpty($samples, 'No timed samples were collected');
 
