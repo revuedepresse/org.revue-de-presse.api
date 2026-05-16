@@ -32,7 +32,13 @@ function clear_package_management_system_cache() {
 }
 
 function install_system_packages() {
-    (
+    # Output is captured to a log file so the (extremely chatty) apt output
+    # doesn't dominate the build log on the happy path, but is dumped to
+    # stderr if anything fails — silent apt failures used to cascade into
+    # docker-php-ext-install errors that nobody could diagnose.
+    local logfile=/tmp/install_system_packages.log
+
+    if ! (
       apt-get update --quiet
       apt-get install \
           --assume-yes \
@@ -57,11 +63,25 @@ function install_system_packages() {
           tini \
           unzip \
           wget
-    ) >> /dev/null 2>&1 || printf '⚠️ Could not install required system packages. 📦'
+    ) > "${logfile}" 2>&1; then
+        printf '%s%s' '❌ Failed to install required system packages — apt log:' $'\n' 1>&2
+        cat "${logfile}" 1>&2
+        kill -s TERM "${install_requirements_pid}"
+        return 1
+    fi
+    printf '%s%s' '✅ Installed system packages successfully.' $'\n' 1>&2
 }
 
 function install_php_extensions() {
-    (
+    # ext-sodium is REQUIRED by App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider
+    # (it encrypts every cached Member payload with sodium_crypto_secretbox).
+    # Removing it from this list will make the service fail at boot.
+    # Same logfile-capture-and-dump-on-failure pattern as
+    # install_system_packages. The previous `>> /dev/null 2>&1` made
+    # production extension-install failures impossible to diagnose.
+    local php_ext_logfile=/tmp/install_php_extensions.log
+
+    if ! (
       docker-php-ext-install \
           bcmath \
           mysqli \
@@ -76,12 +96,43 @@ function install_php_extensions() {
       docker-php-ext-install gd
 
       docker-php-ext-enable opcache
-    ) >> /dev/null 2>&1 && \
-        printf '%s%s' '✅ Installed PHP extensions successfully.' $'\n' 1>&2 || \
-        printf '%s%s' '⚠️ Could not install PHP extension.' $'\n' 1>&2
+    ) > "${php_ext_logfile}" 2>&1; then
+        printf '%s%s' '❌ Failed to install PHP extensions — docker-php-ext-install log:' $'\n' 1>&2
+        cat "${php_ext_logfile}" 1>&2
+        kill -s TERM "${install_requirements_pid}"
+        return 1
+    fi
+    printf '%s%s' '✅ Installed PHP extensions successfully.' $'\n' 1>&2
 
-    (
-      version=3.4.2
+    # Fail the image build if any required extension is missing at runtime.
+    # Catches regressions where the install above silently failed
+    # (it's piped to /dev/null), or where a future base image drops something.
+    local required_extensions=(sodium pdo_pgsql intl sockets pcntl)
+    local missing=()
+    for ext in "${required_extensions[@]}"; do
+        if ! php -m 2>/dev/null | grep -qiE "^${ext}$"; then
+            missing+=("${ext}")
+        fi
+    done
+    if [ "${#missing[@]}" -gt 0 ]; then
+        printf '%s%s' "❌ Required PHP extensions not loaded: ${missing[*]}" $'\n' 1>&2
+        kill -s TERM "${install_requirements_pid}"
+        return 1
+    fi
+    printf '%s%s' '✅ All required PHP extensions verified at runtime.' $'\n' 1>&2
+
+    # xdebug — best-effort by design (the binary is built so dev images
+    # can opt in via php.ini; prod images leave it loaded-but-disabled).
+    # Still capture the log and dump on failure so a real regression
+    # (e.g. PHP ABI bump that xdebug 3.5.x doesn't yet support) is
+    # visible instead of a one-line warning.
+    local xdebug_logfile=/tmp/install_xdebug.log
+
+    if (
+      # 3.5.x is the first xdebug line with PHP 8.5 support (3.4.7 was the
+      # last 3.4.x; building it against PHP 8.5 fails at the ZEND_MODULE_API
+      # check). Bump to a 3.5.x release when raising the base PHP version.
+      version=3.5.1
       wget https://github.com/xdebug/xdebug/archive/${version}.zip \
       --output-document /tmp/${version}.zip
       cd /tmp || exit
@@ -91,9 +142,13 @@ function install_php_extensions() {
       ./configure --with-php-config="$(which php-config)"
       make
       make install
-    ) >> /dev/null 2>&1 && \
-        printf '%s%s' '✅ Installed XDebug extension successfully.' $'\n' 1>&2 || \
-        printf '%s%s' '⚠️ Could not install XDebug extension.' $'\n' 1>&2
+    ) > "${xdebug_logfile}" 2>&1;
+    then
+        printf '%s%s' '✅ Installed XDebug extension successfully.' $'\n' 1>&2
+    else
+        printf '%s%s' '⚠️ Could not install XDebug extension — xdebug build log (non-fatal, prod images do not load xdebug by default):' $'\n' 1>&2
+        cat "${xdebug_logfile}" 1>&2
+    fi
 }
 
 function install_service_requirements() {

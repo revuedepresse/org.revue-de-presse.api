@@ -1,0 +1,7 @@
+# Local-only TLS certs and ACME state mounted into the traefik container.
+# Cert/key files must never be committed.
+*
+!.gitignore
+!letsencrypt/
+letsencrypt/**
+!letsencrypt/.gitkeep

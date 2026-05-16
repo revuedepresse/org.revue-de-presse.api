@@ -265,6 +265,196 @@ function reset_color() {
     echo -n $'\033'\[00m
 }
 
+function source_bench_env() {
+    # run_bench_* runs in test context. Source .env.local first so the docker
+    # compose CLI can resolve COMPOSE_PROJECT_NAME (test env files do not
+    # declare it), then .env.test on top so test-mode values (APP_ENV=test,
+    # BENCHMARK_HOST, API_AUTH_TOKEN, etc.) take precedence on overlap.
+    set -a
+    if [ -f ./.env.local ]; then
+        source ./.env.local
+    fi
+    if [ -f ./.env.test ]; then
+        source ./.env.test
+    fi
+    set +a
+}
+
+function run_bench_deps() {
+    if [ -x bin/phpunit ] && [ -d vendor/phpunit/phpunit ] && [ -d vendor/symfony/phpunit-bridge ]; then
+        return 0
+    fi
+
+    printf '→ Installing composer dev dependencies via the '\''app'\'' service container...%s' $'\n'
+
+    source_bench_env
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        run --rm --no-deps --user root -T app \
+        composer install --no-interaction --prefer-dist
+
+    if [ ! -x bin/phpunit ]; then
+        printf '✗ bin/phpunit still missing after composer install — aborting%s' $'\n' 1>&2
+        return 1
+    fi
+}
+
+function run_bench_highlights() {
+    local bypass_cache="${1:-0}"
+
+    run_bench_deps || return 1
+
+    SYMFONY_DEPRECATIONS_HELPER='disabled' \
+        BENCH_BYPASS_CACHE="${bypass_cache}" \
+        BENCH_ITERATIONS="${BENCH_ITERATIONS:-200}" \
+        BENCH_CONCURRENCY="${BENCH_CONCURRENCY:-1}" \
+        BENCH_WARMUP="${BENCH_WARMUP:-3}" \
+        BENCH_TIMEOUT="${BENCH_TIMEOUT:-30}" \
+        php -d memory_limit="${BENCH_MEMORY_LIMIT:-1G}" \
+            bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+}
+
+function run_bench_with_redis() {
+    run_bench_highlights 0
+}
+
+function run_bench_without_redis() {
+    run_bench_highlights 1
+}
+
+function run_php_worker_build() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            build php-worker'
+}
+
+function run_php_worker_start() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            up --detach php-worker'
+}
+
+function run_php_worker_stop() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            stop php-worker'
+}
+
+function run_php_worker_logs() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            logs --follow --tail=200 php-worker'
+}
+
+function run_reverse_proxy_build() {
+    # Traefik has no local build context — `build` would be a no-op.
+    # `pull` actually fetches the published image so a subsequent
+    # `run_reverse_proxy_start` doesn't have to.
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            pull reverse-proxy'
+}
+
+function run_reverse_proxy_start() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            up --detach reverse-proxy'
+}
+
+function run_reverse_proxy_stop() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            stop reverse-proxy'
+}
+
+function run_update_version() {
+    local repo_file
+    local latest
+    local current
+
+    repo_file='src/Trends/Infrastructure/Repository/PopularPublicationRepository.php'
+
+    latest=$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
+    if [ -z "${latest}" ]; then
+        printf '%s%s' 'ERROR: no git tag found' $'\n' 1>&2
+        return 1
+    fi
+
+    current=$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$/\1/p" "${repo_file}" | head -1)
+    if [ -z "${current}" ]; then
+        printf "ERROR: 'version' key not found in %s%s" "${repo_file}" $'\n' 1>&2
+        return 1
+    fi
+
+    if [ "${current}" = "${latest}" ]; then
+        printf '%s version already up-to-date: %s%s' "${repo_file}" "${current}" $'\n'
+        return 0
+    fi
+
+    sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
+    rm -f "${repo_file}.bak"
+    printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
+}
+
+function run_reverse_proxy_password() {
+    local user="${1:-admin}"
+    local password
+    local hash
+    local htpasswd_file='./var/etc/letsencrypt/htpasswd'
+
+    # 24-char URL-safe random password — plenty for a local dashboard.
+    password=$(openssl rand -base64 32 | tr -d '\n=+/' | head -c 24)
+
+    if command -v htpasswd >/dev/null 2>&1; then
+        hash=$(htpasswd -nbB "${user}" "${password}" | tr -d '\n')
+    else
+        # Fall back to the httpd image — a few-MB pull, runs offline after.
+        hash=$(docker run --rm httpd:2.4-alpine \
+            htpasswd -nbB "${user}" "${password}" | tr -d '\n')
+    fi
+
+    if [ -z "${hash}" ]; then
+        printf '✗ Failed to generate htpasswd hash%s' $'\n' 1>&2
+        return 1
+    fi
+
+    # Single-user dashboard — overwrite the file so re-running the target
+    # rotates credentials cleanly. Edit the file by hand if you want
+    # multiple users (one user:hash line each).
+    mkdir -p "$(dirname "${htpasswd_file}")"
+    printf '%s\n' "${hash}" > "${htpasswd_file}"
+
+    printf '%s%s' '✓ Wrote new Traefik dashboard credentials to '"${htpasswd_file}" $'\n'
+    printf '  %-9s %s%s' 'user:'     "${user}"     $'\n'
+    printf '  %-9s %s%s' 'password:' "${password}" $'\n'
+    printf '%s%s' '  (save the password somewhere — only the bcrypt hash is stored on disk)' $'\n'
+    printf '%s%s' '' $'\n'
+    printf '%s%s' '→ Traefik picks up the new file automatically (file provider watch=true).' $'\n'
+}
+
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 
@@ -333,10 +523,15 @@ SCRIPT
 function stop() {
     load_configuration_parameters
 
+    # Stop only the FPM-stack services. `cache` is a baseline service
+    # shared with the opt-in php-worker / reverse-proxy stack — wiping
+    # the project with `down` would kill Redis for them too, leaving the
+    # benchmark harness in a degraded "cache=error" state. Naming the
+    # FPM services explicitly here keeps the two stacks independent.
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        down
+        stop app service
 }
 
 function validate_docker_compose_configuration() {

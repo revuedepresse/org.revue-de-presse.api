@@ -1,0 +1,81 @@
+# Traefik dynamic configuration — TLS certificate store + handshake policy.
+#
+# Loaded by traefik's `file` provider (see docker-compose.yaml command flags):
+#   --providers.file.directory=/etc/traefik/dynamic
+#   --providers.file.watch=true                       (live reload on save)
+#
+# Cert/key material lives on the host at:
+#   ./var/etc/letsencrypt/live/default/fullchain.pem
+#   ./var/etc/letsencrypt/live/default/privkey.pem
+# and is mounted read-only into the traefik container at /etc/letsencrypt/.
+# Both target paths are gitignored (var/etc/.gitignore) — keys never enter the repo.
+
+tls:
+    # ---- Default certificate store --------------------------------------------
+    # Returned for any router with tls=true that does not pin a specific cert.
+    stores:
+        default:
+            defaultCertificate:
+                certFile: /etc/letsencrypt/live/default/fullchain.pem
+                keyFile:  /etc/letsencrypt/live/default/privkey.pem
+
+    # ---- Per-SNI cert pairs ---------------------------------------------------
+    # Add entries here when one hostname must NOT fall back to the default
+    # store (e.g. an admin subdomain with its own CA). Empty by default —
+    # the default store covers everything.
+    certificates: []
+
+    # ---- Handshake policy -----------------------------------------------------
+    # `default` is applied to every router with tls=true that does not pin
+    # `tls.options=<name>`. The `modern` profile is left as a reference; flip
+    # routers to it via the label:
+    #   traefik.http.routers.<name>.tls.options=modern
+    options:
+
+        default:
+            # TLS 1.2 floor. Symfony HttpClient (the bench harness's curl
+            # transport) speaks 1.3 by default, but the floor is set at 1.2
+            # so a stray legacy client doesn't fail silently in local dev.
+            minVersion: VersionTLS12
+
+            # `sniStrict: true` rejects clients that don't send SNI. Modern
+            # clients all do; the bench harness does. Left at `false` for
+            # local-dev forgiveness — flip to `true` in production.
+            sniStrict: false
+
+            # Modern ECDHE-only TLS 1.2 cipher list (Mozilla "intermediate").
+            # NOTE: TLS 1.3 cipher suites are fixed by Go's crypto/tls and
+            # cannot be configured here — they negotiate independently.
+            cipherSuites:
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+                - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+                - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+
+            # ECDHE key-exchange curve preference. X25519 first for speed;
+            # P-256/P-384 follow for compatibility with clients that lack it.
+            curvePreferences:
+                - X25519
+                - CurveP256
+                - CurveP384
+
+            # ALPN negotiation. h2 first so HTTP/2 wins when both sides
+            # support it — matches the harness's `maxHostConnections` model
+            # which multiplexes over a single TCP connection.
+            alpnProtocols:
+                - h2
+                - http/1.1
+
+        # Stricter profile for routers that should NEVER speak TLS 1.2.
+        # Opt in per-router via tls.options=modern.
+        modern:
+            minVersion: VersionTLS13
+            sniStrict: true
+            curvePreferences:
+                - X25519
+                - CurveP256
+            alpnProtocols:
+                - h2
+                - http/1.1

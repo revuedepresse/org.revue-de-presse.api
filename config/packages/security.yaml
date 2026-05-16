@@ -4,15 +4,18 @@ security:
 
         in_memory: { memory: null }
 
-        chain_provider:
-            chain:
-                providers: [user_provider]
-
-        user_provider:
+        member_entity_provider:
             entity:
                 class:          App\Membership\Domain\Entity\Legacy\Member
                 property:       apiKey
                 manager_name:   default
+
+        user_provider:
+            id: App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider
+
+        chain_provider:
+            chain:
+                providers: [user_provider]
 
     firewalls:
         main:

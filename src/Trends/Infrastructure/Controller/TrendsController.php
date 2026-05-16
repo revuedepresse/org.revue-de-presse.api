@@ -64,10 +64,20 @@ DATA
      */
     public function getHighlights(Request $request): JsonResponse
     {
-        return $this->getCollection(
+        $bypassCache = $this->environment !== 'prod'
+            && $request->headers->has('x-benchmark');
+
+        // Request-scoped state captured by the finder closure; threaded out by
+        // reference instead of stored on the controller. Worker-mode-safe: no
+        // singleton property to leak between requests.
+        $cacheState = $bypassCache ? 'bypass' : 'unknown';
+
+        $response = $this->getCollection(
             $request,
-            counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams),
-            finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams),
+            counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams, $bypassCache),
+            finder: function (SearchParams $searchParams) use ($bypassCache, &$cacheState) {
+                return $this->getHighlightsFromSearchParams($searchParams, $bypassCache, $cacheState);
+            },
             params: [
                 'aggregate'          => 'string',
                 'distinctSources'    => 'bool',
@@ -80,9 +90,13 @@ DATA
                 'term'               => 'string',
             ]
         );
+
+        $response->headers->set('x-cache', $cacheState);
+
+        return $response;
     }
 
-    private function getTotalPages(SearchParams $searchParams): JsonResponse|int
+    private function getTotalPages(SearchParams $searchParams, bool $bypassCache = false): JsonResponse|int
     {
         $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
         $unauthorizedJsonResponse = new JsonResponse(
@@ -95,11 +109,16 @@ DATA
             return $unauthorizedJsonResponse;
         }
 
+        $totalPages = 1;
+
+        if ($bypassCache) {
+            return $totalPages;
+        }
+
         $key = $this->getCacheKey('highlights.total_pages', $searchParams);
 
         $client = $this->redisCache->getClient();
-        $totalPages = 1;
-        
+
         try {
             $client->setex($key, 3600, $totalPages);
         } catch (ConnectionException $exception) {
@@ -115,9 +134,18 @@ DATA
      * @throws JsonException
      * @throws RedisException
      */
-    private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
+    private function getHighlightsFromSearchParams(
+        SearchParams $searchParams,
+        bool $bypassCache,
+        string &$cacheState,
+    ): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
             return [];
+        }
+
+        if ($bypassCache) {
+            $cacheState = 'bypass';
+            return $this->popularPublicationRepository->findBy($searchParams);
         }
 
         $key = $this->getCacheKey('highlights.items', $searchParams);
@@ -127,16 +155,19 @@ DATA
             $cachedHighlights = $client->get($key);
 
             if ($cachedHighlights) {
+                $cacheState = 'hit';
                 return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
             }
 
+            $cacheState = 'miss';
             $highlights = $this->popularPublicationRepository->findBy($searchParams);
             $client->setex($key, 3600, json_encode($highlights, JSON_THROW_ON_ERROR));
 
             return $highlights;
         } catch (ConnectionException $exception) {
             $this->logger->error($exception->getMessage());
-            
+
+            $cacheState = 'error';
             return $this->popularPublicationRepository->findBy($searchParams);
         }
     }
