@@ -49,17 +49,20 @@ class HighlightsPerformanceTest extends TestCase
                 'x-auth-token' => $token,
                 'x-benchmark'  => '1',
             ],
+        ]);
+
+        $requestOptions = [
             'query' => [
                 'startDate'       => '2024-01-01 00:00:00',
                 'endDate'         => '2024-01-01 23:59:59',
                 'includeRetweets' => '0',
             ],
-        ]);
+        ];
 
         // Warmup — not counted.
         for ($i = 0; $i < $warmup; $i++) {
             try {
-                $client->request('GET', $url)->getContent(false);
+                $client->request('GET', $url, $requestOptions)->getContent(false);
             } catch (TransportExceptionInterface) {
                 // ignore during warmup
             }
@@ -72,7 +75,7 @@ class HighlightsPerformanceTest extends TestCase
         for ($i = 0; $i < $iterations; $i++) {
             $start = hrtime(true);
             try {
-                $response = $client->request('GET', $url);
+                $response = $client->request('GET', $url, $requestOptions);
                 // Force the body read so the timing reflects end-to-end work.
                 $response->getContent(false);
                 $status = $response->getStatusCode();
