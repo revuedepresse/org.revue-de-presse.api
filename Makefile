@@ -4,7 +4,7 @@ SHELL:=/bin/bash
         bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
         php-worker-build php-worker-start php-worker-stop php-worker-logs \
         reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
-        start-benchmark-stack stop-benchmark-stack
+        start-benchmark-stack stop-benchmark-stack restart-benchmark-stack
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -87,6 +87,9 @@ start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed)
 
 stop-benchmark-stack: reverse-proxy-stop php-worker-stop ## Stop the full benchmark stack (reverse-proxy first, then php-worker)
 	@printf '✅ Benchmark stack stopped — containers retained for log inspection.%s' $$'\n'
+
+restart-benchmark-stack: stop-benchmark-stack start-benchmark-stack ## Stop the benchmark stack and start it back up (rebuilds if needed)
+	@printf '✅ Benchmark stack restarted.%s' $$'\n'
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
 	@/bin/bash -c 'source fun.sh && run_update_version'
