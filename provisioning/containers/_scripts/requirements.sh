@@ -101,7 +101,10 @@ function install_php_extensions() {
     printf '%s%s' '✅ All required PHP extensions verified at runtime.' $'\n' 1>&2
 
     (
-      version=3.4.2
+      # 3.5.x is the first xdebug line with PHP 8.5 support (3.4.7 was the
+      # last 3.4.x; building it against PHP 8.5 fails at the ZEND_MODULE_API
+      # check). Bump to a 3.5.x release when raising the base PHP version.
+      version=3.5.1
       wget https://github.com/xdebug/xdebug/archive/${version}.zip \
       --output-document /tmp/${version}.zip
       cd /tmp || exit
