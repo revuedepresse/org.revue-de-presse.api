@@ -324,43 +324,102 @@ function run_bench_without_redis() {
     run_bench_highlights 1
 }
 
-function run_frankenphp_build() {
+function run_php_worker_build() {
     /bin/bash -c 'set -a; source ./.env.local; set +a; \
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
             -f ./provisioning/containers/docker-compose.override.yaml \
             --profile frankenphp \
-            build frankenphp traefik'
+            build php-worker'
 }
 
-function run_frankenphp_up() {
+function run_php_worker_start() {
     /bin/bash -c 'set -a; source ./.env.local; set +a; \
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
             -f ./provisioning/containers/docker-compose.override.yaml \
             --profile frankenphp \
-            up --detach frankenphp traefik'
+            up --detach php-worker'
 }
 
-function run_frankenphp_down() {
+function run_php_worker_stop() {
     /bin/bash -c 'set -a; source ./.env.local; set +a; \
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
             -f ./provisioning/containers/docker-compose.override.yaml \
             --profile frankenphp \
-            stop frankenphp traefik'
+            stop php-worker'
 }
 
-function run_frankenphp_logs() {
+function run_php_worker_logs() {
     /bin/bash -c 'set -a; source ./.env.local; set +a; \
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
             -f ./provisioning/containers/docker-compose.override.yaml \
             --profile frankenphp \
-            logs --follow --tail=200 frankenphp traefik'
+            logs --follow --tail=200 php-worker'
 }
 
-function run_traefik_password() {
+function run_reverse_proxy_build() {
+    # Traefik has no local build context — `build` would be a no-op.
+    # `pull` actually fetches the published image so a subsequent
+    # `run_reverse_proxy_start` doesn't have to.
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            pull reverse-proxy'
+}
+
+function run_reverse_proxy_start() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            up --detach reverse-proxy'
+}
+
+function run_reverse_proxy_stop() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            stop reverse-proxy'
+}
+
+function run_update_version() {
+    local repo_file
+    local latest
+    local current
+
+    repo_file='src/Trends/Infrastructure/Repository/PopularPublicationRepository.php'
+
+    latest=$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
+    if [ -z "${latest}" ]; then
+        printf '%s%s' 'ERROR: no git tag found' $'\n' 1>&2
+        return 1
+    fi
+
+    current=$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$/\1/p" "${repo_file}" | head -1)
+    if [ -z "${current}" ]; then
+        printf "ERROR: 'version' key not found in %s%s" "${repo_file}" $'\n' 1>&2
+        return 1
+    fi
+
+    if [ "${current}" = "${latest}" ]; then
+        printf '%s version already up-to-date: %s%s' "${repo_file}" "${current}" $'\n'
+        return 0
+    fi
+
+    sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
+    rm -f "${repo_file}.bak"
+    printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
+}
+
+function run_reverse_proxy_password() {
     local user="${1:-admin}"
     local password
     local hash

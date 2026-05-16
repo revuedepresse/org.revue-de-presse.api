@@ -1,10 +1,9 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
-        bench-with-redis bench-without-redis bench-deps traefik-password \
-        frankenphp-build frankenphp-up frankenphp-down frankenphp-logs
-
-REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
+        bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
+        php-worker-build php-worker-start php-worker-stop php-worker-logs \
+        reverse-proxy-build reverse-proxy-start reverse-proxy-stop
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -58,30 +57,29 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
 
-frankenphp-build: ## Build the FrankenPHP + Traefik images (compose profile `frankenphp`)
-	@/bin/bash -c 'source fun.sh && run_frankenphp_build'
+php-worker-build: ## Build the php-worker image (FrankenPHP under the hood; compose profile `frankenphp`)
+	@/bin/bash -c 'source fun.sh && run_php_worker_build'
 
-frankenphp-up: ## Start FrankenPHP + Traefik in detached mode (compose profile `frankenphp`)
-	@/bin/bash -c 'source fun.sh && run_frankenphp_up'
+php-worker-start: ## Start the php-worker container, detached
+	@/bin/bash -c 'source fun.sh && run_php_worker_start'
 
-frankenphp-down: ## Stop FrankenPHP + Traefik (containers remain so logs are inspectable)
-	@/bin/bash -c 'source fun.sh && run_frankenphp_down'
+php-worker-stop: ## Stop the php-worker container (kept around for log inspection)
+	@/bin/bash -c 'source fun.sh && run_php_worker_stop'
 
-frankenphp-logs: ## Tail FrankenPHP + Traefik logs
-	@/bin/bash -c 'source fun.sh && run_frankenphp_logs'
+php-worker-logs: ## Tail php-worker logs
+	@/bin/bash -c 'source fun.sh && run_php_worker_logs'
 
-traefik-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
-	@/bin/bash -c 'source fun.sh && run_traefik_password "${TRAEFIK_USER:-admin}"'
+reverse-proxy-build: ## Pull the reverse-proxy image (Traefik; compose profile `frankenphp`)
+	@/bin/bash -c 'source fun.sh && run_reverse_proxy_build'
+
+reverse-proxy-start: ## Start the reverse-proxy container, detached (php-worker pulled in via depends_on)
+	@/bin/bash -c 'source fun.sh && run_reverse_proxy_start'
+
+reverse-proxy-stop: ## Stop the reverse-proxy container (kept around for log inspection)
+	@/bin/bash -c 'source fun.sh && run_reverse_proxy_stop'
+
+reverse-proxy-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
+	@/bin/bash -c 'source fun.sh && run_reverse_proxy_password "${TRAEFIK_USER:-admin}"'
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
-	@latest=$$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/'); \
-	if [ -z "$$latest" ]; then echo "ERROR: no git tag found"; exit 1; fi; \
-	current=$$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$$/\1/p" $(REPOSITORY_VERSION_FILE) | head -1); \
-	if [ -z "$$current" ]; then echo "ERROR: 'version' key not found in $(REPOSITORY_VERSION_FILE)"; exit 1; fi; \
-	if [ "$$current" = "$$latest" ]; then \
-		echo "$(REPOSITORY_VERSION_FILE) version already up-to-date: $$current"; \
-	else \
-		sed -i.bak -E "s|('version' => ')[^']+(',)|\1$$latest\2|" $(REPOSITORY_VERSION_FILE); \
-		rm -f $(REPOSITORY_VERSION_FILE).bak; \
-		echo "$(REPOSITORY_VERSION_FILE) version updated: $$current -> $$latest"; \
-	fi
+	@/bin/bash -c 'source fun.sh && run_update_version'

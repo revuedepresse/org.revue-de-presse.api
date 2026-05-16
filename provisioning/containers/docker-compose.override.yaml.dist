@@ -11,11 +11,11 @@ services:
       - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
       - 'service-run:/var/www/org.example.api/var/run'
 
-  # Project mount for the opt-in FrankenPHP service (compose profile).
+  # Project mount for the opt-in php-worker service (compose profile).
   # Keep the block here even when the profile is inactive — having it
   # described in the override means an operator can flip the profile on
   # without re-editing the file.
-  frankenphp:
+  php-worker:
     volumes:
       - '../../:/var/www/org.example.api/'
       - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
