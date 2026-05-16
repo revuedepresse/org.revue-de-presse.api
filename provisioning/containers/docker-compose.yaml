@@ -81,11 +81,15 @@ services:
             # specifically want a dev-style FrankenPHP run.
             APP_ENV:                 'prod'
             APP_DEBUG:               '0'
-            APP_RUNTIME:             'Runtime\\FrankenPhpSymfony\\Runtime'
             # Listen on both :80 (for reverse-proxy internal HTTP) and :443
             # (for direct TLS access if a host port mapping is added back).
             SERVER_NAME:             ':80 :443'
-            FRANKENPHP_CONFIG:       'worker /var/www/${PROJECT:-org.example.api}/public/index.php'
+            # Manual worker mode — public/worker.php contains the
+            # `frankenphp_handle_request()` request loop. Not using
+            # symfony/runtime/runtime-frankenphp-symfony so the FPM
+            # container's public/index.php stays untouched (it's still
+            # the classic pre-Runtime-component shape).
+            FRANKENPHP_CONFIG:       'worker /var/www/${PROJECT:-org.example.api}/public/worker.php'
             FRANKENPHP_NUM_THREADS:  '${FRANKENPHP_NUM_THREADS:-8}'
             PROJECT_DIR:             '/var/www/${PROJECT:-org.example.api}'
         restart: 'unless-stopped'
