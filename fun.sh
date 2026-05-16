@@ -265,6 +265,50 @@ function reset_color() {
     echo -n $'\033'\[00m
 }
 
+function run_bench_deps() {
+    if [ -x bin/phpunit ] && [ -d vendor/phpunit/phpunit ] && [ -d vendor/symfony/phpunit-bridge ]; then
+        return 0
+    fi
+
+    printf '→ Installing composer dev dependencies via the '\''app'\'' service container...%s' $'\n'
+
+    set -a
+    source ./.env.local
+    set +a
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        run --rm --no-deps --user root -T app \
+        composer install --no-interaction --prefer-dist
+
+    if [ ! -x bin/phpunit ]; then
+        printf '✗ bin/phpunit still missing after composer install — aborting%s' $'\n' 1>&2
+        return 1
+    fi
+}
+
+function run_bench_highlights() {
+    local bypass_cache="${1:-0}"
+
+    run_bench_deps || return 1
+
+    SYMFONY_DEPRECATIONS_HELPER='disabled' \
+        BENCH_BYPASS_CACHE="${bypass_cache}" \
+        BENCH_ITERATIONS="${BENCH_ITERATIONS:-200}" \
+        BENCH_CONCURRENCY="${BENCH_CONCURRENCY:-1}" \
+        BENCH_WARMUP="${BENCH_WARMUP:-3}" \
+        bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+}
+
+function run_bench_with_redis() {
+    run_bench_highlights 0
+}
+
+function run_bench_without_redis() {
+    run_bench_highlights 1
+}
+
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 

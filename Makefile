@@ -5,16 +5,13 @@ SHELL:=/bin/bash
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
-# docker compose file pair used by every container-side target; matches the
-# pattern used by fun.sh.
-COMPOSE_FILES := -f ./provisioning/containers/docker-compose.yaml \
-                 -f ./provisioning/containers/docker-compose.override.yaml
-
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
+# Exported so fun.sh::run_bench_highlights sees them in its environment.
 BENCH_ITERATIONS  ?= 200
 BENCH_CONCURRENCY ?= 1
 BENCH_WARMUP      ?= 3
+export BENCH_ITERATIONS BENCH_CONCURRENCY BENCH_WARMUP
 
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
@@ -50,29 +47,13 @@ test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
 
 bench-deps: ## Install composer dev deps via the `app` service container (idempotent)
-	@if [ ! -x bin/phpunit ] || [ ! -d vendor/phpunit/phpunit ] || [ ! -d vendor/symfony/phpunit-bridge ]; then \
-		echo "→ Installing composer dev dependencies via the 'app' service container..."; \
-		/bin/bash -c 'set -a; source ./.env.local; set +a; \
-			docker compose $(COMPOSE_FILES) run --rm --no-deps --user root -T app \
-				composer install --no-interaction --prefer-dist'; \
-	fi
-	@test -x bin/phpunit || { echo "✗ bin/phpunit still missing after composer install — aborting"; exit 1; }
+	@/bin/bash -c 'source fun.sh && run_bench_deps'
 
-bench-with-redis: bench-deps ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
-	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
-		BENCH_BYPASS_CACHE=0 \
-		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
-		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
-		BENCH_WARMUP=$(BENCH_WARMUP) \
-		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+bench-with-redis: ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
+	@/bin/bash -c 'source fun.sh && run_bench_with_redis'
 
-bench-without-redis: bench-deps ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
-	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
-		BENCH_BYPASS_CACHE=1 \
-		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
-		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
-		BENCH_WARMUP=$(BENCH_WARMUP) \
-		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
+	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
 	@latest=$$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/'); \
