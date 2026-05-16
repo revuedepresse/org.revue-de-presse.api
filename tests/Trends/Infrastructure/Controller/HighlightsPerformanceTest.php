@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Tests\Trends\Infrastructure\Controller;
 
 use App\Trends\Infrastructure\Performance\PerformanceMetrics;
-use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\HttpClient\HttpClient;
@@ -23,7 +24,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  *
  * @group performance
  */
-class HighlightsPerformanceTest extends TestCase
+class HighlightsPerformanceTest extends KernelTestCase
 {
     public function test_measures_highlights_endpoint_latency_distribution(): void
     {
@@ -37,6 +38,10 @@ class HighlightsPerformanceTest extends TestCase
             self::markTestSkipped('API_AUTH_TOKEN is empty in env (.env.test).');
         }
 
+        self::bootKernel();
+        /** @var LoggerInterface $logger */
+        $logger = static::getContainer()->get('monolog.logger.benchmark');
+
         $base = str_contains($host, '://') ? $host : 'https://' . $host;
         $url  = rtrim($base, '/') . '/api/twitter/highlights';
 
@@ -46,6 +51,15 @@ class HighlightsPerformanceTest extends TestCase
         if ($concurrency < 1) {
             $concurrency = 1;
         }
+
+        $runId = bin2hex(random_bytes(4));
+        $logger->info('benchmark.start', [
+            'run_id'      => $runId,
+            'url'         => $url,
+            'iterations'  => $iterations,
+            'concurrency' => $concurrency,
+            'warmup'      => $warmup,
+        ]);
 
         $client = HttpClient::create(
             [
@@ -111,6 +125,12 @@ class HighlightsPerformanceTest extends TestCase
                         $firstErrorIter   = $iterIndex;
                         $firstErrorStatus = 'transport: ' . $e->getMessage();
                     }
+                    $logger->warning('benchmark.transport_error', [
+                        'run_id'    => $runId,
+                        'iteration' => $iterIndex,
+                        'exception' => $e::class,
+                        'message'   => $e->getMessage(),
+                    ]);
                     continue;
                 }
 
@@ -122,6 +142,14 @@ class HighlightsPerformanceTest extends TestCase
                         $firstErrorIter   = $iterIndex;
                         $firstErrorStatus = (string) $status;
                     }
+                    $debugException = $response->getHeaders(false)['x-debug-exception'][0] ?? null;
+                    $logger->warning('benchmark.non_2xx', [
+                        'run_id'          => $runId,
+                        'iteration'       => $iterIndex,
+                        'status'          => $status,
+                        'elapsed_ms'      => $elapsedMs,
+                        'x_debug_exception' => $debugException !== null ? rawurldecode($debugException) : null,
+                    ]);
                     continue;
                 }
                 $samples[] = $elapsedMs;
@@ -139,6 +167,29 @@ class HighlightsPerformanceTest extends TestCase
             array_values($statusHistogram)
         ));
 
+        $metrics = new PerformanceMetrics($samples, $errors);
+
+        $logger->info('benchmark.complete', [
+            'run_id'           => $runId,
+            'url'              => $url,
+            'iterations'       => $iterations,
+            'concurrency'      => $concurrency,
+            'warmup'           => $warmup,
+            'count'            => $metrics->count(),
+            'errors'           => $metrics->errors(),
+            'first_error_iter' => $firstErrorIter,
+            'first_error_status' => $firstErrorStatus,
+            'min_ms'           => $metrics->min(),
+            'p50_ms'           => $metrics->p50(),
+            'p95_ms'           => $metrics->p95(),
+            'p99_ms'           => $metrics->p99(),
+            'max_ms'           => $metrics->max(),
+            'mean_ms'          => $metrics->mean(),
+            'throughput_rps'   => $metrics->throughput($wallSeconds),
+            'wall_seconds'     => $wallSeconds,
+            'status_histogram' => $statusHistogram,
+        ]);
+
         self::assertSame(
             0,
             $errors,
@@ -153,8 +204,6 @@ class HighlightsPerformanceTest extends TestCase
             )
         );
         self::assertNotEmpty($samples, 'No timed samples were collected');
-
-        $metrics = new PerformanceMetrics($samples, $errors);
 
         $output = new StreamOutput(STDERR);
         $table = new Table($output);
