@@ -101,6 +101,7 @@ class HighlightsPerformanceTest extends KernelTestCase
         $samples          = [];
         $errors           = 0;
         $statusHistogram  = [];
+        $cacheHistogram   = ['hit' => 0, 'miss' => 0, 'bypass' => 0, 'error' => 0, 'unknown' => 0, 'absent' => 0];
         $firstErrorIter   = null;
         $firstErrorStatus = null;
         $wallStart        = hrtime(true);
@@ -143,6 +144,12 @@ class HighlightsPerformanceTest extends KernelTestCase
 
                 $statusHistogram[$status] = ($statusHistogram[$status] ?? 0) + 1;
 
+                $cacheHeader = $response->getHeaders(false)['x-cache'][0] ?? null;
+                $cacheKey = $cacheHeader !== null && isset($cacheHistogram[$cacheHeader])
+                    ? $cacheHeader
+                    : ($cacheHeader === null ? 'absent' : 'unknown');
+                $cacheHistogram[$cacheKey]++;
+
                 if ($status < 200 || $status >= 300) {
                     $errors++;
                     if ($firstErrorIter === null) {
@@ -177,37 +184,62 @@ class HighlightsPerformanceTest extends KernelTestCase
         $metrics = new PerformanceMetrics($samples, $errors);
 
         $logger->info('benchmark.complete', [
-            'run_id'           => $runId,
-            'url'              => $url,
-            'iterations'       => $iterations,
-            'concurrency'      => $concurrency,
-            'warmup'           => $warmup,
-            'count'            => $metrics->count(),
-            'errors'           => $metrics->errors(),
-            'first_error_iter' => $firstErrorIter,
+            'run_id'             => $runId,
+            'url'                => $url,
+            'iterations'         => $iterations,
+            'concurrency'        => $concurrency,
+            'warmup'             => $warmup,
+            'bypass_cache'       => $bypassCache,
+            'count'              => $metrics->count(),
+            'errors'             => $metrics->errors(),
+            'first_error_iter'   => $firstErrorIter,
             'first_error_status' => $firstErrorStatus,
-            'min_ms'           => $metrics->min(),
-            'p50_ms'           => $metrics->p50(),
-            'p95_ms'           => $metrics->p95(),
-            'p99_ms'           => $metrics->p99(),
-            'max_ms'           => $metrics->max(),
-            'mean_ms'          => $metrics->mean(),
-            'throughput_rps'   => $metrics->throughput($wallSeconds),
-            'wall_seconds'     => $wallSeconds,
-            'status_histogram' => $statusHistogram,
+            'min_ms'             => $metrics->min(),
+            'p50_ms'             => $metrics->p50(),
+            'p95_ms'             => $metrics->p95(),
+            'p99_ms'             => $metrics->p99(),
+            'max_ms'             => $metrics->max(),
+            'mean_ms'            => $metrics->mean(),
+            'throughput_rps'     => $metrics->throughput($wallSeconds),
+            'wall_seconds'       => $wallSeconds,
+            'status_histogram'   => $statusHistogram,
+            'cache_histogram'    => $cacheHistogram,
         ]);
+
+        // When the harness is run with Redis active (bench-with-redis), the
+        // controller must actually serve cache hits — otherwise every request
+        // silently falls through to Postgres and the "upper limit" we measure
+        // is the same Postgres ceiling bench-without-redis already finds. Fail
+        // loudly with the cache breakdown so the operator can fix the Redis
+        // connectivity (REDIS_HOST resolution, container networking, etc.).
+        if (!$bypassCache && $cacheHistogram['hit'] === 0) {
+            self::fail(sprintf(
+                'bench-with-redis requested, but the controller never returned x-cache: hit '
+                . '(histogram: hit=%d, miss=%d, bypass=%d, error=%d, unknown=%d, absent=%d). '
+                . 'The app cannot serve cached responses on this stack — most likely the '
+                . 'service container cannot reach Redis at the configured REDIS_HOST. '
+                . 'Investigate before relying on these numbers as a Redis-served upper limit.',
+                $cacheHistogram['hit'],
+                $cacheHistogram['miss'],
+                $cacheHistogram['bypass'],
+                $cacheHistogram['error'],
+                $cacheHistogram['unknown'],
+                $cacheHistogram['absent']
+            ));
+        }
 
         self::assertSame(
             0,
             $errors,
             sprintf(
-                '%d of %d requests failed against %s; first non-2xx at iteration %s (status %s); status histogram: %s',
+                '%d of %d requests failed against %s; first non-2xx at iteration %s (status %s); status histogram: %s; cache histogram: %s',
                 $errors,
                 $iterations,
                 $url,
                 $firstErrorIter ?? 'n/a',
                 $firstErrorStatus ?? 'n/a',
-                $histogramStr
+                $histogramStr,
+                json_encode($cacheHistogram)
             )
         );
         self::assertNotEmpty($samples, 'No timed samples were collected');
@@ -229,6 +261,13 @@ class HighlightsPerformanceTest extends KernelTestCase
             ['Max (ms)',         number_format($metrics->max(), 2)],
             ['Mean (ms)',        number_format($metrics->mean(), 2)],
             ['Throughput (rps)', number_format($metrics->throughput($wallSeconds), 2)],
+            ['Cache hits',       sprintf(
+                'hit=%d miss=%d bypass=%d error=%d',
+                $cacheHistogram['hit'],
+                $cacheHistogram['miss'],
+                $cacheHistogram['bypass'],
+                $cacheHistogram['error']
+            )],
         ]);
         $table->render();
     }

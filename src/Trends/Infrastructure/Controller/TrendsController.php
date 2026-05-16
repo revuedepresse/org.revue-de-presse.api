@@ -26,6 +26,13 @@ class TrendsController
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
+    /**
+     * One of: 'hit', 'miss', 'bypass', 'error', 'unknown'.
+     * Set by getHighlightsFromSearchParams; surfaced as the x-cache response
+     * header so the perf harness can verify Redis is actually serving hits.
+     */
+    private string $lastCacheState = 'unknown';
+
     public function callback(Request $request): JsonResponse
     {
         if ($request->isMethod('OPTIONS')) {
@@ -67,7 +74,9 @@ DATA
         $bypassCache = $this->environment !== 'prod'
             && $request->headers->has('x-benchmark');
 
-        return $this->getCollection(
+        $this->lastCacheState = $bypassCache ? 'bypass' : 'unknown';
+
+        $response = $this->getCollection(
             $request,
             counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams, $bypassCache),
             finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams, $bypassCache),
@@ -83,6 +92,10 @@ DATA
                 'term'               => 'string',
             ]
         );
+
+        $response->headers->set('x-cache', $this->lastCacheState);
+
+        return $response;
     }
 
     private function getTotalPages(SearchParams $searchParams, bool $bypassCache = false): JsonResponse|int
@@ -129,6 +142,7 @@ DATA
         }
 
         if ($bypassCache) {
+            $this->lastCacheState = 'bypass';
             return $this->popularPublicationRepository->findBy($searchParams);
         }
 
@@ -139,9 +153,11 @@ DATA
             $cachedHighlights = $client->get($key);
 
             if ($cachedHighlights) {
+                $this->lastCacheState = 'hit';
                 return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
             }
 
+            $this->lastCacheState = 'miss';
             $highlights = $this->popularPublicationRepository->findBy($searchParams);
             $client->setex($key, 3600, json_encode($highlights, JSON_THROW_ON_ERROR));
 
@@ -149,6 +165,7 @@ DATA
         } catch (ConnectionException $exception) {
             $this->logger->error($exception->getMessage());
 
+            $this->lastCacheState = 'error';
             return $this->popularPublicationRepository->findBy($searchParams);
         }
     }
