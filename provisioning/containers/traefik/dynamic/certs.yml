@@ -1,0 +1,26 @@
+# Traefik dynamic configuration — TLS certificate store.
+#
+# Loaded by traefik's `file` provider (see docker-compose.yaml command flags).
+# The actual cert/key files are expected at:
+#   ./var/etc/letsencrypt/live/default/fullchain.pem
+#   ./var/etc/letsencrypt/live/default/privkey.pem
+# on the host, which is mounted read-only into the traefik container at
+# /etc/letsencrypt/.
+#
+# To reuse the existing self-signed cert from local.proxy, copy:
+#   cp /path/to/local.proxy/var/certificates/dhparam/nginx.crt \
+#       var/etc/letsencrypt/live/default/fullchain.pem
+#   cp /path/to/local.proxy/var/certificates/dhparam/nginx.key \
+#       var/etc/letsencrypt/live/default/privkey.pem
+# Both target paths are gitignored (see var/etc/.gitignore) — keys never
+# enter the repo.
+
+tls:
+    stores:
+        default:
+            defaultCertificate:
+                certFile: /etc/letsencrypt/live/default/fullchain.pem
+                keyFile:  /etc/letsencrypt/live/default/privkey.pem
+
+    # Additional named cert pairs can be declared here for multiple hosts.
+    certificates: []

@@ -133,6 +133,10 @@ services:
             - '--ping=true'
             - '--providers.docker=true'
             - '--providers.docker.exposedbydefault=false'
+            # File provider for the TLS cert store; resolves cert paths to the
+            # /etc/letsencrypt mount below.
+            - '--providers.file.directory=/etc/traefik/dynamic'
+            - '--providers.file.watch=true'
             - '--entrypoints.web.address=:80'
             - '--entrypoints.websecure.address=:443'
             - '--log.level=INFO'
@@ -150,6 +154,14 @@ services:
             # Docker provider needs read-only access to the socket to
             # discover the frankenphp service's labels.
             - '/var/run/docker.sock:/var/run/docker.sock:ro'
+            # Dynamic config — declares the TLS cert store and any future
+            # static routes/middlewares. Read-only mount; watch=true picks
+            # up edits live.
+            - './traefik/dynamic:/etc/traefik/dynamic:ro'
+            # Local TLS material. Drop your fullchain.pem and privkey.pem
+            # into var/etc/letsencrypt/live/default/ on the host (gitignored)
+            # and they're picked up by traefik via the file provider.
+            - '../../var/etc/letsencrypt:/etc/letsencrypt:ro'
         # Dashboard router with basic-auth middleware. Routed via the `web`
         # entrypoint at http://traefik.localhost/dashboard/ — credentials
         # come from TRAEFIK_DASHBOARD_USERS in .env.local.
