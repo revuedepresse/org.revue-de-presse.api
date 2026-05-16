@@ -265,6 +265,21 @@ function reset_color() {
     echo -n $'\033'\[00m
 }
 
+function source_bench_env() {
+    # run_bench_* runs in test context. Source .env.local first so the docker
+    # compose CLI can resolve COMPOSE_PROJECT_NAME (test env files do not
+    # declare it), then .env.test on top so test-mode values (APP_ENV=test,
+    # BENCHMARK_HOST, API_AUTH_TOKEN, etc.) take precedence on overlap.
+    set -a
+    if [ -f ./.env.local ]; then
+        source ./.env.local
+    fi
+    if [ -f ./.env.test ]; then
+        source ./.env.test
+    fi
+    set +a
+}
+
 function run_bench_deps() {
     if [ -x bin/phpunit ] && [ -d vendor/phpunit/phpunit ] && [ -d vendor/symfony/phpunit-bridge ]; then
         return 0
@@ -272,9 +287,7 @@ function run_bench_deps() {
 
     printf '→ Installing composer dev dependencies via the '\''app'\'' service container...%s' $'\n'
 
-    set -a
-    source ./.env.local
-    set +a
+    source_bench_env
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
