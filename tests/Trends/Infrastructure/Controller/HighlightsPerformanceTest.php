@@ -40,16 +40,25 @@ class HighlightsPerformanceTest extends TestCase
         $base = str_contains($host, '://') ? $host : 'https://' . $host;
         $url  = rtrim($base, '/') . '/api/twitter/highlights';
 
-        $iterations = (int) (getenv('BENCH_ITERATIONS') ?: $_SERVER['BENCH_ITERATIONS'] ?? $_ENV['BENCH_ITERATIONS'] ?? 50);
-        $warmup     = (int) (getenv('BENCH_WARMUP')     ?: $_SERVER['BENCH_WARMUP']     ?? $_ENV['BENCH_WARMUP']     ?? 3);
+        $iterations  = (int) (getenv('BENCH_ITERATIONS')  ?: $_SERVER['BENCH_ITERATIONS']  ?? $_ENV['BENCH_ITERATIONS']  ?? 50);
+        $warmup      = (int) (getenv('BENCH_WARMUP')      ?: $_SERVER['BENCH_WARMUP']      ?? $_ENV['BENCH_WARMUP']      ?? 3);
+        $concurrency = (int) (getenv('BENCH_CONCURRENCY') ?: $_SERVER['BENCH_CONCURRENCY'] ?? $_ENV['BENCH_CONCURRENCY'] ?? 1);
+        if ($concurrency < 1) {
+            $concurrency = 1;
+        }
 
-        $client = HttpClient::create([
-            'timeout' => 30.0,
-            'headers' => [
-                'x-auth-token' => $token,
-                'x-benchmark'  => '1',
+        $client = HttpClient::create(
+            [
+                'timeout' => 30.0,
+                'headers' => [
+                    'x-auth-token' => $token,
+                    'x-benchmark'  => '1',
+                ],
             ],
-        ]);
+            // Bump the per-host connection cap so concurrency > 6 is actually
+            // honored. Symfony's curl transport defaults this to 6.
+            maxHostConnections: max(6, $concurrency)
+        );
 
         $requestOptions = [
             'query' => [
@@ -68,42 +77,57 @@ class HighlightsPerformanceTest extends TestCase
             }
         }
 
-        $samples         = [];
-        $errors          = 0;
-        $statusHistogram = [];
-        $firstErrorIter  = null;
+        $samples          = [];
+        $errors           = 0;
+        $statusHistogram  = [];
+        $firstErrorIter   = null;
         $firstErrorStatus = null;
-        $wallStart       = hrtime(true);
+        $wallStart        = hrtime(true);
 
-        for ($i = 0; $i < $iterations; $i++) {
-            $start = hrtime(true);
-            try {
-                $response = $client->request('GET', $url, $requestOptions);
-                // Force the body read so the timing reflects end-to-end work.
-                $response->getContent(false);
-                $status = $response->getStatusCode();
-            } catch (TransportExceptionInterface $e) {
-                $errors++;
-                $statusHistogram['transport_error'] = ($statusHistogram['transport_error'] ?? 0) + 1;
-                if ($firstErrorIter === null) {
-                    $firstErrorIter = $i;
-                    $firstErrorStatus = 'transport: ' . $e->getMessage();
-                }
-                continue;
+        $completed = 0;
+        while ($completed < $iterations) {
+            $batchSize = min($concurrency, $iterations - $completed);
+
+            // Dispatch a batch of lazy responses. Symfony HttpClient lets up to
+            // `max_host_connections` of them be in flight at once; calling
+            // getContent() on each then drives the multiplexed event loop.
+            $responses = [];
+            for ($j = 0; $j < $batchSize; $j++) {
+                $responses[] = $client->request('GET', $url, $requestOptions);
             }
-            $elapsedMs = (hrtime(true) - $start) / 1_000_000.0;
 
-            $statusHistogram[$status] = ($statusHistogram[$status] ?? 0) + 1;
-
-            if ($status < 200 || $status >= 300) {
-                $errors++;
-                if ($firstErrorIter === null) {
-                    $firstErrorIter = $i;
-                    $firstErrorStatus = (string) $status;
+            foreach ($responses as $idx => $response) {
+                $iterIndex = $completed + $idx;
+                try {
+                    $response->getContent(false);
+                    $status = $response->getStatusCode();
+                    // getInfo('total_time') is the curl-measured request time
+                    // in seconds; reliable even when many responses overlap.
+                    $elapsedMs = ((float) $response->getInfo('total_time')) * 1000.0;
+                } catch (TransportExceptionInterface $e) {
+                    $errors++;
+                    $statusHistogram['transport_error'] = ($statusHistogram['transport_error'] ?? 0) + 1;
+                    if ($firstErrorIter === null) {
+                        $firstErrorIter   = $iterIndex;
+                        $firstErrorStatus = 'transport: ' . $e->getMessage();
+                    }
+                    continue;
                 }
-                continue;
+
+                $statusHistogram[$status] = ($statusHistogram[$status] ?? 0) + 1;
+
+                if ($status < 200 || $status >= 300) {
+                    $errors++;
+                    if ($firstErrorIter === null) {
+                        $firstErrorIter   = $iterIndex;
+                        $firstErrorStatus = (string) $status;
+                    }
+                    continue;
+                }
+                $samples[] = $elapsedMs;
             }
-            $samples[] = $elapsedMs;
+
+            $completed += $batchSize;
         }
 
         $wallSeconds = (hrtime(true) - $wallStart) / 1_000_000_000.0;
@@ -138,6 +162,7 @@ class HighlightsPerformanceTest extends TestCase
         $table->setRows([
             ['URL',              $url],
             ['Iterations',       (string) $metrics->count()],
+            ['Concurrency',      (string) $concurrency],
             ['Warmup',           (string) $warmup],
             ['Errors',           (string) $metrics->errors()],
             ['Min (ms)',         number_format($metrics->min(), 2)],
