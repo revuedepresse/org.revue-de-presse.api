@@ -1,0 +1,43 @@
+; PHP runtime configuration for the FrankenPHP service.
+;
+; Mounted (read-only) at /usr/local/etc/php/conf.d/zz-frankenphp-prod.ini
+; via the docker-compose.yaml `frankenphp` service. The leading `zz-`
+; ensures it loads after the base image defaults, so values here win
+; on conflict.
+;
+; Two distinct blocks:
+;   1. Shared baseline — mirrors provisioning/containers/service/templates/
+;      www.conf.dist's php_admin_value/php_admin_flag settings so a request
+;      handled by either runtime sees the same memory / error-handling
+;      policy.
+;   2. FrankenPHP-specific tuning — opcache + JIT + realpath cache.
+;      These pay off on long-lived workers (not per-request FPM workers)
+;      and are NOT mirrored in www.conf.dist.
+
+; ---- shared baseline with www.conf.dist -------------------------------------
+
+memory_limit                    = 64M
+error_reporting                 = E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
+display_errors                  = Off
+display_startup_errors          = Off
+html_errors                     = On
+log_errors                      = On
+
+; ---- FrankenPHP-specific ----------------------------------------------------
+
+; Worker mode keeps the PHP runtime hot across thousands of requests, so
+; aggressive opcache + JIT is finally worth its compile-time cost.
+opcache.enable                  = 1
+opcache.enable_cli              = 1
+opcache.memory_consumption      = 256
+opcache.max_accelerated_files   = 20000
+opcache.validate_timestamps     = 0
+opcache.jit                     = tracing
+opcache.jit_buffer_size         = 128M
+
+; Reduce stat() overhead on hot include paths.
+realpath_cache_size             = 4096K
+realpath_cache_ttl              = 600
+
+; Trim response surface.
+expose_php                      = Off
