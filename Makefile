@@ -3,7 +3,8 @@ SHELL:=/bin/bash
 .PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
         bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
         php-worker-build php-worker-start php-worker-stop php-worker-logs \
-        reverse-proxy-build reverse-proxy-start reverse-proxy-stop
+        reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
+        start-benchmark-stack
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -60,7 +61,7 @@ bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-b
 php-worker-build: ## Build the php-worker image (FrankenPHP under the hood; compose profile `frankenphp`)
 	@/bin/bash -c 'source fun.sh && run_php_worker_build'
 
-php-worker-start: ## Start the php-worker container, detached
+php-worker-start: php-worker-build ## Start the php-worker container, detached (rebuilds the image first)
 	@/bin/bash -c 'source fun.sh && run_php_worker_start'
 
 php-worker-stop: ## Stop the php-worker container (kept around for log inspection)
@@ -72,7 +73,7 @@ php-worker-logs: ## Tail php-worker logs
 reverse-proxy-build: ## Pull the reverse-proxy image (Traefik; compose profile `frankenphp`)
 	@/bin/bash -c 'source fun.sh && run_reverse_proxy_build'
 
-reverse-proxy-start: ## Start the reverse-proxy container, detached (php-worker pulled in via depends_on)
+reverse-proxy-start: reverse-proxy-build ## Start the reverse-proxy container, detached (pulls fresh image first; depends_on php-worker)
 	@/bin/bash -c 'source fun.sh && run_reverse_proxy_start'
 
 reverse-proxy-stop: ## Stop the reverse-proxy container (kept around for log inspection)
@@ -80,6 +81,9 @@ reverse-proxy-stop: ## Stop the reverse-proxy container (kept around for log ins
 
 reverse-proxy-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
 	@/bin/bash -c 'source fun.sh && run_reverse_proxy_password "${TRAEFIK_USER:-admin}"'
+
+start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed) and start the full benchmark stack (php-worker + reverse-proxy)
+	@printf '✅ Benchmark stack up — php-worker + reverse-proxy detached.%s' $$'\n'
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
 	@/bin/bash -c 'source fun.sh && run_update_version'
