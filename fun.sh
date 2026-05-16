@@ -406,7 +406,7 @@ function run_update_version() {
     #
     # The function then proceeds as if TAG had been supplied explicitly:
     # update the PHP file's version literal AND create the git tag on HEAD.
-    if [ -z "${TAG}" ]; then
+    if [ -z "${TAG:-}" ]; then
         local latest_tag version_part track_suffix major minor
         latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
         if [ -z "${latest_tag}" ]; then
@@ -441,9 +441,29 @@ function run_update_version() {
     if [ "${current}" = "${latest}" ]; then
         printf '%s version already up-to-date: %s%s' "${repo_file}" "${current}" $'\n'
     else
+        # Refuse to proceed if the index has unrelated staged changes —
+        # otherwise our `git commit` would sweep them into the release commit.
+        if ! git diff --cached --quiet; then
+            printf 'ERROR: index has already-staged changes; unstage them before update-version%s' $'\n' 1>&2
+            return 1
+        fi
+
         sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
         rm -f "${repo_file}.bak"
         printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
+
+        # Stage and commit the version bump so the new tag points at this
+        # specific change rather than whatever HEAD happened to be. Signed
+        # commit, matching the project's PGP convention.
+        if ! git add "${repo_file}"; then
+            printf 'ERROR: git add %s failed%s' "${repo_file}" $'\n' 1>&2
+            return 1
+        fi
+        if ! git commit -S -m "Release ${TAG}"; then
+            printf 'ERROR: git commit failed; staged %s edit is left for manual handling%s' "${repo_file}" $'\n' 1>&2
+            return 1
+        fi
+        printf '✓ Committed release bump (HEAD now carries version %s)%s' "${latest}" $'\n'
     fi
 
     # Create the git tag on HEAD. Signed annotated tag, matching the
