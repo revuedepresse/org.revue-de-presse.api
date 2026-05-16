@@ -81,6 +81,12 @@ function install_php_extensions() {
     # production extension-install failures impossible to diagnose.
     local php_ext_logfile=/tmp/install_php_extensions.log
 
+    # NOTE: do NOT call `docker-php-ext-enable opcache` — since PHP 8.x
+    # (and confirmed on php:8.5-fpm-bookworm) Zend OPcache is STATICALLY
+    # compiled into PHP itself; there is no `opcache.so` to enable, and
+    # the call fails with "'opcache' does not exist", aborting the
+    # whole step. OPcache shows up under `[Zend Modules]` in `php -m`
+    # automatically.
     if ! (
       docker-php-ext-install \
           bcmath \
@@ -94,8 +100,6 @@ function install_php_extensions() {
 
       docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
       docker-php-ext-install gd
-
-      docker-php-ext-enable opcache
     ) > "${php_ext_logfile}" 2>&1; then
         printf '%s%s' '❌ Failed to install PHP extensions — docker-php-ext-install log:' $'\n' 1>&2
         cat "${php_ext_logfile}" 1>&2
