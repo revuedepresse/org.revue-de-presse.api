@@ -9,4 +9,5 @@ services:
         arguments:
             $inner:       '@security.user.provider.concrete.member_entity_provider'
             $redisCache:  '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $appSecret:   '%env(APP_SECRET)%'
             $ttlSeconds:  60
