@@ -114,7 +114,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
                 },
                 $publications
             ),
-            'version' => 'v3.7.1',
+            'version' => 'v5.0.0',
         ];
     }
 }

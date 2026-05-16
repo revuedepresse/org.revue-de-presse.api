@@ -1,6 +1,8 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache clear-cache install restart start stop test
+.PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version
+
+REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
@@ -34,3 +36,16 @@ stop: ## Stop service
 
 test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
+
+update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
+	@latest=$$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/'); \
+	if [ -z "$$latest" ]; then echo "ERROR: no git tag found"; exit 1; fi; \
+	current=$$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$$/\1/p" $(REPOSITORY_VERSION_FILE) | head -1); \
+	if [ -z "$$current" ]; then echo "ERROR: 'version' key not found in $(REPOSITORY_VERSION_FILE)"; exit 1; fi; \
+	if [ "$$current" = "$$latest" ]; then \
+		echo "$(REPOSITORY_VERSION_FILE) version already up-to-date: $$current"; \
+	else \
+		sed -i.bak -E "s|('version' => ')[^']+(',)|\1$$latest\2|" $(REPOSITORY_VERSION_FILE); \
+		rm -f $(REPOSITORY_VERSION_FILE).bak; \
+		echo "$(REPOSITORY_VERSION_FILE) version updated: $$current -> $$latest"; \
+	fi
