@@ -64,10 +64,13 @@ DATA
      */
     public function getHighlights(Request $request): JsonResponse
     {
+        $bypassCache = $this->environment !== 'prod'
+            && $request->headers->has('x-benchmark');
+
         return $this->getCollection(
             $request,
-            counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams),
-            finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams),
+            counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams, $bypassCache),
+            finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams, $bypassCache),
             params: [
                 'aggregate'          => 'string',
                 'distinctSources'    => 'bool',
@@ -82,7 +85,7 @@ DATA
         );
     }
 
-    private function getTotalPages(SearchParams $searchParams): JsonResponse|int
+    private function getTotalPages(SearchParams $searchParams, bool $bypassCache = false): JsonResponse|int
     {
         $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
         $unauthorizedJsonResponse = new JsonResponse(
@@ -95,11 +98,16 @@ DATA
             return $unauthorizedJsonResponse;
         }
 
+        $totalPages = 1;
+
+        if ($bypassCache) {
+            return $totalPages;
+        }
+
         $key = $this->getCacheKey('highlights.total_pages', $searchParams);
 
         $client = $this->redisCache->getClient();
-        $totalPages = 1;
-        
+
         try {
             $client->setex($key, 3600, $totalPages);
         } catch (ConnectionException $exception) {
@@ -115,9 +123,13 @@ DATA
      * @throws JsonException
      * @throws RedisException
      */
-    private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
+    private function getHighlightsFromSearchParams(SearchParams $searchParams, bool $bypassCache = false): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
             return [];
+        }
+
+        if ($bypassCache) {
+            return $this->popularPublicationRepository->findBy($searchParams);
         }
 
         $key = $this->getCacheKey('highlights.items', $searchParams);
@@ -136,7 +148,7 @@ DATA
             return $highlights;
         } catch (ConnectionException $exception) {
             $this->logger->error($exception->getMessage());
-            
+
             return $this->popularPublicationRepository->findBy($searchParams);
         }
     }
