@@ -17,7 +17,7 @@ services:
     App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
 parameters:
-    monolog_channels:               []
+    monolog_channels:               ['benchmark']
 
     redis_cache.class:              'App\Twitter\Infrastructure\Cache\RedisCache'
 

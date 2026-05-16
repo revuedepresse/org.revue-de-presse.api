@@ -5,9 +5,14 @@ monolog:
             action_level: error
             handler: nested
             excluded_http_codes: [404, 405]
-            channels: ["!event"]
+            channels: ["!event", "!benchmark"]
         nested:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
+        benchmark:
+            type: stream
+            path: "%kernel.logs_dir%/benchmark.log"
+            level: debug
+            channels: ["benchmark"]
     channels: "%monolog_channels%"
