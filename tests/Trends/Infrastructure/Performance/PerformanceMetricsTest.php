@@ -59,4 +59,19 @@ class PerformanceMetricsTest extends TestCase
         self::assertSame(2.0, $metrics->throughput(2.0));
         self::assertSame(0.0, $metrics->throughput(0.0));
     }
+
+    public function test_empty_samples_returns_zero_sentinels(): void
+    {
+        $metrics = new PerformanceMetrics([], 5);
+
+        self::assertSame(0, $metrics->count());
+        self::assertSame(5, $metrics->errors());
+        self::assertSame(0.0, $metrics->min());
+        self::assertSame(0.0, $metrics->max());
+        self::assertSame(0.0, $metrics->mean());
+        self::assertSame(0.0, $metrics->p50());
+        self::assertSame(0.0, $metrics->p95());
+        self::assertSame(0.0, $metrics->p99());
+        self::assertSame(0.0, $metrics->throughput(1.0));
+    }
 }

@@ -38,12 +38,21 @@ final class PerformanceMetrics
 
     public function min(): float
     {
+        if (count($this->sortedSamples) === 0) {
+            return 0.0;
+        }
+
         return $this->sortedSamples[0];
     }
 
     public function max(): float
     {
-        return $this->sortedSamples[count($this->sortedSamples) - 1];
+        $n = count($this->sortedSamples);
+        if ($n === 0) {
+            return 0.0;
+        }
+
+        return $this->sortedSamples[$n - 1];
     }
 
     public function p50(): float
