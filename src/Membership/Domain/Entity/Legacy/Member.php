@@ -148,7 +148,7 @@ class Member extends MemberModel
     protected int $positionInHierarchy;
 
     /**
-     * Protected status according to Twitter
+     * Protected status according to Bluesky
      *
      * @var boolean
      */
@@ -156,13 +156,13 @@ class Member extends MemberModel
     protected ?bool $protected = false;
 
     /**
-     * Suspended status according to Twitter
+     * Suspended status according to Bluesky
      */
     #[ORM\Column(name: 'suspended', type: 'boolean', options: ['default' => false])]
     protected bool $suspended = false;
 
     /**
-     * NotFound status according to Twitter
+     * NotFound status according to Bluesky
      */
     #[ORM\Column(name: 'not_found', type: 'boolean', options: ['default' => false])]
     protected bool $notFound = false;

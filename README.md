@@ -1,6 +1,6 @@
 # Revue de presse
 
-:gb: [Revue-de-presse.org](https://github.com/revuedepresse) serves press titles curated daily from official French Media Twitter accounts.
+:gb: [Revue-de-presse.org](https://github.com/revuedepresse) serves press titles curated daily from official French Media Bluesky accounts.
 
 All development is delivered under free and open-source software licence.
 
@@ -12,7 +12,7 @@ All development is delivered under free and open-source software licence.
 ## HTTP API
 
 API serving daily short lists (10 items) of top news in France sorted by popularity.  
-Said popularity is simply based on retweets fetched by calling Twitter APIs.
+Said popularity is simply based on reposts fetched by calling Bluesky APIs.
 
 ## Installation
 
