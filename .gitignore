@@ -40,3 +40,6 @@ public/graphs
 tmp
 
 /doc/superpowers/
+
+# Local symlink to the sibling local.proxy repo — never part of this repo.
+/provisioning/local.proxy
