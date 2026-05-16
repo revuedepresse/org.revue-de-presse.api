@@ -312,7 +312,8 @@ function run_bench_highlights() {
         BENCH_CONCURRENCY="${BENCH_CONCURRENCY:-1}" \
         BENCH_WARMUP="${BENCH_WARMUP:-3}" \
         BENCH_TIMEOUT="${BENCH_TIMEOUT:-30}" \
-        bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+        php -d memory_limit="${BENCH_MEMORY_LIMIT:-1G}" \
+            bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
 }
 
 function run_bench_with_redis() {

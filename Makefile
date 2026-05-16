@@ -8,11 +8,12 @@ REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicati
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
 # Exported so fun.sh::run_bench_highlights sees them in its environment.
-BENCH_ITERATIONS  ?= 200
-BENCH_CONCURRENCY ?= 1
-BENCH_WARMUP      ?= 3
-BENCH_TIMEOUT     ?= 30
-export BENCH_ITERATIONS BENCH_CONCURRENCY BENCH_WARMUP BENCH_TIMEOUT
+BENCH_ITERATIONS    ?= 200
+BENCH_CONCURRENCY   ?= 1
+BENCH_WARMUP        ?= 3
+BENCH_TIMEOUT       ?= 30
+BENCH_MEMORY_LIMIT  ?= 1G
+export BENCH_ITERATIONS BENCH_CONCURRENCY BENCH_WARMUP BENCH_TIMEOUT BENCH_MEMORY_LIMIT
 
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
