@@ -109,17 +109,39 @@ function install_php_extensions() {
     printf '%s%s' '✅ Installed PHP extensions successfully.' $'\n' 1>&2
 
     # Fail the image build if any required extension is missing at runtime.
-    # Catches regressions where the install above silently failed
-    # (it's piped to /dev/null), or where a future base image drops something.
+    # Catches regressions where the install above silently failed (it's
+    # piped to a log file), or where a future base image drops something.
+    #
+    # On failure we dump everything diagnostic (php -m output and exit code,
+    # conf.d directory listing, install log tail) to stderr so the build
+    # log carries enough context to debug remotely without re-running.
     local required_extensions=(sodium pdo_pgsql intl sockets pcntl)
+    local php_modules_capture=/tmp/php-m-modules.txt
+    local php_modules_exit
+    php -m > "${php_modules_capture}" 2>&1
+    php_modules_exit=$?
+
     local missing=()
     for ext in "${required_extensions[@]}"; do
-        if ! php -m 2>/dev/null | grep -qiE "^${ext}$"; then
+        if ! grep -qiE "^${ext}$" "${php_modules_capture}"; then
             missing+=("${ext}")
         fi
     done
+
     if [ "${#missing[@]}" -gt 0 ]; then
-        printf '%s%s' "❌ Required PHP extensions not loaded: ${missing[*]}" $'\n' 1>&2
+        {
+            printf '\n'
+            printf '❌ Required PHP extensions not loaded: %s\n' "${missing[*]}"
+            printf '\n--- php -m exit code: %d ---\n' "${php_modules_exit}"
+            printf '\n--- php -m output (stdout+stderr) ---\n'
+            cat "${php_modules_capture}"
+            printf '\n--- /usr/local/etc/php/conf.d/ ---\n'
+            ls -la /usr/local/etc/php/conf.d/ 2>&1
+            printf '\n--- /usr/local/lib/php/extensions/ ---\n'
+            ls -la /usr/local/lib/php/extensions/ 2>&1
+            printf '\n--- tail -50 /tmp/install_php_extensions.log ---\n'
+            tail -50 "${php_ext_logfile}" 2>&1 || printf '(install log missing)\n'
+        } 1>&2
         kill -s TERM "${install_requirements_pid}"
         return 1
     fi
