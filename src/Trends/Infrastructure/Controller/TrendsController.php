@@ -26,13 +26,6 @@ class TrendsController
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
-    /**
-     * One of: 'hit', 'miss', 'bypass', 'error', 'unknown'.
-     * Set by getHighlightsFromSearchParams; surfaced as the x-cache response
-     * header so the perf harness can verify Redis is actually serving hits.
-     */
-    private string $lastCacheState = 'unknown';
-
     public function callback(Request $request): JsonResponse
     {
         if ($request->isMethod('OPTIONS')) {
@@ -74,12 +67,17 @@ DATA
         $bypassCache = $this->environment !== 'prod'
             && $request->headers->has('x-benchmark');
 
-        $this->lastCacheState = $bypassCache ? 'bypass' : 'unknown';
+        // Request-scoped state captured by the finder closure; threaded out by
+        // reference instead of stored on the controller. Worker-mode-safe: no
+        // singleton property to leak between requests.
+        $cacheState = $bypassCache ? 'bypass' : 'unknown';
 
         $response = $this->getCollection(
             $request,
             counter: fn(SearchParams $searchParams) => $this->getTotalPages($searchParams, $bypassCache),
-            finder: fn(SearchParams $searchParams) => $this->getHighlightsFromSearchParams($searchParams, $bypassCache),
+            finder: function (SearchParams $searchParams) use ($bypassCache, &$cacheState) {
+                return $this->getHighlightsFromSearchParams($searchParams, $bypassCache, $cacheState);
+            },
             params: [
                 'aggregate'          => 'string',
                 'distinctSources'    => 'bool',
@@ -93,7 +91,7 @@ DATA
             ]
         );
 
-        $response->headers->set('x-cache', $this->lastCacheState);
+        $response->headers->set('x-cache', $cacheState);
 
         return $response;
     }
@@ -136,13 +134,17 @@ DATA
      * @throws JsonException
      * @throws RedisException
      */
-    private function getHighlightsFromSearchParams(SearchParams $searchParams, bool $bypassCache = false): array {
+    private function getHighlightsFromSearchParams(
+        SearchParams $searchParams,
+        bool $bypassCache,
+        string &$cacheState,
+    ): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
             return [];
         }
 
         if ($bypassCache) {
-            $this->lastCacheState = 'bypass';
+            $cacheState = 'bypass';
             return $this->popularPublicationRepository->findBy($searchParams);
         }
 
@@ -153,11 +155,11 @@ DATA
             $cachedHighlights = $client->get($key);
 
             if ($cachedHighlights) {
-                $this->lastCacheState = 'hit';
+                $cacheState = 'hit';
                 return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
             }
 
-            $this->lastCacheState = 'miss';
+            $cacheState = 'miss';
             $highlights = $this->popularPublicationRepository->findBy($searchParams);
             $client->setex($key, 3600, json_encode($highlights, JSON_THROW_ON_ERROR));
 
@@ -165,7 +167,7 @@ DATA
         } catch (ConnectionException $exception) {
             $this->logger->error($exception->getMessage());
 
-            $this->lastCacheState = 'error';
+            $cacheState = 'error';
             return $this->popularPublicationRepository->findBy($searchParams);
         }
     }
