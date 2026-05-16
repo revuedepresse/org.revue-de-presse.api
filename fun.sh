@@ -523,10 +523,15 @@ SCRIPT
 function stop() {
     load_configuration_parameters
 
+    # Stop only the FPM-stack services. `cache` is a baseline service
+    # shared with the opt-in php-worker / reverse-proxy stack — wiping
+    # the project with `down` would kill Redis for them too, leaving the
+    # benchmark harness in a degraded "cache=error" state. Naming the
+    # FPM services explicitly here keeps the two stacks independent.
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        down
+        stop app service
 }
 
 function validate_docker_compose_configuration() {
