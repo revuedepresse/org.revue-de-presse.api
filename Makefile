@@ -5,6 +5,11 @@ SHELL:=/bin/bash
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
+# docker compose file pair used by every container-side target; matches the
+# pattern used by fun.sh.
+COMPOSE_FILES := -f ./provisioning/containers/docker-compose.yaml \
+                 -f ./provisioning/containers/docker-compose.override.yaml
+
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
 BENCH_ITERATIONS  ?= 200
@@ -44,10 +49,12 @@ stop: ## Stop service
 test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
 
-bench-deps: ## Ensure composer dev dependencies (phpunit, http-client, ...) are installed for benchmarks
+bench-deps: ## Install composer dev deps via the `app` service container (idempotent)
 	@if [ ! -x bin/phpunit ] || [ ! -d vendor/phpunit/phpunit ] || [ ! -d vendor/symfony/phpunit-bridge ]; then \
-		echo "→ Installing composer dev dependencies (vendor was --no-dev)..."; \
-		composer install --no-interaction --prefer-dist; \
+		echo "→ Installing composer dev dependencies via the 'app' service container..."; \
+		/bin/bash -c 'set -a; source ./.env.local; set +a; \
+			docker compose $(COMPOSE_FILES) run --rm --no-deps --user root -T app \
+				composer install --no-interaction --prefer-dist'; \
 	fi
 	@test -x bin/phpunit || { echo "✗ bin/phpunit still missing after composer install — aborting"; exit 1; }
 
