@@ -4,3 +4,9 @@ services:
         calls:
             - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setLogger', [ '@logger'] ]
+
+    App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider:
+        arguments:
+            $inner:       '@security.user.provider.concrete.member_entity_provider'
+            $redisCache:  '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $ttlSeconds:  60
