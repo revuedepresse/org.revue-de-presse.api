@@ -88,10 +88,8 @@ services:
                 soft: 65536
                 hard: 65536
         # No host ports — only reachable through the sibling traefik service.
-        # Service-discovery labels for the sibling traefik service. Only
-        # honored when traefik is also running (same profile).
-        expose:
-            - '80'
+        # Traefik finds the container via docker DNS (`frankenphp:80`); the
+        # `loadbalancer.server.port=80` label below is what selects the port.
         labels:
             - 'traefik.enable=true'
             - 'traefik.http.routers.frankenphp-http.entrypoints=web'
