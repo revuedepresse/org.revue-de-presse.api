@@ -45,14 +45,16 @@ test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
 
 bench-with-redis: ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
-	@BENCH_BYPASS_CACHE=0 \
+	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
+		BENCH_BYPASS_CACHE=0 \
 		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
 		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
 		BENCH_WARMUP=$(BENCH_WARMUP) \
 		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
 
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
-	@BENCH_BYPASS_CACHE=1 \
+	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
+		BENCH_BYPASS_CACHE=1 \
 		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
 		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
 		BENCH_WARMUP=$(BENCH_WARMUP) \
