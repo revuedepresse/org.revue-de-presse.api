@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
-        bench-with-redis bench-without-redis
+        bench-with-redis bench-without-redis bench-deps
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
@@ -44,7 +44,14 @@ stop: ## Stop service
 test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
 
-bench-with-redis: ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
+bench-deps: ## Ensure composer dev dependencies (phpunit, http-client, ...) are installed for benchmarks
+	@if [ ! -x bin/phpunit ] || [ ! -d vendor/phpunit/phpunit ] || [ ! -d vendor/symfony/phpunit-bridge ]; then \
+		echo "→ Installing composer dev dependencies (vendor was --no-dev)..."; \
+		composer install --no-interaction --prefer-dist; \
+	fi
+	@test -x bin/phpunit || { echo "✗ bin/phpunit still missing after composer install — aborting"; exit 1; }
+
+bench-with-redis: bench-deps ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
 	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
 		BENCH_BYPASS_CACHE=0 \
 		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
@@ -52,7 +59,7 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 		BENCH_WARMUP=$(BENCH_WARMUP) \
 		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
 
-bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
+bench-without-redis: bench-deps ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@SYMFONY_DEPRECATIONS_HELPER='disabled' \
 		BENCH_BYPASS_CACHE=1 \
 		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
