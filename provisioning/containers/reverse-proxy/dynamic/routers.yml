@@ -26,6 +26,17 @@ http:
             service: php-worker
             tls: {}
 
+        # Dashboard at http://traefik.localhost/dashboard/ — guarded by
+        # basic-auth whose user list lives in a gitignored htpasswd file.
+        # Generate / refresh credentials with `make reverse-proxy-password`.
+        dashboard:
+            entrypoints:
+                - web
+            rule: "Host(`traefik.localhost`)"
+            service: api@internal
+            middlewares:
+                - dashboard-auth
+
     services:
         php-worker:
             loadBalancer:
@@ -34,3 +45,12 @@ http:
                     # sibling service's IP within the compose network.
                     - url: "http://php-worker:80"
                 passHostHeader: true
+
+    middlewares:
+        dashboard-auth:
+            basicAuth:
+                # File is mounted from host var/etc/letsencrypt/htpasswd.
+                # Empty file → every request gets 401 (deny-by-default
+                # when the operator hasn't generated credentials yet).
+                usersFile: /etc/letsencrypt/htpasswd
+                realm: "Traefik dashboard"

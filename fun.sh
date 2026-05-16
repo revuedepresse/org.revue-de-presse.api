@@ -423,6 +423,7 @@ function run_reverse_proxy_password() {
     local user="${1:-admin}"
     local password
     local hash
+    local htpasswd_file='./var/etc/letsencrypt/htpasswd'
 
     # 24-char URL-safe random password — plenty for a local dashboard.
     password=$(openssl rand -base64 32 | tr -d '\n=+/' | head -c 24)
@@ -440,14 +441,18 @@ function run_reverse_proxy_password() {
         return 1
     fi
 
-    printf '%s%s' '→ Generated Traefik dashboard credentials'                    $'\n'
+    # Single-user dashboard — overwrite the file so re-running the target
+    # rotates credentials cleanly. Edit the file by hand if you want
+    # multiple users (one user:hash line each).
+    mkdir -p "$(dirname "${htpasswd_file}")"
+    printf '%s\n' "${hash}" > "${htpasswd_file}"
+
+    printf '%s%s' '✓ Wrote new Traefik dashboard credentials to '"${htpasswd_file}" $'\n'
     printf '  %-9s %s%s' 'user:'     "${user}"     $'\n'
     printf '  %-9s %s%s' 'password:' "${password}" $'\n'
-    printf '%s%s' ''                                                             $'\n'
-    printf '%s%s' '→ Paste this line into .env.local (single-quoted, exactly):' $'\n'
-    printf '%s%s' ''                                                             $'\n'
-    printf "TRAEFIK_DASHBOARD_USERS='%s'%s" "${hash}" $'\n'
-    printf '%s%s' ''                                                             $'\n'
+    printf '%s%s' '  (save the password somewhere — only the bcrypt hash is stored on disk)' $'\n'
+    printf '%s%s' '' $'\n'
+    printf '%s%s' '→ Traefik picks up the new file automatically (file provider watch=true).' $'\n'
 }
 
 function run_php_unit_tests() {
