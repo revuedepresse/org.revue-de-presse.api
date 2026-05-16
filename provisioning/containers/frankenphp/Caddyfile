@@ -1,0 +1,54 @@
+# Production-style Caddy/FrankenPHP configuration.
+# Only loaded when the `frankenphp` compose profile is activated.
+
+{
+    # No interactive admin endpoint in production-shaped runs.
+    admin off
+
+    # Worker count and PHP entrypoint come from FRANKENPHP_CONFIG env, e.g.
+    #   FRANKENPHP_CONFIG="worker /var/www/<project>/public/index.php"
+    frankenphp
+
+    # Don't auto-redirect HTTP→HTTPS at the runtime — the cluster's edge
+    # proxy (Traefik / nginx) is expected to terminate TLS in production.
+    # Inside this container we still accept TLS directly via SERVER_NAME.
+    auto_https off
+
+    # Structured access logs to stdout for whatever log aggregator picks
+    # them up. Override via Caddy's `log` directive on a per-site basis if
+    # you need different sinks per environment.
+    log {
+        format json
+        level INFO
+        output stdout
+    }
+}
+
+# Listen on whatever SERVER_NAME the compose environment passes in (e.g.
+# `:443`, `api.example.org`, or a host:port pair). Multiple values can be
+# whitespace-separated.
+{$SERVER_NAME} {
+    # Internal self-signed cert by default. In a real prod deployment,
+    # mount real certs read-only into /etc/caddy/certs/ and replace this
+    # directive with `tls /etc/caddy/certs/fullchain.pem /etc/caddy/certs/privkey.pem`.
+    tls internal
+
+    root * {$PROJECT_DIR:/app}/public
+
+    encode zstd br gzip
+
+    # Standard php_server pipeline: try files, fall through to index.php.
+    php_server {
+        try_files {path} index.php
+    }
+
+    # Per-site access log. Same JSON format as the global log block.
+    log {
+        output stdout
+        format json
+        level INFO
+    }
+
+    # Strip the server banner.
+    header -Server
+}

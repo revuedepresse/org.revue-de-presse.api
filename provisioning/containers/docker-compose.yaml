@@ -38,3 +38,61 @@ services:
               target: '/usr/local/etc/php-fpm.d/www.conf'
               bind:
                   create_host_path: false
+
+    # Production-style FrankenPHP runtime. Gated behind the `frankenphp`
+    # profile so neither `docker compose up` nor `docker compose build`
+    # touch it without an explicit opt-in.
+    #
+    #   docker compose --profile frankenphp build frankenphp
+    #   docker compose --profile frankenphp up    frankenphp
+    #
+    # Replaces (nginx + php-fpm) with a single Caddy-embedded PHP worker.
+    # The host-port mapping is configurable so it doesn't collide with the
+    # existing fpm/proxy stack — defaults to 8443 on the host to make
+    # parallel-run benchmarking against both runtimes possible.
+    frankenphp:
+        profiles:
+            - frankenphp
+        build:
+            context: .
+            dockerfile: './frankenphp/Dockerfile'
+            args:
+                OWNER_UID: '${PROJECT_OWNER_UID:-1000}'
+                OWNER_GID: '${PROJECT_OWNER_GID:-1001}'
+                PROJECT:   '${PROJECT:-org.example.api}'
+        depends_on:
+            - cache
+        env_file:
+            - '../../.env.local'
+        environment:
+            # Production-shaped defaults. Override via .env.local only if you
+            # specifically want a dev-style FrankenPHP run.
+            APP_ENV:                 'prod'
+            APP_DEBUG:               '0'
+            APP_RUNTIME:             'Runtime\\FrankenPhpSymfony\\Runtime'
+            SERVER_NAME:             ':443'
+            FRANKENPHP_CONFIG:       'worker /var/www/${PROJECT:-org.example.api}/public/index.php'
+            FRANKENPHP_NUM_THREADS:  '${FRANKENPHP_NUM_THREADS:-8}'
+            PROJECT_DIR:             '/var/www/${PROJECT:-org.example.api}'
+        restart: 'unless-stopped'
+        security_opt:
+            - 'no-new-privileges:true'
+        mem_limit: '4g'
+        cpus: 4.0
+        tmpfs:
+            - /tmp:size=128M
+        ulimits:
+            nofile:
+                soft: 65536
+                hard: 65536
+        ports:
+            - '${FRANKENPHP_HTTPS_PORT:-8443}:443'
+        volumes:
+            - '../../../shared/:/var/www/shared/'
+            - './frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro'
+        healthcheck:
+            test: ['CMD', 'curl', '-fkSs', 'https://localhost/api/healthcheck']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 30s
