@@ -16,6 +16,13 @@ BENCH_TIMEOUT       ?= 30
 BENCH_MEMORY_LIMIT  ?= 1G
 export BENCH_ITERATIONS BENCH_CONCURRENCY BENCH_WARMUP BENCH_TIMEOUT BENCH_MEMORY_LIMIT
 
+# Pass TAG through to fun.sh::run_update_version. When set, the function
+# uses it as both the source for the PHP version literal AND as the
+# argument to `git tag`. Example:
+#   make update-version TAG=v5.2.0-http-api
+TAG ?=
+export TAG
+
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
 TMP_DIR ?= '/tmp/tmp_${SERVICE}'
@@ -91,5 +98,5 @@ stop-benchmark-stack: reverse-proxy-stop php-worker-stop ## Stop the full benchm
 restart-benchmark-stack: stop-benchmark-stack start-benchmark-stack ## Stop the benchmark stack and start it back up (rebuilds if needed)
 	@printf '✅ Benchmark stack restarted.%s' $$'\n'
 
-update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
+update-version: ## Sync repo version with latest git tag, OR `make update-version TAG=vX.Y.Z` to set + create a new tag
 	@/bin/bash -c 'source fun.sh && run_update_version'

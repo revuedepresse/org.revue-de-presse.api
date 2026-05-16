@@ -392,16 +392,45 @@ function run_reverse_proxy_stop() {
 
 function run_update_version() {
     local repo_file
+    local source_tag
     local latest
     local current
 
     repo_file='src/Trends/Infrastructure/Repository/PopularPublicationRepository.php'
 
-    latest=$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
-    if [ -z "${latest}" ]; then
-        printf '%s%s' 'ERROR: no git tag found' $'\n' 1>&2
+    # When TAG is unset (e.g. plain `make update-version`), default it to the
+    # next minor on top of the most recent existing tag in the same track:
+    #
+    #   latest tag: v5.1.0-http-api  →  TAG defaults to v5.2.0-http-api
+    #   latest tag: v18.8            →  TAG defaults to v18.9.0
+    #
+    # The function then proceeds as if TAG had been supplied explicitly:
+    # update the PHP file's version literal AND create the git tag on HEAD.
+    if [ -z "${TAG}" ]; then
+        local latest_tag version_part track_suffix major minor
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
+        if [ -z "${latest_tag}" ]; then
+            printf '%s%s' 'ERROR: no existing tag to derive next minor from' $'\n' 1>&2
+            return 1
+        fi
+        if ! printf '%s' "${latest_tag}" | grep -qE '^v[0-9]+\.[0-9]+'; then
+            printf 'ERROR: latest tag %s does not match v<major>.<minor> prefix%s' "${latest_tag}" $'\n' 1>&2
+            return 1
+        fi
+        version_part=$(printf '%s' "${latest_tag}" | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
+        track_suffix=${latest_tag#"${version_part}"}
+        major=$(printf '%s' "${version_part}" | sed -E 's/^v([0-9]+).*/\1/')
+        minor=$(printf '%s' "${version_part}" | sed -E 's/^v[0-9]+\.([0-9]+).*/\1/')
+        TAG="v${major}.$((minor + 1)).0${track_suffix}"
+        printf '→ TAG unset; defaulting to next minor: %s (based on latest tag %s)%s' "${TAG}" "${latest_tag}" $'\n'
+    fi
+    source_tag="${TAG}"
+
+    if ! printf '%s' "${source_tag}" | grep -qE '^v[0-9]+(\.[0-9]+){1,2}'; then
+        printf 'ERROR: %s does not match expected v<major>.<minor>(.<patch>) prefix%s' "${source_tag}" $'\n' 1>&2
         return 1
     fi
+    latest=$(printf '%s' "${source_tag}" | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
 
     current=$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$/\1/p" "${repo_file}" | head -1)
     if [ -z "${current}" ]; then
@@ -411,12 +440,21 @@ function run_update_version() {
 
     if [ "${current}" = "${latest}" ]; then
         printf '%s version already up-to-date: %s%s' "${repo_file}" "${current}" $'\n'
-        return 0
+    else
+        sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
+        rm -f "${repo_file}.bak"
+        printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
     fi
 
-    sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
-    rm -f "${repo_file}.bak"
-    printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
+    # Create the git tag on HEAD. Signed annotated tag, matching the
+    # PGP-signed commits convention. Idempotent: skip if a tag with this
+    # exact name already points somewhere.
+    if git rev-parse --verify --quiet "refs/tags/${TAG}" >/dev/null; then
+        printf '→ git tag %s already exists, skipping creation%s' "${TAG}" $'\n'
+    else
+        printf '→ git tag -s %s%s' "${TAG}" $'\n'
+        git tag -s "${TAG}" -m "Release ${TAG}"
+    fi
 }
 
 function run_reverse_proxy_password() {
