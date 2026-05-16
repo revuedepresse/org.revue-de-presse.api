@@ -40,7 +40,7 @@ services:
                   create_host_path: false
 
     # Production-style PHP worker runtime (FrankenPHP under the hood —
-    # the directory `./frankenphp/` still hosts the Dockerfile + Caddyfile
+    # the directory `./php-worker/` hosts the Dockerfile + Caddyfile
     # + php.ini.dist, but the compose service is named after its role).
     # Gated behind the `frankenphp` profile so neither `docker compose up`
     # nor `docker compose build` touch it without an explicit opt-in.
@@ -67,7 +67,7 @@ services:
             - frankenphp
         build:
             context: .
-            dockerfile: './frankenphp/Dockerfile'
+            dockerfile: './php-worker/Dockerfile'
             args:
                 OWNER_UID: '${PROJECT_OWNER_UID:-1000}'
                 OWNER_GID: '${PROJECT_OWNER_GID:-1001}'
@@ -104,24 +104,17 @@ services:
                 soft: 65536
                 hard: 65536
         # No host ports — only reachable through the sibling reverse-proxy
-        # service. Traefik finds the container via docker DNS
-        # (`php-worker:80`); the `loadbalancer.server.port=80` label below
-        # is what selects the port.
-        labels:
-            - 'traefik.enable=true'
-            - 'traefik.http.routers.php-worker-http.entrypoints=web'
-            - 'traefik.http.routers.php-worker-http.rule=Host(`${BENCHMARK_HOST:-local.api.revue-de-presse.org}`)'
-            - 'traefik.http.routers.php-worker-https.entrypoints=websecure'
-            - 'traefik.http.routers.php-worker-https.rule=Host(`${BENCHMARK_HOST:-local.api.revue-de-presse.org}`)'
-            - 'traefik.http.routers.php-worker-https.tls=true'
-            - 'traefik.http.services.php-worker.loadbalancer.server.port=80'
+        # service. Routing is declared in
+        # provisioning/containers/reverse-proxy/dynamic/routers.yml (file provider);
+        # docker-label-based discovery is intentionally NOT used to avoid
+        # Traefik needing access to the docker socket.
         volumes:
             - '../../../shared/:/var/www/shared/'
-            - './frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro'
+            - './php-worker/Caddyfile:/etc/caddy/Caddyfile:ro'
             # PHP runtime configuration overlay — see
-            # provisioning/containers/frankenphp/templates/php.ini.dist.
+            # provisioning/containers/php-worker/templates/php.ini.dist.
             # Loaded after the base image defaults; the `zz-` prefix wins.
-            - './frankenphp/templates/php.ini.dist:/usr/local/etc/php/conf.d/zz-frankenphp-prod.ini:ro'
+            - './php-worker/templates/php.ini.dist:/usr/local/etc/php/conf.d/zz-frankenphp-prod.ini:ro'
         healthcheck:
             test: ['CMD', 'curl', '-fkSs', 'http://localhost/api/healthcheck']
             interval: 30s
@@ -132,6 +125,12 @@ services:
     # Edge reverse-proxy (Traefik) for the frankenphp profile. Same profile
     # gate. Bring it up with `make reverse-proxy-start` (which pulls
     # php-worker in via depends_on); stop with `make reverse-proxy-stop`.
+    #
+    # Routing is declared in the file provider
+    # (provisioning/containers/reverse-proxy/dynamic/routers.yml). We deliberately
+    # don't use the docker provider: Traefik v3.5's bundled docker client
+    # pins API v1.24, which Docker Engine 29.x (MinAPIVersion=1.40)
+    # rejects with HTTP 400, breaking discovery on every restart.
     #
     # NOTE: takes host ports 80 and 443, so the legacy nginx-based
     # local.proxy stack must not be running at the same time.
@@ -144,15 +143,13 @@ services:
             - php-worker
         command:
             # Dashboard enabled but NOT served on a separate insecure entrypoint —
-            # it's routed via the regular `web` entrypoint behind basic auth (see
-            # labels). Generate credentials with `make reverse-proxy-password`.
+            # add a router for it in routers.yml when needed, then guard it
+            # with a basic-auth middleware whose users live in routers.yml.
             - '--api.dashboard=true'
             - '--api.insecure=false'
             - '--ping=true'
-            - '--providers.docker=true'
-            - '--providers.docker.exposedbydefault=false'
-            # File provider for the TLS cert store; resolves cert paths to the
-            # /etc/letsencrypt mount below.
+            # File provider only — declarative routers + TLS cert store,
+            # live-reloaded on save.
             - '--providers.file.directory=/etc/traefik/dynamic'
             - '--providers.file.watch=true'
             - '--entrypoints.web.address=:80'
@@ -169,27 +166,16 @@ services:
             - '${TRAEFIK_HTTP_PORT:-80}:80/tcp'
             - '${TRAEFIK_HTTPS_PORT:-443}:443/tcp'
         volumes:
-            # Docker provider needs read-only access to the socket to
-            # discover the php-worker service's labels.
-            - '/var/run/docker.sock:/var/run/docker.sock:ro'
             # Dynamic config — declares the TLS cert store and any future
             # static routes/middlewares. Read-only mount; watch=true picks
             # up edits live.
-            - './traefik/dynamic:/etc/traefik/dynamic:ro'
+            - './reverse-proxy/dynamic:/etc/traefik/dynamic:ro'
             # Local TLS material. Drop your fullchain.pem and privkey.pem
             # into var/etc/letsencrypt/live/default/ on the host (gitignored)
             # and they're picked up by traefik via the file provider.
             - '../../var/etc/letsencrypt:/etc/letsencrypt:ro'
-        # Dashboard router with basic-auth middleware. Routed via the `web`
-        # entrypoint at http://traefik.localhost/dashboard/ — credentials
-        # come from TRAEFIK_DASHBOARD_USERS in .env.local.
-        labels:
-            - 'traefik.enable=true'
-            - 'traefik.http.routers.dashboard.entrypoints=web'
-            - 'traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)'
-            - 'traefik.http.routers.dashboard.service=api@internal'
-            - 'traefik.http.routers.dashboard.middlewares=dashboard-auth'
-            - 'traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}'
+        # Dashboard router moved to routers.yml when needed — docker labels
+        # would require the docker provider, which we're not running.
         healthcheck:
             test: ['CMD', 'traefik', 'healthcheck', '--ping']
             interval: 30s

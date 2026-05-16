@@ -45,7 +45,7 @@ RUN /bin/bash -c 'source /tmp/requirements.sh && \
     rm -f /tmp/requirements.sh
 
 # PHP runtime configuration lives in
-# provisioning/containers/frankenphp/templates/php.ini.dist
+# provisioning/containers/php-worker/templates/php.ini.dist
 # and is mounted at runtime by compose at
 # /usr/local/etc/php/conf.d/zz-frankenphp-prod.ini — see docker-compose.yaml.
 # Mounting (not baking) matches the pattern the FPM service already uses

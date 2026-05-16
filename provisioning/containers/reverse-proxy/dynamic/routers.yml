@@ -1,0 +1,36 @@
+# Traefik dynamic configuration — HTTP routers + services.
+#
+# Loaded by traefik's `file` provider (see docker-compose.yaml command flags).
+# Pairs with certs.yml (the default TLS store).
+#
+# We use the file provider instead of the docker provider so Traefik
+# does not need access to the docker socket — sidesteps the recurring
+# Traefik-v3 ↔ Docker-Engine-29.x API-version handshake bug where
+# Traefik requests /v1.24/version and Docker (MinAPIVersion=1.40)
+# rejects it with 400.
+#
+# To target a different host, edit `Host(`…`)` below or add an extra
+# router that points at the same `php-worker` service.
+
+http:
+    routers:
+        php-worker-http:
+            entrypoints:
+                - web
+            rule: "Host(`local.api.revue-de-presse.org`)"
+            service: php-worker
+        php-worker-https:
+            entrypoints:
+                - websecure
+            rule: "Host(`local.api.revue-de-presse.org`)"
+            service: php-worker
+            tls: {}
+
+    services:
+        php-worker:
+            loadBalancer:
+                servers:
+                    # Docker DNS resolves `php-worker` to the
+                    # sibling service's IP within the compose network.
+                    - url: "http://php-worker:80"
+                passHostHeader: true
