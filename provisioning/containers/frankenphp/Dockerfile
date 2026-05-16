@@ -44,31 +44,13 @@ RUN /bin/bash -c 'source /tmp/requirements.sh && \
         clear_package_management_system_cache' && \
     rm -f /tmp/requirements.sh
 
-# PHP runtime configuration overlay. The shared block mirrors the
-# www.conf.dist template that the FPM pool uses; the FrankenPHP-specific
-# block beneath it tunes the long-lived worker runtime, which has different
-# requirements from a per-request FPM child process.
-RUN { \
-        echo "; ---- shared with provisioning/containers/service/templates/www.conf.dist ----"; \
-        echo "memory_limit                  = 64M"; \
-        echo "error_reporting               = E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED"; \
-        echo "display_errors                = Off"; \
-        echo "display_startup_errors        = Off"; \
-        echo "html_errors                   = On"; \
-        echo "log_errors                    = On"; \
-        echo ""; \
-        echo "; ---- FrankenPHP-specific (worker mode is long-lived; opcache + JIT pay off) ----"; \
-        echo "opcache.enable                = 1"; \
-        echo "opcache.enable_cli            = 1"; \
-        echo "opcache.memory_consumption    = 256"; \
-        echo "opcache.max_accelerated_files = 20000"; \
-        echo "opcache.validate_timestamps   = 0"; \
-        echo "opcache.jit                   = tracing"; \
-        echo "opcache.jit_buffer_size       = 128M"; \
-        echo "realpath_cache_size           = 4096K"; \
-        echo "realpath_cache_ttl            = 600"; \
-        echo "expose_php                    = Off"; \
-    } > "$PHP_INI_DIR/conf.d/zz-frankenphp-prod.ini"
+# PHP runtime configuration lives in
+# provisioning/containers/frankenphp/templates/php.ini.dist
+# and is mounted at runtime by compose at
+# /usr/local/etc/php/conf.d/zz-frankenphp-prod.ini — see docker-compose.yaml.
+# Mounting (not baking) matches the pattern the FPM service already uses
+# for its extensions.ini.dist / www.conf templates, so edits don't require
+# a rebuild.
 
 # Assert the required extension set at build time. Mirrors the guard added to
 # requirements.sh::install_php_extensions so a silent install regression

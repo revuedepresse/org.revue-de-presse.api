@@ -324,6 +324,42 @@ function run_bench_without_redis() {
     run_bench_highlights 1
 }
 
+function run_frankenphp_build() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            build frankenphp traefik'
+}
+
+function run_frankenphp_up() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            up --detach frankenphp traefik'
+}
+
+function run_frankenphp_down() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            stop frankenphp traefik'
+}
+
+function run_frankenphp_logs() {
+    /bin/bash -c 'set -a; source ./.env.local; set +a; \
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            --profile frankenphp \
+            logs --follow --tail=200 frankenphp traefik'
+}
+
 function run_traefik_password() {
     local user="${1:-admin}"
     local password

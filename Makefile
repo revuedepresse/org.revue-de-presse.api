@@ -1,7 +1,8 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
-        bench-with-redis bench-without-redis bench-deps traefik-password
+        bench-with-redis bench-without-redis bench-deps traefik-password \
+        frankenphp-build frankenphp-up frankenphp-down frankenphp-logs
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
@@ -56,6 +57,18 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
+
+frankenphp-build: ## Build the FrankenPHP + Traefik images (compose profile `frankenphp`)
+	@/bin/bash -c 'source fun.sh && run_frankenphp_build'
+
+frankenphp-up: ## Start FrankenPHP + Traefik in detached mode (compose profile `frankenphp`)
+	@/bin/bash -c 'source fun.sh && run_frankenphp_up'
+
+frankenphp-down: ## Stop FrankenPHP + Traefik (containers remain so logs are inspectable)
+	@/bin/bash -c 'source fun.sh && run_frankenphp_down'
+
+frankenphp-logs: ## Tail FrankenPHP + Traefik logs
+	@/bin/bash -c 'source fun.sh && run_frankenphp_logs'
 
 traefik-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
 	@/bin/bash -c 'source fun.sh && run_traefik_password "${TRAEFIK_USER:-admin}"'
