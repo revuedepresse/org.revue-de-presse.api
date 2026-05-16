@@ -311,6 +311,7 @@ function run_bench_highlights() {
         BENCH_ITERATIONS="${BENCH_ITERATIONS:-200}" \
         BENCH_CONCURRENCY="${BENCH_CONCURRENCY:-1}" \
         BENCH_WARMUP="${BENCH_WARMUP:-3}" \
+        BENCH_TIMEOUT="${BENCH_TIMEOUT:-30}" \
         bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
 }
 

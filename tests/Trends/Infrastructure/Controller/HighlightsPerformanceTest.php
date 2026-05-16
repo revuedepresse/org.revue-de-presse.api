@@ -48,6 +48,7 @@ class HighlightsPerformanceTest extends KernelTestCase
         $iterations   = (int) (getenv('BENCH_ITERATIONS')    ?: $_SERVER['BENCH_ITERATIONS']    ?? $_ENV['BENCH_ITERATIONS']    ?? 50);
         $warmup       = (int) (getenv('BENCH_WARMUP')        ?: $_SERVER['BENCH_WARMUP']        ?? $_ENV['BENCH_WARMUP']        ?? 3);
         $concurrency  = (int) (getenv('BENCH_CONCURRENCY')   ?: $_SERVER['BENCH_CONCURRENCY']   ?? $_ENV['BENCH_CONCURRENCY']   ?? 1);
+        $timeoutSec   = (float) (getenv('BENCH_TIMEOUT')     ?: $_SERVER['BENCH_TIMEOUT']       ?? $_ENV['BENCH_TIMEOUT']       ?? 30.0);
         // BENCH_BYPASS_CACHE: "1" (default) sends x-benchmark and the controller
         // skips Redis. "0" leaves the header off so the cache serves hits after
         // the first miss — measures the cache-warm path instead of DB latency.
@@ -73,7 +74,7 @@ class HighlightsPerformanceTest extends KernelTestCase
 
         $client = HttpClient::create(
             [
-                'timeout' => 30.0,
+                'timeout' => $timeoutSec,
                 'headers' => $headers,
             ],
             // Bump the per-host connection cap so concurrency > 6 is actually
@@ -252,6 +253,7 @@ class HighlightsPerformanceTest extends KernelTestCase
             ['Iterations',       (string) $metrics->count()],
             ['Concurrency',      (string) $concurrency],
             ['Cache bypass',     $bypassCache ? 'yes (x-benchmark)' : 'no (Redis active)'],
+            ['Timeout (s)',      (string) $timeoutSec],
             ['Warmup',           (string) $warmup],
             ['Errors',           (string) $metrics->errors()],
             ['Min (ms)',         number_format($metrics->min(), 2)],
