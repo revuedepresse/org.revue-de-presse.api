@@ -11,7 +11,7 @@
 # JIT tuning differ from the FPM service; all other PHP runtime values mirror
 # the www.conf.dist template the FPM pool uses.
 
-FROM dunglas/frankenphp:1-php8.4-bookworm
+FROM dunglas/frankenphp:1-php8.5-bookworm
 
 ARG OWNER_GID
 ARG OWNER_UID
