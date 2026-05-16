@@ -45,29 +45,36 @@ class HighlightsPerformanceTest extends KernelTestCase
         $base = str_contains($host, '://') ? $host : 'https://' . $host;
         $url  = rtrim($base, '/') . '/api/twitter/highlights';
 
-        $iterations  = (int) (getenv('BENCH_ITERATIONS')  ?: $_SERVER['BENCH_ITERATIONS']  ?? $_ENV['BENCH_ITERATIONS']  ?? 50);
-        $warmup      = (int) (getenv('BENCH_WARMUP')      ?: $_SERVER['BENCH_WARMUP']      ?? $_ENV['BENCH_WARMUP']      ?? 3);
-        $concurrency = (int) (getenv('BENCH_CONCURRENCY') ?: $_SERVER['BENCH_CONCURRENCY'] ?? $_ENV['BENCH_CONCURRENCY'] ?? 1);
+        $iterations   = (int) (getenv('BENCH_ITERATIONS')    ?: $_SERVER['BENCH_ITERATIONS']    ?? $_ENV['BENCH_ITERATIONS']    ?? 50);
+        $warmup       = (int) (getenv('BENCH_WARMUP')        ?: $_SERVER['BENCH_WARMUP']        ?? $_ENV['BENCH_WARMUP']        ?? 3);
+        $concurrency  = (int) (getenv('BENCH_CONCURRENCY')   ?: $_SERVER['BENCH_CONCURRENCY']   ?? $_ENV['BENCH_CONCURRENCY']   ?? 1);
+        // BENCH_BYPASS_CACHE: "1" (default) sends x-benchmark and the controller
+        // skips Redis. "0" leaves the header off so the cache serves hits after
+        // the first miss — measures the cache-warm path instead of DB latency.
+        $bypassCache  = ((string) (getenv('BENCH_BYPASS_CACHE') ?: $_SERVER['BENCH_BYPASS_CACHE'] ?? $_ENV['BENCH_BYPASS_CACHE'] ?? '1')) !== '0';
         if ($concurrency < 1) {
             $concurrency = 1;
         }
 
         $runId = bin2hex(random_bytes(4));
         $logger->info('benchmark.start', [
-            'run_id'      => $runId,
-            'url'         => $url,
-            'iterations'  => $iterations,
-            'concurrency' => $concurrency,
-            'warmup'      => $warmup,
+            'run_id'       => $runId,
+            'url'          => $url,
+            'iterations'   => $iterations,
+            'concurrency'  => $concurrency,
+            'warmup'       => $warmup,
+            'bypass_cache' => $bypassCache,
         ]);
+
+        $headers = ['x-auth-token' => $token];
+        if ($bypassCache) {
+            $headers['x-benchmark'] = '1';
+        }
 
         $client = HttpClient::create(
             [
                 'timeout' => 30.0,
-                'headers' => [
-                    'x-auth-token' => $token,
-                    'x-benchmark'  => '1',
-                ],
+                'headers' => $headers,
             ],
             // Bump the per-host connection cap so concurrency > 6 is actually
             // honored. Symfony's curl transport defaults this to 6.
@@ -212,6 +219,7 @@ class HighlightsPerformanceTest extends KernelTestCase
             ['URL',              $url],
             ['Iterations',       (string) $metrics->count()],
             ['Concurrency',      (string) $concurrency],
+            ['Cache bypass',     $bypassCache ? 'yes (x-benchmark)' : 'no (Redis active)'],
             ['Warmup',           (string) $warmup],
             ['Errors',           (string) $metrics->errors()],
             ['Min (ms)',         number_format($metrics->min(), 2)],
