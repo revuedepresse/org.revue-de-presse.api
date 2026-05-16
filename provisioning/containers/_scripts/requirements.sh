@@ -61,6 +61,9 @@ function install_system_packages() {
 }
 
 function install_php_extensions() {
+    # ext-sodium is REQUIRED by App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider
+    # (it encrypts every cached Member payload with sodium_crypto_secretbox).
+    # Removing it from this list will make the service fail at boot.
     (
       docker-php-ext-install \
           bcmath \
@@ -79,6 +82,23 @@ function install_php_extensions() {
     ) >> /dev/null 2>&1 && \
         printf '%s%s' '✅ Installed PHP extensions successfully.' $'\n' 1>&2 || \
         printf '%s%s' '⚠️ Could not install PHP extension.' $'\n' 1>&2
+
+    # Fail the image build if any required extension is missing at runtime.
+    # Catches regressions where the install above silently failed
+    # (it's piped to /dev/null), or where a future base image drops something.
+    local required_extensions=(sodium pdo_pgsql intl sockets pcntl)
+    local missing=()
+    for ext in "${required_extensions[@]}"; do
+        if ! php -m 2>/dev/null | grep -qiE "^${ext}$"; then
+            missing+=("${ext}")
+        fi
+    done
+    if [ "${#missing[@]}" -gt 0 ]; then
+        printf '%s%s' "❌ Required PHP extensions not loaded: ${missing[*]}" $'\n' 1>&2
+        kill -s TERM "${install_requirements_pid}"
+        return 1
+    fi
+    printf '%s%s' '✅ All required PHP extensions verified at runtime.' $'\n' 1>&2
 
     (
       version=3.4.2
