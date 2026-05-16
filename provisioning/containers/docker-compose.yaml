@@ -44,12 +44,12 @@ services:
     # touch it without an explicit opt-in.
     #
     #   docker compose --profile frankenphp build frankenphp
-    #   docker compose --profile frankenphp up    frankenphp
+    #   docker compose --profile frankenphp up    frankenphp traefik
     #
     # Replaces (nginx + php-fpm) with a single Caddy-embedded PHP worker.
-    # The host-port mapping is configurable so it doesn't collide with the
-    # existing fpm/proxy stack — defaults to 8443 on the host to make
-    # parallel-run benchmarking against both runtimes possible.
+    # Reachable only through the sibling `traefik` service — no host ports
+    # are published directly. Compose's default network gives traefik
+    # service-name discovery, so `traefik` forwards to `frankenphp:80`.
     frankenphp:
         profiles:
             - frankenphp
@@ -70,7 +70,9 @@ services:
             APP_ENV:                 'prod'
             APP_DEBUG:               '0'
             APP_RUNTIME:             'Runtime\\FrankenPhpSymfony\\Runtime'
-            SERVER_NAME:             ':443'
+            # Listen on both :80 (for traefik internal HTTP) and :443 (for
+            # direct TLS access via the 8443 host mapping below).
+            SERVER_NAME:             ':80 :443'
             FRANKENPHP_CONFIG:       'worker /var/www/${PROJECT:-org.example.api}/public/index.php'
             FRANKENPHP_NUM_THREADS:  '${FRANKENPHP_NUM_THREADS:-8}'
             PROJECT_DIR:             '/var/www/${PROJECT:-org.example.api}'
@@ -85,14 +87,82 @@ services:
             nofile:
                 soft: 65536
                 hard: 65536
-        ports:
-            - '${FRANKENPHP_HTTPS_PORT:-8443}:443'
+        # No host ports — only reachable through the sibling traefik service.
+        # Service-discovery labels for the sibling traefik service. Only
+        # honored when traefik is also running (same profile).
+        expose:
+            - '80'
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.frankenphp-http.entrypoints=web'
+            - 'traefik.http.routers.frankenphp-http.rule=Host(`${BENCHMARK_HOST:-local.api.revue-de-presse.org}`)'
+            - 'traefik.http.routers.frankenphp-https.entrypoints=websecure'
+            - 'traefik.http.routers.frankenphp-https.rule=Host(`${BENCHMARK_HOST:-local.api.revue-de-presse.org}`)'
+            - 'traefik.http.routers.frankenphp-https.tls=true'
+            - 'traefik.http.services.frankenphp.loadbalancer.server.port=80'
         volumes:
             - '../../../shared/:/var/www/shared/'
             - './frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro'
         healthcheck:
-            test: ['CMD', 'curl', '-fkSs', 'https://localhost/api/healthcheck']
+            test: ['CMD', 'curl', '-fkSs', 'http://localhost/api/healthcheck']
             interval: 30s
             timeout: 5s
             retries: 3
             start_period: 30s
+
+    # Edge reverse-proxy for the frankenphp profile. Same profile gate;
+    # starts as part of the same opt-in topology.
+    #
+    #   docker compose --profile frankenphp up traefik frankenphp
+    #
+    # NOTE: takes host ports 80 and 443, so the legacy nginx-based
+    # local.proxy stack must not be running at the same time.
+    traefik:
+        profiles:
+            - frankenphp
+        image: 'traefik:v3.5'
+        restart: 'unless-stopped'
+        depends_on:
+            - frankenphp
+        command:
+            # Dashboard enabled but NOT served on a separate insecure entrypoint —
+            # it's routed via the regular `web` entrypoint behind basic auth (see
+            # labels). Generate credentials with `make traefik-password`.
+            - '--api.dashboard=true'
+            - '--api.insecure=false'
+            - '--ping=true'
+            - '--providers.docker=true'
+            - '--providers.docker.exposedbydefault=false'
+            - '--entrypoints.web.address=:80'
+            - '--entrypoints.websecure.address=:443'
+            - '--log.level=INFO'
+            - '--accesslog=true'
+        env_file:
+            - '../../.env.local'
+        security_opt:
+            - 'no-new-privileges:true'
+        mem_limit: '256m'
+        cpus: 1.0
+        ports:
+            - '${TRAEFIK_HTTP_PORT:-80}:80/tcp'
+            - '${TRAEFIK_HTTPS_PORT:-443}:443/tcp'
+        volumes:
+            # Docker provider needs read-only access to the socket to
+            # discover the frankenphp service's labels.
+            - '/var/run/docker.sock:/var/run/docker.sock:ro'
+        # Dashboard router with basic-auth middleware. Routed via the `web`
+        # entrypoint at http://traefik.localhost/dashboard/ — credentials
+        # come from TRAEFIK_DASHBOARD_USERS in .env.local.
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.dashboard.entrypoints=web'
+            - 'traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)'
+            - 'traefik.http.routers.dashboard.service=api@internal'
+            - 'traefik.http.routers.dashboard.middlewares=dashboard-auth'
+            - 'traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}'
+        healthcheck:
+            test: ['CMD', 'traefik', 'healthcheck', '--ping']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 10s

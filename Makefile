@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
-        bench-with-redis bench-without-redis bench-deps
+        bench-with-redis bench-without-redis bench-deps traefik-password
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
 
@@ -56,6 +56,9 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
+
+traefik-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
+	@/bin/bash -c 'source fun.sh && run_traefik_password "${TRAEFIK_USER:-admin}"'
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
 	@latest=$$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/'); \

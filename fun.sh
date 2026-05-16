@@ -324,6 +324,37 @@ function run_bench_without_redis() {
     run_bench_highlights 1
 }
 
+function run_traefik_password() {
+    local user="${1:-admin}"
+    local password
+    local hash
+
+    # 24-char URL-safe random password — plenty for a local dashboard.
+    password=$(openssl rand -base64 32 | tr -d '\n=+/' | head -c 24)
+
+    if command -v htpasswd >/dev/null 2>&1; then
+        hash=$(htpasswd -nbB "${user}" "${password}" | tr -d '\n')
+    else
+        # Fall back to the httpd image — a few-MB pull, runs offline after.
+        hash=$(docker run --rm httpd:2.4-alpine \
+            htpasswd -nbB "${user}" "${password}" | tr -d '\n')
+    fi
+
+    if [ -z "${hash}" ]; then
+        printf '✗ Failed to generate htpasswd hash%s' $'\n' 1>&2
+        return 1
+    fi
+
+    printf '%s%s' '→ Generated Traefik dashboard credentials'                    $'\n'
+    printf '  %-9s %s%s' 'user:'     "${user}"     $'\n'
+    printf '  %-9s %s%s' 'password:' "${password}" $'\n'
+    printf '%s%s' ''                                                             $'\n'
+    printf '%s%s' '→ Paste this line into .env.local (single-quoted, exactly):' $'\n'
+    printf '%s%s' ''                                                             $'\n'
+    printf "TRAEFIK_DASHBOARD_USERS='%s'%s" "${hash}" $'\n'
+    printf '%s%s' ''                                                             $'\n'
+}
+
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 
