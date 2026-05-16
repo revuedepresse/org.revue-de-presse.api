@@ -1,8 +1,15 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version
+.PHONY: help build clean clear-app-cache clear-cache install restart start stop test update-version \
+        bench-with-redis bench-without-redis
 
 REPOSITORY_VERSION_FILE := src/Trends/Infrastructure/Repository/PopularPublicationRepository.php
+
+# Defaults for the highlights perf harness. Override on the command line, e.g.
+#   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
+BENCH_ITERATIONS  ?= 200
+BENCH_CONCURRENCY ?= 1
+BENCH_WARMUP      ?= 3
 
 COMPOSE_PROJECT_NAME ?= 'org_example_api'
 SERVICE ?= 'org.example.api'
@@ -36,6 +43,20 @@ stop: ## Stop service
 
 test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
+
+bench-with-redis: ## Run the highlights perf harness with Redis cache active (no x-benchmark header)
+	@BENCH_BYPASS_CACHE=0 \
+		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
+		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
+		BENCH_WARMUP=$(BENCH_WARMUP) \
+		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+
+bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
+	@BENCH_BYPASS_CACHE=1 \
+		BENCH_ITERATIONS=$(BENCH_ITERATIONS) \
+		BENCH_CONCURRENCY=$(BENCH_CONCURRENCY) \
+		BENCH_WARMUP=$(BENCH_WARMUP) \
+		bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
 
 update-version: ## Sync hard-coded repository version with the latest git tag (idempotent)
 	@latest=$$(git describe --tags --abbrev=0 | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/'); \
