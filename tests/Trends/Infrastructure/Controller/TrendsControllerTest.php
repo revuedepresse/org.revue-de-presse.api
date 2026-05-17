@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Trends\Infrastructure\Controller;
 
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\Member;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -35,11 +35,7 @@ class TrendsControllerTest extends WebTestCase
 
         $member = new Member();
         $member->apiKey = self::DUMMY_TOKEN;
-        $member->setEmail('dummy@test.local');
-        $member->setTwitterID('1');
-        $member->setTwitterUsername('dummy_user');
-        $member->setScreenName('dummy_user');
-        $member->setFullName('Dummy User');
+        $member->setUsername('dummy_user');
         $member->setEnabled(true);
         $em->persist($member);
         $em->flush();

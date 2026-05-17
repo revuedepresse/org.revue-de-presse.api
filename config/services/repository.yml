@@ -3,7 +3,7 @@ services:
         class: 'App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Domain\Entity\Legacy\Member'
+            - 'App\Membership\Domain\Entity\Member'
         calls:
             - [ 'setLogger', [ '@logger'] ]
         tags:

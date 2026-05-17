@@ -18,7 +18,7 @@ doctrine:
                 mappings:
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
+                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity'
                         is_bundle:  false
-                        prefix:     'App\Membership\Domain\Entity\Legacy'
+                        prefix:     'App\Membership\Domain\Entity'
                         type:       attribute
