@@ -2,3 +2,7 @@ framework:
     test: true
     session:
         storage_factory_id: session.storage.factory.mock_file
+    cache:
+        pools:
+            cache.rate_limiter:
+                adapter: cache.adapter.array
