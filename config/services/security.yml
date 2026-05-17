@@ -39,6 +39,32 @@ services:
 
     App\Infrastructure\Security\TokenProcessor: ~
 
+    # NewsReview wiring (Highlight resource)
+    App\NewsReview\Domain\Snapshot\SnapshotReader:
+        class: App\NewsReview\Infrastructure\Repository\FilesystemSnapshotReader
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+
+    App\NewsReview\Domain\Snapshot\Filter\HighlightFilters: ~
+    App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer: ~
+
+    App\NewsReview\Infrastructure\ApiPlatform\State\HighlightCollectionProvider:
+        arguments:
+            $reader:       '@App\NewsReview\Domain\Snapshot\SnapshotReader'
+            $filters:      '@App\NewsReview\Domain\Snapshot\Filter\HighlightFilters'
+            $normalizer:   '@App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer'
+            $redis:        '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $requestStack: '@request_stack'
+            $logger:       '@logger'
+            $apiEnv:       '%kernel.environment%'
+        tags:
+            - { name: 'api_platform.state_provider' }
+
+    App\NewsReview\Infrastructure\ApiPlatform\Listener\HighlightsCacheHeaderListener:
+        tags:
+            - { name: kernel.event_subscriber }
+
     App\Infrastructure\RateLimit\RateLimitSubscriber:
         arguments:
             $tokenMintLimiterFactory:  '@limiter.token_mint'
