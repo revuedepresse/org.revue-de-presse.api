@@ -10,7 +10,7 @@ use App\NewsReview\Domain\Snapshot\Filter\HighlightFilters;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 use App\NewsReview\Infrastructure\Repository\CacheKey\HighlightCacheKey;
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 

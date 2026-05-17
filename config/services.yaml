@@ -13,12 +13,12 @@ services:
             - "%redis_host%"
             - "%redis_port%"
 
-    App\Cache\RedisCache: '@app.cache.redis'
+    App\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
 parameters:
     monolog_channels:               ['benchmark']
 
-    redis_cache.class:              'App\Cache\RedisCache'
+    redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 
     allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 

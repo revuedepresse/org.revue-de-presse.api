@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Cache;
 
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 
 class InMemoryRedisCache extends RedisCache
 {

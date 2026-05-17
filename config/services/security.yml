@@ -6,7 +6,7 @@ services:
     App\Infrastructure\Security\AccessTokenStore:
         class: App\Infrastructure\Security\RedisAccessTokenStore
         arguments:
-            $redis: '@App\Cache\RedisCache'
+            $redis: '@App\Infrastructure\Cache\RedisCache'
 
     App\Infrastructure\Security\AccessTokenMinter:
         arguments:
@@ -35,7 +35,7 @@ services:
             $reader:       '@App\NewsReview\Domain\Snapshot\SnapshotReader'
             $filters:      '@App\NewsReview\Domain\Snapshot\Filter\HighlightFilters'
             $normalizer:   '@App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer'
-            $redis:        '@App\Cache\RedisCache'
+            $redis:        '@App\Infrastructure\Cache\RedisCache'
             $requestStack: '@request_stack'
             $logger:       '@logger'
             $apiEnv:       '%kernel.environment%'

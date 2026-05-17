@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Cache;
+namespace App\Infrastructure\Cache;
 
 use Predis\Client;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
