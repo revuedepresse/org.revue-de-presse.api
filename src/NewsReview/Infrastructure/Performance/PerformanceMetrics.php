@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Trends\Infrastructure\Performance;
+namespace App\NewsReview\Infrastructure\Performance;
 
 use function array_sum;
 use function ceil;

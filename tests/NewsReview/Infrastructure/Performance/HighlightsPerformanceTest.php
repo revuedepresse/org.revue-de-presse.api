@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Trends\Infrastructure\Controller;
+namespace App\Tests\NewsReview\Infrastructure\Performance;
 
-use App\Trends\Infrastructure\Performance\PerformanceMetrics;
+use App\NewsReview\Infrastructure\Performance\PerformanceMetrics;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Helper\Table;
@@ -28,14 +28,14 @@ class HighlightsPerformanceTest extends KernelTestCase
 {
     public function test_measures_highlights_endpoint_latency_distribution(): void
     {
-        $host  = (string) ($_ENV['BENCHMARK_HOST']   ?? '');
-        $token = (string) ($_ENV['API_AUTH_TOKEN']   ?? '');
+        $host   = (string) ($_ENV['BENCHMARK_HOST']    ?? '');
+        $secret = (string) ($_ENV['API_CLIENT_SECRET'] ?? $_ENV['API_AUTH_TOKEN'] ?? '');
 
         if ($host === '') {
             self::markTestSkipped('BENCHMARK_HOST is empty in env (.env.test).');
         }
-        if ($token === '') {
-            self::markTestSkipped('API_AUTH_TOKEN is empty in env (.env.test).');
+        if ($secret === '') {
+            self::markTestSkipped('API_CLIENT_SECRET is empty in env (.env.test).');
         }
 
         self::bootKernel();
@@ -43,7 +43,25 @@ class HighlightsPerformanceTest extends KernelTestCase
         $logger = static::getContainer()->get('monolog.logger.benchmark');
 
         $base = str_contains($host, '://') ? $host : 'https://' . $host;
-        $url  = rtrim($base, '/') . '/api/twitter/highlights';
+        $url  = rtrim($base, '/') . '/api/highlights';
+
+        // Mint a short-lived Bearer using the long-lived client secret. The
+        // harness loop then sends Authorization: Bearer for every request.
+        $tokenMint = HttpClient::create()->request(
+            'POST',
+            rtrim($base, '/') . '/api/token',
+            ['headers' => ['Authorization' => 'Basic ' . base64_encode(':' . $secret), 'Accept' => 'application/json']],
+        );
+        $tokenBody = $tokenMint->toArray(false);
+        $bearer = $tokenBody['access_token'] ?? null;
+        if ($bearer === null) {
+            self::markTestSkipped(sprintf(
+                'Could not mint a bearer against %s (status=%d, body=%s)',
+                $base,
+                $tokenMint->getStatusCode(),
+                json_encode($tokenBody),
+            ));
+        }
 
         $iterations   = (int) (getenv('BENCH_ITERATIONS')    ?: $_SERVER['BENCH_ITERATIONS']    ?? $_ENV['BENCH_ITERATIONS']    ?? 50);
         $warmup       = (int) (getenv('BENCH_WARMUP')        ?: $_SERVER['BENCH_WARMUP']        ?? $_ENV['BENCH_WARMUP']        ?? 3);
@@ -67,7 +85,7 @@ class HighlightsPerformanceTest extends KernelTestCase
             'bypass_cache' => $bypassCache,
         ]);
 
-        $headers = ['x-auth-token' => $token];
+        $headers = ['Authorization' => 'Bearer ' . $bearer];
         if ($bypassCache) {
             $headers['x-benchmark'] = '1';
         }

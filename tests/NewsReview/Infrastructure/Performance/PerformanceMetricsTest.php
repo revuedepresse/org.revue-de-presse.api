@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Trends\Infrastructure\Performance;
+namespace App\Tests\NewsReview\Infrastructure\Performance;
 
-use App\Trends\Infrastructure\Performance\PerformanceMetrics;
+use App\NewsReview\Infrastructure\Performance\PerformanceMetrics;
 use PHPUnit\Framework\TestCase;
 
 /**
