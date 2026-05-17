@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security;
 
 use App\Membership\Domain\Entity\Member;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use Symfony\Component\HttpFoundation\Request;
 
 final class BasicClientCredentialsExtractor

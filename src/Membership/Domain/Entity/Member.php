@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Entity;
 
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
 use Symfony\Component\Security\Core\User\UserInterface;

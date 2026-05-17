@@ -10,7 +10,7 @@ use App\Infrastructure\Security\BasicClientCredentialsExtractor;
 use App\Infrastructure\Security\InvalidClientCredentialsException;
 use App\Infrastructure\Security\TokenProcessor;
 use App\Membership\Domain\Entity\Member;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

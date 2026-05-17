@@ -6,7 +6,7 @@ namespace App\Tests\Infrastructure\Security;
 use App\Infrastructure\Security\BasicClientCredentialsExtractor;
 use App\Infrastructure\Security\InvalidClientCredentialsException;
 use App\Membership\Domain\Entity\Member;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Infrastructure\Repository\MemberRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 

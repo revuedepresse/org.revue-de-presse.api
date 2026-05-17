@@ -16,7 +16,7 @@ services:
 
     App\Infrastructure\Security\ApiAccessTokenHandler:
         arguments:
-            $memberRepository: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+            $memberRepository: '@App\Membership\Infrastructure\Repository\MemberRepository'
 
     App\Infrastructure\Security\TokenProcessor: ~
 

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Repository\Membership;
+namespace App\Membership\Infrastructure\Repository;
 
 use App\Membership\Domain\Entity\Member;
-use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Membership\Domain\Repository\MemberRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Psr\Log\LoggerInterface;
 
 /**
  * @method Member|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,7 +16,14 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class MemberRepository extends ServiceEntityRepository implements MemberRepositoryInterface
 {
-    use LoggerTrait;
+    protected LoggerInterface $logger;
+
+    public function setLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
 
     /**
      * Look up a single enabled member whose `apiKey` column matches the submitted

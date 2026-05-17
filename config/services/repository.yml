@@ -1,6 +1,6 @@
 services:
-    App\Twitter\Infrastructure\Repository\Membership\MemberRepository:
-        class: 'App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+    App\Membership\Infrastructure\Repository\MemberRepository:
+        class: 'App\Membership\Infrastructure\Repository\MemberRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Membership\Domain\Entity\Member'
@@ -9,4 +9,4 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+    App\Membership\Domain\Repository\MemberRepositoryInterface: '@App\Membership\Infrastructure\Repository\MemberRepository'
