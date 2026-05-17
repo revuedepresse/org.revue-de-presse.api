@@ -1,0 +1,17 @@
+framework:
+    rate_limiter:
+        token_mint:
+            policy: 'token_bucket'
+            limit: 3
+            rate: { interval: '6 seconds', amount: 1 }
+            cache_pool: cache.rate_limiter
+        highlights:
+            policy: 'sliding_window'
+            limit: 60
+            interval: '1 minute'
+            cache_pool: cache.rate_limiter
+        docs:
+            policy: 'sliding_window'
+            limit: 30
+            interval: '1 minute'
+            cache_pool: cache.rate_limiter

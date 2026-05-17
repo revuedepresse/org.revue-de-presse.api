@@ -14,9 +14,9 @@
     <server name="DATABASE_URL" value="sqlite:///:memory:" force="true"/>
   </php>
   <groups>
-    <include>
-      <group>controller</group>
-    </include>
+    <exclude>
+      <group>performance</group>
+    </exclude>
   </groups>
   <testsuites>
     <testsuite name="Project Test Suite">

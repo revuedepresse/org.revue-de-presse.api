@@ -1,13 +1,57 @@
 services:
-    app.token_authenticator:
-        class: 'App\Twitter\Infrastructure\Security\Authentication\TokenAuthenticator'
-        calls:
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setLogger', [ '@logger'] ]
+    _defaults:
+        autowire: true
+        autoconfigure: true
 
-    App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider:
+    App\Security\Domain\AccessTokenStore:
+        class: App\Security\Infrastructure\Redis\RedisAccessTokenStore
         arguments:
-            $inner:       '@security.user.provider.concrete.member_entity_provider'
-            $redisCache:  '@App\Twitter\Infrastructure\Cache\RedisCache'
-            $appSecret:   '%env(APP_SECRET)%'
-            $ttlSeconds:  60
+            $redis: '@App\Infrastructure\Cache\RedisCache'
+
+    App\Security\Domain\AccessTokenMinter:
+        arguments:
+            $ttlSeconds: 900
+
+    App\Security\Infrastructure\Symfony\BasicClientCredentialsExtractor: ~
+
+    App\Security\Infrastructure\Symfony\ApiAccessTokenHandler:
+        arguments:
+            $memberRepository: '@App\Membership\Infrastructure\Repository\MemberRepository'
+
+    App\Security\Infrastructure\ApiPlatform\State\TokenProcessor: ~
+
+    # NewsReview wiring (Highlight resource)
+    App\NewsReview\Domain\Snapshot\SnapshotReader:
+        class: App\NewsReview\Infrastructure\Repository\FilesystemSnapshotReader
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+
+    App\NewsReview\Domain\Snapshot\Filter\HighlightFilters: ~
+    App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer: ~
+
+    App\NewsReview\Infrastructure\ApiPlatform\State\HighlightCollectionProvider:
+        arguments:
+            $reader:       '@App\NewsReview\Domain\Snapshot\SnapshotReader'
+            $filters:      '@App\NewsReview\Domain\Snapshot\Filter\HighlightFilters'
+            $normalizer:   '@App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer'
+            $redis:        '@App\Infrastructure\Cache\RedisCache'
+            $requestStack: '@request_stack'
+            $logger:       '@logger'
+            $apiEnv:       '%kernel.environment%'
+        tags:
+            - { name: 'api_platform.state_provider' }
+
+    App\NewsReview\Infrastructure\ApiPlatform\Listener\HighlightsCacheHeaderListener:
+        tags:
+            - { name: kernel.event_subscriber }
+
+    App\Infrastructure\RateLimit\RateLimitSubscriber:
+        arguments:
+            $tokenMintLimiterFactory:  '@limiter.token_mint'
+            $highlightsLimiterFactory: '@limiter.highlights'
+            $docsLimiterFactory:       '@limiter.docs'
+            $logger: '@logger'
+            $enabled: '%env(bool:RATE_LIMIT_ENABLED)%'
+        tags:
+            - { name: kernel.event_subscriber }

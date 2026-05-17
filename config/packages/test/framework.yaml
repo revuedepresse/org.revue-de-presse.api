@@ -2,3 +2,15 @@ framework:
     test: true
     session:
         storage_factory_id: session.storage.factory.mock_file
+    cache:
+        pools:
+            cache.rate_limiter:
+                adapter: cache.adapter.array
+                provider: ~
+
+parameters:
+    # Suppress Symfony's "env var declared but never used" check — the
+    # REDIS_HOST/REDIS_PORT vars are still loaded via dotenv for the perf
+    # harness; the override above means the test container itself doesn't
+    # consume them.
+    container.dumper.inline_factories: false

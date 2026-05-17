@@ -1,5 +1,4 @@
 imports:
-    - { resource: services/controller.yml }
     - { resource: services/repository.yml }
     - { resource: services/security.yml }
 
@@ -14,12 +13,12 @@ services:
             - "%redis_host%"
             - "%redis_port%"
 
-    App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
+    App\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
 parameters:
     monolog_channels:               ['benchmark']
 
-    redis_cache.class:              'App\Twitter\Infrastructure\Cache\RedisCache'
+    redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 
     allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 
