@@ -1,4 +1,11 @@
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Legacy authenticator services — removed in Phase 6 along with the classes.
+    # Kept here for now because security.yaml still references app.token_authenticator
+    # until Task 21 rewrites the firewall config.
     app.token_authenticator:
         class: 'App\Twitter\Infrastructure\Security\Authentication\TokenAuthenticator'
         calls:
@@ -11,3 +18,33 @@ services:
             $redisCache:  '@App\Twitter\Infrastructure\Cache\RedisCache'
             $appSecret:   '%env(APP_SECRET)%'
             $ttlSeconds:  60
+
+    # New infrastructure wiring.
+    App\Infrastructure\Security\AccessTokenStore:
+        class: App\Infrastructure\Security\RedisAccessTokenStore
+        arguments:
+            $redis: '@App\Twitter\Infrastructure\Cache\RedisCache'
+
+    App\Infrastructure\Security\AccessTokenMinter:
+        arguments:
+            $ttlSeconds: 900
+
+    App\Infrastructure\Security\BasicClientCredentialsExtractor:
+        arguments:
+            $memberRepository: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+
+    App\Infrastructure\Security\ApiAccessTokenHandler:
+        arguments:
+            $memberRepository: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+
+    App\Infrastructure\Security\TokenProcessor: ~
+
+    App\Infrastructure\RateLimit\RateLimitSubscriber:
+        arguments:
+            $tokenMintLimiterFactory:  '@limiter.token_mint'
+            $highlightsLimiterFactory: '@limiter.highlights'
+            $docsLimiterFactory:       '@limiter.docs'
+            $logger: '@logger'
+            $enabled: '%env(bool:RATE_LIMIT_ENABLED)%'
+        tags:
+            - { name: kernel.event_subscriber }
