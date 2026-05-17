@@ -2,6 +2,9 @@ api_platform:
     title: 'Revue de presse — HTTP API'
     version: '6.0.0'
     description: 'Daily curated highlights from French press Bluesky accounts.'
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Infrastructure/Security/Resource'
     formats:
         jsonld: ['application/ld+json']
         json:   ['application/json']
