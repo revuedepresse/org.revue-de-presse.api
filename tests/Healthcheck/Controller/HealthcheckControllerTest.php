@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Healthcheck\Controller;
+namespace App\Tests\Healthcheck\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
- * @group controller
+ * @group http
  */
 class HealthcheckControllerTest extends WebTestCase
 {

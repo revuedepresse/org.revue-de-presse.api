@@ -10,7 +10,7 @@ use App\Infrastructure\Security\BasicClientCredentialsExtractor;
 use App\Infrastructure\Security\InvalidClientCredentialsException;
 use App\Infrastructure\Security\TokenProcessor;
 use App\Membership\Domain\Entity\Member;
-use Doctrine\ORM\EntityRepository;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,7 +22,7 @@ class TokenProcessorTest extends TestCase
         $member = $this->makeMember('secret-abc');
         $store = new InMemoryAccessTokenStore();
         $minter = new AccessTokenMinter($store, ttlSeconds: 900);
-        $extractor = new BasicClientCredentialsExtractor($this->repoReturning([$member]));
+        $extractor = new BasicClientCredentialsExtractor($this->repoReturning('secret-abc', $member));
 
         $request = Request::create('/api/token', 'POST');
         $request->headers->set('Authorization', 'Basic ' . base64_encode(':secret-abc'));
@@ -42,7 +42,7 @@ class TokenProcessorTest extends TestCase
     {
         $store = new InMemoryAccessTokenStore();
         $minter = new AccessTokenMinter($store, ttlSeconds: 900);
-        $extractor = new BasicClientCredentialsExtractor($this->repoReturning([]));
+        $extractor = new BasicClientCredentialsExtractor($this->repoReturning('expected', null));
 
         $request = Request::create('/api/token', 'POST');
         $request->headers->set('Authorization', 'Basic ' . base64_encode(':wrong'));
@@ -65,15 +65,18 @@ class TokenProcessorTest extends TestCase
         return $member;
     }
 
-    private function repoReturning(array $members): EntityRepository
+    private function repoReturning(string $expected, ?Member $member): MemberRepository
     {
-        return new class($members) extends EntityRepository {
-            public function __construct(private readonly array $members)
-            {
+        return new class($expected, $member) extends MemberRepository {
+            public function __construct(
+                private readonly string $expected,
+                private readonly ?Member $member,
+            ) {
             }
-            public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
+
+            public function findEnabledByApiKey(string $submittedSecret): ?Member
             {
-                return $this->members;
+                return hash_equals($this->expected, $submittedSecret) ? $this->member : null;
             }
         };
     }

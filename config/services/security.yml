@@ -29,9 +29,7 @@ services:
         arguments:
             $ttlSeconds: 900
 
-    App\Infrastructure\Security\BasicClientCredentialsExtractor:
-        arguments:
-            $memberRepository: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+    App\Infrastructure\Security\BasicClientCredentialsExtractor: ~
 
     App\Infrastructure\Security\ApiAccessTokenHandler:
         arguments:

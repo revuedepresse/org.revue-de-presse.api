@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security;
 
 use App\Membership\Domain\Entity\Member;
-use Doctrine\ORM\EntityRepository;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use Symfony\Component\HttpFoundation\Request;
 
 final class BasicClientCredentialsExtractor
 {
-    public function __construct(private readonly EntityRepository $memberRepository)
+    public function __construct(private readonly MemberRepository $memberRepository)
     {
     }
 
@@ -31,15 +31,7 @@ final class BasicClientCredentialsExtractor
             throw new InvalidClientCredentialsException('Empty client secret');
         }
 
-        $candidates = $this->memberRepository->findBy(['enabled' => true]);
-
-        $match = null;
-        foreach ($candidates as $candidate) {
-            if ($candidate->apiKey !== null && hash_equals($candidate->apiKey, $submittedSecret)) {
-                $match = $candidate;
-            }
-        }
-
+        $match = $this->memberRepository->findEnabledByApiKey($submittedSecret);
         if ($match === null) {
             throw new InvalidClientCredentialsException('Invalid client credentials');
         }

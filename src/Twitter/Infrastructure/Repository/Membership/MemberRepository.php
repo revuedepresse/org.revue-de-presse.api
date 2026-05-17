@@ -17,4 +17,22 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 class MemberRepository extends ServiceEntityRepository implements MemberRepositoryInterface
 {
     use LoggerTrait;
+
+    /**
+     * Look up a single enabled member whose `apiKey` column matches the submitted
+     * secret. The match happens in the DB rather than in PHP-land — we don't fetch
+     * all enabled members and compare in a loop. Portable across sqlite and
+     * postgresql.
+     */
+    public function findEnabledByApiKey(string $submittedSecret): ?Member
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.enabled = :enabled')
+            ->andWhere('m.apiKey = :secret')
+            ->setParameter('enabled', true)
+            ->setParameter('secret', $submittedSecret)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
