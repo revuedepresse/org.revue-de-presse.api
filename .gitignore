@@ -37,9 +37,3 @@ public/graphs
 
 *.tar.gz
 
-tmp
-
-/internal-spec/
-
-# Local symlink to the sibling local.proxy repo — never part of this repo.
-/provisioning/local.proxy
