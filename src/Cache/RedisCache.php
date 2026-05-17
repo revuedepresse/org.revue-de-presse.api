@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Twitter\Infrastructure\Cache;
+namespace App\Cache;
 
 use Predis\Client;
 use Symfony\Component\Cache\Adapter\RedisAdapter;

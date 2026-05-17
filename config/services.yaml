@@ -14,12 +14,12 @@ services:
             - "%redis_host%"
             - "%redis_port%"
 
-    App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
+    App\Cache\RedisCache: '@app.cache.redis'
 
 parameters:
     monolog_channels:               ['benchmark']
 
-    redis_cache.class:              'App\Twitter\Infrastructure\Cache\RedisCache'
+    redis_cache.class:              'App\Cache\RedisCache'
 
     allowed.origin:                 '%env(resolve:ALLOWED_ORIGIN)%'
 

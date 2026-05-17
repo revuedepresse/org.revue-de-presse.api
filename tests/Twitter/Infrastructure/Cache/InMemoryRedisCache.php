@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Cache;
 
-use App\Twitter\Infrastructure\Cache\RedisCache;
+use App\Cache\RedisCache;
 
 class InMemoryRedisCache extends RedisCache
 {

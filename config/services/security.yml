@@ -15,7 +15,7 @@ services:
     App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider:
         arguments:
             $inner:       '@security.user.provider.concrete.member_entity_provider'
-            $redisCache:  '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $redisCache:  '@App\Cache\RedisCache'
             $appSecret:   '%env(APP_SECRET)%'
             $ttlSeconds:  60
 
@@ -23,7 +23,7 @@ services:
     App\Infrastructure\Security\AccessTokenStore:
         class: App\Infrastructure\Security\RedisAccessTokenStore
         arguments:
-            $redis: '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $redis: '@App\Cache\RedisCache'
 
     App\Infrastructure\Security\AccessTokenMinter:
         arguments:
@@ -54,7 +54,7 @@ services:
             $reader:       '@App\NewsReview\Domain\Snapshot\SnapshotReader'
             $filters:      '@App\NewsReview\Domain\Snapshot\Filter\HighlightFilters'
             $normalizer:   '@App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer'
-            $redis:        '@App\Twitter\Infrastructure\Cache\RedisCache'
+            $redis:        '@App\Cache\RedisCache'
             $requestStack: '@request_stack'
             $logger:       '@logger'
             $apiEnv:       '%kernel.environment%'

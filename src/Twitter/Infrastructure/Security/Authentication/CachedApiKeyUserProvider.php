@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Security\Authentication;
 
-use App\Twitter\Infrastructure\Cache\RedisCache;
+use App\Cache\RedisCache;
 use InvalidArgumentException;
 use RuntimeException;
 use SensitiveParameter;

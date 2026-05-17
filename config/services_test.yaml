@@ -4,8 +4,5 @@ services:
         autowire: true
         autoconfigure: true
 
-    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
-        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
-
     app.cache.redis:
         class: 'App\Tests\Twitter\Infrastructure\Cache\InMemoryRedisCache'

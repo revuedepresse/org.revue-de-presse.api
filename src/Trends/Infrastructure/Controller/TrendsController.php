@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Trends\Infrastructure\Controller;
 
 use App\Trends\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\Twitter\Infrastructure\Cache\RedisCache;
+use App\Cache\RedisCache;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
