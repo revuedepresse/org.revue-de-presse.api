@@ -1,48 +1,43 @@
 security:
-    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-
-        in_memory: { memory: null }
-
         member_entity_provider:
             entity:
-                class:          App\Membership\Domain\Entity\Legacy\Member
-                property:       apiKey
-                manager_name:   default
-
-        user_provider:
-            id: App\Twitter\Infrastructure\Security\Authentication\CachedApiKeyUserProvider
-
-        chain_provider:
-            chain:
-                providers: [user_provider]
+                class: App\Membership\Domain\Entity\Member
+                property: id
 
     firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
         main:
-            provider: user_provider
+            provider: member_entity_provider
             stateless: true
-            custom_authenticators:
-                - app.token_authenticator
-            entry_point: app.token_authenticator
+            access_token:
+                token_handler: App\Security\Infrastructure\Symfony\ApiAccessTokenHandler
+                token_extractors: [header]
+                realm: 'revue-de-presse'
 
 when@prod:
     security:
         access_control:
-            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
             - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
+            - { path: ^/api/token,       role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
 
 when@dev:
     security:
         access_control:
-            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
             - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
+            - { path: ^/api/token,       role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
 
 when@test:
     security:
         access_control:
-            - { path: ^/api/callback,    role: PUBLIC_ACCESS }
             - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
+            - { path: ^/api/token,       role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
             - { path: ^/api,             role: ROLE_USER }
-

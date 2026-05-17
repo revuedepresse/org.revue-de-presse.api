@@ -9,7 +9,7 @@ doctrine:
 
     orm:
         default_entity_manager:         default
-        auto_generate_proxy_classes:    true
+        enable_native_lazy_objects:     true
         entity_managers:
             default:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
@@ -18,7 +18,7 @@ doctrine:
                 mappings:
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
+                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity'
                         is_bundle:  false
-                        prefix:     'App\Membership\Domain\Entity\Legacy'
+                        prefix:     'App\Membership\Domain\Entity'
                         type:       attribute

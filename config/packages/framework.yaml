@@ -1,5 +1,10 @@
 framework:
-    cache: ~
+    cache:
+        pools:
+            cache.rate_limiter:
+                adapter: cache.adapter.redis
+                provider: 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%'
+                default_lifetime: 3600
 
     session:
         handler_id: null
@@ -13,6 +18,9 @@ framework:
         utf8: true
 
     secret: '%env(APP_SECRET)%'
+
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['forwarded', 'x-forwarded-for', 'x-forwarded-proto']
 
     validation:
         email_validation_mode: html5

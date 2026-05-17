@@ -1,3 +1,9 @@
 kernel:
     resource: ../../src/Kernel.php
     type: attribute
+
+healthcheck:
+    resource:
+        path: ../../src/Healthcheck/Infrastructure/Controller/
+        namespace: App\Healthcheck\Infrastructure\Controller
+    type: attribute

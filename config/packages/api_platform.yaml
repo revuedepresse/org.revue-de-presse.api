@@ -1,0 +1,22 @@
+api_platform:
+    title: 'Revue de presse — HTTP API'
+    version: '6.0.0'
+    description: 'Daily curated highlights from French press Bluesky accounts.'
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Security/Infrastructure/ApiPlatform/Resource'
+            - '%kernel.project_dir%/src/NewsReview/Infrastructure/ApiPlatform/Resource'
+    formats:
+        jsonld: ['application/ld+json']
+        json:   ['application/json']
+    docs_formats:
+        jsonld: ['application/ld+json']
+        json:   ['application/json']
+        html:   ['text/html']
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Accept', 'Authorization']
+    openapi:
+        contact: { name: 'revue-de-presse', email: 'contact@revue-de-presse.org' }
+        license: { name: 'GPL-3.0-or-later' }
