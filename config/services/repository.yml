@@ -10,9 +10,3 @@ services:
             - { name: 'doctrine.repository_service' }
 
     App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
-
-    App\Trends\Infrastructure\Repository\PopularPublicationRepository:
-        class: 'App\Trends\Infrastructure\Repository\PopularPublicationRepository'
-        arguments:
-            - '%kernel.project_dir%'
-            - '@logger'
