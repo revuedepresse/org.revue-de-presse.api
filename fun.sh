@@ -225,6 +225,13 @@ function load_configuration_parameters() {
 
     guard_against_missing_variables
 
+    if [ -n "${LABEL:-}" ];
+    then
+
+        export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}_${LABEL}"
+
+    fi
+
     printf '%s'           $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'COMPOSE_PROJECT_NAME: ' "$(reset_color)" "${COMPOSE_PROJECT_NAME}" $'\n'
     printf '%b%s%b"%s"%s' "$(green)" 'DEBUG:                ' "$(reset_color)" "${DEBUG}" $'\n'
