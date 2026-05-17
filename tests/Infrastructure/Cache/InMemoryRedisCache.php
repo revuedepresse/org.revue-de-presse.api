@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Cache;
+namespace App\Tests\Infrastructure\Cache;
 
 use App\Cache\RedisCache;
 

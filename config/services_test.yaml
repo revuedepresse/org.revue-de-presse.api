@@ -5,4 +5,4 @@ services:
         autoconfigure: true
 
     app.cache.redis:
-        class: 'App\Tests\Twitter\Infrastructure\Cache\InMemoryRedisCache'
+        class: 'App\Tests\Infrastructure\Cache\InMemoryRedisCache'
