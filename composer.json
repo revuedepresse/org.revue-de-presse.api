@@ -24,6 +24,7 @@
         "ext-pcntl": "*",
         "ext-pdo": "*",
         "ext-sodium": "*",
+        "api-platform/core": "^4.1.5",
         "beberlei/assert": "^3.3",
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
