@@ -20,12 +20,12 @@ final class RedisAccessTokenStore implements AccessTokenStore
             'e' => $now + $ttlSeconds,
         ], JSON_THROW_ON_ERROR);
 
-        $this->redis->setex(self::KEY_PREFIX . hash('sha256', $tokenPlaintext), $ttlSeconds, $payload);
+        $this->client()->setex(self::KEY_PREFIX . hash('sha256', $tokenPlaintext), $ttlSeconds, $payload);
     }
 
     public function resolve(string $tokenPlaintext): ?AccessTokenRecord
     {
-        $raw = $this->redis->get(self::KEY_PREFIX . hash('sha256', $tokenPlaintext));
+        $raw = $this->client()->get(self::KEY_PREFIX . hash('sha256', $tokenPlaintext));
         if ($raw === null || $raw === false) {
             return null;
         }
@@ -49,6 +49,20 @@ final class RedisAccessTokenStore implements AccessTokenStore
 
     public function revoke(string $tokenPlaintext): void
     {
-        $this->redis->del(self::KEY_PREFIX . hash('sha256', $tokenPlaintext));
+        $this->client()->del(self::KEY_PREFIX . hash('sha256', $tokenPlaintext));
+    }
+
+    /**
+     * The injected object is either a Predis client (direct) or a wrapper exposing
+     * getClient(). Support both shapes so test doubles and prod wiring can share
+     * this class.
+     */
+    private function client(): object
+    {
+        if (method_exists($this->redis, 'getClient')) {
+            return $this->redis->getClient();
+        }
+
+        return $this->redis;
     }
 }
