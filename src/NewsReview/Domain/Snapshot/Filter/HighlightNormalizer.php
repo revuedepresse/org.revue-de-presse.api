@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\NewsReview\Domain\Snapshot\Filter;
 
-use App\NewsReview\Domain\Resource\HighlightDto;
+use App\NewsReview\Domain\Model\HighlightDto;
 
 final class HighlightNormalizer
 {

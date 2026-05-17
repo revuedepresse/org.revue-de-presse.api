@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\NewsReview\Infrastructure\ApiPlatform\State;
 
 use ApiPlatform\Metadata\GetCollection;
-use App\NewsReview\Domain\Resource\HighlightDto;
+use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightFilters;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Infrastructure\ApiPlatform\State\HighlightCollectionProvider;

@@ -4,8 +4,8 @@ api_platform:
     description: 'Daily curated highlights from French press Bluesky accounts.'
     mapping:
         paths:
-            - '%kernel.project_dir%/src/Infrastructure/Security/Resource'
-            - '%kernel.project_dir%/src/NewsReview/Domain/Resource'
+            - '%kernel.project_dir%/src/Security/Infrastructure/ApiPlatform/Resource'
+            - '%kernel.project_dir%/src/NewsReview/Infrastructure/ApiPlatform/Resource'
     formats:
         jsonld: ['application/ld+json']
         json:   ['application/json']

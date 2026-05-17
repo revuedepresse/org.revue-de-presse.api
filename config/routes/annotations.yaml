@@ -4,6 +4,6 @@ kernel:
 
 healthcheck:
     resource:
-        path: ../../src/Healthcheck/Controller/
-        namespace: App\Healthcheck\Controller
+        path: ../../src/Healthcheck/Infrastructure/Controller/
+        namespace: App\Healthcheck\Infrastructure\Controller
     type: attribute

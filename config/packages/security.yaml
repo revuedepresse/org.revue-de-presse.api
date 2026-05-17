@@ -14,7 +14,7 @@ security:
             provider: member_entity_provider
             stateless: true
             access_token:
-                token_handler: App\Infrastructure\Security\ApiAccessTokenHandler
+                token_handler: App\Security\Infrastructure\Symfony\ApiAccessTokenHandler
                 token_extractors: [header]
                 realm: 'revue-de-presse'
 

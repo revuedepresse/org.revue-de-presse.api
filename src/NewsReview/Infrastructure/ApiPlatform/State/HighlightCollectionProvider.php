@@ -5,7 +5,7 @@ namespace App\NewsReview\Infrastructure\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\NewsReview\Domain\Resource\HighlightDto;
+use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightFilters;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;

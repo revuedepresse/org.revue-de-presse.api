@@ -3,22 +3,22 @@ services:
         autowire: true
         autoconfigure: true
 
-    App\Infrastructure\Security\AccessTokenStore:
-        class: App\Infrastructure\Security\RedisAccessTokenStore
+    App\Security\Domain\AccessTokenStore:
+        class: App\Security\Infrastructure\Redis\RedisAccessTokenStore
         arguments:
             $redis: '@App\Infrastructure\Cache\RedisCache'
 
-    App\Infrastructure\Security\AccessTokenMinter:
+    App\Security\Domain\AccessTokenMinter:
         arguments:
             $ttlSeconds: 900
 
-    App\Infrastructure\Security\BasicClientCredentialsExtractor: ~
+    App\Security\Infrastructure\Symfony\BasicClientCredentialsExtractor: ~
 
-    App\Infrastructure\Security\ApiAccessTokenHandler:
+    App\Security\Infrastructure\Symfony\ApiAccessTokenHandler:
         arguments:
             $memberRepository: '@App\Membership\Infrastructure\Repository\MemberRepository'
 
-    App\Infrastructure\Security\TokenProcessor: ~
+    App\Security\Infrastructure\ApiPlatform\State\TokenProcessor: ~
 
     # NewsReview wiring (Highlight resource)
     App\NewsReview\Domain\Snapshot\SnapshotReader:
