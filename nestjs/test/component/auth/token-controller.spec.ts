@@ -1,8 +1,8 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TokenController } from '@/auth/token.controller';
 import { AccessTokenMinter } from '@/auth/access-token.minter';
 import { BasicCredentialsExtractor } from '@/auth/basic-credentials.extractor';
-import { InvalidClientCredentialsException } from '@/auth/invalid-client-credentials.exception';
 import { ACCESS_TOKEN_STORE } from '@/auth/access-token.store';
 import { InMemoryAccessTokenStore } from '@test/doubles/in-memory-access-token.store';
 import { MembersRepository } from '@/members/members.repository';
@@ -45,8 +45,8 @@ describe('TokenController', () => {
     expect(dto.access_token).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('throws for invalid credentials', async () => {
+  it('throws UnauthorizedException for invalid credentials', async () => {
     const controller = await setup(null);
-    await expect(controller.mint({ authorization: basic(':wrong') })).rejects.toBeInstanceOf(InvalidClientCredentialsException);
+    await expect(controller.mint({ authorization: basic(':wrong') })).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

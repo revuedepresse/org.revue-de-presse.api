@@ -1,5 +1,5 @@
 import { BasicCredentialsExtractor } from '@/auth/basic-credentials.extractor';
-import { InvalidClientCredentialsException } from '@/auth/invalid-client-credentials.exception';
+import { InvalidClientCredentialsError } from '@/core/errors/invalid-client-credentials.error';
 import { createMember } from '@/members/member.entity';
 import type { MembersRepository } from '@/members/members.repository';
 
@@ -26,23 +26,23 @@ describe('BasicCredentialsExtractor', () => {
 
   it('throws for missing authorization header', async () => {
     const ex = new BasicCredentialsExtractor(asRepo(new CountingRepo('any', null)));
-    await expect(ex.extract({})).rejects.toBeInstanceOf(InvalidClientCredentialsException);
+    await expect(ex.extract({})).rejects.toBeInstanceOf(InvalidClientCredentialsError);
   });
 
   it('throws for non-Basic scheme', async () => {
     const ex = new BasicCredentialsExtractor(asRepo(new CountingRepo('any', null)));
-    await expect(ex.extract({ authorization: 'Bearer some-token' })).rejects.toBeInstanceOf(InvalidClientCredentialsException);
+    await expect(ex.extract({ authorization: 'Bearer some-token' })).rejects.toBeInstanceOf(InvalidClientCredentialsError);
   });
 
   it('throws for malformed base64', async () => {
     const ex = new BasicCredentialsExtractor(asRepo(new CountingRepo('any', null)));
-    await expect(ex.extract({ authorization: 'Basic !!!!' })).rejects.toBeInstanceOf(InvalidClientCredentialsException);
+    await expect(ex.extract({ authorization: 'Basic !!!!' })).rejects.toBeInstanceOf(InvalidClientCredentialsError);
   });
 
   it('throws for wrong secret', async () => {
     const member = createMember({ apiKey: 'right-secret', isEnabled: true });
     const ex = new BasicCredentialsExtractor(asRepo(new CountingRepo('right-secret', member)));
-    await expect(ex.extract({ authorization: basic(':wrong-secret') })).rejects.toBeInstanceOf(InvalidClientCredentialsException);
+    await expect(ex.extract({ authorization: basic(':wrong-secret') })).rejects.toBeInstanceOf(InvalidClientCredentialsError);
   });
 
   it('repository lookup does not fan out — findEnabledByApiKey called once only', async () => {

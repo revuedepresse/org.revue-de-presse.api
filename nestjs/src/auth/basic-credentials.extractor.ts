@@ -1,6 +1,6 @@
 import { MembersRepository } from '@/members/members.repository';
 import type { Member } from '@/members/member.entity';
-import { InvalidClientCredentialsException } from './invalid-client-credentials.exception';
+import { InvalidClientCredentialsError } from '@/core/errors/invalid-client-credentials.error';
 
 type HeadersLike = Record<string, string | string[] | undefined>;
 
@@ -11,7 +11,7 @@ export class BasicCredentialsExtractor {
     const raw = headers.authorization;
     const header = Array.isArray(raw) ? raw[0] : raw;
     if (typeof header !== 'string' || !header.startsWith('Basic ')) {
-      throw new InvalidClientCredentialsException('Missing or non-Basic Authorization header');
+      throw new InvalidClientCredentialsError('Missing or non-Basic Authorization header');
     }
 
     let decoded: string;
@@ -23,17 +23,17 @@ export class BasicCredentialsExtractor {
         throw new Error('malformed base64');
       }
     } catch {
-      throw new InvalidClientCredentialsException('Malformed Basic credentials');
+      throw new InvalidClientCredentialsError('Malformed Basic credentials');
     }
     if (!decoded.includes(':')) {
-      throw new InvalidClientCredentialsException('Malformed Basic credentials');
+      throw new InvalidClientCredentialsError('Malformed Basic credentials');
     }
     const submitted = decoded.slice(decoded.indexOf(':') + 1);
     if (submitted === '') {
-      throw new InvalidClientCredentialsException('Empty client secret');
+      throw new InvalidClientCredentialsError('Empty client secret');
     }
     const match = await this.members.findEnabledByApiKey(submitted);
-    if (!match) throw new InvalidClientCredentialsException('Invalid client credentials');
+    if (!match) throw new InvalidClientCredentialsError('Invalid client credentials');
     return match;
   }
 }
