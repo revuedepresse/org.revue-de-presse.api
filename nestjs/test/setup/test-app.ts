@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import Database from 'better-sqlite3';
 import { Test } from '@nestjs/testing';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -52,4 +53,8 @@ export async function bootTestApp(overrides: Partial<Record<string, string>> = {
     app, sqlite, redis,
     close: async () => { await app.close(); sqlite.close(); },
   };
+}
+
+export function fixturesProjectDir(): string {
+  return path.resolve(__dirname, '../fixtures-project');
 }
