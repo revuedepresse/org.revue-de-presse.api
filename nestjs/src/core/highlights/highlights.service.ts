@@ -1,4 +1,3 @@
-import type Redis from 'ioredis';
 import type { Env } from '@/config/env';
 import { SnapshotReader } from './snapshot-reader';
 import { HighlightFilters, FilterParams } from './highlight-filters';
@@ -6,6 +5,7 @@ import { HighlightNormalizer } from './highlight-normalizer';
 import { HighlightDto } from './highlight.dto';
 import { highlightCacheKey, CacheKeyParams } from './cache-key';
 import { Logger, NoopLogger } from '@/core/ports/logger';
+import type { KeyValueCache } from '@/core/ports/cache';
 
 export interface HighlightsRequest {
   query: Record<string, string | string[] | undefined>;
@@ -18,7 +18,7 @@ export class HighlightsService {
     private readonly reader: SnapshotReader,
     private readonly filters: HighlightFilters,
     private readonly normalizer: HighlightNormalizer,
-    private readonly redis: Redis | null,
+    private readonly redis: KeyValueCache | null,
     private readonly appEnvOrEnv: Env | string,
     private readonly logger: Logger = new NoopLogger(),
   ) {}
