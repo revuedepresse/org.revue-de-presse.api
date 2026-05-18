@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { Env } from '@/config/env';
-import { SnapshotReader } from './snapshot-reader';
+import { SnapshotReader } from '@/core/highlights/snapshot-reader';
 import { Logger, NoopLogger } from '@/core/ports/logger';
 
 export class FilesystemSnapshotReader implements SnapshotReader {

@@ -1,4 +1,4 @@
-import { createMember } from '@/members/member.entity';
+import { createMember } from '@/core/members/member.entity';
 
 describe('Member', () => {
   it('default isEnabled is false', () => {

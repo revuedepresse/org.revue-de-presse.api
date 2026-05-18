@@ -1,4 +1,4 @@
-import { hydraCollection } from '@/highlights/hydra.serializer';
+import { hydraCollection } from '@/core/highlights/hydra.serializer';
 
 describe('hydraCollection', () => {
   it('builds the collection envelope with @type Collection', () => {

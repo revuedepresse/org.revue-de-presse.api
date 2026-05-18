@@ -1,4 +1,4 @@
-import { highlightCacheKey, sortedCsv, dateHourEuropeParis } from '@/highlights/cache-key';
+import { highlightCacheKey, sortedCsv, dateHourEuropeParis } from '@/core/highlights/cache-key';
 
 describe('highlightCacheKey', () => {
   it('selectedAggregates order does not affect key', () => {

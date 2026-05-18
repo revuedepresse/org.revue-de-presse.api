@@ -1,4 +1,4 @@
-import { PerformanceMetrics } from '@/highlights/performance-metrics';
+import { PerformanceMetrics } from '@/core/highlights/performance-metrics';
 
 const HOST = process.env.BENCHMARK_HOST ?? '';
 const SECRET = process.env.API_CLIENT_SECRET ?? process.env.API_AUTH_TOKEN ?? '';

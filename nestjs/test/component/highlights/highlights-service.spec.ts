@@ -1,6 +1,6 @@
-import { HighlightsService } from '@/highlights/highlights.service';
-import { HighlightFilters } from '@/highlights/highlight-filters';
-import { HighlightNormalizer } from '@/highlights/highlight-normalizer';
+import { HighlightsService } from '@/core/highlights/highlights.service';
+import { HighlightFilters } from '@/core/highlights/highlight-filters';
+import { HighlightNormalizer } from '@/core/highlights/highlight-normalizer';
 import { InMemorySnapshotReader } from '@test/doubles/in-memory-snapshot-reader';
 
 function makeReq(query: Record<string, string> = {}, headers: Record<string, string> = {}) {

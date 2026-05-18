@@ -1,8 +1,8 @@
 import { Controller, Get, Header, Headers, Query, Req, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { HighlightsService } from './highlights.service';
-import { hydraCollection } from './hydra.serializer';
+import { HighlightsService } from '@/core/highlights/highlights.service';
+import { hydraCollection } from '@/core/highlights/hydra.serializer';
 import { CacheLabelInterceptor } from '@/common/cache-label.interceptor';
 
 @ApiTags('highlights')

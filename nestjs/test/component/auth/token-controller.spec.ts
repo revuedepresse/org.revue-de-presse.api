@@ -1,12 +1,12 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TokenController } from '@/auth/token.controller';
-import { AccessTokenMinter } from '@/auth/access-token.minter';
-import { BasicCredentialsExtractor } from '@/auth/basic-credentials.extractor';
-import { ACCESS_TOKEN_STORE } from '@/auth/access-token.store';
+import { AccessTokenMinter } from '@/core/auth/access-token.minter';
+import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
+import { ACCESS_TOKEN_STORE } from '@/core/auth/access-token.store';
 import { InMemoryAccessTokenStore } from '@test/doubles/in-memory-access-token.store';
 import { MembersRepository } from '@/members/members.repository';
-import { createMember } from '@/members/member.entity';
+import { createMember } from '@/core/members/member.entity';
 
 class StubRepo {
   constructor(private expected: string, private member: ReturnType<typeof createMember> | null) {}

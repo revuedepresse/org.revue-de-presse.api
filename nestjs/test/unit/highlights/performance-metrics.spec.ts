@@ -1,4 +1,4 @@
-import { PerformanceMetrics } from '@/highlights/performance-metrics';
+import { PerformanceMetrics } from '@/core/highlights/performance-metrics';
 
 describe('PerformanceMetrics', () => {
   it('computes basic statistics on ten samples', () => {

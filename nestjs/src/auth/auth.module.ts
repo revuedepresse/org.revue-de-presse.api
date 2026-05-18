@@ -5,10 +5,10 @@ import { MembersModule } from '@/members/members.module';
 import { RedisModule } from '@/redis/redis.module';
 import { REDIS_CLIENT } from '@/redis/redis.tokens';
 import { MembersRepository } from '@/members/members.repository';
-import { ACCESS_TOKEN_STORE, AccessTokenStore } from './access-token.store';
+import { ACCESS_TOKEN_STORE, AccessTokenStore } from '@/core/auth/access-token.store';
 import { RedisAccessTokenStore } from './redis-access-token.store';
-import { AccessTokenMinter } from './access-token.minter';
-import { BasicCredentialsExtractor } from './basic-credentials.extractor';
+import { AccessTokenMinter } from '@/core/auth/access-token.minter';
+import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
 import { BearerGuard } from './bearer.guard';
 import { TokenController } from './token.controller';
 

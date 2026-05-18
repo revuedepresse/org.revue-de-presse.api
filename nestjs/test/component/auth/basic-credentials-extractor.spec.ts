@@ -1,7 +1,7 @@
-import { BasicCredentialsExtractor } from '@/auth/basic-credentials.extractor';
+import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
 import { InvalidClientCredentialsError } from '@/core/errors/invalid-client-credentials.error';
-import { createMember } from '@/members/member.entity';
-import type { MembersRepository } from '@/members/members.repository';
+import { createMember } from '@/core/members/member.entity';
+import type { MembersRepository } from '@/core/members/members.repository';
 
 class CountingRepo {
   findEnabledByApiKeyCalls = 0;

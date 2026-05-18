@@ -1,5 +1,5 @@
-import { MembersRepository } from '@/members/members.repository';
-import type { Member } from '@/members/member.entity';
+import type { MembersRepository } from '@/core/members/members.repository';
+import type { Member } from '@/core/members/member.entity';
 import { InvalidClientCredentialsError } from '@/core/errors/invalid-client-credentials.error';
 
 type HeadersLike = Record<string, string | string[] | undefined>;

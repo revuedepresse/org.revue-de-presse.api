@@ -1,4 +1,4 @@
-import { HighlightNormalizer } from '@/highlights/highlight-normalizer';
+import { HighlightNormalizer } from '@/core/highlights/highlight-normalizer';
 
 describe('HighlightNormalizer', () => {
   it('bluesky shape payload yields bsky URL', () => {

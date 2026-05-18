@@ -1,4 +1,4 @@
-import { AccessTokenRecord } from '@/auth/access-token-record';
+import { AccessTokenRecord } from '@/core/auth/access-token-record';
 
 describe('AccessTokenRecord', () => {
   it('carries memberId, issuedAt, expiresAt', () => {

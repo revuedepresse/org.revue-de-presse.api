@@ -1,7 +1,7 @@
 import { Controller, Headers, Post, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
-import { AccessTokenMinter } from './access-token.minter';
-import { BasicCredentialsExtractor } from './basic-credentials.extractor';
+import { AccessTokenMinter } from '@/core/auth/access-token.minter';
+import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
 import { AccessTokenResponseDto } from './access-token-response.dto';
 import { Public } from './public.decorator';
 import { InvalidClientCredentialsError } from '@/core/errors/invalid-client-credentials.error';

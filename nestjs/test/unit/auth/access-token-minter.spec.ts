@@ -1,4 +1,4 @@
-import { AccessTokenMinter } from '@/auth/access-token.minter';
+import { AccessTokenMinter } from '@/core/auth/access-token.minter';
 import { InMemoryAccessTokenStore } from '@test/doubles/in-memory-access-token.store';
 
 describe('AccessTokenMinter', () => {

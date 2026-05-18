@@ -5,10 +5,10 @@ import type Redis from 'ioredis';
 import { REDIS_CLIENT } from '@/redis/redis.tokens';
 import { RedisModule } from '@/redis/redis.module';
 import { HighlightsController } from './highlights.controller';
-import { HighlightsService } from './highlights.service';
-import { HighlightFilters } from './highlight-filters';
-import { HighlightNormalizer } from './highlight-normalizer';
-import { SNAPSHOT_READER, SnapshotReader } from './snapshot-reader';
+import { HighlightsService } from '@/core/highlights/highlights.service';
+import { HighlightFilters } from '@/core/highlights/highlight-filters';
+import { HighlightNormalizer } from '@/core/highlights/highlight-normalizer';
+import { SNAPSHOT_READER, SnapshotReader } from '@/core/highlights/snapshot-reader';
 import { FilesystemSnapshotReader } from './filesystem-snapshot-reader';
 
 @Module({

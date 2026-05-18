@@ -1,4 +1,4 @@
-import { HighlightFilters } from '@/highlights/highlight-filters';
+import { HighlightFilters } from '@/core/highlights/highlight-filters';
 
 describe('HighlightFilters', () => {
   const filters = new HighlightFilters();

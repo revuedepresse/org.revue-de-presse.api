@@ -2,8 +2,8 @@ import { Reflector } from '@nestjs/core';
 import { UnauthorizedException } from '@nestjs/common';
 import { BearerGuard } from '@/auth/bearer.guard';
 import { InMemoryAccessTokenStore } from '@test/doubles/in-memory-access-token.store';
-import { createMember } from '@/members/member.entity';
-import type { MembersRepository } from '@/members/members.repository';
+import { createMember } from '@/core/members/member.entity';
+import type { MembersRepository } from '@/core/members/members.repository';
 
 class StubRepo {
   constructor(private member: ReturnType<typeof createMember> | null) {}

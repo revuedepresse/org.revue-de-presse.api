@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { AccessTokenRecord } from '@/auth/access-token-record';
-import { AccessTokenStore } from '@/auth/access-token.store';
+import { AccessTokenRecord } from '@/core/auth/access-token-record';
+import { AccessTokenStore } from '@/core/auth/access-token.store';
 
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex');
 
