@@ -37,6 +37,11 @@ describe('highlightCacheKey', () => {
     expect(sortedCsv([])).toBe('');
   });
 
+  it('sortedCsv compares numeric strings numerically (PHP SORT_REGULAR parity)', () => {
+    expect(sortedCsv(['42', '7', '100'])).toBe('7,42,100');
+    expect(sortedCsv(['10', 'abc', '2'])).toBe('2,10,abc');
+  });
+
   it('media flag is inverted (excludeMedia=true => media=0)', () => {
     const base = {
       startDate: new Date('2026-05-01T10:00:00'),
@@ -64,12 +69,21 @@ describe('highlightCacheKey', () => {
           includeRetweets: false,
         },
         // PHP: sha1('2024-01-01 00;2024-01-01 23;page=1;items=25;rt=0;media=1;ds=0;term=;aggs=')
-        expected: 'PHP_FIXTURE_SHA1_1',
+        expected: '4d908a0feb3e64400e210dee86340a4fa5fe5dbd',
+      },
+      {
+        params: {
+          startDate: new Date('2026-05-01T08:30:00+02:00'),  // Paris DST, 08:30 local
+          endDate: new Date('2026-05-01T12:00:00+02:00'),
+          distinctSources: true,
+          selectedAggregates: ['political', 'cultural'],  // intentionally out of order
+          term: 'macron',
+        },
+        // PHP: sha1('2026-05-01 08;2026-05-01 12;page=1;items=25;rt=0;media=1;ds=1;term=macron;aggs=cultural,political')
+        expected: '903d316c6bfbf57e5bc7c7bef012a05df5e09043',
       },
     ];
     for (const { params, expected } of cases) {
-      // Skip until fixtures are regenerated against canonical PHP impl in Task 40.
-      if (expected.startsWith('PHP_FIXTURE_')) continue;
       expect(highlightCacheKey(params as never)).toBe(expected);
     }
   });

@@ -31,7 +31,16 @@ export function dateHourEuropeParis(d: Date | null | undefined): string {
 }
 
 export function sortedCsv(values: string[]): string {
-  return [...values].map((v) => String(v)).sort().join(',');
+  const strs = [...values].map((v) => String(v));
+  strs.sort((a, b) => {
+    const na = Number(a), nb = Number(b);
+    // Match PHP SORT_REGULAR: when both look like numbers, compare numerically.
+    if (a !== '' && b !== '' && !Number.isNaN(na) && !Number.isNaN(nb)) {
+      return na === nb ? 0 : na < nb ? -1 : 1;
+    }
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  return strs.join(',');
 }
 
 export function highlightCacheKey(p: CacheKeyParams): string {
