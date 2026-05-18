@@ -53,7 +53,7 @@
         "symfony/rate-limiter": "^7.4",
         "symfony/security-bundle": "^7.4",
         "symfony/security-core": "^7.4",
-        "symfony/string": "^7.4",
+        "symfony/string": "^8.0",
         "symfony/translation": "^7.4",
         "symfony/translation-contracts": "^3",
         "symfony/uid": "^7.4",
