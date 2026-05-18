@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { RedisAccessTokenStore } from '@/auth/redis-access-token.store';
+import { RedisAccessTokenStore } from '@/adapters/persistence/redis/redis-access-token.store';
 import { InMemoryRedis } from '@test/doubles/in-memory-redis';
 
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex');

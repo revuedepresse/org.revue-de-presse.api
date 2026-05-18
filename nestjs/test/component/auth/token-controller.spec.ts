@@ -5,7 +5,7 @@ import { AccessTokenMinter } from '@/core/auth/access-token.minter';
 import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
 import { ACCESS_TOKEN_STORE } from '@/core/auth/access-token.store';
 import { InMemoryAccessTokenStore } from '@test/doubles/in-memory-access-token.store';
-import { MembersRepository } from '@/members/members.repository';
+import { MembersRepository } from '@/core/members/members.repository';
 import { createMember } from '@/core/members/member.entity';
 
 class StubRepo {

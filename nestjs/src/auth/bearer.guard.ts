@@ -1,8 +1,7 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ACCESS_TOKEN_STORE, AccessTokenStore } from '@/core/auth/access-token.store';
-import type { MembersRepository } from '@/core/members/members.repository';
-import { MembersRepository as MembersRepositoryClass } from '@/members/members.repository';
+import { MEMBERS_REPOSITORY, MembersRepository } from '@/core/members/members.repository';
 import { IS_PUBLIC } from './public.decorator';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class BearerGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     @Inject(ACCESS_TOKEN_STORE) private readonly store: AccessTokenStore,
-    @Inject(MembersRepositoryClass) private readonly members: MembersRepository,
+    @Inject(MEMBERS_REPOSITORY) private readonly members: MembersRepository,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {

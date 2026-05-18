@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { ENV } from '@/config/env';
 import type { Env } from '@/config/env';
-import { RedisRateLimiter, Policy } from './redis-rate-limiter';
+import { RATE_LIMITER, RateLimiter, Policy } from '@/core/rate-limit/rate-limiter';
 
 const TOKEN_POLICY: Policy = { kind: 'token-bucket', name: 'token_mint', burst: 3, refillAmount: 1, intervalMs: 6000 };
 const DOCS_POLICY: Policy = { kind: 'sliding-window', name: 'docs', limit: 30, windowMs: 60_000 };
@@ -14,7 +14,7 @@ export class RateLimitGuard implements CanActivate {
   private readonly logger = new Logger(RateLimitGuard.name);
   constructor(
     @Inject(ENV) private readonly env: Env,
-    private readonly limiter: RedisRateLimiter,
+    @Inject(RATE_LIMITER) private readonly limiter: RateLimiter,
     private readonly _reflector: Reflector,
   ) {}
 

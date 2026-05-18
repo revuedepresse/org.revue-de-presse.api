@@ -1,17 +1,17 @@
 import { and, eq } from 'drizzle-orm';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import type { Db } from '@/db/db.module';
-import * as schema from '@/db/schema';
-import { weavingUser } from '@/db/schema';
+import type { Db } from '@/adapters/persistence/drizzle/db.module';
+import * as schema from '@/adapters/persistence/drizzle/schema';
+import { weavingUser } from '@/adapters/persistence/drizzle/schema';
 import { Member } from '@/core/members/member.entity';
-import { MembersRepository as MembersRepositoryPort } from '@/core/members/members.repository';
+import { MembersRepository } from '@/core/members/members.repository';
 
 // The Db union (NodePgDatabase | BetterSQLite3Database) has incompatible .select() overloads
 // at the TypeScript level. We cast to the sqlite variant (which is the test-time driver) so
 // the compiler is happy; at runtime the pg driver exposes the same API surface.
 type AnyDb = BetterSQLite3Database<typeof schema>;
 
-export class MembersRepository implements MembersRepositoryPort {
+export class DrizzleMembersRepository implements MembersRepository {
   constructor(private readonly db: Db) {}
 
   private get anyDb(): AnyDb {

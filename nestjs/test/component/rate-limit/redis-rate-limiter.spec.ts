@@ -1,4 +1,4 @@
-import { RedisRateLimiter } from '@/rate-limit/redis-rate-limiter';
+import { RedisRateLimiter } from '@/adapters/persistence/redis/redis-rate-limiter';
 import { InMemoryRedis } from '@test/doubles/in-memory-redis';
 
 // Drop-in eval-stub that mimics the sliding-window contract for tests.

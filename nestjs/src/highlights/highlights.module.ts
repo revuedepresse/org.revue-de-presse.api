@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { ENV } from '@/config/env';
 import type { Env } from '@/config/env';
 import type Redis from 'ioredis';
-import { REDIS_CLIENT } from '@/redis/redis.tokens';
-import { RedisModule } from '@/redis/redis.module';
+import { REDIS_CLIENT } from '@/adapters/persistence/redis/redis.tokens';
+import { RedisModule } from '@/adapters/persistence/redis/redis.module';
 import { HighlightsController } from './highlights.controller';
 import { HighlightsService } from '@/core/highlights/highlights.service';
 import { HighlightFilters } from '@/core/highlights/highlight-filters';
 import { HighlightNormalizer } from '@/core/highlights/highlight-normalizer';
 import { SNAPSHOT_READER, SnapshotReader } from '@/core/highlights/snapshot-reader';
-import { FilesystemSnapshotReader } from './filesystem-snapshot-reader';
+import { FilesystemSnapshotReader } from '@/adapters/snapshots/filesystem-snapshot-reader';
 
 @Module({
   imports: [RedisModule],

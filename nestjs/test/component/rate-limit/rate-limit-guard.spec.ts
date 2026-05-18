@@ -1,8 +1,8 @@
 import { Reflector } from '@nestjs/core';
 import { RateLimitGuard } from '@/rate-limit/rate-limit.guard';
-import type { RedisRateLimiter, Policy } from '@/rate-limit/redis-rate-limiter';
+import type { RateLimiter, Policy } from '@/core/rate-limit/rate-limiter';
 
-function stubLimiter(accept: boolean, retry = 1): RedisRateLimiter {
+function stubLimiter(accept: boolean, retry = 1): RateLimiter {
   return {
     consume: jest.fn(async (_p: Policy) => ({
       accepted: accept, limit: 60, remaining: accept ? 59 : 0, retryAfter: retry, reset: retry,

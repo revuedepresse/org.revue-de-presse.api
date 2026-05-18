@@ -1,15 +1,15 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { MembersRepository } from '@/members/members.repository';
+import { DrizzleMembersRepository } from '@/adapters/persistence/drizzle/drizzle-members.repository';
 import { bootstrapSqlite } from '@test/setup/sqlite-bootstrap';
-import * as schema from '@/db/schema';
+import * as schema from '@/adapters/persistence/drizzle/schema';
 
 describe('MembersRepository', () => {
   function setup() {
     const sqlite = new Database(':memory:');
     bootstrapSqlite(sqlite);
     const db = drizzle(sqlite, { schema });
-    const repo = new MembersRepository(db as never);
+    const repo = new DrizzleMembersRepository(db as never);
     return { db, repo, sqlite };
   }
 

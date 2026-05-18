@@ -1,16 +1,5 @@
 import type Redis from 'ioredis';
-
-export type Policy =
-  | { kind: 'sliding-window'; name: string; limit: number; windowMs: number }
-  | { kind: 'token-bucket'; name: string; burst: number; refillAmount: number; intervalMs: number };
-
-export interface ConsumeResult {
-  accepted: boolean;
-  limit: number;
-  remaining: number;
-  retryAfter: number;
-  reset: number;
-}
+import { Policy, ConsumeResult, RateLimiter } from '@/core/rate-limit/rate-limiter';
 
 const SLIDING_WINDOW_LUA = `
 local key = KEYS[1]
@@ -56,7 +45,7 @@ redis.call('PEXPIRE', key, intervalMs * 2)
 return {1, burst, 0}
 `.trim();
 
-export class RedisRateLimiter {
+export class RedisRateLimiter implements RateLimiter {
   constructor(private readonly redis: Redis) {}
 
   async consume(policy: Policy, key: string): Promise<ConsumeResult> {
