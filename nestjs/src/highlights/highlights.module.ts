@@ -1,25 +1,37 @@
 import { Module } from '@nestjs/common';
 import { ENV } from '@/config/env';
 import type { Env } from '@/config/env';
+import type Redis from 'ioredis';
+import { REDIS_CLIENT } from '@/redis/redis.tokens';
 import { RedisModule } from '@/redis/redis.module';
 import { HighlightsController } from './highlights.controller';
 import { HighlightsService } from './highlights.service';
 import { HighlightFilters } from './highlight-filters';
 import { HighlightNormalizer } from './highlight-normalizer';
-import { SNAPSHOT_READER } from './snapshot-reader';
+import { SNAPSHOT_READER, SnapshotReader } from './snapshot-reader';
 import { FilesystemSnapshotReader } from './filesystem-snapshot-reader';
 
 @Module({
   imports: [RedisModule],
   controllers: [HighlightsController],
   providers: [
-    HighlightsService,
     HighlightFilters,
     HighlightNormalizer,
     {
       provide: SNAPSHOT_READER,
       useFactory: (env: Env) => new FilesystemSnapshotReader(env),
       inject: [ENV],
+    },
+    {
+      provide: HighlightsService,
+      useFactory: (
+        reader: SnapshotReader,
+        filters: HighlightFilters,
+        normalizer: HighlightNormalizer,
+        redis: Redis,
+        env: Env,
+      ) => new HighlightsService(reader, filters, normalizer, redis, env),
+      inject: [SNAPSHOT_READER, HighlightFilters, HighlightNormalizer, REDIS_CLIENT, ENV],
     },
   ],
   exports: [HighlightsService],

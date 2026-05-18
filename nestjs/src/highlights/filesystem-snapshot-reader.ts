@@ -1,17 +1,16 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ENV } from '@/config/env';
 import type { Env } from '@/config/env';
 import { SnapshotReader } from './snapshot-reader';
+import { Logger, NoopLogger } from '@/core/ports/logger';
 
-@Injectable()
 export class FilesystemSnapshotReader implements SnapshotReader {
-  private readonly logger = new Logger(FilesystemSnapshotReader.name);
   private readonly projectDir: string;
+  private readonly logger: Logger;
 
-  constructor(@Inject(ENV) envOrDir: Env | string) {
+  constructor(envOrDir: Env | string, logger: Logger = new NoopLogger()) {
     this.projectDir = typeof envOrDir === 'string' ? envOrDir : (envOrDir.PROJECT_DIR ?? process.cwd());
+    this.logger = logger;
   }
 
   async read(date: string): Promise<unknown[] | Record<string, unknown>> {
@@ -20,7 +19,7 @@ export class FilesystemSnapshotReader implements SnapshotReader {
     try {
       raw = await fs.readFile(file, 'utf8');
     } catch {
-      this.logger.log({ msg: 'snapshot missing', date });
+      this.logger.log({ msg: 'snapshot missing', date }, 'FilesystemSnapshotReader');
       return [];
     }
     try {

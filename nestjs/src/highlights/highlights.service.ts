@@ -1,13 +1,11 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type Redis from 'ioredis';
-import { ENV } from '@/config/env';
 import type { Env } from '@/config/env';
-import { REDIS_CLIENT } from '@/redis/redis.tokens';
-import { SNAPSHOT_READER, SnapshotReader } from './snapshot-reader';
+import { SnapshotReader } from './snapshot-reader';
 import { HighlightFilters, FilterParams } from './highlight-filters';
 import { HighlightNormalizer } from './highlight-normalizer';
 import { HighlightDto } from './highlight.dto';
 import { highlightCacheKey, CacheKeyParams } from './cache-key';
+import { Logger, NoopLogger } from '@/core/ports/logger';
 
 export interface HighlightsRequest {
   query: Record<string, string | string[] | undefined>;
@@ -15,16 +13,14 @@ export interface HighlightsRequest {
   _highlights_cache?: string;
 }
 
-@Injectable()
 export class HighlightsService {
-  private readonly logger = new Logger(HighlightsService.name);
-
   constructor(
-    @Inject(SNAPSHOT_READER) private readonly reader: SnapshotReader,
+    private readonly reader: SnapshotReader,
     private readonly filters: HighlightFilters,
     private readonly normalizer: HighlightNormalizer,
-    @Optional() @Inject(REDIS_CLIENT) private readonly redis: Redis | null,
-    @Optional() @Inject(ENV) private readonly appEnvOrEnv: Env | string,
+    private readonly redis: Redis | null,
+    private readonly appEnvOrEnv: Env | string,
+    private readonly logger: Logger = new NoopLogger(),
   ) {}
 
   private appEnv(): string {
@@ -54,7 +50,7 @@ export class HighlightsService {
       await this.redis.setex(key, 3600, JSON.stringify(fresh.map((d) => ({ ...d, date: d.date.toISOString() }))));
       return fresh;
     } catch (err) {
-      this.logger.warn({ msg: 'redis read-through unavailable', error: (err as Error).message });
+      this.logger.warn({ msg: 'redis read-through unavailable', error: (err as Error).message }, 'HighlightsService');
       req._highlights_cache = 'error';
       return this.loadFresh(params);
     }
