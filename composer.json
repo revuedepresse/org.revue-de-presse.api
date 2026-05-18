@@ -59,7 +59,7 @@
         "symfony/uid": "^7.4",
         "symfony/validator": "^7.4",
         "symfony/var-dumper": "^7.4",
-        "symfony/var-exporter": "^7.4",
+        "symfony/var-exporter": "^8.0",
         "symfony/yaml": "^7.4"
     },
     "require-dev": {
