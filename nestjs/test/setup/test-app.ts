@@ -10,6 +10,7 @@ import * as schema from '@/db/schema';
 import { ProblemJsonFilter } from '@/common/problem-json.filter';
 import { ENV, loadEnv } from '@/config/env';
 import { InMemoryRedis } from '@test/doubles/in-memory-redis';
+import { InMemoryRedisWithEval } from '@test/doubles/in-memory-redis-with-eval';
 import { bootstrapSqlite } from './sqlite-bootstrap';
 
 export interface TestAppHandle {
@@ -19,8 +20,13 @@ export interface TestAppHandle {
   close: () => Promise<void>;
 }
 
-export async function bootTestApp(overrides: Partial<Record<string, string>> = {}): Promise<TestAppHandle> {
-  for (const [k, v] of Object.entries(overrides)) process.env[k] = String(v);
+export async function bootTestApp(
+  overrides: Partial<Record<string, string>> & { useEvalRedis?: boolean } = {},
+): Promise<TestAppHandle> {
+  const { useEvalRedis, ...envOverrides } = overrides as Record<string, unknown>;
+  for (const [k, v] of Object.entries(envOverrides)) {
+    if (typeof v === 'string') process.env[k] = v;
+  }
   // Ensure ALLOWED_ORIGIN is a valid JS regex string ('*' from .env.test is not valid).
   if (!overrides.ALLOWED_ORIGIN && (!process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGIN === '*')) {
     process.env.ALLOWED_ORIGIN = '.*';
@@ -29,7 +35,7 @@ export async function bootTestApp(overrides: Partial<Record<string, string>> = {
   const sqlite = new Database(':memory:');
   bootstrapSqlite(sqlite);
   const db = drizzle(sqlite, { schema });
-  const redis = new InMemoryRedis();
+  const redis = useEvalRedis ? new InMemoryRedisWithEval() : new InMemoryRedis();
 
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(ENV).useValue(env)

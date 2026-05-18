@@ -10,11 +10,12 @@ export class ProblemJsonFilter implements ExceptionFilter {
     const title = isHttp ? exception.message || 'Error' : 'Internal Server Error';
     const exposedTitle = status === 401 ? 'Unauthorized' : title;
     const detail = isHttp ? extractDetail(exception) : 'Unexpected error';
+    const type = isHttp ? extractType(exception) : 'about:blank';
 
     res.status(status);
     res.setHeader('Content-Type', 'application/problem+json');
     res.json({
-      type: 'about:blank',
+      type,
       title: exposedTitle,
       status,
       detail,
@@ -32,4 +33,13 @@ function extractDetail(e: HttpException): string {
     if (Array.isArray(obj.message)) return obj.message.join('; ');
   }
   return e.message;
+}
+
+function extractType(e: HttpException): string {
+  const r = e.getResponse();
+  if (r && typeof r === 'object') {
+    const obj = r as Record<string, unknown>;
+    if (typeof obj.type === 'string') return obj.type;
+  }
+  return 'about:blank';
 }
