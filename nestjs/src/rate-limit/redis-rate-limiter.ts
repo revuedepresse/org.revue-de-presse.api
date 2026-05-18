@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
 import type Redis from 'ioredis';
-import { REDIS_CLIENT } from '@/redis/redis.tokens';
 
 export type Policy =
   | { kind: 'sliding-window'; name: string; limit: number; windowMs: number }
@@ -58,9 +56,8 @@ redis.call('PEXPIRE', key, intervalMs * 2)
 return {1, burst, 0}
 `.trim();
 
-@Injectable()
 export class RedisRateLimiter {
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+  constructor(private readonly redis: Redis) {}
 
   async consume(policy: Policy, key: string): Promise<ConsumeResult> {
     const now = Date.now();

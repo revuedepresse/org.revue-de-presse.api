@@ -1,17 +1,14 @@
 import { createHash } from 'node:crypto';
-import { Inject, Injectable } from '@nestjs/common';
 import type Redis from 'ioredis';
-import { REDIS_CLIENT } from '@/redis/redis.tokens';
 import { AccessTokenRecord } from './access-token-record';
 import { AccessTokenStore } from './access-token.store';
 
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex');
 
-@Injectable()
 export class RedisAccessTokenStore implements AccessTokenStore {
   private static readonly PREFIX = 'auth:bearer:';
 
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+  constructor(private readonly redis: Redis) {}
 
   async put(tokenPlaintext: string, memberId: string, ttlSeconds: number): Promise<void> {
     const now = Math.floor(Date.now() / 1000);

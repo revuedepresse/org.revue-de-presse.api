@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { MembersRepository } from '@/members/members.repository';
 import type { Member } from '@/members/member.entity';
 import { InvalidClientCredentialsException } from './invalid-client-credentials.exception';
 
 type HeadersLike = Record<string, string | string[] | undefined>;
 
-@Injectable()
 export class BasicCredentialsExtractor {
   constructor(private readonly members: MembersRepository) {}
 

@@ -1,7 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { DB } from '@/db/db.tokens';
 import type { Db } from '@/db/db.module';
 import * as schema from '@/db/schema';
 import { weavingUser } from '@/db/schema';
@@ -12,9 +10,8 @@ import { Member } from './member.entity';
 // the compiler is happy; at runtime the pg driver exposes the same API surface.
 type AnyDb = BetterSQLite3Database<typeof schema>;
 
-@Injectable()
 export class MembersRepository {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(private readonly db: Db) {}
 
   private get anyDb(): AnyDb {
     return this.db as unknown as AnyDb;

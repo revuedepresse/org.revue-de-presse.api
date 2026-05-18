@@ -17,13 +17,20 @@ const basic = (s: string) => 'Basic ' + Buffer.from(s).toString('base64');
 
 describe('TokenController', () => {
   async function setup(member: ReturnType<typeof createMember> | null, expected = 'secret') {
+    const store = new InMemoryAccessTokenStore();
+    const repo = new StubRepo(expected, member) as unknown as MembersRepository;
     const moduleRef = await Test.createTestingModule({
       controllers: [TokenController],
       providers: [
-        AccessTokenMinter,
-        BasicCredentialsExtractor,
-        { provide: ACCESS_TOKEN_STORE, useClass: InMemoryAccessTokenStore },
-        { provide: MembersRepository, useValue: new StubRepo(expected, member) },
+        { provide: ACCESS_TOKEN_STORE, useValue: store },
+        {
+          provide: AccessTokenMinter,
+          useValue: new AccessTokenMinter(store, 900),
+        },
+        {
+          provide: BasicCredentialsExtractor,
+          useValue: new BasicCredentialsExtractor(repo),
+        },
       ],
     }).compile();
     return moduleRef.get(TokenController);
