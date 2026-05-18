@@ -1,5 +1,5 @@
 import { HttpStatus, UnauthorizedException } from '@nestjs/common';
-import { ProblemJsonFilter } from '@/common/problem-json.filter';
+import { ProblemJsonFilter } from '@/adapters/nestjs/common/problem-json.filter';
 
 function makeHost() {
   const headers: Record<string, string> = {};

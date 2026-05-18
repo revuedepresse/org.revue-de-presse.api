@@ -55,21 +55,33 @@ Env vars are zod-validated at boot (`src/config/env.ts`); the app refuses to sta
 
 ## Architecture
 
-Conventional NestJS feature folders under `src/`:
+Hexagonal layout under `src/`:
 
 ```
 src/
-├── main.ts                  bootstrap (CORS, Swagger, problem+json filter)
-├── app.module.ts            composes all feature modules
-├── config/                  zod env loader + global ConfigModule
-├── redis/                   REDIS_CLIENT provider (ioredis)
-├── db/                      Drizzle DB provider (pg + better-sqlite3); weavingUser schema
-├── members/                 MembersRepository (findEnabledByApiKey, findById)
-├── auth/                    BearerGuard (global), @Public, AccessTokenMinter, RedisAccessTokenStore, TokenController
-├── highlights/              SnapshotReader, filters, normalizer, sha1 cache-key, HighlightsService, Hydra serializer, controller
-├── health/                  HealthcheckController
-├── rate-limit/              RedisRateLimiter (Lua), RateLimitGuard (global), policy table
-└── common/                  ProblemJsonFilter (RFC 7807), CacheLabelInterceptor (x-cache), JsonLogger (pino), Swagger setup
+├── compose.ts               framework-agnostic composition root (builds full service graph)
+├── config/env.ts            zod env loader (pure, shared by core and adapters)
+├── core/                    pure TypeScript — zero NestJS / Drizzle / ioredis imports
+│   ├── ports/logger.ts
+│   ├── errors/
+│   ├── auth/                AccessTokenRecord, AccessTokenStore (port), AccessTokenMinter, BasicCredentialsExtractor
+│   ├── highlights/          HighlightDto, filters, normalizer, cache-key, SnapshotReader (port), HighlightsService, Hydra serializer, PerformanceMetrics
+│   ├── members/             Member entity, MembersRepository (interface + MEMBERS_REPOSITORY symbol)
+│   └── rate-limit/          RateLimiter (interface + RATE_LIMITER symbol), Policy types
+└── adapters/
+    ├── persistence/
+    │   ├── drizzle/         DbModule, DB token, weavingUser schema, DrizzleMembersRepository
+    │   └── redis/           RedisModule, REDIS_CLIENT token, RedisAccessTokenStore, RedisRateLimiter
+    ├── snapshots/           FilesystemSnapshotReader
+    └── nestjs/              NestJS HTTP adapter
+        ├── auth/            AuthModule, BearerGuard (global APP_GUARD), @Public, TokenController, AccessTokenResponseDto
+        ├── highlights/      HighlightsModule, HighlightsController
+        ├── health/          HealthModule, HealthcheckController
+        ├── rate-limit/      RateLimitModule, RateLimitGuard (global APP_GUARD)
+        ├── common/          ProblemJsonFilter (RFC 7807), CacheLabelInterceptor (x-cache), PinoLogger, Swagger setup
+        ├── config/          ConfigModule (provides ENV token)
+        ├── app.module.ts    composes all feature modules
+        └── main.ts          bootstrap (CORS, Swagger, problem+json filter)
 ```
 
 Two guards are registered as `APP_GUARD`: `BearerGuard` (from `AuthModule`) runs first, `RateLimitGuard` (from `RateLimitModule`) runs second. Public routes (`@Public()`) skip the bearer check; the rate-limiter's path table skips `/api/healthcheck`.

@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { HighlightsService } from '@/core/highlights/highlights.service';
 import { hydraCollection } from '@/core/highlights/hydra.serializer';
-import { CacheLabelInterceptor } from '@/common/cache-label.interceptor';
+import { CacheLabelInterceptor } from '@/adapters/nestjs/common/cache-label.interceptor';
 
 @ApiTags('highlights')
 @ApiBearerAuth()

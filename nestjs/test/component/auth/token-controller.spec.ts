@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { TokenController } from '@/auth/token.controller';
+import { TokenController } from '@/adapters/nestjs/auth/token.controller';
 import { AccessTokenMinter } from '@/core/auth/access-token.minter';
 import { BasicCredentialsExtractor } from '@/core/auth/basic-credentials.extractor';
 import { ACCESS_TOKEN_STORE } from '@/core/auth/access-token.store';

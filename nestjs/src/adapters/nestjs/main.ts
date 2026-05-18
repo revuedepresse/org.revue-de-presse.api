@@ -2,16 +2,16 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { loadEnv } from './config/env';
+import { loadEnv } from '@/config/env';
 import { ProblemJsonFilter } from './common/problem-json.filter';
 import { setupSwagger } from './common/swagger';
-import { JsonLogger } from './common/logger';
+import { PinoLogger } from './common/pino-logger';
 
 async function bootstrap() {
   const env = loadEnv(process.env);
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
-    logger: new JsonLogger(env.APP_ENV),
+    logger: new PinoLogger(env.APP_ENV),
   });
 
   app.setGlobalPrefix('api');

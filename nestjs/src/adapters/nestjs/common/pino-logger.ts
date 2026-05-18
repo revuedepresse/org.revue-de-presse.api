@@ -1,7 +1,7 @@
 import { LoggerService } from '@nestjs/common';
 import pino, { Logger } from 'pino';
 
-export class JsonLogger implements LoggerService {
+export class PinoLogger implements LoggerService {
   private readonly logger: Logger;
   constructor(appEnv: string) {
     this.logger = pino({
@@ -16,3 +16,6 @@ export class JsonLogger implements LoggerService {
   debug(message: unknown, context?: string) { this.logger.debug({ context }, String(message)); }
   verbose(message: unknown, context?: string) { this.logger.trace({ context }, String(message)); }
 }
+
+/** @deprecated use PinoLogger */
+export { PinoLogger as JsonLogger };

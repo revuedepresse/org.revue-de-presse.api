@@ -1,5 +1,5 @@
 import { Reflector } from '@nestjs/core';
-import { RateLimitGuard } from '@/rate-limit/rate-limit.guard';
+import { RateLimitGuard } from '@/adapters/nestjs/rate-limit/rate-limit.guard';
 import type { RateLimiter, Policy } from '@/core/rate-limit/rate-limiter';
 
 function stubLimiter(accept: boolean, retry = 1): RateLimiter {

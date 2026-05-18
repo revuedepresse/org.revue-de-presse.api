@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "start": "node dist/main.js",
+    "start": "node dist/adapters/nestjs/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings 0",
     "format": "prettier --check \"{src,test}/**/*.ts\"",

@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { CacheLabelInterceptor } from '@/common/cache-label.interceptor';
+import { CacheLabelInterceptor } from '@/adapters/nestjs/common/cache-label.interceptor';
 import type { CallHandler, ExecutionContext } from '@nestjs/common';
 
 function makeCtx(reqAttr: string | null) {
