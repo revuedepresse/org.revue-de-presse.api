@@ -39,13 +39,18 @@ describe('RateLimitGuard', () => {
     await expect(guard.canActivate(ctx as never)).resolves.toBe(true);
   });
 
-  it('returns false and writes 429 problem+json when limiter rejects', async () => {
+  it('throws HttpException(429) and sets Retry-After when limiter rejects', async () => {
     const limiter = stubLimiter(false, 5);
     const guard = new RateLimitGuard(env as never, limiter, new Reflector());
-    const { ctx, res, headers } = ctxFor('/api/highlights');
-    await expect(guard.canActivate(ctx as never)).resolves.toBe(false);
-    expect(res.status).toHaveBeenCalledWith(429);
-    expect(headers['Content-Type']).toBe('application/problem+json');
+    const { ctx, headers } = ctxFor('/api/highlights');
+    await expect(guard.canActivate(ctx as never)).rejects.toMatchObject({
+      status: 429,
+      response: expect.objectContaining({
+        type: 'https://tools.ietf.org/html/rfc6585#section-4',
+        title: 'Too Many Requests',
+        status: 429,
+      }),
+    });
     expect(headers['Retry-After']).toBe('5');
     expect(headers['RateLimit-Remaining']).toBe('0');
   });
