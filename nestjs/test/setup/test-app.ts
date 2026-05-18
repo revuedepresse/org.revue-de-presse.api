@@ -8,6 +8,7 @@ import { REDIS_CLIENT } from '@/redis/redis.tokens';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '@/db/schema';
 import { ProblemJsonFilter } from '@/common/problem-json.filter';
+import { setupSwagger } from '@/common/swagger';
 import { ENV, loadEnv } from '@/config/env';
 import { InMemoryRedis } from '@test/doubles/in-memory-redis';
 import { InMemoryRedisWithEval } from '@test/doubles/in-memory-redis-with-eval';
@@ -54,6 +55,7 @@ export async function bootTestApp(
     credentials: false,
     maxAge: 3600,
   });
+  setupSwagger(app);
   await app.init();
   return {
     app, sqlite, redis,
