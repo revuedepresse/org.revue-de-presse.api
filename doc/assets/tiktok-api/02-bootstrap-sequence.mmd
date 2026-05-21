@@ -1,0 +1,30 @@
+sequenceDiagram
+  autonumber
+  participant M as Maintainer
+  participant CLI as bootstrap-auth CLI
+  participant B as Browser
+  participant TT as TikTok (www.tiktok.com)
+  participant CB as api.revue-de-presse.org<br/>GET /api/tiktok/oauth/callback
+  participant EX as api.revue-de-presse.org<br/>POST /api/tiktok/oauth/exchange
+  participant TKN as TikTok (open.tiktokapis.com)<br/>POST /v2/oauth/token/
+
+  M->>CLI: make tiktok-bootstrap
+  CLI->>CLI: generate state + PKCE (code_verifier, code_challenge S256)
+  CLI->>B: open authorize URL<br/>redirect_uri=https://api.revue-de-presse.org/api/tiktok/oauth/callback
+  B->>TT: sign in as @revue_2_presse + approve scopes<br/>user.info.basic, video.upload, video.publish
+  TT-->>B: 302 to redirect_uri?code=AUTH_CODE&state=STATE
+  B->>CB: GET /api/tiktok/oauth/callback?code=AUTH_CODE&state=STATE
+  CB-->>B: 200 text/html (copy-paste page,<br/>Cache-Control: no-store)
+  M->>CLI: paste the full callback URL into the prompt
+  CLI->>CLI: parse code+state, verify state matches local nonce
+
+  CLI->>EX: POST /api/token (Basic auth)
+  EX-->>CLI: { access_token: BEARER, token_type: 'Bearer', ttl }
+
+  CLI->>EX: POST /api/tiktok/oauth/exchange<br/>Authorization: Bearer BEARER<br/>{ code, code_verifier, redirect_uri }
+  EX->>EX: load TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET from env<br/>(503 if unconfigured)
+  EX->>TKN: POST /v2/oauth/token/<br/>application/x-www-form-urlencoded<br/>grant_type=authorization_code<br/>+ code + code_verifier + redirect_uri + client_key + client_secret
+  TKN-->>EX: { access_token, refresh_token,<br/>expires_in: 86400, refresh_expires_in: 31536000 }
+  EX-->>CLI: 200 application/json with the tokens
+
+  CLI->>CLI: persist refresh_token to social/tiktok/.env.local<br/>(or print `gh secret set ...` for CI)
