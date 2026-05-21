@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-24.04
     defaults: { run: { working-directory: nestjs } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: '24', cache: 'npm', cache-dependency-path: nestjs/package-lock.json }
       - run: npm ci
       - run: npm run lint
@@ -43,8 +43,8 @@ jobs:
       ALLOWED_ORIGIN: '.*'
       RATE_LIMIT_ENABLED: 'false'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: '24', cache: 'npm', cache-dependency-path: nestjs/package-lock.json }
       - run: npm ci
       - run: npm run test:e2e
@@ -61,15 +61,18 @@ jobs:
         ports: ['5432:5432']
         options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      APP_ENV: test
       DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
-        with: { php-version: '8.4', extensions: pdo_pgsql, bcmath }
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, bcmath
       - run: composer install --prefer-dist --no-progress
       - run: php bin/console doctrine:migrations:migrate --no-interaction
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with: { node-version: '24', cache: 'npm', cache-dependency-path: nestjs/package-lock.json }
       - run: cd nestjs && npm ci
       - run: cd nestjs && npm run db:introspect:check

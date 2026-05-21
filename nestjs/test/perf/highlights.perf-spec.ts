@@ -55,7 +55,6 @@ const P95_CEILING_MS = Number(process.env.BENCH_P95_CEILING_MS ?? 1500);
 
     const wallSeconds = Number(process.hrtime.bigint() - wallStart) / 1e9;
     const m = new PerformanceMetrics(samples, errors);
-    // eslint-disable-next-line no-console
     console.log(JSON.stringify({
       count: m.count(), errors: m.errors(),
       min_ms: m.min(), p50_ms: m.p50(), p95_ms: m.p95(), p99_ms: m.p99(), max_ms: m.max(),
