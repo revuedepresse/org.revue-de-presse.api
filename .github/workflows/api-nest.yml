@@ -62,7 +62,7 @@ jobs:
         options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       APP_ENV: test
-      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app?serverVersion=16&charset=utf8
     steps:
       - uses: actions/checkout@v5
       - name: Setup PHP
