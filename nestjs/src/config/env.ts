@@ -19,6 +19,8 @@ export const EnvSchema = z.object({
   PORT: intish.optional(),
   PG_POOL_MIN: intish.optional(),
   PG_POOL_MAX: intish.optional(),
+  TIKTOK_CLIENT_KEY: z.string().optional(),
+  TIKTOK_CLIENT_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

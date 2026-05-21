@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { HighlightsModule } from './highlights/highlights.module';
 import { HealthModule } from './health/health.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
+import { TikTokModule } from './tiktok/tiktok.module';
 
 @Global()
 @Module({
@@ -17,6 +18,7 @@ import { RateLimitModule } from './rate-limit/rate-limit.module';
     HighlightsModule,
     HealthModule,
     RateLimitModule,
+    TikTokModule,
   ],
 })
 export class AppModule {}
