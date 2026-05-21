@@ -71,7 +71,7 @@ jobs:
           php-version: '8.4'
           extensions: pdo_pgsql, bcmath
       - run: composer install --prefer-dist --no-progress
-      - run: php bin/console doctrine:migrations:migrate --no-interaction
+      - run: php bin/console doctrine:schema:create
       - uses: actions/setup-node@v5
         with: { node-version: '24', cache: 'npm', cache-dependency-path: nestjs/package-lock.json }
       - run: cd nestjs && npm ci
