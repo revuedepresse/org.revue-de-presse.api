@@ -25,6 +25,7 @@ when@prod:
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api,                        role: ROLE_USER }
 
 when@dev:
@@ -34,6 +35,7 @@ when@dev:
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api,                        role: ROLE_USER }
 
 when@test:
@@ -43,4 +45,5 @@ when@test:
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api,                        role: ROLE_USER }
