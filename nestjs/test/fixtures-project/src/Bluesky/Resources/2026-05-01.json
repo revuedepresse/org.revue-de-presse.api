@@ -1,0 +1,14 @@
+{
+  "statuses": [
+    {
+      "screen_name": "lemonde.fr",
+      "reposts": 12,
+      "likes": 34,
+      "replies": 5,
+      "avatar_url": "https://cdn/avatar.jpg",
+      "text": "An example post for the e2e test",
+      "publication_id": "at://did:plc:abc/x/post-1",
+      "publicationDateTime": "2026-05-01T10:00:00+02:00"
+    }
+  ]
+}

@@ -39,6 +39,33 @@ services:
               bind:
                   create_host_path: false
 
+    # NestJS API service — lightweight Node.js HTTP API ported from the
+    # Symfony/API-Platform stack. Gated behind the `nest` profile so it
+    # does not start with bare `docker compose up` unless explicitly opted in.
+    # Drive it through make targets or:
+    #
+    #   docker compose --profile nest up -d api-nest
+    #
+    api-nest:
+        profiles:
+            - nest
+        build:
+            context: ../..
+            dockerfile: provisioning/containers/api-nest/Dockerfile
+        image: revue-de-presse/api-nest:latest
+        depends_on:
+            - cache
+        environment:
+            APP_ENV: prod
+            DATABASE_URL: '${DATABASE_URL}'
+            REDIS_HOST: '${REDIS_HOST:-cache}'
+            REDIS_PORT: '${REDIS_PORT:-6379}'
+            ALLOWED_ORIGIN: '${CORS_ALLOW_ORIGIN}'
+            RATE_LIMIT_ENABLED: 'true'
+            TRUSTED_PROXIES: '${TRUSTED_PROXIES}'
+            PORT: '3000'
+        restart: 'unless-stopped'
+
     # Production-style PHP worker runtime (FrankenPHP under the hood —
     # the directory `./php-worker/` hosts the Dockerfile + Caddyfile
     # + php.ini.dist, but the compose service is named after its role).

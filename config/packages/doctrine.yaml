@@ -4,7 +4,7 @@ doctrine:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 server_version: '14'
-                charset: utf8mb4
+                charset: UTF8
                 logging: false
 
     orm:

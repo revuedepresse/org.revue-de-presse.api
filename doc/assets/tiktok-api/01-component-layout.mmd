@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph Maintainer[Maintainer machine]
+    CLI[bootstrap-auth CLI<br/>org.revue-de-presse.benchmark/social/tiktok/bin/bootstrap-auth.ts]
+    Browser[System browser]
+  end
+
+  subgraph TikTok[TikTok platform]
+    Auth[/www.tiktok.com<br/>OAuth authorize page/]
+    Token[/open.tiktokapis.com<br/>POST /v2/oauth/token/]
+  end
+
+  subgraph API[api.revue-de-presse.org]
+    direction TB
+    subgraph Nest[NestJS adapter]
+      NCb[GET /api/tiktok/oauth/callback<br/>TikTokOAuthController]
+      NEx[POST /api/tiktok/oauth/exchange<br/>TikTokOAuthController + HttpTikTokOAuthClient]
+    end
+    subgraph Sym[Symfony / API Platform adapter]
+      SCb[GET /api/tiktok/oauth/callback<br/>TikTokOAuthCallbackController]
+      SEx[POST /api/tiktok/oauth/exchange<br/>TikTokOAuthExchangeController + HttpTikTokOAuthClient]
+    end
+  end
+
+  Browser -->|1: opens authorize URL| Auth
+  Auth -->|2: 302 redirect with code+state| Browser
+  Browser -->|3: GET /api/tiktok/oauth/callback?code=&state=| NCb
+  Browser -. or .-> SCb
+  NCb -->|4: 200 text/html copy-paste page| Browser
+  SCb -. or .-> Browser
+  Browser -->|5: maintainer copies URL| CLI
+  CLI -->|6: POST /api/token Basic-auth| API
+  CLI -->|7: POST /api/tiktok/oauth/exchange<br/>Bearer + JSON body| NEx
+  NEx -. or .-> SEx
+  NEx -->|8: form-encoded POST<br/>grant_type=authorization_code| Token
+  Token -->|9: access_token + refresh_token| NEx
+  NEx -->|10: 200 application/json| CLI

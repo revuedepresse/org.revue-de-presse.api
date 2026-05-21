@@ -15,6 +15,22 @@ services:
 
     App\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
+    App\TikTok\Infrastructure\Http\HttpTikTokOAuthClient:
+        arguments:
+            $httpClient:   '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            $clientKey:    '%env(string:TIKTOK_CLIENT_KEY)%'
+            $clientSecret: '%env(string:TIKTOK_CLIENT_SECRET)%'
+
+    App\TikTok\Infrastructure\Http\TikTokOAuthClient: '@App\TikTok\Infrastructure\Http\HttpTikTokOAuthClient'
+
+    App\TikTok\Infrastructure\Controller\TikTokOAuthCallbackController:
+        tags: ['controller.service_arguments']
+
+    App\TikTok\Infrastructure\Controller\TikTokOAuthExchangeController:
+        arguments:
+            $client: '@App\TikTok\Infrastructure\Http\TikTokOAuthClient'
+        tags: ['controller.service_arguments']
+
 parameters:
     monolog_channels:               ['benchmark']
 
