@@ -21,23 +21,26 @@ security:
 when@prod:
     security:
         access_control:
-            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
-            - { path: ^/api/token,       role: PUBLIC_ACCESS }
-            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
-            - { path: ^/api,             role: ROLE_USER }
+            - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
+            - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api,                        role: ROLE_USER }
 
 when@dev:
     security:
         access_control:
-            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
-            - { path: ^/api/token,       role: PUBLIC_ACCESS }
-            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
-            - { path: ^/api,             role: ROLE_USER }
+            - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
+            - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api,                        role: ROLE_USER }
 
 when@test:
     security:
         access_control:
-            - { path: ^/api/healthcheck, role: PUBLIC_ACCESS }
-            - { path: ^/api/token,       role: PUBLIC_ACCESS }
-            - { path: ^/api/docs,        role: PUBLIC_ACCESS }
-            - { path: ^/api,             role: ROLE_USER }
+            - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
+            - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
+            - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
+            - { path: ^/api,                        role: ROLE_USER }
