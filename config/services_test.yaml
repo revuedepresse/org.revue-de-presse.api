@@ -6,3 +6,20 @@ services:
 
     app.cache.redis:
         class: 'App\Tests\Infrastructure\Cache\InMemoryRedisCache'
+
+    # MockHttpClient stand-in for tests. The default response factory yields
+    # 200 + an empty JSON body so any unexpected call surfaces as a TikTok
+    # invalid-response-shape failure rather than silently passing.
+    app.test.tiktok_mock_http_client:
+        class: Symfony\Component\HttpClient\MockHttpClient
+        public: true
+
+    # Override the production service so the controller's TikTokOAuthClient
+    # dependency runs against MockHttpClient instead of a live HTTP client.
+    App\TikTok\Infrastructure\Http\HttpTikTokOAuthClient:
+        arguments:
+            $httpClient:   '@app.test.tiktok_mock_http_client'
+            $clientKey:    '%env(string:TIKTOK_CLIENT_KEY)%'
+            $clientSecret: '%env(string:TIKTOK_CLIENT_SECRET)%'
+
+    App\TikTok\Infrastructure\Http\TikTokOAuthClient: '@App\TikTok\Infrastructure\Http\HttpTikTokOAuthClient'

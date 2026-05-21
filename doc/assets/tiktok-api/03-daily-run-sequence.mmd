@@ -1,0 +1,17 @@
+sequenceDiagram
+  autonumber
+  participant CRON as GitHub Actions cron
+  participant CLI as post-daily-top10 CLI
+  participant TKN as TikTok (open.tiktokapis.com)<br/>POST /v2/oauth/token/
+  participant CP as TikTok Content Posting API<br/>open.tiktokapis.com
+
+  CRON->>CLI: 30 21 * * * UTC
+  CLI->>CLI: load TIKTOK_REFRESH_TOKEN from env
+  CLI->>TKN: POST /v2/oauth/token/<br/>grant_type=refresh_token
+  TKN-->>CLI: new access_token + rotated refresh_token
+  CLI->>CLI: persist rotated refresh_token (gh secret set OR .env.local rewrite)<br/>BEFORE any further network call
+  CLI->>CP: POST inbox/video/init OR post/publish/video/init<br/>Authorization: Bearer access_token
+  CP-->>CLI: { publish_id, upload_url }
+  CLI->>CP: PUT upload_url with MP4 bytes
+  CLI->>CP: POST publish/status/fetch (poll until terminal)
+  CP-->>CLI: SEND_TO_USER_INBOX or PUBLISH_COMPLETE

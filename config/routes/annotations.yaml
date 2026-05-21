@@ -7,3 +7,9 @@ healthcheck:
         path: ../../src/Healthcheck/Infrastructure/Controller/
         namespace: App\Healthcheck\Infrastructure\Controller
     type: attribute
+
+tiktok:
+    resource:
+        path: ../../src/TikTok/Infrastructure/Controller/
+        namespace: App\TikTok\Infrastructure\Controller
+    type: attribute

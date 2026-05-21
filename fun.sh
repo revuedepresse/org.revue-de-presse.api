@@ -403,7 +403,7 @@ function run_update_version() {
     local latest
     local current
 
-    repo_file='src/Trends/Infrastructure/Repository/PopularPublicationRepository.php'
+    repo_file='config/packages/api_platform.yaml'
 
     # When TAG is unset (e.g. plain `make update-version`), default it to the
     # next minor on top of the most recent existing tag in the same track:
@@ -439,7 +439,7 @@ function run_update_version() {
     fi
     latest=$(printf '%s' "${source_tag}" | sed -E 's/^(v[0-9]+(\.[0-9]+){1,2}).*/\1/')
 
-    current=$(sed -nE "s/^[[:space:]]+'version' => '([^']+)',?\$/\1/p" "${repo_file}" | head -1)
+    current=$(sed -nE "s/^[[:space:]]+version:[[:space:]]*'([^']+)'[[:space:]]*\$/\1/p" "${repo_file}" | head -1)
     if [ -z "${current}" ]; then
         printf "ERROR: 'version' key not found in %s%s" "${repo_file}" $'\n' 1>&2
         return 1
@@ -455,7 +455,7 @@ function run_update_version() {
             return 1
         fi
 
-        sed -i.bak -E "s|('version' => ')[^']+(',)|\1${latest}\2|" "${repo_file}"
+        sed -i.bak -E "s|(^[[:space:]]+version:[[:space:]]*')[^']+(')|\1${latest}\2|" "${repo_file}"
         rm -f "${repo_file}.bak"
         printf '%s version updated: %s -> %s%s' "${repo_file}" "${current}" "${latest}" $'\n'
 
