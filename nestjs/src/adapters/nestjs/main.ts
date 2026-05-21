@@ -12,6 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
     logger: new PinoLogger(env.APP_ENV),
+    rawBody: true,
   });
 
   app.setGlobalPrefix('api');

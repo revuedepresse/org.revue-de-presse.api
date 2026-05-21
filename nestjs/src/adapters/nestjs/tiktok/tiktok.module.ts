@@ -7,7 +7,14 @@ import {
   type TikTokOAuthClient,
 } from '@/core/tiktok/tiktok-oauth.client';
 import { TikTokExchangeError } from '@/core/tiktok/tiktok-oauth.errors';
+import {
+  HmacTikTokWebhookVerifier,
+  TIKTOK_WEBHOOK_VERIFIER,
+  TikTokWebhookVerificationError,
+  type TikTokWebhookVerifier,
+} from '@/core/tiktok/tiktok-webhook.verifier';
 import { TikTokOAuthController } from './tiktok-oauth.controller';
+import { TikTokWebhookController } from './tiktok-webhook.controller';
 
 /**
  * The real client is constructed lazily — if env vars are absent we still
@@ -25,8 +32,14 @@ class UnconfiguredTikTokOAuthClient implements TikTokOAuthClient {
   }
 }
 
+class UnconfiguredTikTokWebhookVerifier implements TikTokWebhookVerifier {
+  verifyAndParse(): never {
+    throw new TikTokWebhookVerificationError('client secret not configured');
+  }
+}
+
 @Module({
-  controllers: [TikTokOAuthController],
+  controllers: [TikTokOAuthController, TikTokWebhookController],
   providers: [
     {
       provide: TIKTOK_OAUTH_CLIENT,
@@ -38,6 +51,16 @@ class UnconfiguredTikTokOAuthClient implements TikTokOAuthClient {
           );
         }
         return new UnconfiguredTikTokOAuthClient();
+      },
+      inject: [ENV],
+    },
+    {
+      provide: TIKTOK_WEBHOOK_VERIFIER,
+      useFactory: (env: Env): TikTokWebhookVerifier => {
+        if (env.TIKTOK_CLIENT_SECRET) {
+          return new HmacTikTokWebhookVerifier(env.TIKTOK_CLIENT_SECRET);
+        }
+        return new UnconfiguredTikTokWebhookVerifier();
       },
       inject: [ENV],
     },
