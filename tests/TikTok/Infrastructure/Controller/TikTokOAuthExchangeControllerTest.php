@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Tests\TikTok\Infrastructure\Controller;
 
 use App\Membership\Domain\Entity\Member;
+use App\TikTok\Domain\TikTokTokenResponse;
+use App\TikTok\Infrastructure\Http\TikTokOAuthClient;
+use App\TikTok\Infrastructure\Http\UnconfiguredTikTokClientException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -24,11 +27,9 @@ class TikTokOAuthExchangeControllerTest extends WebTestCase
     {
         // The exchange endpoint is gated behind the existing access_token
         // firewall, so each case mints a Bearer the same way TokenResourceTest
-        // does. Override TikTok env vars per-case via $_SERVER so the
-        // %env(string:...)% resolution sees the value at container boot.
-        $_SERVER['TIKTOK_CLIENT_KEY'] = 'test-key';
-        $_SERVER['TIKTOK_CLIENT_SECRET'] = 'test-secret';
-
+        // does. Test env (.env.test) ships TIKTOK_CLIENT_KEY=test-key /
+        // _SECRET=test-secret as the defaults; the missing-credentials case
+        // swaps the wired client at the service level instead.
         $this->client = static::createClient();
         $this->client->catchExceptions(true);
         $this->client->disableReboot();
@@ -189,43 +190,21 @@ class TikTokOAuthExchangeControllerTest extends WebTestCase
 
     public function test_missing_credentials_returns_503_problem_json(): void
     {
-        // Re-boot the kernel after clearing the credentials so the
-        // %env(string:...)% binding picks up the empty values. Note the
-        // existing test pattern relies on disableReboot(); here we want a
-        // fresh client with the new env values.
-        unset($_SERVER['TIKTOK_CLIENT_KEY'], $_SERVER['TIKTOK_CLIENT_SECRET']);
-        $_SERVER['TIKTOK_CLIENT_KEY'] = '';
-        $_SERVER['TIKTOK_CLIENT_SECRET'] = '';
+        // The %env(...)% bindings are baked into the compiled container, so
+        // env mutation between requests is fragile. Instead we replace the
+        // wired TikTokOAuthClient with a stub that throws the same exception
+        // `HttpTikTokOAuthClient` would throw when client_key/client_secret
+        // are missing. The controller's 503 mapping is what we want to cover.
+        $bearer = $this->mintToken();
 
-        self::ensureKernelShutdown();
-        $client = static::createClient();
-        $client->catchExceptions(true);
-        $client->disableReboot();
+        static::getContainer()->set(TikTokOAuthClient::class, new class implements TikTokOAuthClient {
+            public function exchangeCode(string $code, string $codeVerifier, string $redirectUri): TikTokTokenResponse
+            {
+                throw UnconfiguredTikTokClientException::withDefaultMessage();
+            }
+        });
 
-        /** @var EntityManagerInterface $em */
-        $em = static::getContainer()->get('doctrine')->getManager();
-        $schemaTool = new SchemaTool($em);
-        $metadata = $em->getMetadataFactory()->getAllMetadata();
-        if ($metadata !== []) {
-            $schemaTool->dropSchema($metadata);
-            $schemaTool->createSchema($metadata);
-        }
-        $member = new Member();
-        $member->apiKey = self::SECRET;
-        $member->setEnabled(true);
-        $member->setUsername('test-user');
-        $em->persist($member);
-        $em->flush();
-
-        $client->request(
-            'POST',
-            '/api/token',
-            server: ['HTTP_AUTHORIZATION' => 'Basic ' . base64_encode(':' . self::SECRET)],
-        );
-        $tokenBody = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $bearer = $tokenBody['access_token'];
-
-        $client->request(
+        $this->client->request(
             'POST',
             '/api/tiktok/oauth/exchange',
             server: [
@@ -239,7 +218,7 @@ class TikTokOAuthExchangeControllerTest extends WebTestCase
             ]),
         );
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         self::assertSame(503, $response->getStatusCode(), (string) $response->getContent());
         self::assertStringContainsString(
             'application/problem+json',
