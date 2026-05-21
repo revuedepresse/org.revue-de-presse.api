@@ -60,3 +60,7 @@ jobs:
       - name: Run tests
         timeout-minutes: 5
         run: make test
+
+      - name: PHPStan static analysis
+        timeout-minutes: 5
+        run: vendor/bin/phpstan analyse --no-progress --error-format=github
