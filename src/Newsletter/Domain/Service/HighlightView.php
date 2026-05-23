@@ -7,10 +7,10 @@ final class HighlightView
 {
     public function __construct(
         public readonly string $rank,
-        public readonly string $screenName,
-        public readonly ?string $avatarUrl,
+        public readonly string $screen_name,
+        public readonly ?string $avatar_url,
         public readonly string $text,
-        public readonly string $dateFr,
+        public readonly string $date_fr,
         public readonly int $reposts,
         public readonly int $likes,
         public readonly string $url,
