@@ -78,6 +78,11 @@ services:
 
     App\Newsletter\Infrastructure\Console\RotateEncryptionKeyCommand: ~
 
+    App\Newsletter\Domain\Service\SubscriberConfirmer: ~
+
+    App\Newsletter\Infrastructure\Http\ConfirmController:
+        tags: ['controller.service_arguments']
+
     App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand:
         arguments:
             $projectDir: '%kernel.project_dir%'

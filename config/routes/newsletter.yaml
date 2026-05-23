@@ -1,0 +1,4 @@
+newsletter:
+    resource: '../../src/Newsletter/Infrastructure/Http/'
+    type: attribute
+    prefix: /newsletter
