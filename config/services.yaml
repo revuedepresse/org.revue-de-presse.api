@@ -61,6 +61,11 @@ services:
 
     App\Newsletter\Domain\Service\DailyReportRenderer: ~
 
+    App\Newsletter\Domain\Service\DailyHighlightsSource:
+        alias: App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher
+
+    App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher: ~
+
     App\Newsletter\Infrastructure\Config\NewsletterConfig:
         arguments:
             $timezone:          '%env(NEWSLETTER_DAILY_TZ)%'
