@@ -80,7 +80,12 @@ services:
 
     App\Newsletter\Domain\Service\SubscriberConfirmer: ~
 
+    App\Newsletter\Domain\Service\SubscriberUnsubscriber: ~
+
     App\Newsletter\Infrastructure\Http\ConfirmController:
+        tags: ['controller.service_arguments']
+
+    App\Newsletter\Infrastructure\Http\UnsubscribeController:
         tags: ['controller.service_arguments']
 
     App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand:
