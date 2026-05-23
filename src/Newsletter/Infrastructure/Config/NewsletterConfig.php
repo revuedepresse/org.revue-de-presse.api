@@ -13,7 +13,7 @@ final class NewsletterConfig
         public readonly string $baseUrl,
         public readonly string $designTokensPath,
         public readonly string $encryptionKey,
-        public readonly string $encryptionKeyNext,
+        public readonly ?string $encryptionKeyNext = null,
     ) {
         if ($encryptionKey === '') {
             throw new InvalidNewsletterConfigException('NEWSLETTER_ENCRYPTION_KEY is required');
