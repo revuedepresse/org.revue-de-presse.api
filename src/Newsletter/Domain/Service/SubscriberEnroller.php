@@ -43,9 +43,16 @@ final class SubscriberEnroller
 
         return match ($existing->status()) {
             SubscriberStatus::Active => EnrolmentOutcome::alreadyActive(),
-            SubscriberStatus::Pending => EnrolmentOutcome::resent($existing->confirmToken()),
+            SubscriberStatus::Pending => $this->resendPending($existing),
             SubscriberStatus::Unsubscribed => $this->reenrol($existing, $now),
         };
+    }
+
+    private function resendPending(Subscriber $existing): EnrolmentOutcome
+    {
+        $token = $existing->confirmToken();
+        \assert($token !== null, 'Pending subscriber must have a confirm token');
+        return EnrolmentOutcome::resent($token);
     }
 
     private function reenrol(Subscriber $sub, \DateTimeImmutable $now): EnrolmentOutcome
