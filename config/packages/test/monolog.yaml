@@ -15,4 +15,9 @@ monolog:
             path: "%kernel.logs_dir%/benchmark.log"
             level: debug
             channels: ["benchmark"]
+        newsletter:
+            type: stream
+            path: "%kernel.logs_dir%/newsletter.log"
+            level: debug
+            channels: ["newsletter"]
     channels: "%monolog_channels%"

@@ -120,8 +120,12 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.request', priority: 256 }
 
+    App\Newsletter\Infrastructure\Logging\TokenRedactingProcessor:
+        tags:
+            - { name: monolog.processor, channel: newsletter }
+
 parameters:
-    monolog_channels:               ['benchmark']
+    monolog_channels:               ['benchmark', 'newsletter']
 
     redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 

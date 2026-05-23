@@ -30,5 +30,10 @@ monolog:
             handler: deprecation
             max_level: info
             channels: ["php"]
+        newsletter:
+            type: stream
+            path: "%kernel.logs_dir%/newsletter.log"
+            level: info
+            channels: ["newsletter"]
 
     channels: "%monolog_channels%"
