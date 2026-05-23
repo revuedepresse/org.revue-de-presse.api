@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand('newsletter:sync-tokens', 'Regenerate templates/newsletter/_styles/design-tokens.html.twig from the design-system tokens.json')]
+#[AsCommand('newsletter:check-design-tokens', 'Audit design-tokens.html.twig against the design-system tokens.json source — reports drift only, does not write')]
 final class SyncDesignTokensCommand extends Command
 {
     public function __construct(private readonly NewsletterConfig $config, private readonly string $projectDir)

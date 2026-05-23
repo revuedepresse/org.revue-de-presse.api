@@ -10,6 +10,12 @@ final class BootEncryptedStringType
 {
     public function __construct(private readonly StaticEncryptionKey $key)
     {
+        if (!\sodium_crypto_aead_aes256gcm_is_available()) {
+            throw new \RuntimeException(
+                'AES-256-GCM not available on this host (libsodium reports AES-NI missing). ' .
+                'Newsletter encryption requires AES-NI. Use a CPU with AES-NI or switch to XChaCha20-Poly1305.'
+            );
+        }
         EncryptedStringType::injectKey($this->key);
     }
 
