@@ -113,6 +113,13 @@ services:
             $encryptionKey:     '%env(NEWSLETTER_ENCRYPTION_KEY)%'
             $encryptionKeyNext: '%env(default::NEWSLETTER_ENCRYPTION_KEY_NEXT)%'
 
+    App\Newsletter\Infrastructure\Http\PublicRateLimitListener:
+        arguments:
+            $newsletterPublicLimiter: '@limiter.newsletter_public'
+            $newsletterUnsubscribePostLimiter: '@limiter.newsletter_unsubscribe_post'
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', priority: 256 }
+
 parameters:
     monolog_channels:               ['benchmark']
 
