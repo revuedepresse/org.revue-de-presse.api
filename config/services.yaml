@@ -70,6 +70,8 @@ services:
 
     App\Newsletter\Infrastructure\Console\EnrollSubscriberCommand: ~
 
+    App\Newsletter\Infrastructure\Console\ListSubscribersCommand: ~
+
     Twig\Extra\CssInliner\CssInlinerExtension:
         tags: ['twig.extension']
 
