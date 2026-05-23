@@ -10,10 +10,10 @@ final class StaticEncryptionKey
 
     public function __construct(string $base64PrimaryKey, ?string $base64NextKey = null)
     {
-        $this->primaryKey = KeyDerivation::deriveAes256Key($base64PrimaryKey, 'newsletter-email-v1');
+        $this->primaryKey = KeyDerivation::derive32ByteKey($base64PrimaryKey, 'newsletter-email-v1');
         $this->nextKey = $base64NextKey === null || $base64NextKey === ''
             ? null
-            : KeyDerivation::deriveAes256Key($base64NextKey, 'newsletter-email-v1');
+            : KeyDerivation::derive32ByteKey($base64NextKey, 'newsletter-email-v1');
     }
 
     public function primary(): string { return $this->primaryKey; }

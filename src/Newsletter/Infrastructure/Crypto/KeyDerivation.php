@@ -5,7 +5,7 @@ namespace App\Newsletter\Infrastructure\Crypto;
 
 final class KeyDerivation
 {
-    public static function deriveAes256Key(string $base64MasterKey, string $infoLabel): string
+    public static function derive32ByteKey(string $base64MasterKey, string $infoLabel): string
     {
         $master = base64_decode($base64MasterKey, true);
         if ($master === false || strlen($master) < 32) {
