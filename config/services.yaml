@@ -66,7 +66,7 @@ services:
     App\Newsletter\Domain\Service\SubscriberEnroller:
         arguments:
             $confirmTtlHours: '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
-            $actingUser:      '%env(default:NEWSLETTER_ACTING_USER:USER)%'
+            $actingUser:      '%env(NEWSLETTER_ACTING_USER)%'
 
     App\Newsletter\Infrastructure\Console\EnrollSubscriberCommand: ~
 

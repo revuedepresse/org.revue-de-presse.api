@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Newsletter\Infrastructure\Doctrine\Type;
 
 use App\Newsletter\Infrastructure\Crypto\StaticEncryptionKey;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 
@@ -26,6 +27,11 @@ final class EncryptedStringType extends Type
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getBlobTypeDeclarationSQL($column);
+    }
+
+    public function getBindingType(): ParameterType
+    {
+        return ParameterType::LARGE_OBJECT;
     }
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
