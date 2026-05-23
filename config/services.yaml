@@ -59,6 +59,17 @@ services:
     App\Newsletter\Domain\Service\TokenGenerator:
         alias: App\Newsletter\Infrastructure\Service\RandomTokenGenerator
 
+    App\Newsletter\Infrastructure\Config\NewsletterConfig:
+        arguments:
+            $timezone:          '%env(NEWSLETTER_DAILY_TZ)%'
+            $confirmTtlHours:   '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
+            $fromEmail:         '%env(NEWSLETTER_FROM_EMAIL)%'
+            $fromName:          '%env(NEWSLETTER_FROM_NAME)%'
+            $baseUrl:           '%env(NEWSLETTER_BASE_URL)%'
+            $designTokensPath:  '%env(NEWSLETTER_DESIGN_TOKENS_PATH)%'
+            $encryptionKey:     '%env(NEWSLETTER_ENCRYPTION_KEY)%'
+            $encryptionKeyNext: '%env(default::NEWSLETTER_ENCRYPTION_KEY_NEXT)%'
+
 parameters:
     monolog_channels:               ['benchmark']
 
