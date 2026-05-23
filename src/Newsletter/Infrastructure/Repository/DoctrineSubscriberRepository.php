@@ -43,6 +43,16 @@ final class DoctrineSubscriberRepository implements SubscriberRepository
         return $this->iterateByStatus(SubscriberStatus::Active->value, $batchSize);
     }
 
+    public function truncate(): int
+    {
+        $conn = $this->em->getConnection();
+        $count = (int) $conn->executeQuery('SELECT COUNT(*) FROM newsletter_subscribers')->fetchOne();
+        $sql = $conn->getDatabasePlatform()->getTruncateTableSQL('newsletter_subscribers');
+        $conn->executeStatement($sql);
+        $this->em->clear();
+        return $count;
+    }
+
     public function iterateByStatus(string $status, int $batchSize = 200): iterable
     {
         $qb = $this->em->createQueryBuilder()

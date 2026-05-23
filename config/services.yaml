@@ -72,6 +72,8 @@ services:
 
     App\Newsletter\Infrastructure\Console\ListSubscribersCommand: ~
 
+    App\Newsletter\Infrastructure\Console\TruncateSubscribersCommand: ~
+
     App\Newsletter\Infrastructure\Console\SendDailyReportCommand:
         arguments:
             $newsletterLockFactory: '@lock.newsletter.factory'

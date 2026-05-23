@@ -25,4 +25,10 @@ interface SubscriberRepository
      * @return iterable<Subscriber>
      */
     public function iterateByStatus(string $status, int $batchSize = 200): iterable;
+
+    /**
+     * Delete every subscriber row. Returns the number of rows that existed
+     * before truncation.
+     */
+    public function truncate(): int;
 }
