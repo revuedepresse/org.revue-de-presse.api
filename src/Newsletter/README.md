@@ -10,7 +10,7 @@ Daily-report mailer. See the design at
 - `bin/console newsletter:list [--status=active|pending|unsubscribed]` — list.
 - `bin/console newsletter:send-daily [--date=YYYY-MM-DD] [--dry-run]` — cron entry.
 - `bin/console newsletter:rotate-encryption-key` — re-encrypt rows with NEXT key.
-- `bin/console newsletter:sync-tokens` — verify design tokens haven't drifted.
+- `bin/console newsletter:check-design-tokens` — audit design tokens against the source-of-truth JSON (read-only; reports drift).
 
 ## Local dev
 
