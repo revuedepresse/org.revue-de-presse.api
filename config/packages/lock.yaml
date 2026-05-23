@@ -1,2 +1,4 @@
 framework:
-    lock: '%env(LOCK_DSN)%'
+    lock:
+        default: '%env(LOCK_DSN)%'
+        newsletter: '%env(LOCK_DSN)%'
