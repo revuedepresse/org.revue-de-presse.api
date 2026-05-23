@@ -57,12 +57,12 @@ services:
             - cache
         environment:
             APP_ENV: prod
-            DATABASE_URL: '${DATABASE_URL}'
+            DATABASE_URL: '${DATABASE_URL:-}'
             REDIS_HOST: '${REDIS_HOST:-cache}'
             REDIS_PORT: '${REDIS_PORT:-6379}'
-            ALLOWED_ORIGIN: '${CORS_ALLOW_ORIGIN}'
+            ALLOWED_ORIGIN: '${CORS_ALLOW_ORIGIN:-}'
             RATE_LIMIT_ENABLED: 'true'
-            TRUSTED_PROXIES: '${TRUSTED_PROXIES}'
+            TRUSTED_PROXIES: '${TRUSTED_PROXIES:-}'
             PORT: '3000'
         restart: 'unless-stopped'
 
