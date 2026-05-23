@@ -1,5 +1,7 @@
 doctrine:
     dbal:
+        types:
+            newsletter_encrypted_string: App\Newsletter\Infrastructure\Doctrine\Type\EncryptedStringType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'

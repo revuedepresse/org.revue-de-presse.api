@@ -42,6 +42,17 @@ services:
             $verifier: '@App\TikTok\Infrastructure\Http\TikTokWebhookVerifier'
         tags: ['controller.service_arguments']
 
+    App\Newsletter\Infrastructure\Crypto\StaticEncryptionKey:
+        arguments:
+            $base64PrimaryKey: '%env(NEWSLETTER_ENCRYPTION_KEY)%'
+            $base64NextKey: '%env(default::NEWSLETTER_ENCRYPTION_KEY_NEXT)%'
+
+    App\Newsletter\Infrastructure\Doctrine\BootEncryptedStringType:
+        arguments: ['@App\Newsletter\Infrastructure\Crypto\StaticEncryptionKey']
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', priority: 1024 }
+            - { name: 'kernel.event_listener', event: 'console.command', priority: 1024 }
+
 parameters:
     monolog_channels:               ['benchmark']
 
