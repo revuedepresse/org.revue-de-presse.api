@@ -198,6 +198,8 @@ function install() {
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
     clear_cache_warmup --reuse-existing-container
+
+    run_doctrine_migrations
 }
 
 function load_configuration_parameters() {
@@ -321,6 +323,26 @@ function run_bench_highlights() {
         BENCH_TIMEOUT="${BENCH_TIMEOUT:-30}" \
         php -d memory_limit="${BENCH_MEMORY_LIMIT:-1G}" \
             bin/phpunit -c ./phpunit.xml.dist --group performance --filter HighlightsPerformanceTest
+}
+
+function run_doctrine_migrations() {
+    local PROJECT
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
+
+    load_configuration_parameters
+
+    printf '%s.%s' 'About to apply pending Doctrine migrations' $'\n'
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        --user "${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID}" \
+        -T app \
+        /bin/bash -c 'bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration'
+
+    printf '%s.%s' 'Finished applying Doctrine migrations' $'\n'
 }
 
 function run_bench_with_redis() {
