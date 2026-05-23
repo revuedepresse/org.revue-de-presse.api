@@ -1,0 +1,20 @@
+{# Receives: { rank, screen_name, avatar_url, text, date_fr, reposts, likes, url } #}
+<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    {% if highlight.avatar_url %}
+    <td valign="top" width="56">
+      <img src="{{ highlight.avatar_url }}" width="40" height="40" alt="" style="border-radius:50%;display:block;">
+    </td>
+    {% endif %}
+    <td valign="top">
+      <div class="rank">{{ highlight.rank }}. {{ highlight.screen_name }}</div>
+      {% if highlight.text %}<div class="text">{{ highlight.text }}</div>{% endif %}
+      <div class="meta">
+        {{ highlight.date_fr }}
+        &nbsp;·&nbsp; <span class="vanity-retweets">♻ {{ highlight.reposts }}</span>
+        &nbsp; <span class="vanity-likes">♥ {{ highlight.likes }}</span>
+      </div>
+      <div class="url"><a href="{{ highlight.url }}">{{ highlight.url }}</a></div>
+    </td>
+  </tr>
+</table>
