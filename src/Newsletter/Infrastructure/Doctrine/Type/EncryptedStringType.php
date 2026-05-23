@@ -36,9 +36,9 @@ final class EncryptedStringType extends Type
         if (self::$key === null) {
             throw new \LogicException('EncryptedStringType not initialised; call injectKey() at boot.');
         }
-        $nonce = random_bytes(12);
+        $nonce = random_bytes(SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES);
         $key = self::$key->next() ?? self::$key->primary();
-        $cipher = sodium_crypto_aead_aes256gcm_encrypt((string) $value, '', $nonce, $key);
+        $cipher = sodium_crypto_aead_xchacha20poly1305_ietf_encrypt((string) $value, '', $nonce, $key);
         return $nonce . $cipher;
     }
 
@@ -51,12 +51,12 @@ final class EncryptedStringType extends Type
             throw new \LogicException('EncryptedStringType not initialised; call injectKey() at boot.');
         }
         $raw = is_resource($value) ? stream_get_contents($value) : (string) $value;
-        $nonce = substr($raw, 0, 12);
-        $cipher = substr($raw, 12);
+        $nonce = substr($raw, 0, SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES);
+        $cipher = substr($raw, SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES);
 
-        $plain = sodium_crypto_aead_aes256gcm_decrypt($cipher, '', $nonce, self::$key->primary());
+        $plain = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($cipher, '', $nonce, self::$key->primary());
         if ($plain === false && self::$key->next() !== null) {
-            $plain = sodium_crypto_aead_aes256gcm_decrypt($cipher, '', $nonce, self::$key->next());
+            $plain = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($cipher, '', $nonce, self::$key->next());
         }
         if ($plain === false) {
             throw new \RuntimeException('newsletter_encrypted_string: decryption failed');
