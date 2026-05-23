@@ -66,7 +66,7 @@ services:
     App\Newsletter\Domain\Service\SubscriberEnroller:
         arguments:
             $confirmTtlHours: '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
-            $actingUser:      'rdp-api'
+            $actingUser:      '%env(default:NEWSLETTER_ACTING_USER:USER)%'
 
     App\Newsletter\Infrastructure\Console\EnrollSubscriberCommand: ~
 
