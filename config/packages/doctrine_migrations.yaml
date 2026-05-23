@@ -1,3 +1,4 @@
 doctrine_migrations:
     migrations_paths:
         'App\Membership\Infrastructure\Database\Migrations': '%kernel.project_dir%/src/Membership/Infrastructure/Database/Migrations'
+        'App\Newsletter\Infrastructure\Database\Migrations': '%kernel.project_dir%/src/Newsletter/Infrastructure/Database/Migrations'
