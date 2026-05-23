@@ -1,0 +1,15 @@
+Revue de presse — {{ date_fr }}
+
+Top 10 des publications de presse les plus relayées sur Bluesky le {{ date_fr }} :
+
+{% for h in highlights %}
+{{ h.rank }}. {{ h.screen_name }}
+{% if h.text %}    {{ h.text }}
+{% endif %}    {{ h.date_fr }} · {{ h.reposts }} reposts · {{ h.likes }} likes
+    {{ h.url }}
+
+{% endfor %}
+Voir la revue de presse complète : https://revue-de-presse.org
+
+Vous recevez ce courriel parce que vous êtes abonné·e à la lettre quotidienne.
+Se désabonner : {{ unsubscribe_url }}
