@@ -55,7 +55,13 @@ final class SendDailyReportCommand extends Command
         }
 
         try {
-            $views = $this->highlights->fetchTop10($date);
+            try {
+                $views = $this->highlights->fetchTop10($date);
+            } catch (\Throwable $e) {
+                $this->logger->error('newsletter highlights fetch failed', ['date' => $dateKey, 'error' => $e->getMessage()]);
+                $io->error('Highlights fetch failed: ' . $e->getMessage());
+                return 2;
+            }
             if (count($views) === 0) {
                 $io->warning('No highlights for ' . $dateKey);
                 return 2;
