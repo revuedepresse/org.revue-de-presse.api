@@ -62,4 +62,11 @@ final class InMemorySubscriberRepository implements SubscriberRepository
             }
         }
     }
+
+    public function truncate(): int
+    {
+        $count = count($this->byId);
+        $this->byId = [];
+        return $count;
+    }
 }
