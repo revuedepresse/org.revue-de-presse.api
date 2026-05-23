@@ -1,0 +1,12 @@
+{% apply inline_css(source('newsletter/_styles/design-tokens.html.twig')) %}
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head><body>
+<table role="presentation" class="wrap" width="100%">
+  <tr><td class="brand-header"><h1>Revue de presse</h1></td></tr>
+  <tr><td style="padding:16px">
+    Bonjour,<br><br>
+    Confirmez votre abonnement à la lettre quotidienne de Revue de presse en cliquant sur le lien ci-dessous :<br><br>
+    <a href="{{ confirm_url }}">Confirmer mon abonnement</a><br><br>
+    Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.
+  </td></tr>
+</table></body></html>
+{% endapply %}
