@@ -53,11 +53,25 @@ services:
             - { name: 'kernel.event_listener', event: 'kernel.request', priority: 1024 }
             - { name: 'kernel.event_listener', event: 'console.command', priority: 1024 }
 
+    App\Newsletter\Infrastructure\Repository\DoctrineSubscriberRepository: ~
+
     App\Newsletter\Domain\Repository\SubscriberRepository:
         alias: App\Newsletter\Infrastructure\Repository\DoctrineSubscriberRepository
 
+    App\Newsletter\Infrastructure\Service\RandomTokenGenerator: ~
+
     App\Newsletter\Domain\Service\TokenGenerator:
         alias: App\Newsletter\Infrastructure\Service\RandomTokenGenerator
+
+    App\Newsletter\Domain\Service\SubscriberEnroller:
+        arguments:
+            $confirmTtlHours: '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
+            $actingUser:      'rdp-api'
+
+    App\Newsletter\Infrastructure\Console\EnrollSubscriberCommand: ~
+
+    Twig\Extra\CssInliner\CssInlinerExtension:
+        tags: ['twig.extension']
 
     App\Newsletter\Domain\Service\DailyReportRenderer: ~
 
