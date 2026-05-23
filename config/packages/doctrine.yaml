@@ -22,3 +22,9 @@ doctrine:
                         is_bundle:  false
                         prefix:     'App\Membership\Domain\Entity'
                         type:       attribute
+                    Newsletter:
+                        alias:      'Newsletter'
+                        dir:        '%kernel.project_dir%/src/Newsletter/Domain/Entity'
+                        is_bundle:  false
+                        prefix:     'App\Newsletter\Domain\Entity'
+                        type:       attribute
