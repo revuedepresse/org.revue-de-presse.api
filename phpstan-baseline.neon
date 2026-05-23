@@ -1,79 +1,43 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$confirmationToken\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Membership/Domain/Entity/Legacy/Member.php
-
-		-
-			message: '#^Access to an undefined property App\\Membership\\Domain\\Entity\\Legacy\\Member\:\:\$expired\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Membership/Domain/Entity/Legacy/Member.php
-
-		-
-			message: '#^PHPDoc tag @return with type string\|false is not subtype of native type string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: src/Membership/Domain/Entity/Legacy/Member.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 15 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Membership/Domain/Model/Member.php
-
-		-
-			message: '#^Property App\\Twitter\\Infrastructure\\Cache\\RedisCache\:\:\$client \(Predis\\Client\) does not accept Predis\\ClientInterface\|Redis\|RedisArray\|RedisCluster\|Relay\\Cluster\|Relay\\Relay\.$#'
+			message: '#^Property App\\Infrastructure\\Cache\\RedisCache\:\:\$client \(Predis\\Client\) does not accept Predis\\ClientInterface\|Redis\|RedisArray\|RedisCluster\|Relay\\Cluster\|Relay\\Relay\.$#'
 			identifier: assign.propertyType
 			count: 1
-			path: src/Twitter/Infrastructure/Cache/RedisCache.php
+			path: src/Infrastructure/Cache/RedisCache.php
 
 		-
-			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:fromArray\(\) should return static\(App\\Twitter\\Infrastructure\\Http\\Entity\\Token\) but returns App\\Twitter\\Infrastructure\\Http\\Entity\\Token\.$#'
-			identifier: return.type
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+			path: tests/Infrastructure/RateLimit/RateLimitTokenTest.php
 
 		-
-			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:getCreatedAt\(\) should return DateTime but returns DateTimeInterface\|null\.$#'
-			identifier: return.type
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
 			count: 1
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+			path: tests/Membership/Domain/Entity/MemberTest.php
 
 		-
-			message: '#^Method App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:getUpdatedAt\(\) should return DateTime but returns DateTimeInterface\|null\.$#'
-			identifier: return.type
+			message: '#^Method Doctrine\\ORM\\EntityRepository@anonymous/tests/Security/Infrastructure/Symfony/ApiAccessTokenHandlerTest\.php\:58\:\:find\(\) is marked as impure but does not have any side effects\.$#'
+			identifier: impureMethod.pure
 			count: 1
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+			path: tests/Security/Infrastructure/Symfony/ApiAccessTokenHandlerTest.php
 
 		-
-			message: '#^Property App\\Twitter\\Infrastructure\\Http\\Entity\\Token\:\:\$type \(string\) does not accept App\\Twitter\\Infrastructure\\Http\\Entity\\TokenType\|null\.$#'
-			identifier: assign.propertyType
+			message: '#^Access to an undefined property App\\Membership\\Infrastructure\\Repository\\MemberRepository\:\:\$findAllCalls\.$#'
+			identifier: property.notFound
 			count: 1
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+			path: tests/Security/Infrastructure/Symfony/BasicClientCredentialsExtractorTest.php
 
 		-
-			message: '#^Result of && is always true\.$#'
-			identifier: booleanAnd.alwaysTrue
+			message: '#^Access to an undefined property App\\Membership\\Infrastructure\\Repository\\MemberRepository\:\:\$findByCalls\.$#'
+			identifier: property.notFound
 			count: 1
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
+			path: tests/Security/Infrastructure/Symfony/BasicClientCredentialsExtractorTest.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 2
-			path: src/Twitter/Infrastructure/Http/Entity/Token.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
+			message: '#^Access to an undefined property App\\Membership\\Infrastructure\\Repository\\MemberRepository\:\:\$findEnabledByApiKeyCalls\.$#'
+			identifier: property.notFound
 			count: 1
-			path: src/Twitter/Infrastructure/Http/SearchParams.php
-
-		-
-			message: '#^Method class@anonymous/tests/Twitter/Infrastructure/Cache/InMemoryRedisCache\.php\:16\:\:get\(\) never returns string so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: tests/Twitter/Infrastructure/Cache/InMemoryRedisCache.php
+			path: tests/Security/Infrastructure/Symfony/BasicClientCredentialsExtractorTest.php
