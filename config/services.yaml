@@ -59,6 +59,8 @@ services:
     App\Newsletter\Domain\Service\TokenGenerator:
         alias: App\Newsletter\Infrastructure\Service\RandomTokenGenerator
 
+    App\Newsletter\Domain\Service\DailyReportRenderer: ~
+
     App\Newsletter\Infrastructure\Config\NewsletterConfig:
         arguments:
             $timezone:          '%env(NEWSLETTER_DAILY_TZ)%'
