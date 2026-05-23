@@ -24,6 +24,6 @@ final class SnapshotHighlightsFetcherTest extends TestCase
         $views = $fetcher->fetchTop10(new \DateTimeImmutable('2026-05-23'));
         self::assertCount(10, $views);
         self::assertSame('01', $views[0]->rank);
-        self::assertSame('pub1', $views[0]->screenName);
+        self::assertSame('pub1', $views[0]->screen_name);
     }
 }

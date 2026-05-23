@@ -124,6 +124,9 @@ services:
         tags:
             - { name: monolog.processor, channel: newsletter }
 
+    App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
+        tags: ['controller.service_arguments']
+
 parameters:
     monolog_channels:               ['benchmark', 'newsletter']
 

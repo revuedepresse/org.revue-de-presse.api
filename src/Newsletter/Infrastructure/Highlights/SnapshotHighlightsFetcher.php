@@ -19,10 +19,10 @@ final class SnapshotHighlightsFetcher implements DailyHighlightsSource
         foreach (array_slice($raw, 0, 10) as $i => $row) {
             $views[] = new HighlightView(
                 rank: sprintf('%02d', $i + 1),
-                screenName: (string) ($row['screen_name'] ?? $row['screenName'] ?? ''),
-                avatarUrl: $row['avatar_url'] ?? $row['avatarUrl'] ?? null,
+                screen_name: (string) ($row['screen_name'] ?? $row['screenName'] ?? ''),
+                avatar_url: $row['avatar_url'] ?? $row['avatarUrl'] ?? null,
                 text: trim((string) ($row['text'] ?? '')),
-                dateFr: $this->formatDateFr($date),
+                date_fr: $this->formatDateFr($date),
                 reposts: (int) ($row['reposts'] ?? 0),
                 likes: (int) ($row['likes'] ?? 0),
                 url: (string) ($row['url'] ?? ''),
