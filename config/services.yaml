@@ -76,6 +76,12 @@ services:
         arguments:
             $newsletterLockFactory: '@lock.newsletter.factory'
 
+    App\Newsletter\Infrastructure\Console\RotateEncryptionKeyCommand: ~
+
+    App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
     Twig\Extra\CssInliner\CssInlinerExtension:
         tags: ['twig.extension']
 
