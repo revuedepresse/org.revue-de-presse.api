@@ -43,4 +43,26 @@ final class EncryptedStringTypeTest extends TestCase
         self::assertNull($type->convertToDatabaseValue(null, $platform));
         self::assertNull($type->convertToPHPValue(null, $platform));
     }
+
+    public function test_uses_next_key_for_encryption_when_set(): void
+    {
+        // Simulate rotation: PRIMARY = old, NEXT = new
+        $oldKeyBase64 = base64_encode(str_repeat("\x01", 32));
+        $newKeyBase64 = base64_encode(str_repeat("\x02", 32));
+
+        $type = new EncryptedStringType();
+        EncryptedStringType::injectKey(new StaticEncryptionKey($oldKeyBase64, $newKeyBase64));
+        $platform = new PostgreSQLPlatform();
+
+        $cipher = $type->convertToDatabaseValue('rotated@example.com', $platform);
+
+        // Switch to only the NEW key as primary (simulating post-rotation env)
+        EncryptedStringType::injectKey(new StaticEncryptionKey($newKeyBase64));
+        self::assertSame('rotated@example.com', $type->convertToPHPValue($cipher, $platform));
+
+        // And the OLD key alone CANNOT decrypt it
+        EncryptedStringType::injectKey(new StaticEncryptionKey($oldKeyBase64));
+        $this->expectException(\RuntimeException::class);
+        $type->convertToPHPValue($cipher, $platform);
+    }
 }

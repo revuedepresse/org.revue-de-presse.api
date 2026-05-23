@@ -37,7 +37,8 @@ final class EncryptedStringType extends Type
             throw new \LogicException('EncryptedStringType not initialised; call injectKey() at boot.');
         }
         $nonce = random_bytes(12);
-        $cipher = sodium_crypto_aead_aes256gcm_encrypt((string) $value, '', $nonce, self::$key->primary());
+        $key = self::$key->next() ?? self::$key->primary();
+        $cipher = sodium_crypto_aead_aes256gcm_encrypt((string) $value, '', $nonce, $key);
         return $nonce . $cipher;
     }
 
