@@ -69,3 +69,18 @@ jobs:
       - name: PHPStan static analysis
         timeout-minutes: 5
         run: php bin/phpstan analyse --no-progress --error-format=github
+
+      # Mirror the prod deploy's autoloader (provisioning/containers/_scripts/requirements.sh
+      # runs `composer install --no-dev --classmap-authoritative`). Without
+      # this, CI uses PSR-4 fallback and never sees classes that exist in
+      # src/ but are missing from the optimised classmap — exactly the
+      # failure mode that surfaces as ClassNotFoundError at first request
+      # post-deploy.
+      - name: Regenerate autoload as in prod (classmap-authoritative)
+        run: composer dump-autoload --classmap-authoritative --no-dev
+
+      # Compile the prod container so missing-classmap-entry bugs blow up
+      # in CI instead of in production. CI previously only warmed the
+      # `test` env, which never exercised the prod service wiring.
+      - name: Warm prod container
+        run: php bin/console cache:clear --env=prod --no-debug && php bin/console cache:warmup --env=prod --no-debug
