@@ -115,4 +115,23 @@ final class TextCleanerTest extends TestCase
 
         self::assertSame($expected, TextCleaner::clean($input));
     }
+
+    /**
+     * Regression for the 2026-05-24 report where Mediapart-shaped rows reached
+     * subscribers with both the wrapping straight quotes AND the literal `\n\n`
+     * byline separator still present. Pins both invariants in one assertion
+     * using the exact text shape the user pasted from a delivered newsletter.
+     */
+    public function test_clean_strips_wrapping_quotes_and_decodes_literal_lf_in_mediapart_row(): void
+    {
+        $input = '"Des milliers de familles de la bande de Gaza sont sans nouvelle de leurs proches, volatilisés sans laisser de traces. Certains de ces disparus forcés croupissent dans des lieux de détention en Israël. Obtenir des informations relève de la gageure.\\n\\nPar Gwenaelle Lenoir"';
+        $expected = "Des milliers de familles de la bande de Gaza sont sans nouvelle de leurs proches, volatilisés sans laisser de traces. Certains de ces disparus forcés croupissent dans des lieux de détention en Israël. Obtenir des informations relève de la gageure.\n\nPar Gwenaelle Lenoir";
+
+        $cleaned = TextCleaner::clean($input);
+
+        self::assertSame($expected, $cleaned);
+        self::assertStringNotContainsString('\\n', $cleaned);
+        self::assertStringStartsNotWith('"', $cleaned);
+        self::assertStringEndsNotWith('"', $cleaned);
+    }
 }
