@@ -5,6 +5,7 @@ namespace App\Newsletter\Infrastructure\Highlights;
 
 use App\Newsletter\Domain\Service\DailyHighlightsSource;
 use App\Newsletter\Domain\Service\HighlightView;
+use App\Newsletter\Infrastructure\Text\TextCleaner;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 
 final class SnapshotHighlightsFetcher implements DailyHighlightsSource
@@ -37,14 +38,8 @@ final class SnapshotHighlightsFetcher implements DailyHighlightsSource
         return $fmt->format($date);
     }
 
-    // Snapshot text may arrive double-encoded (HTML entities from upstream
-    // sanitisation) or with JSON-style backslash-quoted apostrophes. Decode
-    // once here so Twig's autoescape produces a single, correct round of
-    // HTML encoding in the rendered newsletter.
     private function cleanText(string $raw): string
     {
-        $decoded = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $unescaped = str_replace(["\\'", '\\"'], ["'", '"'], $decoded);
-        return trim($unescaped);
+        return TextCleaner::clean($raw);
     }
 }
