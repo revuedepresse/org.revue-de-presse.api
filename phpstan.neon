@@ -14,14 +14,6 @@ parameters:
     excludePaths:
         - src/Bluesky/Resources
         - tests/Resources
-    ignoreErrors:
-        # FrankenPHP worker-mode runtime functions — provided by the
-        # FrankenPHP binary at request time, not by any composer package.
-        # public/worker.php guards its first call with function_exists()
-        # and throws RuntimeException when not running under FrankenPHP.
-        -
-            message: '#Function frankenphp_handle_request not found\.#'
-            path: public/worker.php
     symfony:
         containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml
     doctrine:

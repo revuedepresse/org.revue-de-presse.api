@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand('newsletter:check-design-tokens', 'Audit design-tokens.html.twig against the design-system tokens.json source — reports drift only, does not write')]
 final class SyncDesignTokensCommand extends Command
 {
-    public function __construct(private readonly NewsletterConfig $config, private readonly string $projectDir)
+    public function __construct(private readonly NewsletterConfig $config)
     { parent::__construct(); }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

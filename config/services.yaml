@@ -90,9 +90,7 @@ services:
     App\Newsletter\Infrastructure\Http\UnsubscribeController:
         tags: ['controller.service_arguments']
 
-    App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand:
-        arguments:
-            $projectDir: '%kernel.project_dir%'
+    App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand: ~
 
     Twig\Extra\CssInliner\CssInlinerExtension:
         tags: ['twig.extension']

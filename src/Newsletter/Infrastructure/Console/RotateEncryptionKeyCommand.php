@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Newsletter\Infrastructure\Console;
 
 use App\Newsletter\Domain\Repository\SubscriberRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,7 +15,6 @@ final class RotateEncryptionKeyCommand extends Command
 {
     public function __construct(
         private readonly SubscriberRepository $repo,
-        private readonly EntityManagerInterface $em,
     ) { parent::__construct(); }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
