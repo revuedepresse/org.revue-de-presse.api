@@ -1,0 +1,26 @@
+{% apply inline_css(source('newsletter/_styles/design-tokens.html.twig')) %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Revue de presse — {{ date_fr }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=Signika:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <table role="presentation" class="wrap" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td class="brand-header"><h1>Revue de presse</h1></td></tr>
+    <tr><td class="title-row">Top 10 des publications de presse les plus relayées sur Bluesky le {{ date_fr }}</td></tr>
+    {% for highlight in highlights %}
+      <tr><td>{% include 'newsletter/_partials/highlight-card.html.twig' %}</td></tr>
+    {% endfor %}
+    <tr><td class="footer">
+      Voir la revue de presse complète : <a href="https://revue-de-presse.org">revue-de-presse.org</a>
+      <br><br>
+      Vous recevez ce courriel parce que vous êtes abonné·e à la lettre quotidienne.
+      <a href="{{ unsubscribe_url }}">Se désabonner</a>
+    </td></tr>
+  </table>
+</body>
+</html>
+{% endapply %}

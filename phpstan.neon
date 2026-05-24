@@ -10,6 +10,7 @@ parameters:
     paths:
         - src
         - tests
+        - public
     excludePaths:
         - src/Bluesky/Resources
         - tests/Resources

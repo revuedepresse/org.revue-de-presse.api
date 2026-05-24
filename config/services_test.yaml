@@ -23,3 +23,5 @@ services:
             $clientSecret: '%env(string:TIKTOK_CLIENT_SECRET)%'
 
     App\TikTok\Infrastructure\Http\TikTokOAuthClient: '@App\TikTok\Infrastructure\Http\HttpTikTokOAuthClient'
+
+    App\Newsletter\Domain\Service\DailyReportRenderer: ~

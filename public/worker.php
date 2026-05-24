@@ -46,7 +46,12 @@ while (true) {
     // Reset request-scoped services (Doctrine EntityManager,
     // Symfony container resettable services, profiler data store, etc.)
     // so request N+1 doesn't see leftover state from request N.
-    $kernel->reset();
+    // Kernel::getContainer() returns ContainerInterface (no reset()),
+    // but the concrete Container implements ResetInterface.
+    $container = $kernel->getContainer();
+    if ($container instanceof \Symfony\Contracts\Service\ResetInterface) {
+        $container->reset();
+    }
 
     // Reclaim cycle-reference memory so leaks don't compound over hours
     // of worker uptime.

@@ -20,6 +20,17 @@ services:
       - '../../:/var/www/org.example.api/'
       - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
 
+###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025"
+      - "8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+###< symfony/mailer ###
+
 volumes:
   service-run:
     name: org_example_api_service-run

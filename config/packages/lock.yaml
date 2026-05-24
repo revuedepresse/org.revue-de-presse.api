@@ -1,0 +1,4 @@
+framework:
+    lock:
+        default: '%env(LOCK_DSN)%'
+        newsletter: '%env(LOCK_DSN)%'

@@ -1,5 +1,7 @@
 doctrine:
     dbal:
+        types:
+            newsletter_encrypted_string: App\Newsletter\Infrastructure\Doctrine\Type\EncryptedStringType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
@@ -21,4 +23,10 @@ doctrine:
                         dir:        '%kernel.project_dir%/src/Membership/Domain/Entity'
                         is_bundle:  false
                         prefix:     'App\Membership\Domain\Entity'
+                        type:       attribute
+                    Newsletter:
+                        alias:      'Newsletter'
+                        dir:        '%kernel.project_dir%/src/Newsletter/Domain/Entity'
+                        is_bundle:  false
+                        prefix:     'App\Newsletter\Domain\Entity'
                         type:       attribute

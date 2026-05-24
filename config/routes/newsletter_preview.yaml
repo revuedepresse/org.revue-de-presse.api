@@ -1,0 +1,11 @@
+when@dev:
+    newsletter_preview:
+        resource: '../../src/Newsletter/Infrastructure/Http/Dev/'
+        type: attribute
+        prefix: /_dev/newsletter
+
+when@test:
+    newsletter_preview:
+        resource: '../../src/Newsletter/Infrastructure/Http/Dev/'
+        type: attribute
+        prefix: /_dev/newsletter

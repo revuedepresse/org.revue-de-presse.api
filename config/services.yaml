@@ -42,8 +42,93 @@ services:
             $verifier: '@App\TikTok\Infrastructure\Http\TikTokWebhookVerifier'
         tags: ['controller.service_arguments']
 
+    App\Newsletter\Infrastructure\Crypto\StaticEncryptionKey:
+        arguments:
+            $base64PrimaryKey: '%env(NEWSLETTER_ENCRYPTION_KEY)%'
+            $base64NextKey: '%env(default::NEWSLETTER_ENCRYPTION_KEY_NEXT)%'
+
+    App\Newsletter\Infrastructure\Doctrine\BootEncryptedStringType:
+        arguments: ['@App\Newsletter\Infrastructure\Crypto\StaticEncryptionKey']
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', priority: 1024 }
+            - { name: 'kernel.event_listener', event: 'console.command', priority: 1024 }
+
+    App\Newsletter\Infrastructure\Repository\DoctrineSubscriberRepository: ~
+
+    App\Newsletter\Domain\Repository\SubscriberRepository:
+        alias: App\Newsletter\Infrastructure\Repository\DoctrineSubscriberRepository
+
+    App\Newsletter\Infrastructure\Service\RandomTokenGenerator: ~
+
+    App\Newsletter\Domain\Service\TokenGenerator:
+        alias: App\Newsletter\Infrastructure\Service\RandomTokenGenerator
+
+    App\Newsletter\Domain\Service\SubscriberEnroller:
+        arguments:
+            $confirmTtlHours: '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
+            $actingUser:      '%env(NEWSLETTER_ACTING_USER)%'
+
+    App\Newsletter\Infrastructure\Console\EnrollSubscriberCommand: ~
+
+    App\Newsletter\Infrastructure\Console\ListSubscribersCommand: ~
+
+    App\Newsletter\Infrastructure\Console\TruncateSubscribersCommand: ~
+
+    App\Newsletter\Infrastructure\Console\SendDailyReportCommand:
+        arguments:
+            $newsletterLockFactory: '@lock.newsletter.factory'
+
+    App\Newsletter\Infrastructure\Console\RotateEncryptionKeyCommand: ~
+
+    App\Newsletter\Domain\Service\SubscriberConfirmer: ~
+
+    App\Newsletter\Domain\Service\SubscriberUnsubscriber: ~
+
+    App\Newsletter\Infrastructure\Http\ConfirmController:
+        tags: ['controller.service_arguments']
+
+    App\Newsletter\Infrastructure\Http\UnsubscribeController:
+        tags: ['controller.service_arguments']
+
+    App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand: ~
+
+    Twig\Extra\CssInliner\CssInlinerExtension:
+        tags: ['twig.extension']
+
+    App\Newsletter\Domain\Service\DailyReportRenderer: ~
+
+    App\Newsletter\Domain\Service\DailyHighlightsSource:
+        alias: App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher
+
+    App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher: ~
+
+    App\Newsletter\Infrastructure\Config\NewsletterConfig:
+        arguments:
+            $timezone:          '%env(NEWSLETTER_DAILY_TZ)%'
+            $confirmTtlHours:   '%env(int:NEWSLETTER_CONFIRM_TTL_HOURS)%'
+            $fromEmail:         '%env(NEWSLETTER_FROM_EMAIL)%'
+            $fromName:          '%env(NEWSLETTER_FROM_NAME)%'
+            $baseUrl:           '%env(NEWSLETTER_BASE_URL)%'
+            $designTokensPath:  '%env(NEWSLETTER_DESIGN_TOKENS_PATH)%'
+            $encryptionKey:     '%env(NEWSLETTER_ENCRYPTION_KEY)%'
+            $encryptionKeyNext: '%env(default::NEWSLETTER_ENCRYPTION_KEY_NEXT)%'
+
+    App\Newsletter\Infrastructure\Http\PublicRateLimitListener:
+        arguments:
+            $newsletterPublicLimiter: '@limiter.newsletter_public'
+            $newsletterUnsubscribePostLimiter: '@limiter.newsletter_unsubscribe_post'
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', priority: 256 }
+
+    App\Newsletter\Infrastructure\Logging\TokenRedactingProcessor:
+        tags:
+            - { name: monolog.processor, channel: newsletter }
+
+    App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
+        tags: ['controller.service_arguments']
+
 parameters:
-    monolog_channels:               ['benchmark']
+    monolog_channels:               ['benchmark', 'newsletter']
 
     redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 

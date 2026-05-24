@@ -16,7 +16,7 @@ jobs:
         run: sudo apt-get install bash gzip tar wget
 
       - name: Checkout project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -60,3 +60,12 @@ jobs:
       - name: Run tests
         timeout-minutes: 5
         run: make test
+
+      - name: Warm test container (debug) for PHPStan
+        env:
+          APP_DEBUG: '1'
+        run: php bin/console cache:warmup --env=test
+
+      - name: PHPStan static analysis
+        timeout-minutes: 5
+        run: php bin/phpstan analyse --no-progress --error-format=github

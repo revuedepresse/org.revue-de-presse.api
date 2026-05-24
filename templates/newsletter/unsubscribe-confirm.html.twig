@@ -1,0 +1,13 @@
+{% apply inline_css(source('newsletter/_styles/design-tokens.html.twig')) %}
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"></head><body>
+<table role="presentation" class="wrap" width="100%">
+  <tr><td class="brand-header"><h1>Revue de presse</h1></td></tr>
+  <tr><td style="padding:16px">
+    <form method="post" action="">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('newsletter-unsubscribe') }}">
+      <p>Confirmez votre désabonnement de la lettre quotidienne :</p>
+      <button type="submit" style="background:#006663;color:#fff;border:0;border-radius:8px;padding:12px 24px;font-size:16px;cursor:pointer">Me désabonner</button>
+    </form>
+  </td></tr>
+</table></body></html>
+{% endapply %}
