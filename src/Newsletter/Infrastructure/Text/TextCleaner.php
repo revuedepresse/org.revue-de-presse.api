@@ -35,11 +35,10 @@ final class TextCleaner
             if ($code === 0xA0 || $code === 0x2007 || $code === 0x202F) {
                 return ' ';
             }
-            if ($code < 0x20 || ($code >= 0x7F && $code < 0xA0)) {
+            if ($code < 0x20 || ($code >= 0x7F && $code < 0xA0) || ($code >= 0xD800 && $code <= 0xDFFF)) {
                 return '';
             }
-            $char = mb_chr($code, 'UTF-8');
-            return $char === false ? '' : $char;
+            return mb_chr($code, 'UTF-8');
         }, $out);
 
         $out = preg_replace_callback('/\\\\x([0-9a-fA-F]{2})\\\\?/', static function (array $m): string {
@@ -84,7 +83,7 @@ final class TextCleaner
         $bytes = '';
         foreach ($chars as $ch) {
             $code = mb_ord($ch, 'UTF-8');
-            if ($code === false || $code > 0xFF) {
+            if ($code > 0xFF) {
                 return $text;
             }
             $bytes .= chr($code);

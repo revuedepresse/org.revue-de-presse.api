@@ -56,6 +56,20 @@ Execute shell in service container
 docker exec -ti $(docker ps -a | grep 'api[-]service' | awk '{print $1}') bash
 ```
 
+### Git hooks (PHPStan pre-commit)
+
+A repo-tracked pre-commit hook under `.githooks/pre-commit` runs PHPStan locally
+whenever staged changes touch PHP files under `src/`, `tests/`, or `public/`.
+
+Enable it once per clone with:
+
+```
+make install-hooks
+```
+
+That sets `core.hooksPath` to `.githooks` for this repo. Disable with
+`git config --unset core.hooksPath`.
+
 ## License
 
 GNU General Public License v3.0 or later
