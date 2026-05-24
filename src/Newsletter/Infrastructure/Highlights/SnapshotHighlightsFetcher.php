@@ -21,7 +21,7 @@ final class SnapshotHighlightsFetcher implements DailyHighlightsSource
                 rank: sprintf('%02d', $i + 1),
                 screen_name: (string) ($row['screen_name'] ?? $row['screenName'] ?? ''),
                 avatar_url: $row['avatar_url'] ?? $row['avatarUrl'] ?? null,
-                text: trim((string) ($row['text'] ?? '')),
+                text: $this->cleanText((string) ($row['text'] ?? '')),
                 date_fr: $this->formatDateFr($date),
                 reposts: (int) ($row['reposts'] ?? 0),
                 likes: (int) ($row['likes'] ?? 0),
@@ -35,5 +35,16 @@ final class SnapshotHighlightsFetcher implements DailyHighlightsSource
     {
         $fmt = new \IntlDateFormatter('fr_FR', \IntlDateFormatter::LONG, \IntlDateFormatter::NONE);
         return $fmt->format($date);
+    }
+
+    // Snapshot text may arrive double-encoded (HTML entities from upstream
+    // sanitisation) or with JSON-style backslash-quoted apostrophes. Decode
+    // once here so Twig's autoescape produces a single, correct round of
+    // HTML encoding in the rendered newsletter.
+    private function cleanText(string $raw): string
+    {
+        $decoded = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $unescaped = str_replace(["\\'", '\\"'], ["'", '"'], $decoded);
+        return trim($unescaped);
     }
 }

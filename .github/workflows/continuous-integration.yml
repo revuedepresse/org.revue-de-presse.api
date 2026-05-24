@@ -82,5 +82,14 @@ jobs:
       # Compile the prod container so missing-classmap-entry bugs blow up
       # in CI instead of in production. CI previously only warmed the
       # `test` env, which never exercised the prod service wiring.
+      #
+      # NEWSLETTER_ENCRYPTION_KEY is required: BootEncryptedStringType is a
+      # console.command listener (config/services.yaml), so booting bin/console
+      # under --env=prod instantiates StaticEncryptionKey, which fails fast on
+      # an empty/invalid key. The value below is the same base64-of-32-zero-bytes
+      # placeholder used in .env.test.dist — CI never encrypts real data, this
+      # only satisfies the boot-time validation.
       - name: Warm prod container
+        env:
+          NEWSLETTER_ENCRYPTION_KEY: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
         run: php bin/console cache:clear --env=prod --no-debug && php bin/console cache:warmup --env=prod --no-debug

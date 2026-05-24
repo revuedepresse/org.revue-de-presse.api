@@ -2,17 +2,19 @@
 <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0">
   <tr>
     {% if highlight.avatar_url %}
-    <td valign="top" width="56">
-      <img src="{{ highlight.avatar_url }}" width="40" height="40" alt="" style="border-radius:50%;display:block;">
+    <td valign="top" width="56" style="padding:16px 0 16px 16px">
+      <a href="https://bsky.app/profile/{{ highlight.screen_name }}" style="display:inline-block;text-decoration:none">
+        <img src="{{ highlight.avatar_url }}" width="40" height="40" alt="" style="border-radius:50%;display:block;border:0">
+      </a>
     </td>
     {% endif %}
-    <td valign="top">
-      <div class="rank">{{ highlight.rank }}. {{ highlight.screen_name }}</div>
-      {% if highlight.text %}<div class="text">{{ highlight.text }}</div>{% endif %}
+    <td valign="top" style="padding:16px">
+      <div class="rank">{{ highlight.rank }}. <a href="https://bsky.app/profile/{{ highlight.screen_name }}" style="color:inherit;text-decoration:none">{{ highlight.screen_name }}</a></div>
+      {% if highlight.text %}<div class="text">{{ highlight.text|nl2br }}</div>{% endif %}
       <div class="meta">
-        {{ highlight.date_fr }}
-        &nbsp;·&nbsp; <span class="vanity-retweets">♻ {{ highlight.reposts }}</span>
-        &nbsp; <span class="vanity-likes">♥ {{ highlight.likes }}</span>
+        <a href="{{ highlight.url }}" style="color:#657786;text-decoration:none">{{ highlight.date_fr }}</a>
+        &nbsp;·&nbsp; <span class="vanity-retweets"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAACXklEQVRYhe2Vz0sUYRjHv887u+vOrhaWQdglilhpZxdvsUlguWNBEIJo1D3pL4i6hBfpYqeCoEsHOyVeCqxNBekQdJCsdrdD3QK1gkppGNhm3m8XF9xd3UGTCJrPaeb5+ZlheAcICQn535HA/CgEo9A10d7eSNz4loOwpb7BIL84fkcZ8/PeHwkk7FQnEX0M0kBFLrgvip+qObMvcxfCEQDR+j6Ca0JZVgpjzkxxYkcCCTvVqRkrCGitDy1LRc5VJWL5TMYQ3AR1g4BATIBZQmklxnlnZnFxWwIblncJ8BMECCQp/LBRohnJfOa6hh4D5ZE7V7zUrFbV3PVnk2T0mYBdAAoAlijyGcJpgTrGqDxFT6otSMATbwqQHxAeCKqtEWjx9EEQ7QCnXa9jAEJCSLf9+CDAJwLsjSVjh4KGwje0gBoS+JFvQn82Wb1M2OmiaVvvN8s1o+WMdTSRT3817fRcUK1qiDx/62xZ3Sy3QxoF/jKhQGS3Bpmnu3ug/FtQxg3teys1OTt9G5TD7mxxsL5v196AinhHCHYD/kMBTgIANCRhpx+AcpXCFIaGjG0JUMOBRmtbX9f+IAFnpjghCvcFep8ojAESEaUsQoYBLmkVuYjJSb++r+lBEc9b9wQYAbCgBHd8ynLDAMJxT717Vf1jmrY1LuAVUvasP8ZH34gMVApvSpvtaH5S5XKmmVgrQOQEgNgWVRWAl93Z0lQ1YNrWOIkRAVZ8Rgcqc6/LW60IPipHoVpfpoe1j7OEmPVpCldNxK99n11Y3RiP29k+45dfcuZLK/U9ISEh/xS/Afqt4VN8tmUaAAAAAElFTkSuQmCC" width="14" height="14" alt="" style="vertical-align:middle;border:0;margin-right:2px"> {{ highlight.reposts }}</span>
+        &nbsp; <span class="vanity-likes"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAACeklEQVRYhe2WzUtUYRTGf+e9YjHQQh0tqGjlwhD8WhUhkYRGrYIWLtq0cRNtXNgwIw6UCQYRte8PiGoXpEEUQQQx42ha9EEfWoPjjE5JGunMe9qojY4zzqgzm3x27z0P5/dw7uWeF3b0v0syFa5U1lc7yCVVPQkcBJKi8sWKDqiaO93Twbep/mvlDYfV2AuItKIcAhxgAtVBY5xbnmjwY04BFKSvss6rKj1ASYZ8CeC2O+Z0AUy7k/0KF7P5RejxREN9AppacNY6S931/SA+wGRoxlLtyLxLG+dc2g6cz8Hf8ty1z/VkfvJxamHVBHqr6lqx8ihLoy3LWG31zAwPpib7J8VfSDiAdWQVY2UCVyvq9ovIBFk+zG2SliAHumJDYUiZgGJqigAHkIRSs3xYCWBEdxUBvhRBd6cFcIx8KxY/6STH0wKUTZk3wEwR+HEbse/SAnQQWAQeFCHAfT9jC2kBAIyT7AP+FBC+YIX+VczUgyfy+hMiNwtFV9Eb3dHQh4wBANxR043yogD8V4loomftw7QAHQQWHeu0A+FthIc1IedS333GAACX44FxkrYViG8DfBbhtO/H0Nf1ihk3mDc+MqqGM8DsVuBqOOWNhkKZDBv+evvcjU0WOwiU5wn/qda0+WaCL7OZsu1wADyxYAChRdHJPOARsCc2gucUAMAbDYXU0aPA+xzsnwVt9sZGgrn0zmv79VbV7sWWPASaMnQbVattvunh77n2zGkCy/JOjUYWZfE4KgPrlJ85CedYPnBY5064kZ7ORxeaf1fcdVymGqQWAOXenrJfZzvDY3P59tv0BcQPptTdcB3ULMRCnX6wm+21o/9bfwFakd5kKHBZGAAAAABJRU5ErkJggg==" width="14" height="14" alt="" style="vertical-align:middle;border:0;margin-right:2px"> {{ highlight.likes }}</span>
       </div>
       <div class="url"><a href="{{ highlight.url }}">{{ highlight.url }}</a></div>
     </td>
