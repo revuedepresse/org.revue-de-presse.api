@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+staged_php="$(git diff --cached --name-only --diff-filter=ACMR -- 'src/*.php' 'tests/*.php' 'public/*.php')"
+if [ -z "$staged_php" ]; then
+    exit 0
+fi
+
+if [ ! -x bin/phpstan ]; then
+    echo "pre-commit: bin/phpstan not found, run 'composer install' first." >&2
+    exit 1
+fi
+
+php bin/phpstan analyse --no-progress --memory-limit=1G

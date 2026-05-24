@@ -26,4 +26,27 @@ final class SnapshotHighlightsFetcherTest extends TestCase
         self::assertSame('01', $views[0]->rank);
         self::assertSame('pub1', $views[0]->screen_name);
     }
+
+    public function test_runs_text_through_the_canonical_cleaner(): void
+    {
+        // Smoke test that the fetcher delegates text normalisation to
+        // TextCleaner. The cleaner's full behaviour is pinned by
+        // TextCleanerTest; here we just confirm the wiring is live by
+        // asserting that escape junk is gone.
+        $reader = new class implements SnapshotReader {
+            public function read(string $date): array {
+                return [[
+                    'screen_name' => 'humanite.fr',
+                    'text' => '1er\xa0\mai et \n new lines',
+                    'reposts' => 1, 'likes' => 1, 'url' => 'https://x/1',
+                ]];
+            }
+        };
+        $fetcher = new SnapshotHighlightsFetcher($reader);
+        $views = $fetcher->fetchTop10(new \DateTimeImmutable('2026-04-30'));
+
+        self::assertSame("1er mai et \n new lines", $views[0]->text);
+        self::assertStringNotContainsString('\\xa0', $views[0]->text);
+        self::assertStringNotContainsString('\\n', $views[0]->text);
+    }
 }

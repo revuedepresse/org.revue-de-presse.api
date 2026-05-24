@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache clear-cache install migrate restart start stop test update-version \
+.PHONY: help build clean clear-app-cache clear-cache install install-hooks migrate phpstan restart start stop test update-version \
         bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
         php-worker-build php-worker-start php-worker-stop php-worker-logs \
         reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
@@ -44,6 +44,13 @@ clear-cache: ## Flush Redis cache
 
 install: build ## Install requirements (build → up app → install-app-requirements → clear+warm cache → migrate)
 	@/bin/bash -c 'source fun.sh && install'
+
+install-hooks: ## Enable repo-tracked git hooks under .githooks (sets core.hooksPath)
+	@git config core.hooksPath .githooks
+	@echo "✅ core.hooksPath set to .githooks (pre-commit will run phpstan)."
+
+phpstan: ## Run static analysis (php bin/phpstan analyse) with a 1G memory limit
+	@php bin/phpstan analyse --no-progress --memory-limit=1G
 
 migrate: ## Apply pending Doctrine migrations in the running app container (idempotent)
 	@/bin/bash -c 'source fun.sh && run_doctrine_migrations'
