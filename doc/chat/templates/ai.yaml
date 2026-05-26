@@ -1,6 +1,10 @@
 # Symfony AI initiative wiring (pre-1.0, experimental).
 # Mistral primary, Google Gemini fallback, both OpenAI-compatible.
 # PostgresStore co-located with the application database for hybrid retrieval.
+#
+# Copy into config/packages/ai.yaml after `composer require symfony/ai-bundle`.
+# Kept under doc/chat/templates/ pre-install so the loaded-config dir stays
+# clean of pending files. See doc/chat/post-install.md.
 ai:
     platform:
         mistral:

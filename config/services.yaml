@@ -128,8 +128,9 @@ services:
         tags: ['controller.service_arguments']
 
     # Chat module — bundle-independent services only.
-    # Bundle-dependent wiring lives in config/packages/services.chat.yaml.dist
-    # and is loaded once symfony/ai-bundle + firebase/php-jwt are installed.
+    # Bundle-dependent wiring lives in doc/chat/templates/services.chat.yaml
+    # and is copied into config/packages/ once symfony/ai-bundle +
+    # firebase/php-jwt are installed (see doc/chat/post-install.md).
     App\Chat\Infrastructure\Repository\DoctrineConversationRepository: ~
     App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository: ~
 

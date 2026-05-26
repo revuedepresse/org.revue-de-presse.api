@@ -1,11 +1,12 @@
 # Chat module — bundle-dependent wiring.
 #
-# Rename to `services.chat.yaml` AFTER running:
+# Copy into config/packages/ AFTER running:
 #   composer require symfony/ai-bundle symfony/ai-platform \
 #                    symfony/ai-store symfony/chat firebase/php-jwt
 #
-# Then import it from config/services.yaml or just leave it in
-# config/packages/ where the framework loads every *.yaml automatically.
+# The framework loads every *.yaml under config/packages/ automatically.
+# Kept under doc/chat/templates/ pre-install so the loaded-config dir
+# stays clean of pending files. See doc/chat/post-install.md.
 #
 # The service ids below (`@ai.indexer.chat_publications`,
 # `@ai.retriever.chat_publications`, `@ai.platform.failover.chat_default`)

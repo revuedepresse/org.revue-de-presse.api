@@ -10,9 +10,9 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # The ^/api/chat firewall (chat:) is defined in
-        # config/packages/security.chat.yaml.dist and activates after
-        # composer install + rename. See doc/chat/post-install.md.
+        # The ^/api/chat firewall (chat:) ships as a template at
+        # doc/chat/templates/security.chat.yaml — copy it into
+        # config/packages/ after composer install. See doc/chat/post-install.md.
 
         main:
             provider: member_entity_provider
@@ -30,7 +30,8 @@ when@prod:
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
-            # ^/api/chat → ROLE_BSKY_USER moved to security.chat.yaml.dist
+            # ^/api/chat → ROLE_BSKY_USER ships as a template at
+            # doc/chat/templates/security.chat.yaml
             - { path: ^/api,                        role: ROLE_USER }
 
 when@dev:
@@ -41,7 +42,8 @@ when@dev:
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
-            # ^/api/chat → ROLE_BSKY_USER moved to security.chat.yaml.dist
+            # ^/api/chat → ROLE_BSKY_USER ships as a template at
+            # doc/chat/templates/security.chat.yaml
             - { path: ^/api,                        role: ROLE_USER }
 
 when@test:
@@ -52,5 +54,6 @@ when@test:
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
-            # ^/api/chat → ROLE_BSKY_USER moved to security.chat.yaml.dist
+            # ^/api/chat → ROLE_BSKY_USER ships as a template at
+            # doc/chat/templates/security.chat.yaml
             - { path: ^/api,                        role: ROLE_USER }

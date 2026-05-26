@@ -1,10 +1,11 @@
-# Chat firewall — referenced from security.yaml after composer install.
+# Chat firewall — copied into config/packages/ after composer install.
 #
-# Rename to `security.chat.yaml` after running:
+# After running:
 #   composer require firebase/php-jwt symfony/ai-bundle ...
-#
-# These two blocks merge into the active security config — the framework
-# concatenates all *.yaml files under config/packages/.
+# copy this file into config/packages/security.chat.yaml. The framework
+# merges every *.yaml under config/packages/ into the active config.
+# Kept under doc/chat/templates/ pre-install so the loaded-config dir
+# stays clean of pending files. See doc/chat/post-install.md.
 
 security:
     firewalls:

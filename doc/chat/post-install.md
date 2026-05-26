@@ -24,18 +24,23 @@ bumping.
 
 ## 2. Activate the bundle-dependent config
 
-Three `.dist` files in `config/packages/` carry the wiring that
-references the AI bundle's service ids. Rename them to drop the suffix:
+Three template files under `doc/chat/templates/` carry the wiring that
+references the AI bundle's service ids. Copy them into `config/packages/`,
+which the framework auto-loads:
 
 ```bash
-cd config/packages
-mv ai.yaml.dist            ai.yaml
-mv services.chat.yaml.dist services.chat.yaml
-mv security.chat.yaml.dist security.chat.yaml
+cp doc/chat/templates/ai.yaml            config/packages/ai.yaml
+cp doc/chat/templates/services.chat.yaml config/packages/services.chat.yaml
+cp doc/chat/templates/security.chat.yaml config/packages/security.chat.yaml
 ```
 
-The framework loads every `*.yaml` under `config/packages/` at boot, so
-no further `imports:` entry is needed.
+The templates live outside `config/packages/` deliberately — keeping the
+loaded-config directory clean of any "not loaded yet" files removes the
+risk of confusion (or an accidental rename committing the loaded copy
+back as a dist).
+
+The framework loads every `*.yaml` under `config/packages/` at boot,
+so no further `imports:` entry is needed once the copy is done.
 
 ## 3. Drop the PHPStan excludes
 
