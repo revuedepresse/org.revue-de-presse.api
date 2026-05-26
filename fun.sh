@@ -357,7 +357,7 @@ function run_chat_store_setup() {
 
     load_configuration_parameters
 
-    printf '%s.%s' 'About to provision the Chat pgvector store (ai:store:setup chat_publications)' $'\n'
+    printf '%s.%s' 'About to provision the Chat pgvector store (ai:store:setup ai.store.postgres.chat_publications)' $'\n'
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
@@ -367,7 +367,7 @@ function run_chat_store_setup() {
         -T app \
         /bin/bash -c '
             if bin/console list ai 2>/dev/null | grep -q "ai:store:setup"; then
-                bin/console ai:store:setup chat_publications --no-interaction
+                bin/console ai:store:setup ai.store.postgres.chat_publications --no-interaction
             else
                 printf "✓ skipped: ai:store:setup not registered yet (symfony/ai-bundle not installed)\n"
             fi
