@@ -9,8 +9,8 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
-use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -70,11 +70,14 @@ final class BlueskyJwtAuthenticator extends AbstractAuthenticator
         }
 
         try {
+            // LooseValidAt enforces `exp` (and `iat` if present) but does NOT
+            // require `nbf`. The Nuxt signer doesn't mint `nbf`, so anything
+            // stricter would reject every real token.
             $this->jwtConfig->validator()->assert(
                 $token,
                 new SignedWith($this->jwtConfig->signer(), $this->jwtConfig->signingKey()),
                 new IssuedBy($this->expectedIssuer),
-                new StrictValidAt(SystemClock::fromUTC(), new \DateInterval('PT0S')),
+                new LooseValidAt(SystemClock::fromUTC(), new \DateInterval('PT0S')),
             );
         } catch (\Throwable $e) {
             $this->logger->info('chat.auth.invalid_token', ['error' => $e::class, 'message' => $e->getMessage()]);

@@ -13,14 +13,14 @@ use App\Chat\Domain\Repository\ConversationTurnRepository;
 use App\Chat\Domain\Text\TextCleaner;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Uid\Ulid;
 
 /**
  * One chat turn end-to-end: rate-limit, persist user turn, retrieve, stream,
  * persist assistant turn. The processor adapts the generator to SSE.
  */
-final class RunChatTurn
+class RunChatTurn
 {
     private const HISTORY_TURN_LIMIT = 6;
     private const RETRIEVAL_K = 8;
@@ -29,8 +29,8 @@ final class RunChatTurn
     private readonly LoggerInterface $logger;
 
     public function __construct(
-        private readonly RateLimiterFactory $chatPerUserLimiter,
-        private readonly RateLimiterFactory $chatGlobalQuotaLimiter,
+        private readonly RateLimiterFactoryInterface $chatPerUserLimiter,
+        private readonly RateLimiterFactoryInterface $chatGlobalQuotaLimiter,
         private readonly ConversationRepository $conversations,
         private readonly ConversationTurnRepository $turns,
         private readonly TextCleaner $textCleaner,
