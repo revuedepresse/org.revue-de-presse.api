@@ -109,3 +109,122 @@ curl -N -H "Authorization: Bearer $NUXT_JWT" \
 
 Expect SSE frames: a series of `event: token` deltas followed by one
 `event: done` carrying citations.
+
+## 7. Daily sync via systemd timer
+
+Each day the upstream news-review pipeline writes a fresh top-10
+snapshot to `src/Bluesky/Resources/{YYYY-MM-DD}.json` (read by
+`App\NewsReview\Infrastructure\Repository\FilesystemSnapshotReader`).
+The cron's job is to embed **yesterday's** snapshot into pgvector once
+it is guaranteed complete — i.e., shortly after Europe/Paris midnight.
+
+We use a systemd oneshot + timer pair on the Docker host. Pick this
+over a host crontab because (a) journalctl gives you logs and
+last-run state without any extra plumbing, (b) `Persistent=true`
+catches up a missed fire after a reboot, (c) `OnFailure=` can hook
+straight into your alerting unit.
+
+### Idempotency
+
+Re-running the same date is safe. `SymfonyAiPublicationEmbedder`
+maps each highlight to a `TextDocument` keyed by `publication_id`
+(the at-proto URI), and the underlying `PostgresStore` upserts by
+that id. Re-runs do, however, re-issue embedding HTTP calls to
+Mistral — keep that in mind if you wire retries.
+
+### Exit codes (from `chat:embed-snapshots`)
+
+| Code | Meaning                                            |
+|------|----------------------------------------------------|
+| 0    | All resolved dates either embedded or empty        |
+| 1    | Some publications embedded, some dates failed      |
+| 2    | All resolved dates failed                          |
+
+systemd treats 1 and 2 as `failed`, so an `OnFailure=` hook will
+fire for either.
+
+### `/etc/systemd/system/chat-embed-snapshots.service`
+
+```ini
+[Unit]
+Description=Embed yesterday's Bluesky top-10 snapshot into pgvector
+Wants=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/org.revue-de-presse.api/provisioning/containers
+# Path to your checkout; docker-compose picks COMPOSE_PROJECT_NAME up
+# from ../../.env.local (org_revue-de-presse_api).
+EnvironmentFile=/opt/org.revue-de-presse.api/.env.local
+ExecStart=/bin/bash -c '\
+  TARGET_DATE=$(TZ=Europe/Paris date -d "yesterday" +%%F); \
+  /usr/bin/docker compose \
+    -f docker-compose.yaml \
+    -f docker-compose.override.yaml \
+    exec -T app \
+    bin/console chat:embed-snapshots --date="$TARGET_DATE" --no-interaction'
+# Tighten the box a little; the command only needs to talk to docker.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+```
+
+Adjust `WorkingDirectory` / `EnvironmentFile` paths to where the
+repo is checked out on the host. The `%%` is a literal `%` escaped
+for systemd unit-file syntax.
+
+### `/etc/systemd/system/chat-embed-snapshots.timer`
+
+```ini
+[Unit]
+Description=Daily run of chat-embed-snapshots.service (02:30 Europe/Paris)
+
+[Timer]
+# Fires at 02:30 local Paris time; ~2.5h after midnight is enough
+# slack for the upstream snapshot writer to finish. Adjust if you
+# know the upstream's own finish-by SLA.
+OnCalendar=*-*-* 02:30:00 Europe/Paris
+# Catch up after host downtime — better a late embed than none.
+Persistent=true
+Unit=chat-embed-snapshots.service
+
+[Install]
+WantedBy=timers.target
+```
+
+### Install / enable / verify
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now chat-embed-snapshots.timer
+
+# Confirm it is scheduled
+systemctl list-timers chat-embed-snapshots.timer
+
+# Trigger an immediate ad-hoc run (useful for first-time validation)
+sudo systemctl start chat-embed-snapshots.service
+
+# Tail logs
+journalctl -u chat-embed-snapshots.service -f
+```
+
+A successful run prints the same SymfonyStyle summary as the manual
+invocation in step 5 — e.g. `10 publication(s) embedded across 1
+snapshot(s) (0 skipped, 0 failed)`.
+
+### Failure handling (optional)
+
+Drop a sibling unit and reference it from the service via
+`OnFailure=chat-embed-snapshots-failed.service`. Common patterns:
+
+- `curl` to a webhook (Slack / Discord / Healthchecks.io)
+- a one-line wrapper around `mail` to the on-call alias
+- `journalctl -u chat-embed-snapshots.service -n 50 --no-pager`
+  piped into the notifier so the alert carries context
+
+Don't paper over a failure by adding `Restart=` — embedding is
+expensive and most failures are upstream (Mistral 5xx, snapshot
+file missing). A single best-effort run with a loud failure signal
+is what you want.
