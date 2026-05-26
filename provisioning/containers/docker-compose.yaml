@@ -161,6 +161,36 @@ services:
     #
     # NOTE: takes host ports 80 and 443, so the legacy nginx-based
     # local.proxy stack must not be running at the same time.
+    # Local-only embedding model server. OpenAI-compatible /v1/embeddings
+    # endpoint consumed by Symfony AI's `ai.platform.generic.ollama` bridge
+    # (see config/packages/ai.yaml). Gated behind the `embeddings` profile so
+    # bare `docker compose up` doesn't pull a ~200 MB image and a ~1.2 GB
+    # model onto every contributor's laptop.
+    #
+    # Bring-up: `make chat-embeddings-setup` (starts the container + pulls bge-m3).
+    # The model lives in the named volume so re-creating the container is fast.
+    ollama:
+        profiles:
+            - embeddings
+        image: 'ollama/ollama:latest'
+        restart: 'unless-stopped'
+        # 11434 stays unexposed on the host by default — only sibling
+        # containers reach it via `http://ollama:11434`. Override via
+        # docker-compose.override.yaml if you want host access for testing.
+        expose:
+            - '11434'
+        volumes:
+            - '../volumes/ollama:/root/.ollama'
+        # bge-m3 footprint at idle is ~1.5 GB; under load ~2.5 GB. Set a
+        # ceiling so a runaway request can't OOM the whole dev box.
+        mem_limit: '4g'
+        healthcheck:
+            test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']
+            interval: 10s
+            timeout: 5s
+            retries: 12
+            start_period: 30s
+
     reverse-proxy:
         profiles:
             - frankenphp

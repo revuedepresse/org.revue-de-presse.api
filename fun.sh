@@ -380,6 +380,41 @@ function run_chat_store_setup() {
     printf '%s.%s' 'Finished provisioning the Chat pgvector store' $'\n'
 }
 
+# Drop + recreate the pgvector store from its current ai.yaml schema. Use
+# whenever the column type changes (e.g. switching the embedding model
+# dimension or vector_type: vector → halfvec). `setup` alone uses
+# `CREATE TABLE IF NOT EXISTS` and silently keeps the old schema.
+function run_chat_store_reset() {
+    # `chat-store-setup` targets `docker compose exec app`, but the always-
+    # running container hosting bin/console is `service` (named e.g.
+    # org_revue-de-presse_api-service-1). Discover it via the same regex
+    # `run_chat_embed_snapshots` uses so this works regardless of which
+    # compose services are up.
+    local container
+    container=$(_chat_api_container)
+    if [ -z "${container}" ]; then
+        printf '✗ No running api-service container; run "make start" first.%s' $'\n' 1>&2
+        return 1
+    fi
+
+    printf '→ Dropping + recreating the Chat pgvector store (destructive — all embeddings wiped)…%s' $'\n'
+
+    docker exec "${container}" /bin/bash -c '
+        set -e
+        if ! bin/console list ai 2>/dev/null | grep -q "ai:store:setup"; then
+            printf "✗ ai:store:* not registered (symfony/ai-bundle missing)\n" 1>&2
+            exit 1
+        fi
+        bin/console ai:store:drop  ai.store.postgres.chat_publications --force --no-interaction
+        bin/console ai:store:setup ai.store.postgres.chat_publications --no-interaction
+    ' || {
+        printf '✗ Chat pgvector store reset FAILED — see error above.%s' $'\n' 1>&2
+        return 1
+    }
+
+    printf '✓ Chat pgvector store reset to current ai.yaml schema.%s' $'\n'
+}
+
 function run_bench_with_redis() {
     run_bench_highlights 0
 }
@@ -599,18 +634,102 @@ function run_chat_jwt_secret() {
     printf '%s%s' '⚠  Rotating invalidates every active chat session. Deploy API first, Nuxt second.' $'\n'
 }
 
+function _chat_embeddings_compose() {
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        --profile embeddings \
+        "$@"
+}
+
+function run_chat_embeddings_build() {
+    printf '→ Pulling the ollama image (idempotent; cached layers skip)…%s' $'\n'
+    _chat_embeddings_compose pull ollama
+    printf '✓ ollama image ready.%s' $'\n'
+}
+
+function run_chat_embeddings_start() {
+    local model="${OLLAMA_EMBEDDING_MODEL:-bge-m3}"
+
+    printf '→ Starting the ollama container (compose profile: embeddings)…%s' $'\n'
+    _chat_embeddings_compose up -d ollama
+
+    printf '→ Waiting for ollama to accept connections…%s' $'\n'
+    local attempts=0
+    until _chat_embeddings_compose exec -T ollama ollama list >/dev/null 2>&1
+    do
+        attempts=$((attempts + 1))
+        if [ "${attempts}" -ge 30 ]; then
+            printf '✗ ollama did not become ready within ~60s.%s' $'\n' 1>&2
+            return 1
+        fi
+        sleep 2
+    done
+
+    # `ollama pull` is itself idempotent — it short-circuits with a
+    # "already up-to-date" line if the model is already in the volume.
+    printf '→ Ensuring embedding model "%s" is loaded (no-op if already present)…%s' "${model}" $'\n'
+    _chat_embeddings_compose exec -T ollama ollama pull "${model}"
+
+    printf '✓ ollama is up and "%s" is loaded.%s' "${model}" $'\n'
+    printf '  Next: set OLLAMA_BASE_URL=http://ollama:11434 in .env.local (if not already), then run `make chat-store-setup` and `make chat-embed-snapshots`.%s' $'\n'
+}
+
+function run_chat_embeddings_stop() {
+    printf '→ Stopping the ollama container (model volume preserved)…%s' $'\n'
+    _chat_embeddings_compose stop ollama
+    printf '✓ ollama stopped.%s' $'\n'
+}
+
+function run_chat_embeddings_shell() {
+    _chat_embeddings_compose exec ollama /bin/sh
+}
+
+function _chat_api_container() {
+    docker ps -a --format '{{.ID}} {{.Names}}' | awk '/api[-]service/ { print $1; exit }'
+}
+
+function run_chat_cache_clear() {
+    local container
+    container=$(_chat_api_container)
+    if [ -z "${container}" ]; then
+        printf '✗ No running api-service container; run "make start" first.%s' $'\n' 1>&2
+        return 1
+    fi
+    printf '→ Wiping var/cache/dev in api-service (forces YAML re-read on next --no-debug run)…%s' $'\n'
+    docker exec "${container}" rm -rf var/cache/dev
+    printf '✓ Cache cleared.%s' $'\n'
+}
+
 function run_chat_embed_snapshots() {
     local args="${1:-}"
     # Delegate to bin/console inside the running app container so the command
     # sees the configured Doctrine connection, Redis cache, and Symfony AI bundle.
     local container
-    container=$(docker ps -a --format '{{.ID}} {{.Names}}' | awk '/api[-]service/ { print $1; exit }')
+    container=$(_chat_api_container)
     if [ -z "${container}" ]; then
         printf '✗ No running api-service container; run "make start" first.%s' $'\n' 1>&2
         return 1
     fi
+
+    # --no-debug skips Symfony's YAML resource-tracking. If config/packages/
+    # has been edited since the cached container was compiled, the cache is
+    # stale (e.g. still routes the vectorizer at Gemini after we swapped to
+    # Ollama). Detect and clear, otherwise the embed run silently uses the
+    # old wiring.
+    local container_cache='var/cache/dev/App_KernelDevContainer.php'
+    if docker exec "${container}" /bin/bash -c "[ -f ${container_cache} ] && [ -n \"\$(find config/packages -name '*.yaml' -newer ${container_cache} -print -quit)\" ]" 2>/dev/null; then
+        printf '→ config/packages/*.yaml changed since the cache was built; clearing…%s' $'\n'
+        docker exec "${container}" rm -rf var/cache/dev
+    fi
+    # --no-debug skips the AI bundle's DebugCompilerPass, which decorates
+    # every platform/store with TraceablePlatform/TraceableStore. Those
+    # decorators accumulate every API call (including full 3072-dim vector
+    # payloads) in an internal $calls array for the profiler — fine for a
+    # single HTTP request, fatal for a 449-day CLI backfill (OOM at ~134 MB).
+    # Disabling debug drops the wrappers entirely.
     # shellcheck disable=SC2086
-    docker exec -ti "${container}" bin/console chat:embed-snapshots ${args}
+    docker exec -ti "${container}" bin/console --no-debug chat:embed-snapshots ${args}
 }
 
 # Internal: refuse to run on non-Linux hosts and on hosts without systemd.

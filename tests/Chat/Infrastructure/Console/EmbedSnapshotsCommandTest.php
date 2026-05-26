@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Chat\Infrastructure\Console;
 
+use App\Chat\Application\Port\EmbeddedPublicationsRegistry;
 use App\Chat\Application\Port\PublicationEmbedder;
 use App\Chat\Infrastructure\Console\EmbedSnapshotsCommand;
 use App\NewsReview\Domain\Model\HighlightDto;
@@ -37,7 +38,7 @@ final class EmbedSnapshotsCommandTest extends TestCase
         $embedder = new RecordingEmbedder();
         $tester = $this->newTester($reader, $embedder);
 
-        $code = $tester->execute(['--date' => '2025-03-04']);
+        $code = $tester->execute(['--date' => '2025-03-04', '--throttle-seconds' => '0']);
         self::assertSame(Command::SUCCESS, $code);
         self::assertSame(1, $embedder->totalEmbedded());
         self::assertSame(['p1'], $embedder->embeddedIds());
@@ -51,7 +52,7 @@ final class EmbedSnapshotsCommandTest extends TestCase
         $embedder = new RecordingEmbedder();
         $tester = $this->newTester($reader, $embedder);
 
-        $code = $tester->execute(['--date' => '2025-03-04', '--dry-run' => true]);
+        $code = $tester->execute(['--date' => '2025-03-04', '--dry-run' => true, '--throttle-seconds' => '0']);
         self::assertSame(Command::SUCCESS, $code);
         self::assertSame(0, $embedder->batchCount(), 'embedder must never be called in dry-run');
         self::assertSame(0, $embedder->totalEmbedded());
@@ -71,6 +72,7 @@ final class EmbedSnapshotsCommandTest extends TestCase
             '--from' => '2025-03-04',
             '--to' => '2025-03-06',
             '--batch-size' => '1',
+            '--throttle-seconds' => '0',
         ]);
         self::assertSame(Command::SUCCESS, $code);
         self::assertSame(3, $embedder->totalEmbedded());
@@ -86,7 +88,7 @@ final class EmbedSnapshotsCommandTest extends TestCase
         $embedder = new RecordingEmbedder();
         $tester = $this->newTester($reader, $embedder);
 
-        $code = $tester->execute(['--from' => '2025-03-04', '--to' => '2025-03-05']);
+        $code = $tester->execute(['--from' => '2025-03-04', '--to' => '2025-03-05', '--throttle-seconds' => '0']);
         self::assertSame(Command::SUCCESS, $code);
         self::assertSame(1, $embedder->totalEmbedded());
     }
@@ -104,9 +106,103 @@ final class EmbedSnapshotsCommandTest extends TestCase
             '--from' => '2025-03-04',
             '--to' => '2025-03-05',
             '--batch-size' => '1',
+            '--throttle-seconds' => '0',
         ]);
         // 2025-03-04 failed, 2025-03-05 succeeded → partial → exit 1.
         self::assertSame(1, $code);
+    }
+
+    public function testIdempotentReRunSkipsPublicationsAlreadyEmbedded(): void
+    {
+        // Idempotency: publications the registry reports as already present
+        // in the pgvector store must be skipped — no provider HTTP call.
+        $reader = new InMemorySnapshotReader([
+            '2025-03-04' => [
+                $this->snapshotRow('p1', '2025-03-04'),
+                $this->snapshotRow('p2', '2025-03-04'),
+                $this->snapshotRow('p3', '2025-03-04'),
+            ],
+        ]);
+        $embedder = new RecordingEmbedder();
+        $registry = new InMemoryEmbeddedPublicationsRegistry(['p1', 'p3']);
+        $tester = $this->newTester($reader, $embedder, $registry);
+
+        $code = $tester->execute(['--date' => '2025-03-04', '--throttle-seconds' => '0']);
+
+        self::assertSame(Command::SUCCESS, $code);
+        self::assertSame(['p2'], $embedder->embeddedIds(), 'p1 and p3 must not hit the embedder');
+        self::assertSame(1, $embedder->totalEmbedded());
+    }
+
+    public function testFullySkippedBatchDoesNotCallEmbedderAtAll(): void
+    {
+        // Whole-batch skip: when the registry knows about every publication
+        // in the batch, the embedder is not invoked even once (no empty
+        // batches reach the provider).
+        $reader = new InMemorySnapshotReader([
+            '2025-03-04' => [
+                $this->snapshotRow('p1', '2025-03-04'),
+                $this->snapshotRow('p2', '2025-03-04'),
+            ],
+        ]);
+        $embedder = new RecordingEmbedder();
+        $registry = new InMemoryEmbeddedPublicationsRegistry(['p1', 'p2']);
+        $tester = $this->newTester($reader, $embedder, $registry);
+
+        $code = $tester->execute(['--date' => '2025-03-04', '--throttle-seconds' => '0']);
+
+        self::assertSame(Command::SUCCESS, $code);
+        self::assertSame(0, $embedder->batchCount(), 'embedder must not be called when every pub is already embedded');
+    }
+
+    public function testForceFlagBypassesTheRegistryAndReEmbedsEverything(): void
+    {
+        // --force opts out of the idempotency check (useful when the
+        // embedding semantics change — e.g. new model, new chunking rule).
+        $reader = new InMemorySnapshotReader([
+            '2025-03-04' => [
+                $this->snapshotRow('p1', '2025-03-04'),
+                $this->snapshotRow('p2', '2025-03-04'),
+            ],
+        ]);
+        $embedder = new RecordingEmbedder();
+        $registry = new InMemoryEmbeddedPublicationsRegistry(['p1', 'p2']);
+        $tester = $this->newTester($reader, $embedder, $registry);
+
+        $code = $tester->execute([
+            '--date' => '2025-03-04',
+            '--throttle-seconds' => '0',
+            '--force' => true,
+        ]);
+
+        self::assertSame(Command::SUCCESS, $code);
+        self::assertSame(['p1', 'p2'], $embedder->embeddedIds(), '--force must re-embed even when registry says they exist');
+    }
+
+    public function testThrottleSecondsZeroMakesTheRunSubSecond(): void
+    {
+        // Regression: the throttle option must be honoured. With
+        // --throttle-seconds=0, embedding 3 days back-to-back must NOT
+        // take ≥ 2s (the default per-batch sleep). If the option ever
+        // gets ignored, this test catches it because the run blows past
+        // 2s wall time even on a fast CI box.
+        $reader = new InMemorySnapshotReader([
+            '2025-03-04' => [$this->snapshotRow('p1', '2025-03-04')],
+            '2025-03-05' => [$this->snapshotRow('p2', '2025-03-05')],
+            '2025-03-06' => [$this->snapshotRow('p3', '2025-03-06')],
+        ]);
+        $tester = $this->newTester($reader, new RecordingEmbedder());
+
+        $start = microtime(true);
+        $tester->execute([
+            '--from' => '2025-03-04',
+            '--to' => '2025-03-06',
+            '--batch-size' => '1',
+            '--throttle-seconds' => '0',
+        ]);
+        $elapsed = microtime(true) - $start;
+
+        self::assertLessThan(1.0, $elapsed, 'throttle-seconds=0 must skip the per-batch sleep');
     }
 
     public function testAllDaysFailingReturnsExitTwo(): void
@@ -122,6 +218,7 @@ final class EmbedSnapshotsCommandTest extends TestCase
             '--from' => '2025-03-04',
             '--to' => '2025-03-05',
             '--batch-size' => '1',
+            '--throttle-seconds' => '0',
         ]);
         self::assertSame(2, $code);
     }
@@ -148,9 +245,17 @@ final class EmbedSnapshotsCommandTest extends TestCase
         ];
     }
 
-    private function newTester(SnapshotReader $reader, PublicationEmbedder $embedder): CommandTester
-    {
-        $command = new EmbedSnapshotsCommand($reader, new HighlightNormalizer(), $embedder);
+    private function newTester(
+        SnapshotReader $reader,
+        PublicationEmbedder $embedder,
+        ?EmbeddedPublicationsRegistry $registry = null,
+    ): CommandTester {
+        $command = new EmbedSnapshotsCommand(
+            $reader,
+            new HighlightNormalizer(),
+            $embedder,
+            $registry ?? new InMemoryEmbeddedPublicationsRegistry(),
+        );
 
         return new CommandTester($command);
     }
@@ -173,6 +278,20 @@ final class InMemorySnapshotReader implements SnapshotReader
     public function read(string $date): array
     {
         return $this->byDate[$date] ?? [];
+    }
+}
+
+/** @internal Returns whichever publication_ids were seeded as "already embedded". */
+final class InMemoryEmbeddedPublicationsRegistry implements EmbeddedPublicationsRegistry
+{
+    /** @param list<string> $existing */
+    public function __construct(private readonly array $existing = [])
+    {
+    }
+
+    public function existingPublicationIds(array $publicationIds): array
+    {
+        return array_values(array_intersect($publicationIds, $this->existing));
     }
 }
 

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Chat\Infrastructure\Console;
 
+use App\Chat\Application\Port\EmbeddedPublicationsRegistry;
 use App\Chat\Application\Port\PublicationEmbedder;
 use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
@@ -31,6 +32,7 @@ final class EmbedSnapshotsCommand extends Command
         private readonly SnapshotReader $snapshotReader,
         private readonly HighlightNormalizer $normalizer,
         private readonly PublicationEmbedder $embedder,
+        private readonly EmbeddedPublicationsRegistry $registry,
         ?LoggerInterface $logger = null,
     ) {
         parent::__construct();
@@ -44,6 +46,11 @@ final class EmbedSnapshotsCommand extends Command
             ->addOption('to', null, InputOption::VALUE_REQUIRED, 'Inclusive end date (YYYY-MM-DD); defaults to today (Europe/Paris)')
             ->addOption('date', null, InputOption::VALUE_REQUIRED, 'Single-day mode (mutually exclusive with --from/--to)')
             ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Highlights per provider HTTP call', '32')
+            // Gemini free-tier embed_content cap is 100 requests/min; with
+            // sleep(2) between every call (success or failure) we top out
+            // at ≤30 req/min and never blow the bucket. Tests override to 0.
+            ->addOption('throttle-seconds', null, InputOption::VALUE_REQUIRED, 'Seconds to sleep after every embedder call (free-tier rate limiting)', '2')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Re-embed publications even when already present in the pgvector store (skips the idempotency check)')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Walk + parse only, no HTTP, no DB writes');
     }
 
@@ -51,7 +58,9 @@ final class EmbedSnapshotsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $dryRun = (bool) $input->getOption('dry-run');
+        $force = (bool) $input->getOption('force');
         $batchSize = max(1, (int) $input->getOption('batch-size'));
+        $throttleSeconds = max(0, (int) $input->getOption('throttle-seconds'));
 
         try {
             $dates = $this->resolveDates($input);
@@ -74,6 +83,7 @@ final class EmbedSnapshotsCommand extends Command
         }
 
         $totalEmbedded = 0;
+        $totalAlreadyEmbedded = 0;
         $totalSkipped = 0;
         $totalFailed = 0;
         $progress = new ProgressBar($output, count($dates));
@@ -94,8 +104,32 @@ final class EmbedSnapshotsCommand extends Command
                 );
 
                 foreach (array_chunk($highlights, $batchSize) as $batch) {
+                    // Idempotency: ask the registry which publications are
+                    // already present in the pgvector store and skip them
+                    // entirely (no provider HTTP call, no throttle penalty).
+                    // --force bypasses the check for a forced re-embed.
+                    if (!$force && !$dryRun) {
+                        $alreadyEmbedded = $this->registry->existingPublicationIds(
+                            array_map(static fn (HighlightDto $h): string => $h->publicationId, $batch),
+                        );
+                        if ($alreadyEmbedded !== []) {
+                            $totalAlreadyEmbedded += count($alreadyEmbedded);
+                            $batch = array_values(array_filter(
+                                $batch,
+                                static fn (HighlightDto $h): bool => !in_array($h->publicationId, $alreadyEmbedded, true),
+                            ));
+                        }
+                    }
+
+                    if ($batch === []) {
+                        continue;
+                    }
+
                     if (!$dryRun) {
                         $this->embedder->embedBatch($batch);
+                        if ($throttleSeconds > 0) {
+                            sleep($throttleSeconds);
+                        }
                     }
                     $totalEmbedded += count($batch);
                 }
@@ -108,6 +142,12 @@ final class EmbedSnapshotsCommand extends Command
                 ]);
                 $io->newLine(2);
                 $io->warning("Failure on {$date}: {$e->getMessage()}");
+                // The failed request still consumed a slot in the provider's
+                // rate window; throttle in the failure path too so we don't
+                // race the bucket on the next day.
+                if (!$dryRun && $throttleSeconds > 0) {
+                    sleep($throttleSeconds);
+                }
             }
 
             $progress->advance();
@@ -116,9 +156,10 @@ final class EmbedSnapshotsCommand extends Command
         $progress->finish();
         $io->newLine(2);
         $io->success(sprintf(
-            '%d publication(s) embedded across %d snapshot(s) (%d skipped, %d failed)',
+            '%d publication(s) embedded across %d snapshot(s) (%d already embedded, %d day(s) skipped, %d day(s) failed)',
             $totalEmbedded,
             count($dates) - $totalSkipped - $totalFailed,
+            $totalAlreadyEmbedded,
             $totalSkipped,
             $totalFailed,
         ));

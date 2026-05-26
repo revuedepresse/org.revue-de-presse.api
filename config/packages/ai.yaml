@@ -1,6 +1,13 @@
 # Symfony AI initiative wiring (pre-1.0, experimental — pinned ^0.9).
-# Mistral primary, Google Gemini fallback. PostgresStore co-located with
-# the application database via the existing Doctrine DBAL connection.
+#
+# Chat completions: Mistral primary, Google Gemini fallback (both paid
+# providers — small per-question traffic, well within free tiers).
+#
+# Query embeddings: self-hosted via Ollama through the `generic` OpenAI-
+# compatible bridge. Vendor-free; no rate limits; no per-token cost. The
+# Ollama container is gated behind the `embeddings` docker-compose profile
+# (see provisioning/containers/docker-compose.yaml) and bootstrapped by
+# `make chat-embeddings-setup`.
 ai:
     platform:
         mistral:
@@ -11,6 +18,22 @@ ai:
             chat_default:
                 platforms: ['ai.platform.mistral', 'ai.platform.gemini']
                 rate_limiter: limiter.chat_failover
+        generic:
+            ollama:
+                # Sibling-container DNS — `ollama` resolves to the
+                # docker-compose service of the same name. Override in
+                # .env.local if you point at a host-side Ollama.
+                base_url: '%env(default::OLLAMA_BASE_URL)%'
+                # Ollama doesn't require auth; the bridge accepts a null
+                # api_key but the YAML node demands a stringNode, so we pass
+                # a placeholder that Ollama happily ignores.
+                api_key: 'unused'
+                supports_completions: false
+                # The bundle's FallbackModelCatalog only classifies a model
+                # as EmbeddingsModel if its name contains "embed" — bge-m3
+                # doesn't, so we register an explicit catalog. See
+                # src/Chat/Infrastructure/Symfony/Ai/OllamaModelCatalog.php.
+                model_catalog: App\Chat\Infrastructure\Symfony\Ai\OllamaModelCatalog
 
     store:
         postgres:
@@ -19,6 +42,9 @@ ai:
                 table_name: chat_publication_embedding
                 vector_field: embedding
                 distance: cosine
+                # bge-m3 emits 1024-dim vectors — pgvector's `vector` type
+                # supports HNSW indexing natively up to 2000 dims, so we
+                # use `vector` + `vector_cosine_ops` (no halfvec needed).
                 setup_options:
                     vector_type: vector
                     vector_size: 1024
@@ -27,8 +53,12 @@ ai:
 
     vectorizer:
         chat_publications:
-            platform: ai.platform.mistral
-            model: mistral-embed
+            platform: ai.platform.generic.ollama
+            # BGE-M3: 1024-dim multilingual embedding model with strong
+            # French recall on short documents. Pulled at setup time via
+            # `make chat-embeddings-setup` (model lives in the named
+            # `ollama` volume, so container re-create is fast).
+            model: bge-m3
 
     indexer:
         chat_publications:
