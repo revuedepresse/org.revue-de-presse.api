@@ -7,7 +7,7 @@ use App\Chat\Domain\Entity\Conversation;
 use App\Chat\Domain\Entity\ConversationTurn;
 use App\Chat\Domain\Repository\ConversationTurnRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final class DoctrineConversationTurnRepository implements ConversationTurnRepository
 {
@@ -42,7 +42,7 @@ final class DoctrineConversationTurnRepository implements ConversationTurnReposi
         return array_reverse($rows);
     }
 
-    public function findById(Ulid $id): ?ConversationTurn
+    public function findById(Uuid $id): ?ConversationTurn
     {
         return $this->em->getRepository(ConversationTurn::class)->find($id);
     }

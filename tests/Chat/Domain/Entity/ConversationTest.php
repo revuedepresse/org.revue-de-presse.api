@@ -5,7 +5,7 @@ namespace App\Tests\Chat\Domain\Entity;
 
 use App\Chat\Domain\Entity\Conversation;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final class ConversationTest extends TestCase
 {
@@ -16,12 +16,12 @@ final class ConversationTest extends TestCase
         self::assertSame('did:plc:abc', $conv->blueskyDid());
         self::assertSame($now, $conv->createdAt());
         self::assertSame($now, $conv->lastTurnAt());
-        self::assertInstanceOf(Ulid::class, $conv->id());
+        self::assertInstanceOf(Uuid::class, $conv->id());
     }
 
     public function testConstructorAcceptsExplicitId(): void
     {
-        $id = new Ulid();
+        $id = Uuid::v7();
         $conv = new Conversation('did:plc:abc', $id);
         self::assertSame($id, $conv->id());
     }

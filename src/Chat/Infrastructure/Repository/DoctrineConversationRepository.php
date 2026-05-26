@@ -6,7 +6,7 @@ namespace App\Chat\Infrastructure\Repository;
 use App\Chat\Domain\Entity\Conversation;
 use App\Chat\Domain\Repository\ConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final class DoctrineConversationRepository implements ConversationRepository
 {
@@ -14,7 +14,7 @@ final class DoctrineConversationRepository implements ConversationRepository
     {
     }
 
-    public function openOrCreateFor(string $blueskyDid, ?Ulid $existingId = null): Conversation
+    public function openOrCreateFor(string $blueskyDid, ?Uuid $existingId = null): Conversation
     {
         if ($existingId !== null) {
             $existing = $this->em->getRepository(Conversation::class)->find($existingId);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Chat\Domain\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'chat_turn')]
@@ -14,9 +14,10 @@ class ConversationTurn
     public const ROLE_USER = 'user';
     public const ROLE_ASSISTANT = 'assistant';
 
+    // See note on Conversation::$id — migrated from 'ulid' to 'uuid' (v7).
     #[ORM\Id]
-    #[ORM\Column(type: 'ulid', unique: true)]
-    private Ulid $id;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: Conversation::class, inversedBy: 'turns')]
     #[ORM\JoinColumn(name: 'conversation_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -59,7 +60,7 @@ class ConversationTurn
         ?int $promptTokens = null,
         ?int $completionTokens = null,
         bool $truncated = false,
-        ?Ulid $id = null,
+        ?Uuid $id = null,
         ?\DateTimeImmutable $createdAt = null,
     ) {
         if ($role !== self::ROLE_USER && $role !== self::ROLE_ASSISTANT) {
@@ -71,7 +72,7 @@ class ConversationTurn
             ));
         }
 
-        $this->id = $id ?? new Ulid();
+        $this->id = $id ?? Uuid::v7();
         $this->conversation = $conversation;
         $this->role = $role;
         $this->content = $content;
@@ -83,7 +84,7 @@ class ConversationTurn
         $this->createdAt = $createdAt ?? new \DateTimeImmutable();
     }
 
-    public function id(): Ulid
+    public function id(): Uuid
     {
         return $this->id;
     }

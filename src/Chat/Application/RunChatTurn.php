@@ -14,7 +14,7 @@ use App\Chat\Domain\Text\TextCleaner;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * One chat turn end-to-end: rate-limit, persist user turn, retrieve, stream,
@@ -65,7 +65,7 @@ class RunChatTurn
             return;
         }
 
-        $existing = $conversationId !== null ? Ulid::fromString($conversationId) : null;
+        $existing = $conversationId !== null ? Uuid::fromString($conversationId) : null;
         $conversation = $this->conversations->openOrCreateFor($blueskyDid, $existing);
 
         $cleaned = $this->textCleaner->clean($userMessage);
@@ -83,8 +83,23 @@ class RunChatTurn
             'user_msg_len' => strlen($cleaned),
         ]);
 
-        $filters = $this->filterExtractor->extract($cleaned);
-        $hits = $this->retriever->retrieve($cleaned, self::RETRIEVAL_K, $filters);
+        // Filter extraction + retrieval embed the query via the vectorizer
+        // (currently mistral-embed, no Gemini failover — see ai.yaml). When
+        // Mistral rate-limits or 5xx's, treat it like the streamer failing
+        // before the first token: emit providers_exhausted instead of letting
+        // the exception bubble up as a 500.
+        try {
+            $filters = $this->filterExtractor->extract($cleaned);
+            $hits = $this->retriever->retrieve($cleaned, self::RETRIEVAL_K, $filters);
+        } catch (\Throwable $e) {
+            $this->logger->error('chat.retrieval.failed', [
+                'error' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+            yield SseEvent::error('providers_exhausted');
+
+            return;
+        }
         $hits = array_values(array_filter(
             $hits,
             static fn ($h): bool => $h->distance <= self::COSINE_DISTANCE_CUTOFF,

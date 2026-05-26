@@ -7,8 +7,28 @@
 # bundle exposes different ids.
 
 services:
+    # YAML _defaults only apply to services declared in the same file.
+    # Without this block, explicitly-declared services here (e.g.
+    # RunChatTurnProcessor below, which has tags: but no arguments:)
+    # are built with zero ctor args and crash at first use:
+    #   "Too few arguments to function App\Chat\…\RunChatTurnProcessor::__construct()"
+    _defaults:
+        autowire:      true
+        autoconfigure: true
+
     App\Chat\Application\Port\PublicationEmbedder:
         alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationEmbedder
+
+    App\Chat\Application\Port\EmbeddedPublicationsRegistry:
+        alias: App\Chat\Infrastructure\Doctrine\DoctrineEmbeddedPublicationsRegistry
+    App\Chat\Infrastructure\Doctrine\DoctrineEmbeddedPublicationsRegistry:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
+    # Explicit catalog wired into ai.platform.generic.ollama so embedding
+    # models without "embed" in their name (e.g. bge-m3) are correctly
+    # classified as EmbeddingsModel, not CompletionsModel.
+    App\Chat\Infrastructure\Symfony\Ai\OllamaModelCatalog: ~
 
     App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationEmbedder:
         arguments:

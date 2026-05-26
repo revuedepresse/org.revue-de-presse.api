@@ -54,8 +54,16 @@ final class SymfonyAiPublicationRetriever implements PublicationRetriever
             $score = $document->getScore();
             $distance = $score !== null ? max(0.0, 1.0 - $score) : 1.0;
 
+            // Row id is now a UUIDv5 hash of the at-proto URI (see
+            // SymfonyAiPublicationEmbedder); surface the original URI from
+            // metadata. Fall back to the raw id for legacy rows written
+            // before the migration to UUIDv5 ids.
+            $publicationId = isset($rawMeta['publication_id']) && \is_string($rawMeta['publication_id'])
+                ? $rawMeta['publication_id']
+                : (string) $document->getId();
+
             $hits[] = new RetrievedHit(
-                publicationId: (string) $document->getId(),
+                publicationId: $publicationId,
                 screenName: $screenName,
                 snapshotDate: $snapshotDate,
                 url: isset($rawMeta['url']) && \is_string($rawMeta['url']) ? $rawMeta['url'] : '',

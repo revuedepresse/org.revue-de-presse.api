@@ -10,20 +10,46 @@ use App\NewsReview\Domain\Model\HighlightDto;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\IndexerInterface;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Adapter wiring symfony/ai-store's IndexerInterface (vectorizer →
- * PostgresStore) to our PublicationEmbedder port. The `id` of each
- * TextDocument is the upstream publication_id (an at-proto URI), so
- * the underlying PostgresStore upserts by id on re-runs.
+ * PostgresStore) to our PublicationEmbedder port.
+ *
+ * The Postgres bridge hardcodes the row `id` column as `UUID PRIMARY KEY`
+ * (see vendor/symfony/ai-postgres-store/Store.php::setup()), but our
+ * upstream publication ids are at-proto URIs like
+ * `at://did:plc:.../app.bsky.feed.post/3lj...` — which Postgres rejects
+ * with `invalid input syntax for type uuid`. We derive a deterministic
+ * UUIDv5 from the at-URI for the row id, and keep the original URI in
+ * metadata so the retriever can surface it intact. Re-runs upsert by the
+ * same UUIDv5 (same at-URI → same UUID).
  */
 final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
 {
+    /**
+     * Namespace UUID for hashing at-proto publication ids into row keys.
+     * Generated once via:
+     *   Uuid::v5(Uuid::fromString(Uuid::NAMESPACE_DNS),
+     *            'revue-de-presse.org/chat-publication')
+     * and frozen here. MUST NOT CHANGE — rotating it orphans every existing
+     * row in the pgvector store.
+     */
+    private const PUBLICATION_ID_NAMESPACE = '1e75b0d1-7c16-57be-91b7-98b70c8007c7';
+
     public function __construct(
         private readonly IndexerInterface $indexer,
         private readonly TextCleaner $textCleaner,
         private readonly PromptBuilder $promptBuilder,
     ) {
+    }
+
+    /**
+     * @internal Exposed for the retriever's reverse-lookup pathway.
+     */
+    public static function rowIdFor(string $publicationId): string
+    {
+        return (string) Uuid::v5(Uuid::fromString(self::PUBLICATION_ID_NAMESPACE), $publicationId);
     }
 
     /**
@@ -49,6 +75,10 @@ final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
         $content = $header . "\n" . $cleaned;
 
         $metadata = new Metadata([
+            // Keep the at-proto URI in metadata so the retriever can surface
+            // it back as RetrievedHit::publicationId (the row id is now a
+            // UUIDv5 hash, not the URI itself).
+            'publication_id' => $h->publicationId,
             'snapshot_date' => $h->date->format('Y-m-d'),
             'screen_name' => $h->screenName,
             'url' => $h->url,
@@ -58,6 +88,10 @@ final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
             'avatar_url' => $h->avatarUrl,
         ]);
 
-        return new TextDocument(id: $h->publicationId, content: $content, metadata: $metadata);
+        return new TextDocument(
+            id: self::rowIdFor($h->publicationId),
+            content: $content,
+            metadata: $metadata,
+        );
     }
 }

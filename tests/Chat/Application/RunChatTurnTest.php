@@ -25,7 +25,7 @@ use Symfony\Component\RateLimiter\RateLimit;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final class RunChatTurnTest extends TestCase
 {
@@ -151,6 +151,30 @@ final class RunChatTurnTest extends TestCase
         self::assertSame('Une réponse ', $assistantTurns[0]->content());
     }
 
+    public function testRetrieverFailureEmitsProvidersExhaustedAndDoesNotInvokeStreamer(): void
+    {
+        // Regression: when the query-embedding call (mistral-embed) rate-limits
+        // or 5xx's, the exception used to bubble up through process() as a
+        // raw 500. It must now surface as an SSE error and stop the turn.
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $retriever = new ThrowingRetriever(new \RuntimeException('Rate limit exceeded. Service tier capacity exceeded for this model.'));
+        // The streamer must NOT be invoked once the retriever failed.
+        $streamer = new ScriptedStreamer(['unreachable']);
+
+        $use_case = $this->makeUseCase($conversations, $turns, $retriever, $streamer);
+        $events = iterator_to_array($use_case('did:plc:user', 'Hello'));
+
+        self::assertCount(1, $events);
+        self::assertSame('error', $events[0]->type);
+        self::assertSame('providers_exhausted', $events[0]->data['code']);
+
+        // Only the user turn was persisted — no assistant turn since retrieval
+        // failed before the streamer was reached.
+        self::assertCount(1, $turns->appended);
+        self::assertSame(ConversationTurn::ROLE_USER, $turns->appended[0]->role());
+    }
+
     public function testHitsAboveCosineThresholdAreDroppedFromCitations(): void
     {
         $conversations = new InMemoryConversationRepository();
@@ -211,7 +235,7 @@ final class InMemoryConversationRepository implements ConversationRepository
     /** @var array<string, Conversation> */
     public array $byId = [];
 
-    public function openOrCreateFor(string $blueskyDid, ?Ulid $existingId = null): Conversation
+    public function openOrCreateFor(string $blueskyDid, ?Uuid $existingId = null): Conversation
     {
         if ($existingId !== null && isset($this->byId[(string) $existingId])) {
             return $this->byId[(string) $existingId];
@@ -249,7 +273,7 @@ final class InMemoryConversationTurnRepository implements ConversationTurnReposi
         return array_slice($same, -$limit);
     }
 
-    public function findById(Ulid $id): ?ConversationTurn
+    public function findById(Uuid $id): ?ConversationTurn
     {
         foreach ($this->appended as $turn) {
             if ($turn->id()->equals($id)) {
@@ -270,6 +294,17 @@ final class ArrayRetriever implements PublicationRetriever
     public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
     {
         return array_slice($this->hits, 0, $k);
+    }
+}
+
+/** @internal Retriever that always throws — models a Mistral embeddings outage. */
+final class ThrowingRetriever implements PublicationRetriever
+{
+    public function __construct(private readonly \Throwable $error) {}
+
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    {
+        throw $this->error;
     }
 }
 

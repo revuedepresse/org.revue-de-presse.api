@@ -5,7 +5,7 @@ namespace App\Chat\Domain\Repository;
 
 use App\Chat\Domain\Entity\Conversation;
 use App\Chat\Domain\Entity\ConversationTurn;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 interface ConversationTurnRepository
 {
@@ -16,5 +16,5 @@ interface ConversationTurnRepository
      */
     public function lastTurns(Conversation $conversation, int $limit): array;
 
-    public function findById(Ulid $id): ?ConversationTurn;
+    public function findById(Uuid $id): ?ConversationTurn;
 }

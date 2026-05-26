@@ -98,6 +98,47 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         self::assertSame(8, $upstream->lastLimit);
     }
 
+    public function testMetadataPublicationIdTakesPrecedenceOverRowId(): void
+    {
+        // After the UUIDv5 row-id migration, the embedder stores the
+        // at-proto URI in metadata.publication_id; the row id itself is a
+        // UUIDv5 hash. The retriever must surface the original URI, not
+        // the hash, to keep citations stable.
+        $doc = $this->vectorDocument(
+            id: '5ee73f5d-45ff-52d3-9994-fe837432ed22',
+            score: 0.9,
+            metadata: [
+                'publication_id' => 'at://did:plc:abc/app.bsky.feed.post/3lj',
+                'screen_name' => 'lemonde.fr',
+                'snapshot_date' => '2025-03-04',
+            ],
+        );
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+
+        $hits = $retriever->retrieve('q', 1, new QueryFilters());
+
+        self::assertSame('at://did:plc:abc/app.bsky.feed.post/3lj', $hits[0]->publicationId);
+    }
+
+    public function testRowIdIsUsedAsFallbackWhenMetadataLacksPublicationId(): void
+    {
+        // Legacy rows written before the UUIDv5 migration won't have
+        // metadata.publication_id; the retriever falls back to the row id.
+        $doc = $this->vectorDocument(
+            id: 'at://legacy-row-id',
+            score: 0.9,
+            metadata: [
+                'screen_name' => 'lemonde.fr',
+                'snapshot_date' => '2025-03-04',
+            ],
+        );
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+
+        $hits = $retriever->retrieve('q', 1, new QueryFilters());
+
+        self::assertSame('at://legacy-row-id', $hits[0]->publicationId);
+    }
+
     public function testNullScoreYieldsDistanceOne(): void
     {
         $doc = $this->vectorDocument(id: 'p1', score: null, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04']);
