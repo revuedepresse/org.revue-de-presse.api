@@ -613,6 +613,68 @@ function run_chat_embed_snapshots() {
     docker exec -ti "${container}" bin/console chat:embed-snapshots ${args}
 }
 
+# Internal: refuse to run on non-Linux hosts and on hosts without systemd.
+# Cron-install targets are no-ops on macOS dev machines.
+function _require_systemd_host() {
+    if [ "$(uname)" != 'Linux' ]; then
+        printf '✗ chat-cron targets are Linux-only (host is %s).%s' "$(uname)" $'\n' 1>&2
+        return 1
+    fi
+    if ! command -v systemctl >/dev/null 2>&1; then
+        printf '✗ systemctl not found on PATH — host has no systemd.%s' $'\n' 1>&2
+        return 1
+    fi
+}
+
+# Install chat-embed-snapshots.{service,timer} into /etc/systemd/system/.
+# Templates live under provisioning/systemd/. @PROJECT_DIR@ is replaced
+# with the absolute path of the repo checkout, so the unit's
+# WorkingDirectory + EnvironmentFile resolve correctly on the host.
+function run_chat_cron_install() {
+    _require_systemd_host || return 1
+
+    local project_dir
+    project_dir="$(pwd)"
+
+    local template_dir="${project_dir}/provisioning/systemd"
+    local service_in="${template_dir}/chat-embed-snapshots.service.in"
+    local timer_src="${template_dir}/chat-embed-snapshots.timer"
+
+    if [ ! -f "${service_in}" ] || [ ! -f "${timer_src}" ]; then
+        printf '✗ Missing unit templates under %s%s' "${template_dir}" $'\n' 1>&2
+        return 1
+    fi
+
+    local tmp_service
+    tmp_service="$(mktemp)"
+    sed "s|@PROJECT_DIR@|${project_dir}|g" "${service_in}" > "${tmp_service}"
+
+    printf '%s%s' '→ Installing chat-embed-snapshots.{service,timer} into /etc/systemd/system/ (sudo required)' $'\n'
+    sudo install -m 0644 "${tmp_service}" /etc/systemd/system/chat-embed-snapshots.service
+    sudo install -m 0644 "${timer_src}"   /etc/systemd/system/chat-embed-snapshots.timer
+    rm -f "${tmp_service}"
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now chat-embed-snapshots.timer
+
+    printf '%s%s' '✓ Timer enabled. Next fire:' $'\n'
+    systemctl list-timers chat-embed-snapshots.timer --no-pager || true
+}
+
+# Disable the timer and remove the units. Tolerates partial state
+# (e.g. uninstall after a failed install). Does not touch journal logs.
+function run_chat_cron_uninstall() {
+    _require_systemd_host || return 1
+
+    printf '%s%s' '→ Disabling chat-embed-snapshots.timer and removing units (sudo required)' $'\n'
+    sudo systemctl disable --now chat-embed-snapshots.timer 2>/dev/null || true
+    sudo rm -f /etc/systemd/system/chat-embed-snapshots.service \
+               /etc/systemd/system/chat-embed-snapshots.timer
+    sudo systemctl daemon-reload
+
+    printf '%s%s' '✓ Removed.' $'\n'
+}
+
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 

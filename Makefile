@@ -5,7 +5,8 @@ SHELL:=/bin/bash
         php-worker-build php-worker-start php-worker-stop php-worker-logs \
         reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
         start-benchmark-stack stop-benchmark-stack restart-benchmark-stack \
-        chat-jwt-secret chat-embed-snapshots
+        chat-jwt-secret chat-embed-snapshots chat-store-setup \
+        chat-cron-install chat-cron-uninstall
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -108,6 +109,12 @@ chat-embed-snapshots: ## Embed snapshots into pgvector via `bin/console chat:emb
 
 chat-store-setup: ## Provision the pgvector publication-embedding store (idempotent)
 	@/bin/bash -c 'source fun.sh && run_chat_store_setup'
+
+chat-cron-install: ## Install + enable systemd timer that runs chat:embed-snapshots daily (Linux host w/ systemd; sudo required)
+	@/bin/bash -c 'source fun.sh && run_chat_cron_install'
+
+chat-cron-uninstall: ## Disable the timer and remove the systemd units (sudo required)
+	@/bin/bash -c 'source fun.sh && run_chat_cron_uninstall'
 
 start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed) and start the full benchmark stack (php-worker + reverse-proxy)
 	@printf '✅ Benchmark stack up — php-worker + reverse-proxy detached.%s' $$'\n'
