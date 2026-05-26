@@ -3,6 +3,10 @@ FROM    php:8.5-cli-bookworm
 ARG     OWNER_GID
 ARG     OWNER_UID
 ARG     PROJECT
+# HOST_OS conveys the developer's host OS to install scripts that
+# would otherwise misbehave on Docker Desktop for macOS (chown/chmod
+# against bind-mounted host paths). Defaults to empty when not passed.
+ARG     HOST_OS=
 
 RUN     test -n "${OWNER_GID}" && \
         test -n "${OWNER_UID}" && \
@@ -10,6 +14,7 @@ RUN     test -n "${OWNER_GID}" && \
 
 ENV     PROJECT_OWNER_GID=${OWNER_GID}
 ENV     PROJECT_OWNER_UID=${OWNER_UID}
+ENV     HOST_OS=${HOST_OS}
 
 ARG     PROJECT_DIR="${PROJECT:-org.example.api}"
 
@@ -21,7 +26,7 @@ COPY    --chown=${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID} \
         ./service/templates \
         /templates
 
-COPY    --from=composer:2.5 /usr/bin/composer /usr/bin/composer
+COPY    --from=composer:2.9 /usr/bin/composer /usr/bin/composer
 
 RUN     /bin/bash -c 'source /scripts/install-service-requirements.sh'
 

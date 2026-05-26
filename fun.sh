@@ -9,8 +9,10 @@ function build() {
     local PROJECT
     local PROJECT_OWNER_UID
     local PROJECT_OWNER_GID
+    local HOST_OS
 
     load_configuration_parameters
+    HOST_OS="$(uname)"
 
     if [ -n "${DEBUG}" ];
     then
@@ -23,6 +25,7 @@ function build() {
             --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
             --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
             --build-arg "PROJECT=${PROJECT}" \
+            --build-arg "HOST_OS=${HOST_OS}" \
             app \
             cache \
             service
@@ -36,6 +39,7 @@ function build() {
             --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
             --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
             --build-arg "PROJECT=${PROJECT}" \
+            --build-arg "HOST_OS=${HOST_OS}" \
             app \
             cache \
             service
