@@ -149,26 +149,15 @@ services:
             retries: 3
             start_period: 30s
 
-    # Edge reverse-proxy (Traefik) for the frankenphp profile. Same profile
-    # gate. Bring it up with `make reverse-proxy-start` (which pulls
-    # php-worker in via depends_on); stop with `make reverse-proxy-stop`.
-    #
-    # Routing is declared in the file provider
-    # (provisioning/containers/reverse-proxy/dynamic/routers.yml). We deliberately
-    # don't use the docker provider: Traefik v3.5's bundled docker client
-    # pins API v1.24, which Docker Engine 29.x (MinAPIVersion=1.40)
-    # rejects with HTTP 400, breaking discovery on every restart.
-    #
-    # NOTE: takes host ports 80 and 443, so the legacy nginx-based
-    # local.proxy stack must not be running at the same time.
     # Local-only embedding model server. OpenAI-compatible /v1/embeddings
     # endpoint consumed by Symfony AI's `ai.platform.generic.ollama` bridge
     # (see config/packages/ai.yaml). Gated behind the `embeddings` profile so
     # bare `docker compose up` doesn't pull a ~200 MB image and a ~1.2 GB
     # model onto every contributor's laptop.
     #
-    # Bring-up: `make chat-embeddings-setup` (starts the container + pulls bge-m3).
-    # The model lives in the named volume so re-creating the container is fast.
+    # Bring-up: `make chat-embeddings-start` (depends on chat-embeddings-build,
+    # idempotently pulls bge-m3 after the container is healthy). The model
+    # lives in the named volume so re-creating the container is fast.
     ollama:
         profiles:
             - embeddings
@@ -191,6 +180,18 @@ services:
             retries: 12
             start_period: 30s
 
+    # Edge reverse-proxy (Traefik) for the frankenphp profile. Same profile
+    # gate. Bring it up with `make reverse-proxy-start` (which pulls
+    # php-worker in via depends_on); stop with `make reverse-proxy-stop`.
+    #
+    # Routing is declared in the file provider
+    # (provisioning/containers/reverse-proxy/dynamic/routers.yml). We deliberately
+    # don't use the docker provider: Traefik v3.5's bundled docker client
+    # pins API v1.24, which Docker Engine 29.x (MinAPIVersion=1.40)
+    # rejects with HTTP 400, breaking discovery on every restart.
+    #
+    # NOTE: takes host ports 80 and 443, so the legacy nginx-based
+    # local.proxy stack must not be running at the same time.
     reverse-proxy:
         profiles:
             - frankenphp
