@@ -127,8 +127,24 @@ services:
     App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
         tags: ['controller.service_arguments']
 
+    # Chat module — bundle-independent services only.
+    # Bundle-dependent wiring lives in config/packages/services.chat.yaml.dist
+    # and is loaded once symfony/ai-bundle + firebase/php-jwt are installed.
+    App\Chat\Infrastructure\Repository\DoctrineConversationRepository: ~
+    App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository: ~
+
+    App\Chat\Domain\Repository\ConversationRepository:
+        alias: App\Chat\Infrastructure\Repository\DoctrineConversationRepository
+    App\Chat\Domain\Repository\ConversationTurnRepository:
+        alias: App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository
+
+    App\Chat\Application\PromptBuilder: ~
+    App\Chat\Application\CitationExtractor: ~
+    App\Chat\Domain\Text\TextCleaner: ~
+    App\Chat\Domain\Query\QueryFilterExtractor: ~
+
 parameters:
-    monolog_channels:               ['benchmark', 'newsletter']
+    monolog_channels:               ['benchmark', 'newsletter', 'chat']
 
     redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 

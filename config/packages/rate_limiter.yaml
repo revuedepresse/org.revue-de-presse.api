@@ -25,3 +25,13 @@ framework:
             limit: 10
             interval: '1 minute'
             cache_pool: cache.rate_limiter
+        chat_per_user:
+            policy: 'token_bucket'
+            limit: 30
+            rate: { interval: '1 hour', amount: 30 }
+            cache_pool: cache.rate_limiter
+        chat_global_quota:
+            policy: 'fixed_window'
+            limit: 1500
+            interval: '1 day'
+            cache_pool: cache.rate_limiter

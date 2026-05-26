@@ -542,6 +542,42 @@ function run_reverse_proxy_password() {
     printf '%s%s' '→ Traefik picks up the new file automatically (file provider watch=true).' $'\n'
 }
 
+function run_chat_jwt_secret() {
+    local secret
+    # 256-bit (32-byte) entropy, URL-safe base64 (no padding, no slashes).
+    secret=$(openssl rand -base64 32 | tr -d '\n=+/' | head -c 43)
+
+    if [ -z "${secret}" ]; then
+        printf '✗ Failed to generate API_JWT_SECRET%s' $'\n' 1>&2
+        return 1
+    fi
+
+    printf '%s%s' '✓ Generated a fresh API_JWT_SECRET (43 URL-safe chars, 256-bit entropy):' $'\n'
+    printf '%s%s' '' $'\n'
+    printf '  API_JWT_SECRET=%s%s' "${secret}" $'\n'
+    printf '%s%s' '' $'\n'
+    printf '%s%s' '→ Paste the SAME line into:' $'\n'
+    printf '%s%s' '    1. org.revue-de-presse.api/.env.local      (the verifier)' $'\n'
+    printf '%s%s' '    2. org.revue-de-presse.benchmark/nuxt/.env (the signer, local dev)' $'\n'
+    printf '%s%s' '    3. Netlify env vars for the Nuxt site      (the signer, prod)' $'\n'
+    printf '%s%s' '' $'\n'
+    printf '%s%s' '⚠  Rotating invalidates every active chat session. Deploy API first, Nuxt second.' $'\n'
+}
+
+function run_chat_embed_snapshots() {
+    local args="${1:-}"
+    # Delegate to bin/console inside the running app container so the command
+    # sees the configured Doctrine connection, Redis cache, and Symfony AI bundle.
+    local container
+    container=$(docker ps -a --format '{{.ID}} {{.Names}}' | awk '/api[-]service/ { print $1; exit }')
+    if [ -z "${container}" ]; then
+        printf '✗ No running api-service container; run `make start` first.%s' $'\n' 1>&2
+        return 1
+    fi
+    # shellcheck disable=SC2086
+    docker exec -ti "${container}" bin/console chat:embed-snapshots ${args}
+}
+
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 

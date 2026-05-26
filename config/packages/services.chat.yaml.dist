@@ -1,0 +1,51 @@
+# Chat module — bundle-dependent wiring.
+#
+# Rename to `services.chat.yaml` AFTER running:
+#   composer require symfony/ai-bundle symfony/ai-platform \
+#                    symfony/ai-store symfony/chat firebase/php-jwt
+#
+# Then import it from config/services.yaml or just leave it in
+# config/packages/ where the framework loads every *.yaml automatically.
+#
+# The service ids below (`@ai.indexer.chat_publications`,
+# `@ai.retriever.chat_publications`, `@ai.platform.failover.chat_default`)
+# are best-guess based on the public symfony/ai-bundle docs. Verify against
+# `bin/console debug:container ai.` after composer install; update if the
+# bundle exposes different ids.
+
+services:
+    App\Chat\Application\Port\PublicationEmbedder:
+        alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationEmbedder
+
+    App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationEmbedder:
+        arguments:
+            $indexer: '@ai.indexer.chat_publications'
+
+    App\Chat\Application\Port\PublicationRetriever:
+        alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever
+    App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever:
+        arguments:
+            $retriever: '@ai.retriever.chat_publications'
+
+    App\Chat\Application\Port\ChatStreamer:
+        alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer
+    App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer:
+        arguments:
+            $platform: '@ai.platform.failover.chat_default'
+            $model: 'mistral-small-latest'
+
+    App\Chat\Application\RunChatTurn:
+        arguments:
+            $chatPerUserLimiter:     '@limiter.chat_per_user'
+            $chatGlobalQuotaLimiter: '@limiter.chat_global_quota'
+
+    App\Chat\Infrastructure\ApiPlatform\State\RunChatTurnProcessor:
+        tags: ['api_platform.state_processor']
+
+    App\Chat\Infrastructure\Security\BlueskyJwtAuthenticator:
+        arguments:
+            $sharedSecret: '%env(string:API_JWT_SECRET)%'
+
+    App\Chat\Infrastructure\Console\EmbedSnapshotsCommand:
+        arguments:
+            $snapshotReader: '@App\NewsReview\Domain\Snapshot\SnapshotReader'

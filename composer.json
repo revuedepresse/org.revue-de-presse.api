@@ -65,7 +65,12 @@
         "symfony/var-dumper": "^7.4",
         "symfony/var-exporter": "^7.4",
         "symfony/yaml": "^7.4",
-        "twig/cssinliner-extra": "^3"
+        "twig/cssinliner-extra": "^3",
+        "symfony/ai-platform": "^0.9",
+        "symfony/ai-store": "^0.9",
+        "symfony/ai-bundle": "^0.9",
+        "symfony/chat": "^0.9",
+        "firebase/php-jwt": "^6.10"
     },
     "require-dev": {
         "phpspec/prophecy-phpunit": "^2.0",

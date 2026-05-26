@@ -1,0 +1,143 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Tests\Chat\Domain\Query;
+
+use App\Chat\Domain\Query\QueryFilterExtractor;
+use PHPUnit\Framework\TestCase;
+
+final class QueryFilterExtractorTest extends TestCase
+{
+    private const FIXED_NOW = '2026-05-26 10:00:00';
+
+    private QueryFilterExtractor $extractor;
+
+    protected function setUp(): void
+    {
+        $this->extractor = new QueryFilterExtractor(
+            new \DateTimeImmutable(self::FIXED_NOW, new \DateTimeZone('Europe/Paris')),
+        );
+    }
+
+    public function testExtractsLeMondeOutlet(): void
+    {
+        $filters = $this->extractor->extract('Que disait Le Monde sur la réforme ?');
+        self::assertSame(['lemonde.fr'], $filters->screenNames);
+    }
+
+    public function testExtractsMultipleOutlets(): void
+    {
+        $filters = $this->extractor->extract('Compare Le Monde et Libération sur le sujet');
+        $names = $filters->screenNames;
+        sort($names);
+        self::assertSame(['lemonde.fr', 'liberation.fr'], $names);
+    }
+
+    public function testIsAccentInsensitive(): void
+    {
+        $filters = $this->extractor->extract("L'humanité a-t-il publié ?");
+        self::assertSame(['humanite.fr'], $filters->screenNames);
+    }
+
+    public function testExtractsYesterday(): void
+    {
+        $filters = $this->extractor->extract('Qu’est-ce qui était en tête hier ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2026-05-25', $filters->dateRange->from->format('Y-m-d'));
+    }
+
+    public function testExtractsMonthAndYear(): void
+    {
+        $filters = $this->extractor->extract('Quelle couverture en mars 2025 ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertNotNull($filters->dateRange->to);
+        self::assertSame('2025-03-01', $filters->dateRange->from->format('Y-m-d'));
+        self::assertSame('2025-03-31', $filters->dateRange->to->format('Y-m-d'));
+    }
+
+    public function testExtractsBareMonthDefaultsToCurrentYear(): void
+    {
+        $filters = $this->extractor->extract('Les unes de mars étaient comment ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2026-03-01', $filters->dateRange->from->format('Y-m-d'));
+    }
+
+    public function testExtractsLastMonth(): void
+    {
+        $filters = $this->extractor->extract('Que s’est-il passé le mois dernier ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2026-04-01', $filters->dateRange->from->format('Y-m-d'));
+        self::assertNotNull($filters->dateRange->to);
+        self::assertSame('2026-04-30', $filters->dateRange->to->format('Y-m-d'));
+    }
+
+    public function testUnknownLanguageReturnsEmptyFilters(): void
+    {
+        $filters = $this->extractor->extract('Какие новости вчера были?');
+        self::assertTrue($filters->isEmpty());
+    }
+
+    public function testLeMondeDiplomatiqueResolvesToDiplo(): void
+    {
+        $filters = $this->extractor->extract('Que disait Le Monde diplomatique ?');
+        self::assertContains('monde-diplomatique.fr', $filters->screenNames);
+    }
+
+    public function testLesEchosResolvesToBskyHandle(): void
+    {
+        $filters = $this->extractor->extract('Que disaient Les Échos ?');
+        self::assertSame(['lesechosfr.bsky.social'], $filters->screenNames);
+    }
+
+    public function testCanonicalScreenNamesMatchesBskyManifest(): void
+    {
+        // Keep CANONICAL_SCREEN_NAMES in sync with `get_authors_feeds` in
+        // deployer/.maintaining/org.revue-de-presse.bsky.sh — that script is
+        // the source of truth for which outlets the project tracks.
+        $expected = [
+            'afp.com',
+            'bfmtv.com',
+            'blast-info.fr',
+            'challengesfr.bsky.social',
+            'charliehebdo.fr',
+            'courrierinter.bsky.social',
+            'franceculture.fr',
+            'france24.com',
+            'humanite.fr',
+            'la-croix.com',
+            'lavoixdunord.fr',
+            'lefigaro.fr',
+            'lecanardenchaine.fr',
+            'lemonde.fr',
+            'afrique.lemonde.fr',
+            'lepoint.fr',
+            'lesechosfr.bsky.social',
+            'lesjours.fr',
+            'liberation.fr',
+            'mediapart.fr',
+            'monde-diplomatique.fr',
+            'nouvelobs.com',
+            'ouest-france.fr',
+            'pixelsfr.bsky.social',
+            'rfi.fr',
+            'telerama.bsky.social',
+        ];
+        self::assertSame($expected, \App\Chat\Domain\Query\QueryFilterExtractor::CANONICAL_SCREEN_NAMES);
+
+        $aliasTargets = array_unique(array_values((function (): array {
+            $r = new \ReflectionClass(\App\Chat\Domain\Query\QueryFilterExtractor::class);
+            $c = $r->getReflectionConstant('OUTLETS');
+            self::assertNotFalse($c);
+
+            return $c->getValue();
+        })()));
+        sort($aliasTargets);
+        $canonical = $expected;
+        sort($canonical);
+        self::assertSame(
+            $canonical,
+            $aliasTargets,
+            'Every alias must resolve to a canonical screen_name, and every canonical screen_name must have at least one alias.',
+        );
+    }
+}

@@ -1,0 +1,26 @@
+# Symfony AI initiative wiring (pre-1.0, experimental).
+# Mistral primary, Google Gemini fallback, both OpenAI-compatible.
+# PostgresStore co-located with the application database for hybrid retrieval.
+ai:
+    platform:
+        mistral:
+            api_key: '%env(MISTRAL_API_KEY)%'
+        google:
+            api_key: '%env(GEMINI_API_KEY)%'
+        failover:
+            chat_default:
+                providers: ['mistral', 'google']
+
+    store:
+        postgres:
+            chat_publications:
+                dsn: '%env(DATABASE_URL)%'
+                table: 'chat_publication_embedding'
+                vector_field: 'embedding'
+                vector_dimensions: 1024
+
+    indexer:
+        chat_publications:
+            store: chat_publications
+            platform: mistral
+            model: 'mistral-embed'

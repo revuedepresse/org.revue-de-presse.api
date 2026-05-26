@@ -1,0 +1,30 @@
+# Chat firewall — referenced from security.yaml after composer install.
+#
+# Rename to `security.chat.yaml` after running:
+#   composer require firebase/php-jwt symfony/ai-bundle ...
+#
+# These two blocks merge into the active security config — the framework
+# concatenates all *.yaml files under config/packages/.
+
+security:
+    firewalls:
+        chat:
+            pattern: ^/api/chat
+            stateless: true
+            custom_authenticators:
+                - App\Chat\Infrastructure\Security\BlueskyJwtAuthenticator
+
+when@prod:
+    security:
+        access_control:
+            - { path: ^/api/chat, role: ROLE_BSKY_USER }
+
+when@dev:
+    security:
+        access_control:
+            - { path: ^/api/chat, role: ROLE_BSKY_USER }
+
+when@test:
+    security:
+        access_control:
+            - { path: ^/api/chat, role: ROLE_BSKY_USER }

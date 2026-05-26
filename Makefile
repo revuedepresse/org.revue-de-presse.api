@@ -4,7 +4,8 @@ SHELL:=/bin/bash
         bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
         php-worker-build php-worker-start php-worker-stop php-worker-logs \
         reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
-        start-benchmark-stack stop-benchmark-stack restart-benchmark-stack
+        start-benchmark-stack stop-benchmark-stack restart-benchmark-stack \
+        chat-jwt-secret chat-embed-snapshots
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -98,6 +99,12 @@ reverse-proxy-stop: ## Stop the reverse-proxy container (kept around for log ins
 
 reverse-proxy-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
 	@/bin/bash -c 'source fun.sh && run_reverse_proxy_password "${TRAEFIK_USER:-admin}"'
+
+chat-jwt-secret: ## Generate a fresh 256-bit API_JWT_SECRET; print to stdout (does NOT touch any .env)
+	@/bin/bash -c 'source fun.sh && run_chat_jwt_secret'
+
+chat-embed-snapshots: ## Embed snapshots into pgvector via `bin/console chat:embed-snapshots $(ARGS)`
+	@/bin/bash -c 'source fun.sh && run_chat_embed_snapshots "$(ARGS)"'
 
 start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed) and start the full benchmark stack (php-worker + reverse-proxy)
 	@printf '✅ Benchmark stack up — php-worker + reverse-proxy detached.%s' $$'\n'
