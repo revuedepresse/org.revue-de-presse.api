@@ -6,10 +6,21 @@ namespace App\Chat\Infrastructure\Symfony\Ai;
 use App\Chat\Application\Port\PublicationRetriever;
 use App\Chat\Domain\Query\QueryFilters;
 use App\Chat\Domain\Retrieval\RetrievedHit;
-use Symfony\AI\Store\RetrieverInterface;
+use Symfony\AI\Store\Document\VectorizerInterface;
+use Symfony\AI\Store\Query\VectorQuery;
+use Symfony\AI\Store\StoreInterface;
 
 /**
- * Adapter over symfony/ai-store's Retriever (vectorize query → PostgresStore::query()).
+ * Adapter over symfony/ai-store's PostgresStore — vectorise the query with
+ * our chat-publications vectorizer, then run a VectorQuery against pgvector.
+ *
+ * Why we *don't* use the bundle's `ai.retriever.chat_publications`: when the
+ * store advertises both VectorQuery and HybridQuery support, the Retriever
+ * auto-picks HybridQuery (semanticRatio=0.5). The hybrid path requires a
+ * `tsvector` column in the schema, which our `vector + cosine` setup doesn't
+ * declare. The hybrid SQL returns zero rows silently — same symptom as the
+ * embedding being bad, but the embedding is fine. Going store-direct keeps us
+ * on the vector path.
  *
  * The bundle's PostgresStore::query() accepts `$options['limit']`; richer
  * metadata-JSONB filters aren't part of the public schema in v0.9, so we
@@ -19,14 +30,19 @@ use Symfony\AI\Store\RetrieverInterface;
  */
 final class SymfonyAiPublicationRetriever implements PublicationRetriever
 {
-    public function __construct(private readonly RetrieverInterface $retriever)
-    {
+    public function __construct(
+        private readonly StoreInterface $store,
+        private readonly VectorizerInterface $vectorizer,
+    ) {
     }
 
     public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
     {
         $fetchLimit = $filters->isEmpty() ? $k : $k * 4;
-        $documents = $this->retriever->retrieve($cleanedQuery, ['limit' => $fetchLimit]);
+        // VectorizerInterface::vectorize() returns a Vector for a string
+        // input (its declared return type narrows on the input shape).
+        $vector = $this->vectorizer->vectorize($cleanedQuery);
+        $documents = $this->store->query(new VectorQuery($vector), ['limit' => $fetchLimit]);
 
         $hits = [];
         foreach ($documents as $document) {

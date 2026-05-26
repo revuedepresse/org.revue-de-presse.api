@@ -38,14 +38,25 @@ services:
         alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever
     App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever:
         arguments:
-            $retriever: '@ai.retriever.chat_publications'
+            # Store + vectorizer injected directly so we craft a VectorQuery
+            # ourselves — see the class doc-block for why we bypass
+            # `ai.retriever.chat_publications` (HybridQuery auto-pick = 0 rows).
+            $store: '@ai.store.postgres.chat_publications'
+            $vectorizer: '@ai.vectorizer.chat_publications'
 
     App\Chat\Application\Port\ChatStreamer:
         alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer
     App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer:
         arguments:
-            $platform: '@ai.platform.failover.chat_default'
-            $model: 'mistral-small-latest'
+            # Self-hosted via Ollama. Default `gemma2:2b` (~1.6 GB) fits
+            # a default Docker Desktop VM alongside the bge-m3 embedding
+            # model. Swap to `gemma2:9b` (~5.4 GB) for higher answer
+            # quality — but FIRST bump Docker Desktop's VM memory to
+            # 12 GB+ and the ollama service's mem_limit accordingly,
+            # otherwise the llama runner OOM-kills and Ollama returns
+            # 500. Both sizes are registered in OllamaModelCatalog.
+            $platform: '@ai.platform.generic.ollama'
+            $model: 'gemma2:2b'
 
     App\Chat\Application\RunChatTurn:
         arguments:

@@ -685,6 +685,33 @@ function run_chat_embeddings_shell() {
     _chat_embeddings_compose exec ollama /bin/sh
 }
 
+# Pull the chat-completion model into the same ollama container that
+# already hosts the embedding model. Idempotent: `ollama pull` no-ops if
+# the model is already cached in the named volume. The container itself
+# is brought up by the `chat-embeddings-start` make prerequisite, so this
+# function assumes ollama is already running.
+function run_chat_completion_start() {
+    # Defaults to gemma2:2b — fits a default Docker Desktop VM. Override
+    # to gemma2:9b (and bump ollama mem_limit + Docker VM RAM) for
+    # higher-quality answers on a beefier dev box.
+    local model="${OLLAMA_COMPLETION_MODEL:-gemma2:2b}"
+
+    printf '→ Ensuring chat-completion model "%s" is downloaded (no-op if cached)…%s' "${model}" $'\n'
+    _chat_embeddings_compose exec -T ollama ollama pull "${model}"
+
+    # Pre-load the model into RAM. Without this, the FIRST user question
+    # pays a ~30-60s cold-load penalty before any token streams back —
+    # which usually blows past PHP's max_execution_time and the user sees
+    # `providers_exhausted` from the dropped SSE connection. Ollama then
+    # keeps the model resident for ~5 minutes after the last call
+    # (configurable via OLLAMA_KEEP_ALIVE on the container).
+    printf '→ Warming up "%s" (loads weights into RAM; first user-turn latency drops from ~60s to ~1s)…%s' "${model}" $'\n'
+    _chat_embeddings_compose exec -T ollama ollama run "${model}" 'Réponds uniquement "OK".' >/dev/null 2>&1 || \
+        printf '⚠ warmup query failed — the model is downloaded but first chat turn will be slow.%s' $'\n' 1>&2
+
+    printf '✓ "%s" ready and warm. ~6 GB resident; ~30-60s per turn on CPU after warmup.%s' "${model}" $'\n'
+}
+
 function _chat_api_container() {
     docker ps -a --format '{{.ID}} {{.Names}}' | awk '/api[-]service/ { print $1; exit }'
 }

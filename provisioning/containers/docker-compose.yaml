@@ -170,8 +170,13 @@ services:
             - '11434'
         volumes:
             - '../volumes/ollama:/root/.ollama'
-        # bge-m3 footprint at idle is ~1.5 GB; under load ~2.5 GB. Set a
-        # ceiling so a runaway request can't OOM the whole dev box.
+        # Both models live simultaneously when the chat is hot:
+        #   bge-m3        ~1.5 GB at idle (embeddings)
+        #   gemma2:2b     ~1.6 GB at idle, ~2.5 GB serving (default LLM)
+        #   gemma2:9b     ~5.4 GB at idle, ~6 GB serving (opt-in LLM)
+        # 4 GB fits the 2b default with headroom. Bump to 10 GB AND
+        # raise Docker Desktop's VM RAM to 12 GB+ when switching to 9b,
+        # otherwise the llama runner is OOM-killed and chat 500s.
         mem_limit: '4g'
         healthcheck:
             test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']

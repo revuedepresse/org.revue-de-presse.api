@@ -36,6 +36,15 @@ final class RunChatTurnProcessor implements ProcessorInterface
             throw new UnauthorizedHttpException('Bearer', 'Bluesky JWT required');
         }
 
+        // SSE-style streamed completions can run for minutes on CPU-only
+        // self-hosted models (gemma2:9b cold-loads in ~30-60s on the first
+        // request, then streams at a few tokens/sec). PHP's default 30s
+        // max_execution_time kills the process mid-stream, the browser
+        // sees the connection drop, and useChat.ts surfaces it as
+        // `providers_exhausted`. Set per-request — never globally, since
+        // the rest of the API stays on the strict default.
+        set_time_limit(300);
+
         $did = $user->did;
         $conversationId = $data->conversationId;
         $userMessage = $data->userMessage;

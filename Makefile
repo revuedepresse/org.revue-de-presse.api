@@ -7,7 +7,7 @@ SHELL:=/bin/bash
         start-benchmark-stack stop-benchmark-stack restart-benchmark-stack \
         chat-jwt-secret chat-embed-snapshots chat-store-setup chat-store-reset \
         chat-embeddings-build chat-embeddings-start chat-embeddings-stop \
-        chat-embeddings-shell chat-cache-clear \
+        chat-embeddings-shell chat-completion-start chat-cache-clear \
         chat-cron-install chat-cron-uninstall
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
@@ -126,6 +126,9 @@ chat-embeddings-stop: ## Stop the ollama container (volume + model cache preserv
 
 chat-embeddings-shell: ## Open an interactive shell inside the ollama container (e.g. for `ollama list`)
 	@/bin/bash -c 'source fun.sh && run_chat_embeddings_shell'
+
+chat-completion-start: chat-embeddings-start ## Ensure the chat-completion model is loaded + warmed in ollama (default gemma2:2b; override via OLLAMA_COMPLETION_MODEL=gemma2:9b)
+	@/bin/bash -c 'source fun.sh && run_chat_completion_start'
 
 chat-cache-clear: ## Wipe the api-service Symfony cache (use after editing ai.yaml / services.chat.yaml — --no-debug doesn't auto-invalidate)
 	@/bin/bash -c 'source fun.sh && run_chat_cache_clear'

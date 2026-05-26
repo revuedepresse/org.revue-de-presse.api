@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Chat\Infrastructure\Symfony\Ai;
 
+use Symfony\AI\Platform\Bridge\Generic\CompletionsModel;
 use Symfony\AI\Platform\Bridge\Generic\EmbeddingsModel;
 use Symfony\AI\Platform\Capability;
 use Symfony\AI\Platform\ModelCatalog\AbstractModelCatalog;
@@ -36,6 +37,24 @@ final class OllamaModelCatalog extends AbstractModelCatalog
             'nomic-embed-text' => [
                 'class' => EmbeddingsModel::class,
                 'capabilities' => [Capability::INPUT_TEXT, Capability::EMBEDDINGS],
+            ],
+            // Chat completion. Both Gemma 2 sizes registered so swapping
+            // is a single edit in services.chat.yaml (`$model: gemma2:2b`
+            // vs `$model: gemma2:9b`).
+            //
+            // gemma2:2b — ~1.6 GB at idle, fits a default Docker Desktop
+            //   VM with bge-m3 also loaded. Default in services.chat.yaml.
+            // gemma2:9b — ~5.4 GB at idle. Needs ~10 GB container RAM
+            //   total (with bge-m3); bump Docker Desktop's VM memory to
+            //   12 GB+ before switching, otherwise the llama runner gets
+            //   OOM-killed and Ollama returns 500.
+            'gemma2:2b' => [
+                'class' => CompletionsModel::class,
+                'capabilities' => [Capability::INPUT_MESSAGES, Capability::OUTPUT_TEXT, Capability::OUTPUT_STREAMING],
+            ],
+            'gemma2:9b' => [
+                'class' => CompletionsModel::class,
+                'capabilities' => [Capability::INPUT_MESSAGES, Capability::OUTPUT_TEXT, Capability::OUTPUT_STREAMING],
             ],
         ];
     }

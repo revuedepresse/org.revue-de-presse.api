@@ -10,7 +10,10 @@ use PHPUnit\Framework\TestCase;
 use Symfony\AI\Platform\Vector\Vector;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\VectorDocument;
-use Symfony\AI\Store\RetrieverInterface;
+use Symfony\AI\Store\Document\VectorizerInterface;
+use Symfony\AI\Store\Query\QueryInterface;
+use Symfony\AI\Store\Query\VectorQuery;
+use Symfony\AI\Store\StoreInterface;
 
 final class SymfonyAiPublicationRetrieverTest extends TestCase
 {
@@ -27,7 +30,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
                 'likes' => 169,
             ],
         );
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
         $hits = $retriever->retrieve('q', 8, new QueryFilters());
 
@@ -49,7 +52,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
             $this->vectorDocument(id: 'p2', score: 0.8, metadata: ['screen_name' => 'mediapart.fr', 'snapshot_date' => '2025-03-04']),
             $this->vectorDocument(id: 'p3', score: 0.7, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04']),
         ];
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever($docs));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore($docs), new StaticVectorizer());
 
         $filters = new QueryFilters(screenNames: ['lemonde.fr']);
         $hits = $retriever->retrieve('q', 8, $filters);
@@ -64,7 +67,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
             $this->vectorDocument(id: 'p-inside', score: 0.85, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-15']),
             $this->vectorDocument(id: 'p-too-new', score: 0.8, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-04-01']),
         ];
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever($docs));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore($docs), new StaticVectorizer());
 
         $filters = new QueryFilters(dateRange: new DateRange(
             from: new \DateTimeImmutable('2025-03-01'),
@@ -86,8 +89,8 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
                 metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04'],
             );
         }
-        $upstream = new ArrayRetriever($docs);
-        $retriever = new SymfonyAiPublicationRetriever($upstream);
+        $upstream = new ArrayStore($docs);
+        $retriever = new SymfonyAiPublicationRetriever($upstream, new StaticVectorizer());
 
         // No filter: limit=k=2.
         $retriever->retrieve('q', 2, new QueryFilters());
@@ -96,6 +99,20 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         // With filter: limit=4k=8.
         $retriever->retrieve('q', 2, new QueryFilters(screenNames: ['lemonde.fr']));
         self::assertSame(8, $upstream->lastLimit);
+    }
+
+    public function testStoreReceivesAVectorQueryNotAHybridQuery(): void
+    {
+        // Regression: the bundle's Retriever auto-picks HybridQuery when the
+        // store supports it, which on our schema returns 0 rows (no tsvector
+        // column). We bypass the Retriever and craft the VectorQuery
+        // ourselves — this test pins the query class actually issued.
+        $store = new ArrayStore([]);
+        $retriever = new SymfonyAiPublicationRetriever($store, new StaticVectorizer());
+
+        $retriever->retrieve('macron', 4, new QueryFilters());
+
+        self::assertInstanceOf(VectorQuery::class, $store->lastQuery);
     }
 
     public function testMetadataPublicationIdTakesPrecedenceOverRowId(): void
@@ -113,7 +130,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
                 'snapshot_date' => '2025-03-04',
             ],
         );
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
         $hits = $retriever->retrieve('q', 1, new QueryFilters());
 
@@ -132,7 +149,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
                 'snapshot_date' => '2025-03-04',
             ],
         );
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
         $hits = $retriever->retrieve('q', 1, new QueryFilters());
 
@@ -142,7 +159,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
     public function testNullScoreYieldsDistanceOne(): void
     {
         $doc = $this->vectorDocument(id: 'p1', score: null, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04']);
-        $retriever = new SymfonyAiPublicationRetriever(new ArrayRetriever([$doc]));
+        $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
         $hits = $retriever->retrieve('q', 1, new QueryFilters());
 
@@ -164,20 +181,46 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
 }
 
 /** @internal */
-final class ArrayRetriever implements RetrieverInterface
+final class ArrayStore implements StoreInterface
 {
     public ?int $lastLimit = null;
+    public ?QueryInterface $lastQuery = null;
 
     /** @param list<VectorDocument> $documents */
     public function __construct(private readonly array $documents)
     {
     }
 
-    public function retrieve(string $query, array $options = []): iterable
+    public function add(VectorDocument|array $documents): void
     {
+        throw new \BadMethodCallException('not used in tests');
+    }
+
+    public function remove(string|array $ids, array $options = []): void
+    {
+        throw new \BadMethodCallException('not used in tests');
+    }
+
+    public function query(QueryInterface $query, array $options = []): iterable
+    {
+        $this->lastQuery = $query;
         $this->lastLimit = isset($options['limit']) && is_int($options['limit']) ? $options['limit'] : null;
         $limit = $this->lastLimit ?? \PHP_INT_MAX;
 
         return \array_slice($this->documents, 0, $limit);
+    }
+
+    public function supports(string $queryClass): bool
+    {
+        return $queryClass === VectorQuery::class;
+    }
+}
+
+/** @internal Static 1-element vector — the retriever doesn't care what it contains. */
+final class StaticVectorizer implements VectorizerInterface
+{
+    public function vectorize(string|\Stringable|\Symfony\AI\Store\Document\EmbeddableDocumentInterface|array $values, array $options = []): Vector
+    {
+        return new Vector([0.0]);
     }
 }

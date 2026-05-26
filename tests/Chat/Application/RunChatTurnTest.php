@@ -151,6 +151,58 @@ final class RunChatTurnTest extends TestCase
         self::assertSame('Une réponse ', $assistantTurns[0]->content());
     }
 
+    public function testStreamerCompletingWithoutAnyTokenEmitsProvidersExhausted(): void
+    {
+        // Regression: the Symfony AI generic bridge yields zero deltas (no
+        // exception) when the upstream returns 500 with no body — typical
+        // of Ollama OOMing during model load. We must NOT persist an empty
+        // assistant turn (it poisons the next turn via the `content: null`
+        // serialization quirk) and must surface the failure to the client.
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $use_case = $this->makeUseCase(
+            $conversations,
+            $turns,
+            new ArrayRetriever([]),
+            new ScriptedStreamer([]), // ← yields nothing, throws nothing
+        );
+
+        $events = iterator_to_array($use_case('did:plc:user', 'Hello'));
+
+        self::assertSame('error', end($events)->type);
+        self::assertSame('providers_exhausted', end($events)->data['code']);
+        // Only the user turn — no empty assistant turn must be persisted.
+        self::assertCount(1, $turns->appended);
+        self::assertSame(ConversationTurn::ROLE_USER, $turns->appended[0]->role());
+    }
+
+    public function testHistoryWithEmptyContentTurnIsDroppedBeforeStreaming(): void
+    {
+        // Regression: the Symfony AI AssistantMessageNormalizer serializes
+        // empty assistant content as `content: null`, which Ollama rejects
+        // with `invalid message content type: <nil>`. RunChatTurn must
+        // never forward such turns to the streamer (defensive — empty
+        // turns can leak in from partially-failed prior runs).
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $conversation = $conversations->openOrCreateFor('did:plc:user');
+
+        // Pre-existing history: one legit user/assistant pair, then a
+        // broken assistant turn with empty content from an earlier failure.
+        $turns->append(new ConversationTurn($conversation, ConversationTurn::ROLE_USER, 'Previous question'));
+        $turns->append(new ConversationTurn($conversation, ConversationTurn::ROLE_ASSISTANT, 'Previous answer'));
+        $turns->append(new ConversationTurn($conversation, ConversationTurn::ROLE_ASSISTANT, '   '));
+
+        $capture = new MessageCapturingStreamer(['ok']);
+        $use_case = $this->makeUseCase($conversations, $turns, new ArrayRetriever([]), $capture);
+
+        iterator_to_array($use_case('did:plc:user', 'New question', (string) $conversation->id()));
+
+        $forwardedContents = array_map(static fn (array $m): string => $m['content'], $capture->lastMessages);
+        self::assertNotContains('   ', $forwardedContents, 'empty-content turn must be filtered out');
+        self::assertNotContains('', $forwardedContents);
+    }
+
     public function testRetrieverFailureEmitsProvidersExhaustedAndDoesNotInvokeStreamer(): void
     {
         // Regression: when the query-embedding call (mistral-embed) rate-limits
@@ -352,6 +404,28 @@ final class ScriptedStreamer implements ChatStreamer
     {
         return $this->completionTokens;
     }
+}
+
+/** @internal Records the messages array passed to stream() for assertions. */
+final class MessageCapturingStreamer implements ChatStreamer
+{
+    /** @var list<array{role: string, content: string}> */
+    public array $lastMessages = [];
+
+    /** @param list<string> $tokens */
+    public function __construct(private readonly array $tokens) {}
+
+    public function stream(array $messages): iterable
+    {
+        $this->lastMessages = $messages;
+        foreach ($this->tokens as $token) {
+            yield $token;
+        }
+    }
+
+    public function lastProvider(): string { return 'capture'; }
+    public function lastPromptTokens(): ?int { return null; }
+    public function lastCompletionTokens(): ?int { return null; }
 }
 
 /** @internal Always rejects consume() — for rate-limit branch tests. */

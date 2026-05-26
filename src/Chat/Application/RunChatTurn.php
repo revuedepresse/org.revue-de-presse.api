@@ -116,6 +116,14 @@ class RunChatTurn
             if ($past->id()->equals($userTurn->id())) {
                 continue;
             }
+            // Skip empty-content turns. The Symfony AI AssistantMessageNormalizer
+            // serializes empty text as `content: null` for OpenAI tool-call
+            // compatibility — Ollama (and stricter OpenAI-compat servers)
+            // reject those with `invalid message content type: <nil>`. Empty
+            // turns can appear in the DB after partially-failed earlier runs.
+            if (trim($past->content()) === '') {
+                continue;
+            }
             $messages[] = ['role' => $past->role(), 'content' => $past->content()];
         }
         $messages[] = ['role' => 'user', 'content' => $this->promptBuilder->buildUserMessage($cleaned, $hits)];
@@ -147,6 +155,22 @@ class RunChatTurn
 
                 return;
             }
+        }
+
+        // The Symfony AI generic bridge swallows non-2xx upstream responses
+        // (e.g. Ollama OOMing on model load returns 500 with no body) and
+        // yields zero deltas instead of raising. Without this guard, we'd
+        // persist an empty assistant turn — which then breaks the *next*
+        // chat turn because the bridge serializes empty assistant content
+        // as `content: null` and Ollama rejects it with
+        // `invalid message content type: <nil>`.
+        if (!$firstTokenSeen) {
+            $this->logger->error('chat.stream.empty', [
+                'provider' => $this->streamer->lastProvider(),
+            ]);
+            yield SseEvent::error('providers_exhausted');
+
+            return;
         }
 
         $citedIds = $this->citationExtractor->extract($accumulator, $hits);
