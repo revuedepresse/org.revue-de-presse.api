@@ -106,6 +106,9 @@ chat-jwt-secret: ## Generate a fresh 256-bit API_JWT_SECRET; print to stdout (do
 chat-embed-snapshots: ## Embed snapshots into pgvector via `bin/console chat:embed-snapshots $(ARGS)`
 	@/bin/bash -c 'source fun.sh && run_chat_embed_snapshots "$(ARGS)"'
 
+chat-store-setup: ## Provision the pgvector publication-embedding store (idempotent)
+	@/bin/bash -c 'source fun.sh && run_chat_store_setup'
+
 start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed) and start the full benchmark stack (php-worker + reverse-proxy)
 	@printf '✅ Benchmark stack up — php-worker + reverse-proxy detached.%s' $$'\n'
 

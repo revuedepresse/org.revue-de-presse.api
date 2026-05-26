@@ -9,18 +9,18 @@ use App\Chat\Domain\Text\TextCleaner;
 use App\NewsReview\Domain\Model\HighlightDto;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
-use Symfony\AI\Store\Indexer;
+use Symfony\AI\Store\IndexerInterface;
 
 /**
- * Adapter wiring symfony/ai-store's Indexer (provider embeddings → PostgresStore)
- * to our PublicationEmbedder port. The `id` of each TextDocument is the
- * upstream publication_id (an at-proto URI); ON CONFLICT semantics mean re-runs
- * upsert by id.
+ * Adapter wiring symfony/ai-store's IndexerInterface (vectorizer →
+ * PostgresStore) to our PublicationEmbedder port. The `id` of each
+ * TextDocument is the upstream publication_id (an at-proto URI), so
+ * the underlying PostgresStore upserts by id on re-runs.
  */
 final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
 {
     public function __construct(
-        private readonly Indexer $indexer,
+        private readonly IndexerInterface $indexer,
         private readonly TextCleaner $textCleaner,
         private readonly PromptBuilder $promptBuilder,
     ) {
@@ -39,7 +39,7 @@ final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
             fn (HighlightDto $h): TextDocument => $this->toDocument($h),
             $highlights,
         );
-        $this->indexer->index(...$documents);
+        $this->indexer->index($documents);
     }
 
     private function toDocument(HighlightDto $h): TextDocument

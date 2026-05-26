@@ -127,10 +127,8 @@ services:
     App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
         tags: ['controller.service_arguments']
 
-    # Chat module — bundle-independent services only.
-    # Bundle-dependent wiring lives in doc/chat/templates/services.chat.yaml
-    # and is copied into config/packages/ once symfony/ai-bundle +
-    # firebase/php-jwt are installed (see doc/chat/post-install.md).
+    # Chat module — bundle-independent services here. Bundle-dependent
+    # wiring lives in config/packages/services.chat.yaml.
     App\Chat\Infrastructure\Repository\DoctrineConversationRepository: ~
     App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository: ~
 

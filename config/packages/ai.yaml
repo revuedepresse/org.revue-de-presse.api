@@ -1,0 +1,41 @@
+# Symfony AI initiative wiring (pre-1.0, experimental — pinned ^0.9).
+# Mistral primary, Google Gemini fallback. PostgresStore co-located with
+# the application database via the existing Doctrine DBAL connection.
+ai:
+    platform:
+        mistral:
+            api_key: '%env(MISTRAL_API_KEY)%'
+        gemini:
+            api_key: '%env(GEMINI_API_KEY)%'
+        failover:
+            chat_default:
+                platforms: ['ai.platform.mistral', 'ai.platform.gemini']
+                rate_limiter: limiter.chat_failover
+
+    store:
+        postgres:
+            chat_publications:
+                dbal_connection: doctrine.dbal.default_connection
+                table_name: chat_publication_embedding
+                vector_field: embedding
+                distance: cosine
+                setup_options:
+                    vector_type: vector
+                    vector_size: 1024
+                    index_method: hnsw
+                    index_opclass: vector_cosine_ops
+
+    vectorizer:
+        chat_publications:
+            platform: ai.platform.mistral
+            model: mistral-embed
+
+    indexer:
+        chat_publications:
+            store: ai.store.postgres.chat_publications
+            vectorizer: ai.vectorizer.chat_publications
+
+    retriever:
+        chat_publications:
+            store: ai.store.postgres.chat_publications
+            vectorizer: ai.vectorizer.chat_publications

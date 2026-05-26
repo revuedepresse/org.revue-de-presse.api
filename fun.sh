@@ -200,6 +200,7 @@ function install() {
     clear_cache_warmup --reuse-existing-container
 
     run_doctrine_migrations
+    run_chat_store_setup
 }
 
 function load_configuration_parameters() {
@@ -343,6 +344,36 @@ function run_doctrine_migrations() {
         /bin/bash -c 'bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration'
 
     printf '%s.%s' 'Finished applying Doctrine migrations' $'\n'
+}
+
+# Provision the pgvector-backed publication-embedding store owned by
+# symfony/ai-store (table + HNSW index). Idempotent: re-running against
+# an already-set-up store is a no-op. Skipped silently when the
+# symfony/ai-bundle isn't loaded yet (pre-`composer install`).
+function run_chat_store_setup() {
+    local PROJECT
+    local PROJECT_OWNER_UID
+    local PROJECT_OWNER_GID
+
+    load_configuration_parameters
+
+    printf '%s.%s' 'About to provision the Chat pgvector store (ai:store:setup chat_publications)' $'\n'
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        --user "${PROJECT_OWNER_UID}:${PROJECT_OWNER_GID}" \
+        -T app \
+        /bin/bash -c '
+            if bin/console list ai 2>/dev/null | grep -q "ai:store:setup"; then
+                bin/console ai:store:setup chat_publications --no-interaction
+            else
+                printf "✓ skipped: ai:store:setup not registered yet (symfony/ai-bundle not installed)\n"
+            fi
+        '
+
+    printf '%s.%s' 'Finished provisioning the Chat pgvector store' $'\n'
 }
 
 function run_bench_with_redis() {
@@ -571,7 +602,7 @@ function run_chat_embed_snapshots() {
     local container
     container=$(docker ps -a --format '{{.ID}} {{.Names}}' | awk '/api[-]service/ { print $1; exit }')
     if [ -z "${container}" ]; then
-        printf '✗ No running api-service container; run `make start` first.%s' $'\n' 1>&2
+        printf '✗ No running api-service container; run "make start" first.%s' $'\n' 1>&2
         return 1
     fi
     # shellcheck disable=SC2086

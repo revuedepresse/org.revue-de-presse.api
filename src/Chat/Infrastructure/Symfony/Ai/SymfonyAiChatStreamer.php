@@ -7,16 +7,14 @@ use App\Chat\Application\Port\ChatStreamer;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
+use Symfony\AI\Platform\TokenUsage\TokenUsage;
 
 /**
- * Adapter over symfony/ai-platform. The injected $platform is expected to be
- * the `FailoverPlatform` configured in ai.yaml (Mistral primary, Gemini
- * fallback). Fallback applies only before the first token is emitted —
- * mid-stream failures bubble out of `stream()`.
- *
- * v0.9 caveat: the exact MessageBag construction and `$result->getContent()`
- * iteration shape are inferred from the public symfony.com/doc samples. Verify
- * against the resolved package source at composer install time.
+ * Adapter over symfony/ai-platform. The injected $platform is expected
+ * to be the FailoverPlatform configured in ai.yaml (Mistral primary,
+ * Gemini fallback). Provider fallback applies only before the first
+ * token is emitted — once the stream starts, mid-stream errors bubble
+ * out of `stream()`.
  */
 final class SymfonyAiChatStreamer implements ChatStreamer
 {
@@ -41,20 +39,22 @@ final class SymfonyAiChatStreamer implements ChatStreamer
             };
         }
 
-        $result = $this->platform->invoke($this->model, $bag, ['stream' => true]);
+        $deferred = $this->platform->invoke($this->model, $bag, ['stream' => true]);
 
-        // TODO(v0.9-API-check): the result metadata API may differ.
-        $metadata = method_exists($result, 'getMetadata') ? $result->getMetadata() : null;
-        if ($metadata !== null) {
-            $this->lastProvider = $this->extractMeta($metadata, 'provider');
-            $promptTokens = $this->extractMeta($metadata, 'prompt_tokens');
-            $completionTokens = $this->extractMeta($metadata, 'completion_tokens');
-            $this->lastPromptTokens = is_numeric($promptTokens) ? (int) $promptTokens : null;
-            $this->lastCompletionTokens = is_numeric($completionTokens) ? (int) $completionTokens : null;
+        foreach ($deferred->asTextStream() as $delta) {
+            yield $delta->getText();
         }
 
-        foreach ($result->getContent() as $delta) {
-            yield (string) $delta;
+        // After the stream completes, DeferredResult promotes the StreamResult's
+        // metadata up onto itself (see DeferredResult::asStream finally block).
+        $metadata = $deferred->getMetadata();
+        $platformName = $metadata->get('platform');
+        $this->lastProvider = \is_string($platformName) ? $platformName : null;
+
+        $usage = $metadata->get(TokenUsage::class);
+        if ($usage instanceof TokenUsage) {
+            $this->lastPromptTokens = $usage->getPromptTokens();
+            $this->lastCompletionTokens = $usage->getCompletionTokens();
         }
     }
 
@@ -71,17 +71,5 @@ final class SymfonyAiChatStreamer implements ChatStreamer
     public function lastCompletionTokens(): ?int
     {
         return $this->lastCompletionTokens;
-    }
-
-    private function extractMeta(mixed $metadata, string $key): mixed
-    {
-        if (is_array($metadata)) {
-            return $metadata[$key] ?? null;
-        }
-        if (is_object($metadata) && method_exists($metadata, 'get')) {
-            return $metadata->get($key);
-        }
-
-        return null;
     }
 }

@@ -349,6 +349,66 @@
     "stella-maris/clock": {
         "version": "0.1.4"
     },
+    "symfony/ai-bundle": {
+        "version": "0.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "2be6ccd77335c2631fdf12d1680649b072efb8ad"
+        },
+        "files": [
+            "config/packages/ai.yaml"
+        ]
+    },
+    "symfony/ai-gemini-platform": {
+        "version": "0.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "a6953d134a46a78354003b4dddf682f03ef886b2"
+        },
+        "files": [
+            "config/packages/ai_gemini_platform.yaml"
+        ]
+    },
+    "symfony/ai-generic-platform": {
+        "version": "0.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "f38913b87380322d4c40c302b41626e811516bc4"
+        },
+        "files": [
+            "config/packages/ai_generic_platform.yaml"
+        ]
+    },
+    "symfony/ai-mistral-platform": {
+        "version": "0.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "2487d366905f51cc768093e51385be66c3d38f76"
+        },
+        "files": [
+            "config/packages/ai_mistral_platform.yaml"
+        ]
+    },
+    "symfony/ai-postgres-store": {
+        "version": "0.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.1",
+            "ref": "2dc03e717a268169c6cb88e260a4cc860ade3c94"
+        },
+        "files": [
+            "config/packages/ai_postgres_store.yaml"
+        ]
+    },
     "symfony/browser-kit": {
         "version": "5.1-dev"
     },
