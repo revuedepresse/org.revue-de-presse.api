@@ -35,10 +35,3 @@ framework:
             limit: 1500
             interval: '1 day'
             cache_pool: cache.rate_limiter
-        # Used by symfony/ai-failover-platform to back-off a failing platform
-        # before retrying. Per-platform, in-process.
-        chat_failover:
-            policy: 'sliding_window'
-            limit: 30
-            interval: '1 minute'
-            cache_pool: cache.rate_limiter

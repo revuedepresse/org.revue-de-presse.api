@@ -1,23 +1,22 @@
 # Symfony AI initiative wiring (pre-1.0, experimental — pinned ^0.9).
 #
-# Chat completions: Mistral primary, Google Gemini fallback (both paid
-# providers — small per-question traffic, well within free tiers).
+# Fully self-hosted via Ollama through the `generic` OpenAI-compatible
+# bridge — no third-party vendor calls, no rate limits, no per-token cost.
+# The Ollama container is gated behind the `embeddings` docker-compose
+# profile (see provisioning/containers/docker-compose.yaml) and
+# bootstrapped by `make chat-embeddings-start` (bge-m3 embeddings) and
+# `make chat-completion-start` (gemma2:9b chat completions).
 #
-# Query embeddings: self-hosted via Ollama through the `generic` OpenAI-
-# compatible bridge. Vendor-free; no rate limits; no per-token cost. The
-# Ollama container is gated behind the `embeddings` docker-compose profile
-# (see provisioning/containers/docker-compose.yaml) and bootstrapped by
-# `make chat-embeddings-setup`.
+# Two models share the one container:
+#   - bge-m3        — 1024-dim embeddings, multilingual, strong French
+#   - gemma2:9b     — chat completions, fluent French, ~30-60s/turn on CPU
+#
+# To re-enable Mistral/Gemini failover for chat completion: restore the
+# `mistral` / `gemini` platform blocks and a `failover.chat_default`
+# block, then swap services.chat.yaml's SymfonyAiChatStreamer $platform
+# back to `@ai.platform.failover.chat_default` with model `mistral-small-latest`.
 ai:
     platform:
-        mistral:
-            api_key: '%env(MISTRAL_API_KEY)%'
-        gemini:
-            api_key: '%env(GEMINI_API_KEY)%'
-        failover:
-            chat_default:
-                platforms: ['ai.platform.mistral', 'ai.platform.gemini']
-                rate_limiter: limiter.chat_failover
         generic:
             ollama:
                 # Sibling-container DNS — `ollama` resolves to the
@@ -28,7 +27,11 @@ ai:
                 # api_key but the YAML node demands a stringNode, so we pass
                 # a placeholder that Ollama happily ignores.
                 api_key: 'unused'
-                supports_completions: false
+                # Both endpoints enabled: /v1/embeddings (bge-m3) and
+                # /v1/chat/completions (gemma2:9b). OllamaModelCatalog
+                # classifies each model into the correct ModelClient.
+                supports_completions: true
+                supports_embeddings: true
                 # The bundle's FallbackModelCatalog only classifies a model
                 # as EmbeddingsModel if its name contains "embed" — bge-m3
                 # doesn't, so we register an explicit catalog. See
