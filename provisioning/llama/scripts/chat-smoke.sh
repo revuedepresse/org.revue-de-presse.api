@@ -97,7 +97,7 @@ echo "    ok: DI knows about ai.platform.generic.llama_chat"
 echo "==> [6/6] Symfony invoke: ai:platform:invoke ai.platform.generic.llama_chat $LLAMA_CHAT_MODEL"
 docker compose -f "$repo_root/provisioning/containers/docker-compose.yaml" \
     exec -T "$PHP_SERVICE" bin/console ai:platform:invoke \
-    ai.platform.generic.llama_chat "$LLAMA_CHAT_MODEL" "Réponds uniquement par OK." \
+    generic.llama_chat "$LLAMA_CHAT_MODEL" "Réponds uniquement par OK." \
     | tee /tmp/llama-smoke-invoke.out
 grep -qi 'OK' /tmp/llama-smoke-invoke.out
 echo "    ok: Symfony invoke round-trip succeeded"
