@@ -1,42 +1,31 @@
 # Symfony AI initiative wiring (pre-1.0, experimental — pinned ^0.9).
 #
-# Fully self-hosted via Ollama through the `generic` OpenAI-compatible
-# bridge — no third-party vendor calls, no rate limits, no per-token cost.
-# The Ollama container is gated behind the `embeddings` docker-compose
-# profile (see provisioning/containers/docker-compose.yaml) and
-# bootstrapped by `make chat-embeddings-start` (bge-m3 embeddings) and
-# `make chat-completion-start` (gemma2:9b chat completions).
+# Fully self-hosted via two host-native llama.cpp servers on the deploy
+# host. Each model gets its own process; PHP reaches them over the Docker
+# Desktop alias `host.docker.internal`:
+#   - llama_chat  → :8081 → Mistral-7B-Instruct-v0.3 (Q5_K_M, Metal)
+#   - llama_embed → :8082 → bge-m3 (FP16, Metal)
 #
-# Two models share the one container:
-#   - bge-m3        — 1024-dim embeddings, multilingual, strong French
-#   - gemma2:9b     — chat completions, fluent French, ~30-60s/turn on CPU
-#
-# To re-enable Mistral/Gemini failover for chat completion: restore the
-# `mistral` / `gemini` platform blocks and a `failover.chat_default`
-# block, then swap services.chat.yaml's SymfonyAiChatStreamer $platform
-# back to `@ai.platform.failover.chat_default` with model `mistral-small-latest`.
+# Lifecycle, plists, model download and smoke tests live under
+# provisioning/llama/. See provisioning/llama/README.md.
 ai:
     platform:
         generic:
-            ollama:
-                # Sibling-container DNS — `ollama` resolves to the
-                # docker-compose service of the same name. Override in
-                # .env.local if you point at a host-side Ollama.
-                base_url: '%env(default::OLLAMA_BASE_URL)%'
-                # Ollama doesn't require auth; the bridge accepts a null
-                # api_key but the YAML node demands a stringNode, so we pass
-                # a placeholder that Ollama happily ignores.
+            llama_chat:
+                base_url: '%env(default::LLAMA_CHAT_BASE_URL)%'
+                # llama-server doesn't require auth; the bridge accepts a
+                # null api_key but the YAML node demands a stringNode, so
+                # we pass a placeholder that llama-server happily ignores.
                 api_key: 'unused'
-                # Both endpoints enabled: /v1/embeddings (bge-m3) and
-                # /v1/chat/completions (gemma2:9b). OllamaModelCatalog
-                # classifies each model into the correct ModelClient.
                 supports_completions: true
+                supports_embeddings: false
+                model_catalog: App\Chat\Infrastructure\Symfony\Ai\LlamaCppModelCatalog
+            llama_embed:
+                base_url: '%env(default::LLAMA_EMBED_BASE_URL)%'
+                api_key: 'unused'
+                supports_completions: false
                 supports_embeddings: true
-                # The bundle's FallbackModelCatalog only classifies a model
-                # as EmbeddingsModel if its name contains "embed" — bge-m3
-                # doesn't, so we register an explicit catalog. See
-                # src/Chat/Infrastructure/Symfony/Ai/OllamaModelCatalog.php.
-                model_catalog: App\Chat\Infrastructure\Symfony\Ai\OllamaModelCatalog
+                model_catalog: App\Chat\Infrastructure\Symfony\Ai\LlamaCppModelCatalog
 
     store:
         postgres:
@@ -56,11 +45,7 @@ ai:
 
     vectorizer:
         chat_publications:
-            platform: ai.platform.generic.ollama
-            # BGE-M3: 1024-dim multilingual embedding model with strong
-            # French recall on short documents. Pulled at setup time via
-            # `make chat-embeddings-setup` (model lives in the named
-            # `ollama` volume, so container re-create is fast).
+            platform: ai.platform.generic.llama_embed
             model: bge-m3
 
     indexer:
