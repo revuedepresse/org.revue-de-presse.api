@@ -25,6 +25,11 @@ provisioning/volumes/database/*
 provisioning/volumes/ollama*
 provisioning/volumes/ollama/*
 
+# Host-native llama-server runtime: models, logs, PIDs, installed-version marker.
+# Provisioned by provisioning/llama/Makefile-llama.mk.
+var/llama/
+provisioning/llama/INSTALLED.version
+
 # Ad-hoc diagnostic output (e.g. captured from `make chat-embed-snapshots`)
 /issues.log
 vendor
