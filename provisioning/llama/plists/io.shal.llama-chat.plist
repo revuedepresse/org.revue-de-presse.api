@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>io.shal.llama-chat</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/llama-server</string>
+        <string>--host</string>
+        <string>127.0.0.1</string>
+        <string>--port</string>
+        <string>8081</string>
+        <string>--model</string>
+        <string>__REPO_ROOT__/var/llama/models/__CHAT_MODEL_FILE__</string>
+        <string>--alias</string>
+        <string>__CHAT_MODEL_ALIAS__</string>
+        <string>--ctx-size</string>
+        <string>8192</string>
+        <string>--n-gpu-layers</string>
+        <string>999</string>
+        <string>--parallel</string>
+        <string>1</string>
+        <string>--cont-batching</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>__REPO_ROOT__/var/llama/logs/chat.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO_ROOT__/var/llama/logs/chat.err.log</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO_ROOT__</string>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>
