@@ -27,6 +27,11 @@ services:
             - cache
         env_file:
             - '../../.env.local'
+        # host-native llama-server reachability for chat (LLAMA_*_BASE_URL).
+        # No-op on Docker Desktop (host.docker.internal resolves natively);
+        # required on Linux/Docker Engine where the alias is opt-in.
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         restart: always
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'

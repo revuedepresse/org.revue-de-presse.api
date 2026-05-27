@@ -83,14 +83,20 @@ else
     echo "    wrote $fingerprint_file — commit it to lock the baseline"
 fi
 
-echo "==> [5/6] Symfony DI: debug:container ai.platform.generic.llama_chat"
+# Production PHP-FPM container name is `service` (per docker-compose.yaml).
+# The dev clone has a separate `php-worker` (frankenphp profile, opt-in) which
+# is not the default deploy target. Override via LLAMA_SMOKE_PHP_SERVICE if
+# someone runs the smoke against a different service name.
+PHP_SERVICE="${LLAMA_SMOKE_PHP_SERVICE:-service}"
+
+echo "==> [5/6] Symfony DI: debug:container ai.platform.generic.llama_chat (in container '$PHP_SERVICE')"
 docker compose -f "$repo_root/provisioning/containers/docker-compose.yaml" \
-    exec -T php-worker bin/console debug:container ai.platform.generic.llama_chat --quiet
+    exec -T "$PHP_SERVICE" bin/console debug:container ai.platform.generic.llama_chat --quiet
 echo "    ok: DI knows about ai.platform.generic.llama_chat"
 
 echo "==> [6/6] Symfony invoke: ai:platform:invoke ai.platform.generic.llama_chat $LLAMA_CHAT_MODEL"
 docker compose -f "$repo_root/provisioning/containers/docker-compose.yaml" \
-    exec -T php-worker bin/console ai:platform:invoke \
+    exec -T "$PHP_SERVICE" bin/console ai:platform:invoke \
     ai.platform.generic.llama_chat "$LLAMA_CHAT_MODEL" "Réponds uniquement par OK." \
     | tee /tmp/llama-smoke-invoke.out
 grep -qi 'OK' /tmp/llama-smoke-invoke.out
