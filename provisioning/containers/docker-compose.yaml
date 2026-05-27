@@ -119,6 +119,8 @@ services:
             FRANKENPHP_CONFIG:       'worker /var/www/${PROJECT:-org.example.api}/public/worker.php'
             FRANKENPHP_NUM_THREADS:  '${FRANKENPHP_NUM_THREADS:-8}'
             PROJECT_DIR:             '/var/www/${PROJECT:-org.example.api}'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         restart: 'unless-stopped'
         security_opt:
             - 'no-new-privileges:true'
@@ -149,41 +151,10 @@ services:
             retries: 3
             start_period: 30s
 
-    # Local-only embedding model server. OpenAI-compatible /v1/embeddings
-    # endpoint consumed by Symfony AI's `ai.platform.generic.ollama` bridge
-    # (see config/packages/ai.yaml). Gated behind the `embeddings` profile so
-    # bare `docker compose up` doesn't pull a ~200 MB image and a ~1.2 GB
-    # model onto every contributor's laptop.
-    #
-    # Bring-up: `make chat-embeddings-start` (depends on chat-embeddings-build,
-    # idempotently pulls bge-m3 after the container is healthy). The model
-    # lives in the named volume so re-creating the container is fast.
-    ollama:
-        profiles:
-            - embeddings
-        image: 'ollama/ollama:latest'
-        restart: 'unless-stopped'
-        # 11434 stays unexposed on the host by default — only sibling
-        # containers reach it via `http://ollama:11434`. Override via
-        # docker-compose.override.yaml if you want host access for testing.
-        expose:
-            - '11434'
-        volumes:
-            - '../volumes/ollama:/root/.ollama'
-        # Both models live simultaneously when the chat is hot:
-        #   bge-m3        ~1.5 GB at idle (embeddings)
-        #   gemma2:2b     ~1.6 GB at idle, ~2.5 GB serving (default LLM)
-        #   gemma2:9b     ~5.4 GB at idle, ~6 GB serving (opt-in LLM)
-        # 4 GB fits the 2b default with headroom. Bump to 10 GB AND
-        # raise Docker Desktop's VM RAM to 12 GB+ when switching to 9b,
-        # otherwise the llama runner is OOM-killed and chat 500s.
-        mem_limit: '4g'
-        healthcheck:
-            test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']
-            interval: 10s
-            timeout: 5s
-            retries: 12
-            start_period: 30s
+    # Chat-stack inference is host-native (llama-server on the Mac with
+    # Metal). No sibling container — PHP reaches the two llama-servers
+    # via host.docker.internal:8081 (chat) and :8082 (embeddings). See
+    # provisioning/llama/README.md.
 
     # Edge reverse-proxy (Traefik) for the frankenphp profile. Same profile
     # gate. Bring it up with `make reverse-proxy-start` (which pulls
