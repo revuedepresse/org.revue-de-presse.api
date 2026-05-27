@@ -1,0 +1,113 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Chat\Infrastructure\Doctrine;
+
+use App\Chat\Application\Port\PublicationRetriever;
+use App\Chat\Domain\Query\QueryFilters;
+use App\Chat\Domain\Retrieval\RetrievedHit;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
+use Symfony\AI\Store\Document\VectorizerInterface;
+
+/**
+ * Direct pgvector retrieval that pushes screen_name and date-range filters
+ * into the SQL WHERE clause, so pgvector ranks the K closest rows AMONG the
+ * filtered subset.
+ *
+ * Replaces SymfonyAiPublicationRetriever for the chat-publications path. The
+ * symfony/ai-store v0.9 PostgresStore wraps the table but only exposes
+ * limit, not arbitrary WHERE; that forced us to over-fetch K*4 candidates and
+ * filter in PHP, which silently dropped to 0 hits when the top-4K didn't
+ * happen to contain any row matching the filter (common when the filtered
+ * outlet is a minority of the corpus). Going DBAL-direct keeps us on the
+ * same `chat_publication_embedding` table (created by `ai:store:setup`) but
+ * lets the database do the filtering at the right layer.
+ */
+final class DoctrinePublicationRetriever implements PublicationRetriever
+{
+    private const TABLE = 'chat_publication_embedding';
+
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly VectorizerInterface $vectorizer,
+    ) {
+    }
+
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    {
+        $vector = $this->vectorizer->vectorize($cleanedQuery);
+
+        $queryVec = '[' . implode(',', $vector->getData()) . ']';
+
+        $where = [];
+        $params = ['query_vec' => $queryVec, 'limit' => $k];
+        $types = ['query_vec' => ParameterType::STRING, 'limit' => ParameterType::INTEGER];
+
+        if ($filters->screenNames !== []) {
+            $where[] = "metadata->>'screen_name' IN (:screen_names)";
+            $params['screen_names'] = $filters->screenNames;
+            $types['screen_names'] = ArrayParameterType::STRING;
+        }
+
+        if ($filters->dateRange->from !== null) {
+            $where[] = "metadata->>'snapshot_date' >= :date_from";
+            $params['date_from'] = $filters->dateRange->from->format('Y-m-d');
+            $types['date_from'] = ParameterType::STRING;
+        }
+        if ($filters->dateRange->to !== null) {
+            $where[] = "metadata->>'snapshot_date' <= :date_to";
+            $params['date_to'] = $filters->dateRange->to->format('Y-m-d');
+            $types['date_to'] = ParameterType::STRING;
+        }
+
+        // BETWEEN form when both bounds are set — lets the SQL stay literal
+        // for the "scoped to month X" case the test pins, and keeps the
+        // planner's range-scan estimate simpler.
+        if ($filters->dateRange->from !== null && $filters->dateRange->to !== null) {
+            array_pop($where);
+            array_pop($where);
+            $where[] = "metadata->>'snapshot_date' BETWEEN :date_from AND :date_to";
+        }
+
+        $whereClause = $where === [] ? '' : 'WHERE ' . implode(' AND ', $where);
+
+        $sql = <<<SQL
+            SELECT
+                metadata->>'publication_id' AS publication_id,
+                metadata->>'screen_name'    AS screen_name,
+                metadata->>'snapshot_date'  AS snapshot_date,
+                metadata->>'url'            AS url,
+                COALESCE(metadata->>'_text', metadata->>'content', '') AS text,
+                (metadata->>'reposts')::int AS reposts,
+                (metadata->>'likes')::int   AS likes,
+                (embedding <=> CAST(:query_vec AS vector)) AS distance
+            FROM {$this->table()}
+            {$whereClause}
+            ORDER BY embedding <=> CAST(:query_vec AS vector)
+            LIMIT :limit
+            SQL;
+
+        $rows = $this->connection->executeQuery($sql, $params, $types)->fetchAllAssociative();
+
+        return array_map(
+            static fn (array $r): RetrievedHit => new RetrievedHit(
+                publicationId: (string) ($r['publication_id'] ?? ''),
+                screenName: (string) ($r['screen_name'] ?? ''),
+                snapshotDate: (string) ($r['snapshot_date'] ?? ''),
+                url: (string) ($r['url'] ?? ''),
+                text: (string) ($r['text'] ?? ''),
+                reposts: (int) ($r['reposts'] ?? 0),
+                likes: (int) ($r['likes'] ?? 0),
+                distance: max(0.0, (float) ($r['distance'] ?? 1.0)),
+            ),
+            $rows,
+        );
+    }
+
+    private function table(): string
+    {
+        return self::TABLE;
+    }
+}

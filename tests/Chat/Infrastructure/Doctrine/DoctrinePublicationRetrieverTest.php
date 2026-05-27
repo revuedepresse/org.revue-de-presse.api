@@ -1,0 +1,159 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Tests\Chat\Infrastructure\Doctrine;
+
+use App\Chat\Domain\Query\DateRange;
+use App\Chat\Domain\Query\QueryFilters;
+use App\Chat\Infrastructure\Doctrine\DoctrinePublicationRetriever;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Result;
+use PHPUnit\Framework\TestCase;
+use Symfony\AI\Platform\Vector\Vector;
+use Symfony\AI\Store\Document\VectorizerInterface;
+use Symfony\AI\Store\Document\EmbeddableDocumentInterface;
+
+final class DoctrinePublicationRetrieverTest extends TestCase
+{
+    public function testUnfilteredQueryHitsAllRowsAndOrdersByDistance(): void
+    {
+        $conn = new RecordingConnection([
+            ['publication_id' => 'at://p1', 'screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04', 'url' => 'u1', 'text' => 't1', 'reposts' => 1, 'likes' => 2, 'distance' => 0.10],
+            ['publication_id' => 'at://p2', 'screen_name' => 'liberation.fr', 'snapshot_date' => '2025-03-05', 'url' => 'u2', 'text' => 't2', 'reposts' => 3, 'likes' => 4, 'distance' => 0.20],
+        ]);
+
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.1, 0.2, 0.3]));
+        $hits = $retriever->retrieve('macron', 8, new QueryFilters());
+
+        // No WHERE on metadata; just ORDER BY embedding <=>, LIMIT k.
+        // ("screen_name" / "snapshot_date" appear in SELECT — we check WHERE-specific phrases.)
+        self::assertStringNotContainsString("metadata->>'screen_name' IN", $conn->lastSql);
+        self::assertStringNotContainsString("metadata->>'snapshot_date' >=", $conn->lastSql);
+        self::assertStringNotContainsString("metadata->>'snapshot_date' BETWEEN", $conn->lastSql);
+        self::assertStringContainsString('ORDER BY embedding <=>', $conn->lastSql);
+        self::assertSame(8, $conn->lastParams['limit'] ?? null);
+
+        self::assertCount(2, $hits);
+        self::assertSame('at://p1', $hits[0]->publicationId);
+        self::assertSame(0.10, $hits[0]->distance);
+        self::assertSame('at://p2', $hits[1]->publicationId);
+    }
+
+    public function testScreenNameFilterIsPushedIntoSqlWhereClause(): void
+    {
+        $conn = new RecordingConnection([
+            ['publication_id' => 'at://p1', 'screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04', 'url' => 'u1', 'text' => 't1', 'reposts' => 0, 'likes' => 0, 'distance' => 0.30],
+        ]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $hits = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['lemonde.fr', 'mediapart.fr']));
+
+        // WHERE pushes the screen_name filter into SQL so pgvector ranks
+        // ONLY rows that match the outlet, instead of post-filtering K candidates.
+        self::assertStringContainsString("metadata->>'screen_name'", $conn->lastSql);
+        self::assertStringContainsString('IN (', $conn->lastSql);
+        // Limit is still K (not 4K) because no over-fetch is needed once the filter is in SQL.
+        self::assertSame(8, $conn->lastParams['limit'] ?? null);
+        self::assertSame(['lemonde.fr', 'mediapart.fr'], $conn->lastParams['screen_names'] ?? null);
+
+        self::assertCount(1, $hits);
+        self::assertSame('lemonde.fr', $hits[0]->screenName);
+    }
+
+    public function testDateRangeFilterIsPushedIntoSqlWhereClause(): void
+    {
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters(
+            dateRange: new DateRange(
+                from: new \DateTimeImmutable('2025-03-01'),
+                to: new \DateTimeImmutable('2025-03-31'),
+            ),
+        ));
+
+        self::assertStringContainsString("metadata->>'snapshot_date'", $conn->lastSql);
+        self::assertStringContainsString('BETWEEN', $conn->lastSql);
+        self::assertSame('2025-03-01', $conn->lastParams['date_from'] ?? null);
+        self::assertSame('2025-03-31', $conn->lastParams['date_to'] ?? null);
+    }
+
+    public function testEmbedsQueryViaInjectedVectorizer(): void
+    {
+        $vectorizer = new FixedVectorizer([0.5, -0.25]);
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, $vectorizer);
+
+        $retriever->retrieve('Macron en visite', 8, new QueryFilters());
+
+        self::assertSame('Macron en visite', $vectorizer->lastInput);
+        // pgvector accepts the array literal "[v1,v2,...]" form.
+        self::assertSame('[0.5,-0.25]', $conn->lastParams['query_vec'] ?? null);
+    }
+
+    public function testEmptyScreenNamesArrayDoesNotEmitWhereClause(): void
+    {
+        // Regression: an empty list mustn't degenerate into `IN ()` (SQL error).
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters(screenNames: []));
+
+        self::assertStringNotContainsString("metadata->>'screen_name' IN", $conn->lastSql);
+    }
+}
+
+/** @internal */
+final class RecordingConnection extends Connection
+{
+    public string $lastSql = '';
+    /** @var array<string, mixed> */
+    public array $lastParams = [];
+
+    /** @param list<array<string, mixed>> $rows */
+    public function __construct(private readonly array $rows)
+    {
+        // bypass parent constructor — we override the methods we use
+    }
+
+    public function executeQuery(string $sql, array $params = [], $types = [], ?\Doctrine\DBAL\Cache\QueryCacheProfile $qcp = null): Result
+    {
+        $this->lastSql = $sql;
+        $this->lastParams = $params;
+
+        return new InMemoryResult($this->rows);
+    }
+}
+
+/** @internal */
+final class InMemoryResult extends Result
+{
+    /** @param list<array<string, mixed>> $rows */
+    public function __construct(private array $rows)
+    {
+        // bypass parent constructor
+    }
+
+    public function fetchAllAssociative(): array
+    {
+        return $this->rows;
+    }
+}
+
+/** @internal */
+final class FixedVectorizer implements VectorizerInterface
+{
+    public ?string $lastInput = null;
+
+    /** @param list<float> $components */
+    public function __construct(private readonly array $components)
+    {
+    }
+
+    public function vectorize(string|\Stringable|EmbeddableDocumentInterface|array $values, array $options = []): Vector
+    {
+        $this->lastInput = \is_string($values) ? $values : (string) $values;
+
+        return new Vector($this->components);
+    }
+}

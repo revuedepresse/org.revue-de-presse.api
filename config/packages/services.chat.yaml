@@ -35,14 +35,17 @@ services:
         arguments:
             $indexer: '@ai.indexer.chat_publications'
 
+    # Retrieval is direct DBAL against the pgvector store so screen_name /
+    # date filters are pushed into SQL (WHERE) instead of post-filtering K
+    # candidates returned by symfony/ai-store. The old SymfonyAiPublicationRetriever
+    # would silently return 0 hits when the top-4K didn't contain any row
+    # matching the filter — common for minority outlets. See class doc-block
+    # for the full rationale.
     App\Chat\Application\Port\PublicationRetriever:
-        alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever
-    App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationRetriever:
+        alias: App\Chat\Infrastructure\Doctrine\DoctrinePublicationRetriever
+    App\Chat\Infrastructure\Doctrine\DoctrinePublicationRetriever:
         arguments:
-            # Store + vectorizer injected directly so we craft a VectorQuery
-            # ourselves — see the class doc-block for why we bypass
-            # `ai.retriever.chat_publications` (HybridQuery auto-pick = 0 rows).
-            $store: '@ai.store.postgres.chat_publications'
+            $connection: '@doctrine.dbal.default_connection'
             $vectorizer: '@ai.vectorizer.chat_publications'
 
     App\Chat\Application\Port\ChatStreamer:
