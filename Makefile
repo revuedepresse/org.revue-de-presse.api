@@ -6,9 +6,7 @@ SHELL:=/bin/bash
         reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
         start-benchmark-stack stop-benchmark-stack restart-benchmark-stack \
         chat-jwt-secret chat-embed-snapshots chat-store-setup chat-store-reset \
-        chat-embeddings-build chat-embeddings-start chat-embeddings-stop \
-        chat-embeddings-shell chat-completion-start chat-cache-clear \
-        chat-cron-install chat-cron-uninstall
+        chat-cache-clear chat-cron-install chat-cron-uninstall
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -115,21 +113,6 @@ chat-store-setup: ## Provision the pgvector publication-embedding store (idempot
 chat-store-reset: ## DROP + recreate the pgvector store from current ai.yaml (destructive — use after changing vector_type / vector_size)
 	@/bin/bash -c 'source fun.sh && run_chat_store_reset'
 
-chat-embeddings-build: ## Pull the ollama image (one-shot, idempotent — safe to re-run before `start`)
-	@/bin/bash -c 'source fun.sh && run_chat_embeddings_build'
-
-chat-embeddings-start: chat-embeddings-build ## Start the ollama container and ensure the bge-m3 model is loaded
-	@/bin/bash -c 'source fun.sh && run_chat_embeddings_start'
-
-chat-embeddings-stop: ## Stop the ollama container (volume + model cache preserved)
-	@/bin/bash -c 'source fun.sh && run_chat_embeddings_stop'
-
-chat-embeddings-shell: ## Open an interactive shell inside the ollama container (e.g. for `ollama list`)
-	@/bin/bash -c 'source fun.sh && run_chat_embeddings_shell'
-
-chat-completion-start: chat-embeddings-start ## Ensure the chat-completion model is loaded + warmed in ollama (default gemma2:2b; override via OLLAMA_COMPLETION_MODEL=gemma2:9b)
-	@/bin/bash -c 'source fun.sh && run_chat_completion_start'
-
 chat-cache-clear: ## Wipe the api-service Symfony cache (use after editing ai.yaml / services.chat.yaml — --no-debug doesn't auto-invalidate)
 	@/bin/bash -c 'source fun.sh && run_chat_cache_clear'
 
@@ -150,3 +133,7 @@ restart-benchmark-stack: stop-benchmark-stack start-benchmark-stack ## Stop the 
 
 update-version: ## Sync repo version with latest git tag, OR `make update-version TAG=vX.Y.Z` to set + create a new tag
 	@/bin/bash -c 'source fun.sh && run_update_version'
+
+# Host-native llama.cpp lifecycle (install / start / stop / smoke).
+# All targets are macOS-only and intended to run on the deploy host.
+-include provisioning/llama/Makefile-llama.mk
