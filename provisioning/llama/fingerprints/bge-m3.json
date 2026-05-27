@@ -1,0 +1,6 @@
+{
+  "first4": [],
+  "tolerance": 0.0001,
+  "captured_at": null,
+  "note": "Empty stub. The chat-smoke script populates this on first successful run against a live bge-m3 llama-server. Commit the populated file to lock the baseline."
+}
