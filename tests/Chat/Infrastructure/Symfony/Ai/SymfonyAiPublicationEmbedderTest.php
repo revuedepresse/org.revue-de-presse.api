@@ -49,6 +49,26 @@ final class SymfonyAiPublicationEmbedderTest extends TestCase
         );
     }
 
+    public function testCleanedTextIsPreservedInMetadataForCitationReadBack(): void
+    {
+        // The pgvector store only persists id + metadata + embedding — the
+        // TextDocument content is consumed by the vectorizer and discarded.
+        // To surface the original text in RetrievedHit::text (so the prompt
+        // and the citations panel have something to quote), the embedder
+        // must echo the cleaned text into metadata.content.
+        $indexer = new RecordingIndexer();
+        $embedder = new SymfonyAiPublicationEmbedder($indexer, new TextCleaner(), new PromptBuilder());
+
+        $embedder->embedBatch([$this->highlight('at://did:plc:abc/app.bsky.feed.post/123')]);
+
+        $meta = $indexer->indexed[0]->getMetadata()->getArrayCopy();
+        self::assertArrayHasKey('content', $meta);
+        // Cleaned, header-free — the screen_name and date are already
+        // separate metadata fields. The retriever-side formatter quotes the
+        // text directly under "[N] lemonde.fr — 2025-03-04 — N reposts".
+        self::assertSame('Donald Trump gèle l’aide militaire à l’Ukraine', $meta['content']);
+    }
+
     public function testEmptyBatchIsANoop(): void
     {
         $indexer = new RecordingIndexer();

@@ -86,6 +86,15 @@ final class SymfonyAiPublicationEmbedder implements PublicationEmbedder
             'likes' => $h->likes,
             'replies' => $h->replies,
             'avatar_url' => $h->avatarUrl,
+            // Echo the cleaned text into metadata so the retriever can surface
+            // it as RetrievedHit::text. The Postgres bridge schema is
+            // (id, metadata, embedding) — the TextDocument content is
+            // consumed by the vectorizer and discarded, so without this we
+            // lose the original text on read-back, and the prompt gets a
+            // hit list with empty quoted bodies. Stored as just the cleaned
+            // text (no screen_name/date header — those are separate fields
+            // that PromptBuilder formats around the quote).
+            'content' => $cleaned,
         ]);
 
         return new TextDocument(
