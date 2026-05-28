@@ -1,0 +1,131 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Summary\Application;
+
+use App\Chat\Application\Port\ChatStreamer;
+use App\Chat\Domain\Text\TextCleaner;
+use App\NewsReview\Domain\Model\HighlightDto;
+use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
+use App\NewsReview\Domain\Snapshot\SnapshotReader;
+use App\Summary\Domain\DailySummary;
+
+/**
+ * Generates one day's thematic synthesis from the top-10 Bluesky
+ * publications stored in src/Bluesky/Resources/{date}.json. Returns null
+ * when the snapshot is missing or empty so callers can skip gracefully
+ * (the corpus has gaps).
+ *
+ * Inputs come from the snapshot directly, NOT pgvector retrieval:
+ * the day's "top-10 most relayed" is already curated upstream, and we
+ * want the same 10 every time (deterministic), not a re-ranked subset.
+ *
+ * Token budget is the same SUMMARY_MAX_TOKENS the live chat /discuter
+ * summary mode uses (~700) — multi-paragraph French syntheses don't fit
+ * in the platform's default cap.
+ */
+final class DailySummaryGenerator
+{
+    private const MAX_TOKENS = 700;
+
+    private const SYSTEM_PROMPT = <<<'PROMPT'
+Tu es un rédacteur en chef qui résume la revue de presse française du jour.
+
+Tu reçois les 10 publications Bluesky les plus relayées d'une date donnée.
+Produis une synthèse en français destinée aux lecteurs qui n'ont pas suivi
+l'actualité du jour.
+
+Règles :
+- 3 à 6 paragraphes courts, regroupés par thème (politique, économie,
+  culture, international, etc.).
+- Mentionne les médias par leur handle entre parenthèses, p.ex.
+  « Selon lemonde.fr et mediapart.fr, … ».
+- Si une publication isolée n'a pas de lien thématique avec les autres,
+  mentionne-la brièvement en fin de synthèse sans la sur-représenter.
+- N'invente ni dates, ni chiffres, ni citations. N'extrapole pas
+  au-delà des extraits fournis.
+- Ton neutre, factuel.
+- Le format de sortie est du markdown valide (titres niveau ##, listes
+  à puces possibles). N'inclus pas de front-matter, ne répète pas la
+  date dans le titre — elle est portée par le nom de fichier.
+PROMPT;
+
+    private const FRENCH_WEEKDAYS = [
+        'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche',
+    ];
+
+    private const FRENCH_MONTHS = [
+        1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril',
+        5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août',
+        9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre',
+    ];
+
+    public function __construct(
+        private readonly SnapshotReader $snapshotReader,
+        private readonly HighlightNormalizer $normalizer,
+        private readonly TextCleaner $textCleaner,
+        private readonly ChatStreamer $streamer,
+    ) {
+    }
+
+    public function generate(string $date): ?DailySummary
+    {
+        $rows = $this->snapshotReader->read($date);
+        $highlights = array_values(array_filter(
+            array_map(
+                fn (mixed $row): ?HighlightDto => is_array($row) ? $this->normalizer->toDto($row) : null,
+                $rows,
+            ),
+            static fn (?HighlightDto $h): bool => $h !== null,
+        ));
+        if ($highlights === []) {
+            return null;
+        }
+
+        $messages = [
+            ['role' => 'system', 'content' => self::SYSTEM_PROMPT],
+            ['role' => 'user',   'content' => $this->buildUserMessage($date, $highlights)],
+        ];
+
+        $markdown = '';
+        foreach ($this->streamer->stream($messages, ['max_tokens' => self::MAX_TOKENS]) as $delta) {
+            $markdown .= $delta;
+        }
+
+        return new DailySummary(
+            date: $date,
+            markdown: trim($markdown) . "\n",
+            publicationCount: count($highlights),
+        );
+    }
+
+    /**
+     * @param list<HighlightDto> $highlights
+     */
+    private function buildUserMessage(string $date, array $highlights): string
+    {
+        $head = "Date : " . $this->longFrenchDate($date) . "\n\nPublications du jour :\n";
+        $lines = [];
+        foreach ($highlights as $i => $h) {
+            $n = $i + 1;
+            $cleaned = $this->textCleaner->clean($h->text);
+            $lines[] = "[{$n}] {$h->screenName} — {$h->reposts} reposts, {$h->likes} likes";
+            $lines[] = "    \"{$cleaned}\"";
+            if ($h->url !== '') {
+                $lines[] = '    ' . $h->url;
+            }
+        }
+
+        return $head . "\n" . implode("\n", $lines);
+    }
+
+    private function longFrenchDate(string $date): string
+    {
+        $d = \DateTimeImmutable::createFromFormat('Y-m-d', $date)
+            ?: new \DateTimeImmutable('1970-01-01');
+        $weekday = self::FRENCH_WEEKDAYS[((int) $d->format('N')) - 1];
+        $month = self::FRENCH_MONTHS[(int) $d->format('n')];
+
+        return "{$weekday} {$d->format('j')} {$month} {$d->format('Y')}";
+    }
+}
