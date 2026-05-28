@@ -59,22 +59,25 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
 
         $hits = $this->runQuery($queryVec, $k, $filters);
 
-        // Fallback: when a date filter combined with an outlet filter yields
-        // zero hits, the corpus simply lacks recent content from that outlet.
-        // Drop the date filter and retry so the user still gets real content
-        // from the named outlet, instead of an empty card panel + a
-        // confabulated assistant response (Mistral writes [N] markers from
-        // the system prompt's strong cite-everything instruction regardless
-        // of whether real extracts exist).
+        // Fallback: when a date filter yields zero hits, the corpus simply
+        // lacks content for that window. Drop the date filter and retry so
+        // the user gets real content (matching any outlet that WAS asked
+        // for), instead of an empty context panel + a confabulated
+        // assistant response (Mistral writes [N] markers from the system
+        // prompt's strong cite-everything instruction regardless of whether
+        // real extracts exist).
         //
-        // We deliberately do NOT drop the screen_name filter on fallback —
-        // switching to a different outlet would surprise the user. The
-        // returned Retrieval carries DATE_FILTER_RELAXED so the prompt
-        // builder can have Mistral acknowledge the gap.
-        if ($hits === []
-            && $filters->screenNames !== []
-            && !$filters->dateRange->isEmpty()
-        ) {
+        // Covers both shapes:
+        //   - date + outlet (e.g. "Telerama cette semaine") — keeps the
+        //     outlet filter, drops the date window
+        //   - date only    (e.g. "Résume la journée d'hier") — drops the
+        //     entire filter set
+        //
+        // We deliberately do NOT drop the screen_name filter — switching
+        // to a different outlet would surprise the user. The returned
+        // Retrieval carries DATE_FILTER_RELAXED so the prompt builder can
+        // have Mistral acknowledge the gap.
+        if ($hits === [] && !$filters->dateRange->isEmpty()) {
             $hits = $this->runQuery(
                 $queryVec,
                 $k,
