@@ -19,6 +19,7 @@ class RateLimitSubscriberTest extends TestCase
     {
         $subscriber = new RateLimitSubscriber(
             tokenMintLimiterFactory: $this->permissiveFactory('token_mint'),
+            deviceTokenMintLimiterFactory: $this->permissiveFactory('device_token_mint'),
             highlightsLimiterFactory: $this->tightFactory('highlights'),
             docsLimiterFactory: $this->tightFactory('docs'),
             logger: new NullLogger(),
@@ -35,6 +36,7 @@ class RateLimitSubscriberTest extends TestCase
     {
         $subscriber = new RateLimitSubscriber(
             tokenMintLimiterFactory: $this->permissiveFactory('token_mint'),
+            deviceTokenMintLimiterFactory: $this->permissiveFactory('device_token_mint'),
             highlightsLimiterFactory: $this->tightFactory('highlights'),
             docsLimiterFactory: $this->tightFactory('docs'),
             logger: new NullLogger(),
@@ -53,6 +55,7 @@ class RateLimitSubscriberTest extends TestCase
         $factory = $this->tightFactory('highlights', limit: 2);
         $subscriber = new RateLimitSubscriber(
             tokenMintLimiterFactory: $this->permissiveFactory('token_mint'),
+            deviceTokenMintLimiterFactory: $this->permissiveFactory('device_token_mint'),
             highlightsLimiterFactory: $factory,
             docsLimiterFactory: $this->permissiveFactory('docs'),
             logger: new NullLogger(),
@@ -81,6 +84,7 @@ class RateLimitSubscriberTest extends TestCase
         $factory = $this->tightFactory('highlights', limit: 1);
         $subscriber = new RateLimitSubscriber(
             tokenMintLimiterFactory: $this->permissiveFactory('token_mint'),
+            deviceTokenMintLimiterFactory: $this->permissiveFactory('device_token_mint'),
             highlightsLimiterFactory: $factory,
             docsLimiterFactory: $this->permissiveFactory('docs'),
             logger: new NullLogger(),
