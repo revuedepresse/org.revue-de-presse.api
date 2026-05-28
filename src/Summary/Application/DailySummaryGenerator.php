@@ -28,7 +28,11 @@ use Psr\Log\NullLogger;
  */
 final class DailySummaryGenerator implements DailySummaryGeneratorInterface
 {
-    private const MAX_TOKENS = 700;
+    // 700 was too tight: a 10-publication day with 5-6 thematic sections
+    // would truncate mid-bullet. 1200 leaves enough headroom for the
+    // structured French syntheses Mistral produces without bloating
+    // generation time.
+    private const MAX_TOKENS = 1200;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
 Tu es un rédacteur en chef qui résume la revue de presse française du jour.
@@ -47,9 +51,11 @@ Règles :
 - N'invente ni dates, ni chiffres, ni citations. N'extrapole pas
   au-delà des extraits fournis.
 - Ton neutre, factuel.
-- Le format de sortie est du markdown valide (titres niveau ##, listes
-  à puces possibles). N'inclus pas de front-matter, ne répète pas la
-  date dans le titre — elle est portée par le nom de fichier.
+- Format de sortie : markdown valide. Utilise UNIQUEMENT les niveaux de
+  titre ## (thème principal) et ### (sous-thème) — n'utilise jamais #,
+  ####, #####. Listes à puces possibles avec "- ". N'inclus pas de
+  front-matter, ne répète pas la date dans le titre — elle est portée
+  par le nom de fichier.
 PROMPT;
 
     private const FRENCH_WEEKDAYS = [
