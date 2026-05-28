@@ -1,6 +1,6 @@
 api_platform:
     title: 'Revue de presse — HTTP API'
-    version: 'v6.2.0'
+    version: 'v6.3.0'
     description: 'Daily curated highlights from French press Bluesky accounts.'
     mapping:
         paths:
