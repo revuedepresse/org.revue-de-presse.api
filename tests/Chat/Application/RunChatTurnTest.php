@@ -177,6 +177,40 @@ final class RunChatTurnTest extends TestCase
         self::assertGreaterThanOrEqual(600, $capture->lastOptions['max_tokens']);
     }
 
+    public function testSummaryModeSurfacesAllRetrievedHitsAsCitationsEvenWithoutBracketMarkers(): void
+    {
+        // In summary mode, Mistral usually writes outlet attribution in
+        // parentheses ("(Le Monde)") rather than [N] markers, so the
+        // CitationExtractor finds zero matches. But the cards still need
+        // to render so the user can verify the synthesis against the
+        // actual extracts. Surface ALL retrieved hits as "consulted
+        // sources" when in summary mode.
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $hits = [
+            new RetrievedHit('at://pub-A', 'lemonde.fr', '2025-03-04', 'https://x', 'Texte A', 1, 1, 0.1),
+            new RetrievedHit('at://pub-B', 'liberation.fr', '2025-03-04', 'https://y', 'Texte B', 2, 2, 0.2),
+            new RetrievedHit('at://pub-C', 'mediapart.fr', '2025-03-04', 'https://z', 'Texte C', 3, 3, 0.3),
+        ];
+        // Mistral writes prose with NO [N] markers (synthesis style).
+        $streamer = new ScriptedStreamer(['Selon Le Monde et Mediapart, …'], provider: 'mistral');
+
+        $use_case = $this->makeUseCase(
+            $conversations,
+            $turns,
+            new ArrayRetriever($hits),
+            $streamer,
+        );
+        $events = iterator_to_array($use_case('did:plc:user', 'Résume la journée d hier'));
+
+        $done = end($events);
+        self::assertSame('done', $done->type);
+        $citations = $done->data['citations'];
+        // All 3 hits surface as cards, in the same order the retriever returned.
+        self::assertCount(3, $citations);
+        self::assertSame(['at://pub-A', 'at://pub-B', 'at://pub-C'], array_map(fn ($c) => $c['publicationId'], $citations));
+    }
+
     public function testNonSummaryIntentKeepsClassicPromptAndUnbumpedMaxTokens(): void
     {
         $conversations = new InMemoryConversationRepository();

@@ -207,13 +207,25 @@ class RunChatTurn
             'truncated' => $truncated,
         ]);
 
+        // Citations panel population:
+        //   - Classic mode: only hits whose [N] marker appears in the answer.
+        //     A precise question gets a precise sources panel.
+        //   - Summary mode: ALL retrieved hits. The synthesis system prompt
+        //     allows outlet attribution in parentheses instead of [N] markers,
+        //     so CitationExtractor often returns nothing — but the user
+        //     still needs to see what was consulted to verify the synthesis.
         $citationsView = [];
-        if ($citedIds !== []) {
+        $hitsToSurface = $filters->isSummary ? array_map(
+            static fn (int $i): string => $hits[$i]->publicationId,
+            array_keys($hits),
+        ) : $citedIds;
+
+        if ($hitsToSurface !== []) {
             $byId = [];
             foreach ($hits as $i => $hit) {
                 $byId[$hit->publicationId] = ['n' => $i + 1, 'hit' => $hit];
             }
-            foreach ($citedIds as $id) {
+            foreach ($hitsToSurface as $id) {
                 if (!isset($byId[$id])) {
                     continue;
                 }
