@@ -5,6 +5,14 @@ framework:
             limit: 3
             rate: { interval: '6 seconds', amount: 1 }
             cache_pool: cache.rate_limiter
+        device_token_mint:
+            # Device clients (Compose Multiplatform desktop/Android/iOS) hit this
+            # with no shared secret. Generous burst tolerates initial mint + a
+            # refresh per hour or so; steady refill stays well below abuse.
+            policy: 'token_bucket'
+            limit: 6
+            rate: { interval: '1 minute', amount: 1 }
+            cache_pool: cache.rate_limiter
         highlights:
             policy: 'sliding_window'
             limit: 60

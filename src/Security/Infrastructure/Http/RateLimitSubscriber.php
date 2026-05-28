@@ -16,6 +16,7 @@ final class RateLimitSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly RateLimiterFactory $tokenMintLimiterFactory,
+        private readonly RateLimiterFactory $deviceTokenMintLimiterFactory,
         private readonly RateLimiterFactory $highlightsLimiterFactory,
         private readonly RateLimiterFactory $docsLimiterFactory,
         private readonly LoggerInterface $logger,
@@ -66,6 +67,9 @@ final class RateLimitSubscriber implements EventSubscriberInterface
         }
         if ($path === '/api/token') {
             return $this->tokenMintLimiterFactory;
+        }
+        if ($path === '/api/device-tokens') {
+            return $this->deviceTokenMintLimiterFactory;
         }
         if (str_starts_with($path, '/api/docs')) {
             return $this->docsLimiterFactory;

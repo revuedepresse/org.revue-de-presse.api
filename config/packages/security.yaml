@@ -23,6 +23,7 @@ when@prod:
         access_control:
             - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/device-tokens,          role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
@@ -33,6 +34,7 @@ when@dev:
         access_control:
             - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/device-tokens,          role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
@@ -43,6 +45,7 @@ when@test:
         access_control:
             - { path: ^/api/healthcheck,            role: PUBLIC_ACCESS }
             - { path: ^/api/token,                  role: PUBLIC_ACCESS }
+            - { path: ^/api/device-tokens,          role: PUBLIC_ACCESS }
             - { path: ^/api/docs,                   role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
