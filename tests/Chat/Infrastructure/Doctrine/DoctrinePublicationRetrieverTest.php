@@ -91,6 +91,49 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         self::assertSame('[0.5,-0.25]', $conn->lastParams['query_vec'] ?? null);
     }
 
+    public function testUnfilteredQueryAppliesSoftRecencyBiasInOrderByClause(): void
+    {
+        // When no explicit date filter is set, the SQL must blend cosine
+        // distance with a date-decay term so that a slightly-less-similar
+        // recent doc can outrank a closer but stale doc. This is the
+        // "nouvelles de la semaine" case: pure cosine over the whole corpus
+        // doesn't prefer recency.
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters());
+
+        // Decay is age (in days) divided by 30, scaled by lambda. Lambda
+        // 0.10 keeps a 30-day-old doc only 0.10 worse than today's closest.
+        self::assertStringContainsString('CURRENT_DATE', $conn->lastSql);
+        self::assertStringContainsString("metadata->>'snapshot_date'", $conn->lastSql);
+        // The decay belongs in the ORDER BY, not the WHERE — we still want
+        // older docs to be retrievable, just deprioritised.
+        self::assertMatchesRegularExpression(
+            '/ORDER\s+BY[^L]*CURRENT_DATE/s',
+            $conn->lastSql,
+            'expected CURRENT_DATE to appear inside the ORDER BY expression',
+        );
+    }
+
+    public function testExplicitDateFilterSuppressesRecencyBias(): void
+    {
+        // When the user already pinned a date window, an extra date-decay
+        // term would skew results within that window (and is redundant).
+        // The ORDER BY should be the bare cosine expression in that case.
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters(
+            dateRange: new DateRange(
+                from: new \DateTimeImmutable('2025-03-01'),
+                to: new \DateTimeImmutable('2025-03-31'),
+            ),
+        ));
+
+        self::assertStringNotContainsString('CURRENT_DATE', $conn->lastSql);
+    }
+
     public function testEmptyScreenNamesArrayDoesNotEmitWhereClause(): void
     {
         // Regression: an empty list mustn't degenerate into `IN ()` (SQL error).

@@ -71,6 +71,54 @@ final class QueryFilterExtractorTest extends TestCase
         self::assertSame('2026-04-30', $filters->dateRange->to->format('Y-m-d'));
     }
 
+    public function testExtractsCetteSemaineAsLastSevenDays(): void
+    {
+        $filters = $this->extractor->extract('Quelles nouvelles cette semaine ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertNotNull($filters->dateRange->to);
+        // FIXED_NOW = 2026-05-26 → last 7 days = 2026-05-20..26
+        self::assertSame('2026-05-20', $filters->dateRange->from->format('Y-m-d'));
+        self::assertSame('2026-05-26', $filters->dateRange->to->format('Y-m-d'));
+    }
+
+    public function testExtractsNouvellesDeLaSemaineAsLastSevenDays(): void
+    {
+        // The phrase that originally surfaced the bug — "nouvelles de la semaine".
+        // Must hit the same 7-day window as bare "cette semaine".
+        $filters = $this->extractor->extract('nouvelles de la semaine');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2026-05-20', $filters->dateRange->from->format('Y-m-d'));
+        self::assertSame('2026-05-26', $filters->dateRange->to->format('Y-m-d'));
+    }
+
+    public function testExtractsCesDerniersJoursAsLastSevenDays(): void
+    {
+        $filters = $this->extractor->extract('Quels sujets ont émergé ces derniers jours ?');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2026-05-20', $filters->dateRange->from->format('Y-m-d'));
+    }
+
+    public function testExtractsRecentAdjectivesAsLastFourteenDays(): void
+    {
+        foreach (['actualités récentes', 'événements récents', 'une publication récente'] as $phrase) {
+            $filters = $this->extractor->extract($phrase);
+            self::assertNotNull($filters->dateRange->from, "expected a date filter for: {$phrase}");
+            // Last 14 days = 2026-05-13..26
+            self::assertSame('2026-05-13', $filters->dateRange->from->format('Y-m-d'),
+                "wrong from for: {$phrase}");
+        }
+    }
+
+    public function testExplicitMonthOverridesGenericRecentPhrase(): void
+    {
+        // "récents" + "mars 2025" → the specific month wins (rule-based extractor
+        // checks specific month/year before bare recency phrases).
+        $filters = $this->extractor->extract('événements récents en mars 2025');
+        self::assertNotNull($filters->dateRange->from);
+        self::assertSame('2025-03-01', $filters->dateRange->from->format('Y-m-d'));
+        self::assertSame('2025-03-31', $filters->dateRange->to->format('Y-m-d'));
+    }
+
     public function testUnknownLanguageReturnsEmptyFilters(): void
     {
         $filters = $this->extractor->extract('Какие новости вчера были?');

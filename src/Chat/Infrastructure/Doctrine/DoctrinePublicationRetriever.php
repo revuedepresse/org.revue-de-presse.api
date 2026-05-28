@@ -35,6 +35,20 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
     ) {
     }
 
+    /**
+     * Recency-bias coefficient applied to the cosine-distance ORDER BY when
+     * NO explicit date filter is set. The penalty is `λ · (age_days / 30)`,
+     * so a 30-day-old doc costs +0.10 distance, a 90-day-old +0.30. With
+     * cosine distances typically in [0.40, 0.60], that's enough to pull
+     * recent-but-close hits above older-but-closest hits, without burying
+     * older content that's a strong semantic match.
+     *
+     * When the user pinned a date window explicitly, the WHERE clause
+     * already restricts the result set; adding decay inside that window
+     * would skew within-window ordering without benefit.
+     */
+    private const RECENCY_BIAS_LAMBDA_PER_30_DAYS = 0.10;
+
     public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
     {
         $vector = $this->vectorizer->vectorize($cleanedQuery);
@@ -44,6 +58,7 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
         $where = [];
         $params = ['query_vec' => $queryVec, 'limit' => $k];
         $types = ['query_vec' => ParameterType::STRING, 'limit' => ParameterType::INTEGER];
+        $hasExplicitDateFilter = !$filters->dateRange->isEmpty();
 
         if ($filters->screenNames !== []) {
             $where[] = "metadata->>'screen_name' IN (:screen_names)";
@@ -73,6 +88,14 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
 
         $whereClause = $where === [] ? '' : 'WHERE ' . implode(' AND ', $where);
 
+        // Recency-biased ORDER BY only when the user didn't pin a date window.
+        // GREATEST(0, ...) clamps future-dated rows (just in case) to no bonus.
+        $lambda = self::RECENCY_BIAS_LAMBDA_PER_30_DAYS;
+        $orderBy = $hasExplicitDateFilter
+            ? 'embedding <=> CAST(:query_vec AS vector)'
+            : "embedding <=> CAST(:query_vec AS vector) "
+                . "+ {$lambda} * GREATEST(0, (CURRENT_DATE - (metadata->>'snapshot_date')::date) / 30.0)";
+
         $sql = <<<SQL
             SELECT
                 metadata->>'publication_id' AS publication_id,
@@ -87,7 +110,7 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
                 (embedding <=> CAST(:query_vec AS vector)) AS distance
             FROM {$this->table()}
             {$whereClause}
-            ORDER BY embedding <=> CAST(:query_vec AS vector)
+            ORDER BY {$orderBy}
             LIMIT :limit
             SQL;
 

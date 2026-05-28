@@ -175,7 +175,9 @@ final class QueryFilterExtractor
             return new DateRange($start, $end);
         }
 
-        // "<month> <year>" → that whole month
+        // "<month> <year>" → that whole month. Specific dates always beat the
+        // looser "recents/cette semaine" heuristics below (a user asking
+        // "événements récents en mars 2025" wants March 2025, not last week).
         if (preg_match('/\b(' . implode('|', array_keys(self::MONTHS)) . ')\s+(\d{4})\b/u', $folded, $m) === 1) {
             $month = self::MONTHS[$m[1]];
             $year = (int) $m[2];
@@ -193,6 +195,51 @@ final class QueryFilterExtractor
             $last = $first->modify('last day of this month')->setTime(23, 59, 59);
 
             return new DateRange($first, $last);
+        }
+
+        // Recency phrasings — these only fire after explicit date phrases
+        // and month names have been ruled out. Each maps to a fixed
+        // backward-looking window ending today.
+        //
+        // 14-day window: things "récent(e)(s)" can plausibly span half a month.
+        // The substring 'recent' matches all of recent/recente/recentes
+        // (after fold + ASCII transliteration). Window is today + 13 prior
+        // days (inclusive both ends) — matches what a user means by "the
+        // last two weeks".
+        if (str_contains($folded, 'recent')) {
+            $start = $now->modify('-13 days')->setTime(0, 0, 0);
+
+            return new DateRange($start, $now->setTime(23, 59, 59));
+        }
+
+        // 3-day window: tightest informal recency. Today + 2 prior days.
+        if (str_contains($folded, 'ces jours-ci') || str_contains($folded, 'ces jours ci')) {
+            $start = $now->modify('-2 days')->setTime(0, 0, 0);
+
+            return new DateRange($start, $now->setTime(23, 59, 59));
+        }
+
+        // 7-day window covering the common "week" phrasings. Matches:
+        //   "cette semaine", "la semaine" (e.g. "nouvelles de la semaine"),
+        //   "ces derniers jours", "ces derniers temps", "il y a une semaine",
+        //   bare "nouvelles" (a French speaker asking about "nouvelles"
+        //   without further qualification means current news, not the
+        //   whole archive).
+        $sevenDayTriggers = [
+            'cette semaine',
+            'la semaine',
+            'ces derniers jours',
+            'ces derniers temps',
+            'il y a une semaine',
+            'nouvelles',
+        ];
+        foreach ($sevenDayTriggers as $trigger) {
+            if (str_contains($folded, $trigger)) {
+                // Today + 6 prior days = 7-day inclusive window.
+                $start = $now->modify('-6 days')->setTime(0, 0, 0);
+
+                return new DateRange($start, $now->setTime(23, 59, 59));
+            }
         }
 
         return new DateRange();
