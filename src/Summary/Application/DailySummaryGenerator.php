@@ -9,6 +9,8 @@ use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 use App\Summary\Domain\DailySummary;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Generates one day's thematic synthesis from the top-10 Bluesky
@@ -24,7 +26,7 @@ use App\Summary\Domain\DailySummary;
  * summary mode uses (~700) — multi-paragraph French syntheses don't fit
  * in the platform's default cap.
  */
-final class DailySummaryGenerator
+final class DailySummaryGenerator implements DailySummaryGeneratorInterface
 {
     private const MAX_TOKENS = 700;
 
@@ -60,12 +62,16 @@ PROMPT;
         9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre',
     ];
 
+    private readonly LoggerInterface $logger;
+
     public function __construct(
         private readonly SnapshotReader $snapshotReader,
         private readonly HighlightNormalizer $normalizer,
         private readonly TextCleaner $textCleaner,
         private readonly ChatStreamer $streamer,
+        ?LoggerInterface $logger = null,
     ) {
+        $this->logger = $logger ?? new NullLogger();
     }
 
     public function generate(string $date): ?DailySummary
@@ -91,12 +97,19 @@ PROMPT;
         foreach ($this->streamer->stream($messages, ['max_tokens' => self::MAX_TOKENS]) as $delta) {
             $markdown .= $delta;
         }
+        $body = trim($markdown) . "\n";
 
-        return new DailySummary(
-            date: $date,
-            markdown: trim($markdown) . "\n",
-            publicationCount: count($highlights),
-        );
+        // Generation-time observability — publication count is transient data
+        // that doesn't belong on the DTO (the read-side has no way to recover
+        // it from the markdown body). Log here so backfill runs can be audited
+        // after the fact.
+        $this->logger->info('chat.summary.generated', [
+            'date' => $date,
+            'publication_count' => count($highlights),
+            'markdown_bytes' => strlen($body),
+        ]);
+
+        return new DailySummary(date: $date, markdown: $body);
     }
 
     /**

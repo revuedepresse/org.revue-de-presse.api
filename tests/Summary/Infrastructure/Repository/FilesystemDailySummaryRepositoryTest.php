@@ -42,7 +42,6 @@ final class FilesystemDailySummaryRepositoryTest extends TestCase
         $summary = new DailySummary(
             date: '2025-03-04',
             markdown: "## Politique\nUne synthèse.\n",
-            publicationCount: 8,
         );
 
         $repo->save($summary);
@@ -65,7 +64,7 @@ final class FilesystemDailySummaryRepositoryTest extends TestCase
         // Atomic write: file_put_contents to .tmp then rename. After save,
         // there must be exactly one summary file and no .tmp leftover.
         $repo = new FilesystemDailySummaryRepository($this->tmp);
-        $repo->save(new DailySummary('2025-03-04', 'x', 1));
+        $repo->save(new DailySummary('2025-03-04', 'x'));
 
         $files = glob($this->tmp . '/src/Bluesky/Resources/*');
         self::assertNotFalse($files);
@@ -77,8 +76,8 @@ final class FilesystemDailySummaryRepositoryTest extends TestCase
     public function testSaveOverwritesExistingFile(): void
     {
         $repo = new FilesystemDailySummaryRepository($this->tmp);
-        $repo->save(new DailySummary('2025-03-04', 'old', 1));
-        $repo->save(new DailySummary('2025-03-04', 'new', 2));
+        $repo->save(new DailySummary('2025-03-04', 'old'));
+        $repo->save(new DailySummary('2025-03-04', 'new'));
 
         $loaded = $repo->read('2025-03-04');
         self::assertNotNull($loaded);

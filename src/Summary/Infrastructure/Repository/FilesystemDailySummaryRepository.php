@@ -31,15 +31,7 @@ final class FilesystemDailySummaryRepository implements DailySummaryRepository
             return null;
         }
 
-        return new DailySummary(
-            date: $date,
-            markdown: $body,
-            // publicationCount isn't persisted in the markdown body; we don't
-            // need it on read (the day-page already shows the count from the
-            // existing top-10 view). Defaults to 0 on read; -1 would be more
-            // honest but breaks the int contract.
-            publicationCount: 0,
-        );
+        return new DailySummary(date: $date, markdown: $body);
     }
 
     public function save(DailySummary $summary): void

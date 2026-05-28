@@ -36,7 +36,6 @@ final class DailySummaryGeneratorTest extends TestCase
         self::assertNotNull($summary);
         self::assertSame('2025-03-04', $summary->date);
         self::assertSame("## Politique\nSelon lemonde.fr, …\n", $summary->markdown);
-        self::assertSame(1, $summary->publicationCount);
 
         // System prompt + user message shape.
         self::assertCount(2, $streamer->lastMessages);

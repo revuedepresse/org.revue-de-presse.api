@@ -10,9 +10,8 @@ namespace App\Summary\Domain;
 final readonly class DailySummary
 {
     public function __construct(
-        public string $date,            // YYYY-MM-DD
-        public string $markdown,        // body, no front-matter
-        public int    $publicationCount,
+        public string $date,      // YYYY-MM-DD
+        public string $markdown,  // body, no front-matter
     ) {
     }
 }
