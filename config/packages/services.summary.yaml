@@ -1,0 +1,22 @@
+# Daily-summary module — wiring for the pre-computed-summary product
+# (App\Summary). The chat module's services.chat.yaml exposes the
+# dependencies this module consumes (SnapshotReader, HighlightNormalizer,
+# TextCleaner, ChatStreamer) via autowiring.
+
+services:
+    _defaults:
+        autowire:      true
+        autoconfigure: true
+
+    # Port → adapter
+    App\Summary\Domain\DailySummaryRepository:
+        alias: App\Summary\Infrastructure\Repository\FilesystemDailySummaryRepository
+    App\Summary\Infrastructure\Repository\FilesystemDailySummaryRepository:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Summary\Application\DailySummaryGeneratorInterface:
+        alias: App\Summary\Application\DailySummaryGenerator
+    App\Summary\Application\DailySummaryGenerator: ~
+
+    App\Summary\Infrastructure\Console\GenerateDailySummariesCommand: ~
