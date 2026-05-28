@@ -1,7 +1,6 @@
-# Daily-summary module — wiring for the pre-computed-summary product
-# (App\Summary). The chat module's services.chat.yaml exposes the
-# dependencies this module consumes (SnapshotReader, HighlightNormalizer,
-# TextCleaner, ChatStreamer) via autowiring.
+# Daily-summary module wiring (App\Summary). Also owns the
+# llama_chat platform binding (model catalog) and the ChatStreamer
+# port → SymfonyAi adapter that drives daily synthesis.
 
 services:
     _defaults:
@@ -24,3 +23,20 @@ services:
     # API Platform read side
     App\Summary\Infrastructure\ApiPlatform\State\SummaryProvider:
         tags: ['api_platform.state_provider']
+
+    # Explicit model catalog wired into ai.platform.generic.llama_chat so
+    # mistral-7b-instruct-v0.3 is classified as a CompletionsModel
+    # regardless of the bundle's default name-based heuristics.
+    App\Summary\Infrastructure\Symfony\Ai\LlamaCppModelCatalog: ~
+
+    # ChatStreamer port → SymfonyAi adapter
+    App\Summary\Application\Port\ChatStreamer:
+        alias: App\Summary\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer
+    App\Summary\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer:
+        arguments:
+            # Self-hosted via host-native llama-server on the Mac M2
+            # (Metal). LLAMA_CHAT_MODEL identifies which model the
+            # chat-port llama-server has loaded; it must match the
+            # plist's --alias and an entry in LlamaCppModelCatalog.
+            $platform: '@ai.platform.generic.llama_chat'
+            $model:    '%env(string:LLAMA_CHAT_MODEL)%'

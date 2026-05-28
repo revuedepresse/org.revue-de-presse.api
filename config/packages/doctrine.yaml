@@ -30,9 +30,3 @@ doctrine:
                         is_bundle:  false
                         prefix:     'App\Newsletter\Domain\Entity'
                         type:       attribute
-                    Chat:
-                        alias:      'Chat'
-                        dir:        '%kernel.project_dir%/src/Chat/Domain/Entity'
-                        is_bundle:  false
-                        prefix:     'App\Chat\Domain\Entity'
-                        type:       attribute

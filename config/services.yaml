@@ -127,23 +127,10 @@ services:
     App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
         tags: ['controller.service_arguments']
 
-    # Chat module — bundle-independent services here. Bundle-dependent
-    # wiring lives in config/packages/services.chat.yaml.
-    App\Chat\Infrastructure\Repository\DoctrineConversationRepository: ~
-    App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository: ~
-
-    App\Chat\Domain\Repository\ConversationRepository:
-        alias: App\Chat\Infrastructure\Repository\DoctrineConversationRepository
-    App\Chat\Domain\Repository\ConversationTurnRepository:
-        alias: App\Chat\Infrastructure\Repository\DoctrineConversationTurnRepository
-
-    App\Chat\Application\PromptBuilder: ~
-    App\Chat\Application\CitationExtractor: ~
     App\Summary\Domain\Text\TextCleaner: ~
-    App\Chat\Domain\Query\QueryFilterExtractor: ~
 
 parameters:
-    monolog_channels:               ['benchmark', 'newsletter', 'chat']
+    monolog_channels:               ['benchmark', 'newsletter']
 
     redis_cache.class:              'App\Infrastructure\Cache\RedisCache'
 

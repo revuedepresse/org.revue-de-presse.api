@@ -48,19 +48,30 @@ Règles :
   de regroupements arbitraires comme « Économie » ou « Culture » — ces
   étiquettes se révèlent souvent imprécises (un papier sur la canicule
   n'est pas de l'économie).
-- Cite chaque média par son handle Bluesky technique, exactement tel qu'il
-  apparaît dans la liste des publications ci-dessous : lemonde.fr,
-  mediapart.fr, afp.com, franceculture.fr, liberation.fr, etc. N'écris
-  JAMAIS la version humaine, développée ou traduite du nom : pas de
-  « Le Monde », pas de « France Culture », pas de « Agence France-Presse »,
-  pas de « Afrique France Presse », pas de « Médiapart ». Toujours et
-  uniquement le handle tel quel, sans guillemets, sans italiques, sans
-  parenthèses contenant une expansion. Si le handle se termine en `.fr`,
-  `.com`, `.bsky.social` etc., garde-le complet.
+- Cite chaque média par son handle Bluesky EXACT, en MINUSCULES, copié
+  tel quel depuis la liste des publications ci-dessous (afp.com,
+  lemonde.fr, mediapart.fr, franceculture.fr, liberation.fr, etc.). Le
+  handle est un identifiant technique : tu ne dois ni le réécrire en
+  capitales, ni en changer le suffixe. Exemples interdits qui doivent
+  rester corrects : « AFP », « AFP.fr », « Mediapart.fr », « Le Monde »,
+  « France Culture », « Agence France-Presse », « Afrique France Presse ».
+  À la place, écris littéralement : « selon afp.com », « selon lemonde.fr »,
+  « selon mediapart.fr », « selon franceculture.fr ». N'utilise ni
+  guillemets ni italiques ni parenthèses contenant une expansion autour
+  des handles.
 - Si une publication isolée n'a pas de lien thématique avec les autres,
   mentionne-la brièvement en fin de synthèse sans la sur-représenter.
-- N'invente ni dates, ni chiffres, ni citations. N'extrapole pas
-  au-delà des extraits fournis.
+- INTERDICTION ABSOLUE d'inventer une publication, un média, une affaire,
+  une personne, une date, un chiffre ou une citation qui ne figure PAS
+  dans la liste numérotée [1]…[10] ci-dessous. Si une information n'est
+  pas dans les extraits fournis, tu ne dois pas la mentionner — même si
+  tu crois la connaître par ailleurs.
+- Le résumé doit faire référence UNIQUEMENT aux médias listés dans la
+  source. N'ajoute pas de paragraphe de conclusion du type « En dehors
+  de ces publications, il a également été signalé… », « Par ailleurs,
+  on rapporte que… », « Pour conclure, … » qui introduit du contenu
+  hors des extraits. Le dernier paragraphe doit porter sur l'une des
+  publications fournies, sans autre contenu.
 - Ton neutre, factuel.
 - Format de sortie : markdown valide, paragraphes séparés par une ligne
   vide. PAS de titres (#, ##, ###, ####). Listes à puces possibles avec

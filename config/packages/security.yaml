@@ -10,12 +10,6 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        chat:
-            pattern: ^/api/chat
-            stateless: true
-            custom_authenticators:
-                - App\Chat\Infrastructure\Security\BlueskyJwtAuthenticator
-
         main:
             provider: member_entity_provider
             stateless: true
@@ -33,7 +27,6 @@ when@prod:
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api/days,                   role: PUBLIC_ACCESS }
-            - { path: ^/api/chat,                   role: ROLE_BSKY_USER }
             - { path: ^/api,                        role: ROLE_USER }
 
 when@dev:
@@ -45,7 +38,6 @@ when@dev:
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api/days,                   role: PUBLIC_ACCESS }
-            - { path: ^/api/chat,                   role: ROLE_BSKY_USER }
             - { path: ^/api,                        role: ROLE_USER }
 
 when@test:
@@ -57,5 +49,4 @@ when@test:
             - { path: ^/api/tiktok/oauth/callback,  role: PUBLIC_ACCESS }
             - { path: ^/api/tiktok/webhook/callback, role: PUBLIC_ACCESS }
             - { path: ^/api/days,                   role: PUBLIC_ACCESS }
-            - { path: ^/api/chat,                   role: ROLE_BSKY_USER }
             - { path: ^/api,                        role: ROLE_USER }

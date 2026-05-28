@@ -1,12 +1,10 @@
 # Symfony AI initiative wiring (pre-1.0, experimental — pinned ^0.9).
 #
-# Fully self-hosted via two host-native llama.cpp servers on the deploy
-# host. Each model gets its own process; PHP reaches them over the Docker
-# Desktop alias `host.docker.internal`:
-#   - llama_chat  → :8081 → Mistral-7B-Instruct-v0.3 (Q5_K_M, Metal)
-#   - llama_embed → :8082 → bge-m3 (FP16, Metal)
+# Self-hosted via a host-native llama.cpp server on the deploy host. PHP
+# reaches it over the Docker Desktop alias `host.docker.internal`:
+#   - llama_chat → :8081 → Mistral-7B-Instruct-v0.3 (Q5_K_M, Metal)
 #
-# Lifecycle, plists, model download and smoke tests live under
+# Lifecycle, plist, model download and smoke tests live under
 # provisioning/llama/. See provisioning/llama/README.md.
 ai:
     platform:
@@ -19,41 +17,4 @@ ai:
                 api_key: 'unused'
                 supports_completions: true
                 supports_embeddings: false
-                model_catalog: App\Chat\Infrastructure\Symfony\Ai\LlamaCppModelCatalog
-            llama_embed:
-                base_url: '%env(default::LLAMA_EMBED_BASE_URL)%'
-                api_key: 'unused'
-                supports_completions: false
-                supports_embeddings: true
-                model_catalog: App\Chat\Infrastructure\Symfony\Ai\LlamaCppModelCatalog
-
-    store:
-        postgres:
-            chat_publications:
-                dbal_connection: doctrine.dbal.default_connection
-                table_name: chat_publication_embedding
-                vector_field: embedding
-                distance: cosine
-                # bge-m3 emits 1024-dim vectors — pgvector's `vector` type
-                # supports HNSW indexing natively up to 2000 dims, so we
-                # use `vector` + `vector_cosine_ops` (no halfvec needed).
-                setup_options:
-                    vector_type: vector
-                    vector_size: 1024
-                    index_method: hnsw
-                    index_opclass: vector_cosine_ops
-
-    vectorizer:
-        chat_publications:
-            platform: ai.platform.generic.llama_embed
-            model: bge-m3
-
-    indexer:
-        chat_publications:
-            store: ai.store.postgres.chat_publications
-            vectorizer: ai.vectorizer.chat_publications
-
-    retriever:
-        chat_publications:
-            store: ai.store.postgres.chat_publications
-            vectorizer: ai.vectorizer.chat_publications
+                model_catalog: App\Summary\Infrastructure\Symfony\Ai\LlamaCppModelCatalog
