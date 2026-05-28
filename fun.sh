@@ -388,8 +388,17 @@ function run_update_version() {
         track_suffix=${latest_tag#"${version_part}"}
         major=$(printf '%s' "${version_part}" | sed -E 's/^v([0-9]+).*/\1/')
         minor=$(printf '%s' "${version_part}" | sed -E 's/^v[0-9]+\.([0-9]+).*/\1/')
-        TAG="v${major}.$((minor + 1)).0${track_suffix}"
-        printf '→ TAG unset; defaulting to next minor: %s (based on latest tag %s)%s' "${TAG}" "${latest_tag}" $'\n'
+        minor=$((minor + 1))
+        TAG="v${major}.${minor}.0${track_suffix}"
+        printf '→ TAG unset; candidate %s (based on latest tag %s)%s' "${TAG}" "${latest_tag}" $'\n'
+        # Bump past any existing collisions so a stale tag in this track
+        # doesn't silently turn the release into a no-op.
+        while git rev-parse --verify --quiet "refs/tags/${TAG}" >/dev/null; do
+            printf '→ %s already exists; trying next minor%s' "${TAG}" $'\n'
+            minor=$((minor + 1))
+            TAG="v${major}.${minor}.0${track_suffix}"
+        done
+        printf '→ using TAG=%s%s' "${TAG}" $'\n'
     fi
     source_tag="${TAG}"
 
