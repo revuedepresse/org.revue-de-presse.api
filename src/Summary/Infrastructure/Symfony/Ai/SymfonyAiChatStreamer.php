@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Chat\Infrastructure\Symfony\Ai;
+namespace App\Summary\Infrastructure\Symfony\Ai;
 
-use App\Chat\Application\Port\ChatStreamer;
+use App\Summary\Application\Port\ChatStreamer;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;

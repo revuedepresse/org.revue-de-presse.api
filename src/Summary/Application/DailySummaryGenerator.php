@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Summary\Application;
 
-use App\Chat\Application\Port\ChatStreamer;
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Application\Port\ChatStreamer;
+use App\Summary\Domain\Text\TextCleaner;
 use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;

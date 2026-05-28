@@ -48,9 +48,9 @@ services:
             $connection: '@doctrine.dbal.default_connection'
             $vectorizer: '@ai.vectorizer.chat_publications'
 
-    App\Chat\Application\Port\ChatStreamer:
-        alias: App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer
-    App\Chat\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer:
+    App\Summary\Application\Port\ChatStreamer:
+        alias: App\Summary\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer
+    App\Summary\Infrastructure\Symfony\Ai\SymfonyAiChatStreamer:
         arguments:
             # Self-hosted via host-native llama-server on the Mac M2
             # (Metal). LLAMA_CHAT_MODEL identifies which model the

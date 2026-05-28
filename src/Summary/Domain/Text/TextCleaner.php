@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Chat\Domain\Text;
+namespace App\Summary\Domain\Text;
 
 /**
  * Pre-embedding hygiene: decode literal \uXXXX escapes, NFC-normalise,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Chat\Application;
 
 use App\Chat\Application\CitationExtractor;
-use App\Chat\Application\Port\ChatStreamer;
+use App\Summary\Application\Port\ChatStreamer;
 use App\Chat\Application\Port\PublicationRetriever;
 use App\Chat\Application\PromptBuilder;
 use App\Chat\Application\RunChatTurn;
@@ -18,7 +18,7 @@ use App\Chat\Domain\Repository\ConversationTurnRepository;
 use App\Chat\Domain\Retrieval\Retrieval;
 use App\Chat\Domain\Retrieval\RetrievalNotice;
 use App\Chat\Domain\Retrieval\RetrievedHit;
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Domain\Text\TextCleaner;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\RateLimiter\Policy\NoLimiter;
 use Symfony\Component\RateLimiter\Policy\Rate;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Chat\Infrastructure\Symfony\Ai;
 
 use App\Chat\Application\PromptBuilder;
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Domain\Text\TextCleaner;
 use App\Chat\Infrastructure\Symfony\Ai\SymfonyAiPublicationEmbedder;
 use App\NewsReview\Domain\Model\HighlightDto;
 use PHPUnit\Framework\TestCase;

@@ -139,7 +139,7 @@ services:
 
     App\Chat\Application\PromptBuilder: ~
     App\Chat\Application\CitationExtractor: ~
-    App\Chat\Domain\Text\TextCleaner: ~
+    App\Summary\Domain\Text\TextCleaner: ~
     App\Chat\Domain\Query\QueryFilterExtractor: ~
 
 parameters:

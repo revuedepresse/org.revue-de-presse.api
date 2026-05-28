@@ -5,7 +5,7 @@ namespace App\Chat\Infrastructure\Symfony\Ai;
 
 use App\Chat\Application\Port\PublicationEmbedder;
 use App\Chat\Application\PromptBuilder;
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Domain\Text\TextCleaner;
 use App\NewsReview\Domain\Model\HighlightDto;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;

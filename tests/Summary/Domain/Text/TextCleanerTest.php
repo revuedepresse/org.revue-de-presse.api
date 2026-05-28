@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Chat\Domain\Text;
+namespace App\Tests\Summary\Domain\Text;
 
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Domain\Text\TextCleaner;
 use PHPUnit\Framework\TestCase;
 
 final class TextCleanerTest extends TestCase

@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Chat\Application;
 
-use App\Chat\Application\Port\ChatStreamer;
+use App\Summary\Application\Port\ChatStreamer;
 use App\Chat\Application\Port\PublicationRetriever;
 use App\Chat\Application\Stream\SseEvent;
 use App\Chat\Domain\Entity\ConversationTurn;
 use App\Chat\Domain\Query\QueryFilterExtractor;
 use App\Chat\Domain\Repository\ConversationRepository;
 use App\Chat\Domain\Repository\ConversationTurnRepository;
-use App\Chat\Domain\Text\TextCleaner;
+use App\Summary\Domain\Text\TextCleaner;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;

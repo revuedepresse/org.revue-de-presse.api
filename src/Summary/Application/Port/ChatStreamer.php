@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Chat\Application\Port;
+namespace App\Summary\Application\Port;
 
 /**
  * Streams a chat completion as a sequence of token deltas.
