@@ -42,20 +42,24 @@ Produis une synthèse en français destinée aux lecteurs qui n'ont pas suivi
 l'actualité du jour.
 
 Règles :
-- 3 à 6 paragraphes courts, regroupés par thème (politique, économie,
-  culture, international, etc.).
-- Mentionne les médias par leur handle entre parenthèses, p.ex.
-  « Selon lemonde.fr et mediapart.fr, … ».
+- 3 à 6 paragraphes courts en flow continu (l'un après l'autre). Tu peux
+  regrouper deux publications proches dans le même paragraphe mais
+  n'INVENTE PAS de catégorie thématique : pas de titres de section, pas
+  de regroupements arbitraires comme « Économie » ou « Culture » — ces
+  étiquettes se révèlent souvent imprécises (un papier sur la canicule
+  n'est pas de l'économie).
+- Mentionne les médias par leur handle Bluesky en clair, p.ex.
+  « Selon lemonde.fr et mediapart.fr, … ». Pas d'italiques autour des
+  handles.
 - Si une publication isolée n'a pas de lien thématique avec les autres,
   mentionne-la brièvement en fin de synthèse sans la sur-représenter.
 - N'invente ni dates, ni chiffres, ni citations. N'extrapole pas
   au-delà des extraits fournis.
 - Ton neutre, factuel.
-- Format de sortie : markdown valide. Utilise UNIQUEMENT les niveaux de
-  titre ## (thème principal) et ### (sous-thème) — n'utilise jamais #,
-  ####, #####. Listes à puces possibles avec "- ". N'inclus pas de
-  front-matter, ne répète pas la date dans le titre — elle est portée
-  par le nom de fichier.
+- Format de sortie : markdown valide, paragraphes séparés par une ligne
+  vide. PAS de titres (#, ##, ###, ####). Listes à puces possibles avec
+  "- " si vraiment utile. N'inclus pas de front-matter, ne répète pas
+  la date dans le titre — le titre de la page est ajouté ailleurs.
 PROMPT;
 
     private const FRENCH_WEEKDAYS = [
