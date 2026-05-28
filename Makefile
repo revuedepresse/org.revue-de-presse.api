@@ -133,7 +133,3 @@ restart-benchmark-stack: stop-benchmark-stack start-benchmark-stack ## Stop the 
 
 update-version: ## Sync repo version with latest git tag, OR `make update-version TAG=vX.Y.Z` to set + create a new tag
 	@/bin/bash -c 'source fun.sh && run_update_version'
-
-# Host-native llama.cpp lifecycle (install / start / stop / smoke).
-# All targets are macOS-only and intended to run on the deploy host.
--include provisioning/llama/Makefile-llama.mk

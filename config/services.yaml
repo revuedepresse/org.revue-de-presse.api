@@ -127,8 +127,6 @@ services:
     App\Newsletter\Infrastructure\Http\Dev\NewsletterPreviewController:
         tags: ['controller.service_arguments']
 
-    App\Summary\Domain\Text\TextCleaner: ~
-
 parameters:
     monolog_channels:               ['benchmark', 'newsletter']
 
