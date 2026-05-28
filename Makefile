@@ -1,9 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install install-hooks migrate phpstan restart start stop test update-version \
-        bench-with-redis bench-without-redis bench-deps \
-        chat-jwt-secret chat-embed-snapshots chat-store-setup chat-store-reset \
-        chat-cache-clear chat-cron-install chat-cron-uninstall
+        bench-with-redis bench-without-redis bench-deps
 
 # Defaults for the highlights perf harness. Override on the command line, e.g.
 #   make bench-with-redis BENCH_CONCURRENCY=32 BENCH_ITERATIONS=400
@@ -73,27 +71,6 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
-
-chat-jwt-secret: ## Generate a fresh 256-bit API_JWT_SECRET; print to stdout (does NOT touch any .env)
-	@/bin/bash -c 'source fun.sh && run_chat_jwt_secret'
-
-chat-embed-snapshots: ## Embed snapshots into pgvector via `bin/console chat:embed-snapshots $(ARGS)`
-	@/bin/bash -c 'source fun.sh && run_chat_embed_snapshots "$(ARGS)"'
-
-chat-store-setup: ## Provision the pgvector publication-embedding store (idempotent — CREATE TABLE IF NOT EXISTS)
-	@/bin/bash -c 'source fun.sh && run_chat_store_setup'
-
-chat-store-reset: ## DROP + recreate the pgvector store from current ai.yaml (destructive — use after changing vector_type / vector_size)
-	@/bin/bash -c 'source fun.sh && run_chat_store_reset'
-
-chat-cache-clear: ## Wipe the api-service Symfony cache (use after editing ai.yaml / services.chat.yaml — --no-debug doesn't auto-invalidate)
-	@/bin/bash -c 'source fun.sh && run_chat_cache_clear'
-
-chat-cron-install: ## Install + enable systemd timer that runs chat:embed-snapshots daily (Linux host w/ systemd; sudo required)
-	@/bin/bash -c 'source fun.sh && run_chat_cron_install'
-
-chat-cron-uninstall: ## Disable the timer and remove the systemd units (sudo required)
-	@/bin/bash -c 'source fun.sh && run_chat_cron_uninstall'
 
 update-version: ## Sync repo version with latest git tag, OR `make update-version TAG=vX.Y.Z` to set + create a new tag
 	@/bin/bash -c 'source fun.sh && run_update_version'
