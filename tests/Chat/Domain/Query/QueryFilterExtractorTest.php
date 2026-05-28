@@ -119,6 +119,38 @@ final class QueryFilterExtractorTest extends TestCase
         self::assertSame('2025-03-31', $filters->dateRange->to->format('Y-m-d'));
     }
 
+    public function testDetectsSummaryIntentFromFrenchPhrasings(): void
+    {
+        $phrases = [
+            'Résume la journée',
+            'Donne-moi un résumé de cette semaine',
+            'Quelle synthèse de mars 2025 ?',
+            'Synthétise les sujets du mois',
+            'Que s\'est-il passé hier',
+            'Quoi de neuf cette semaine',
+            'Donne-moi un aperçu',
+            'Fais un panorama de la semaine',
+        ];
+        foreach ($phrases as $p) {
+            $filters = $this->extractor->extract($p);
+            self::assertTrue($filters->isSummary, "expected summary intent for: {$p}");
+        }
+    }
+
+    public function testDoesNotDetectSummaryIntentForSpecificQuestions(): void
+    {
+        $phrases = [
+            'Que dit Le Monde sur la réforme ?',
+            'Comment Libération a-t-il couvert le sujet ?',
+            'Donne-moi les articles d\'aujourd\'hui',
+            'Compare Le Monde et Mediapart sur le sujet',
+        ];
+        foreach ($phrases as $p) {
+            $filters = $this->extractor->extract($p);
+            self::assertFalse($filters->isSummary, "did NOT expect summary intent for: {$p}");
+        }
+    }
+
     public function testUnknownLanguageReturnsEmptyFilters(): void
     {
         $filters = $this->extractor->extract('Какие новости вчера были?');

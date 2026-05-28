@@ -153,6 +153,46 @@ final class RunChatTurnTest extends TestCase
         self::assertStringContainsString('Tu DOIS commencer ta réponse', $lastUser['content']);
     }
 
+    public function testSummaryIntentSwapsSystemPromptAndRaisesMaxTokens(): void
+    {
+        // When the extractor flags the query as summary-intent, the
+        // assistant turn must run with the synthesis system prompt AND
+        // a raised max_tokens (so 3-6 paragraphs don't get truncated).
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $capture = new MessageCapturingStreamer(['ok']);
+
+        $use_case = $this->makeUseCase($conversations, $turns, new ArrayRetriever([]), $capture);
+        // "Résume la journée d'hier" triggers BOTH summary intent and date filter.
+        iterator_to_array($use_case('did:plc:user', 'Résume la journée d hier'));
+
+        $systemMessage = $capture->lastMessages[0] ?? null;
+        self::assertNotNull($systemMessage);
+        self::assertSame('system', $systemMessage['role']);
+        // Pin a string that ONLY appears in SYSTEM_PROMPT_SUMMARY, not the default.
+        self::assertStringContainsString('synthèse thématique', $systemMessage['content']);
+
+        // max_tokens bumped for synthesis-length answers.
+        self::assertArrayHasKey('max_tokens', $capture->lastOptions);
+        self::assertGreaterThanOrEqual(600, $capture->lastOptions['max_tokens']);
+    }
+
+    public function testNonSummaryIntentKeepsClassicPromptAndUnbumpedMaxTokens(): void
+    {
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $capture = new MessageCapturingStreamer(['ok']);
+
+        $use_case = $this->makeUseCase($conversations, $turns, new ArrayRetriever([]), $capture);
+        iterator_to_array($use_case('did:plc:user', 'Que dit Le Monde sur la réforme ?'));
+
+        $systemMessage = $capture->lastMessages[0] ?? null;
+        self::assertNotNull($systemMessage);
+        // Classic prompt has "Cite chaque affirmation par son numéro entre crochets".
+        self::assertStringContainsString('Cite chaque affirmation', $systemMessage['content']);
+        self::assertArrayNotHasKey('max_tokens', $capture->lastOptions);
+    }
+
     public function testPerUserRateLimitYieldsErrorAndPersistsNothing(): void
     {
         $conversations = new InMemoryConversationRepository();
@@ -464,7 +504,7 @@ final class ScriptedStreamer implements ChatStreamer
         private readonly ?int $completionTokens = null,
     ) {}
 
-    public function stream(array $messages): iterable
+    public function stream(array $messages, array $options = []): iterable
     {
         if ($this->failsImmediately) {
             throw new \RuntimeException('upstream is down');
@@ -500,13 +540,16 @@ final class MessageCapturingStreamer implements ChatStreamer
 {
     /** @var list<array{role: string, content: string}> */
     public array $lastMessages = [];
+    /** @var array{max_tokens?: int} */
+    public array $lastOptions = [];
 
     /** @param list<string> $tokens */
     public function __construct(private readonly array $tokens) {}
 
-    public function stream(array $messages): iterable
+    public function stream(array $messages, array $options = []): iterable
     {
         $this->lastMessages = $messages;
+        $this->lastOptions = $options;
         foreach ($this->tokens as $token) {
             yield $token;
         }

@@ -14,9 +14,13 @@ interface ChatStreamer
 {
     /**
      * @param list<array{role: string, content: string}> $messages
+     * @param array{max_tokens?: int} $options per-call overrides; recognised keys:
+     *   - max_tokens: cap on generated tokens. Use a higher value (~600+)
+     *     for synthesis-style replies. Default platform behaviour applies
+     *     when unset.
      * @return iterable<string> token deltas
      */
-    public function stream(array $messages): iterable;
+    public function stream(array $messages, array $options = []): iterable;
 
     /**
      * Provider that handled the last `stream()` call. Useful for the

@@ -24,7 +24,17 @@ class RunChatTurn
 {
     private const HISTORY_TURN_LIMIT = 6;
     private const RETRIEVAL_K = 8;
+    /** Wider net for summary-intent queries — needs to span a day/week of stories. */
+    private const RETRIEVAL_K_SUMMARY = 20;
     private const COSINE_DISTANCE_CUTOFF = 0.6;
+    /**
+     * Token budget for summary-mode replies. The classic 2-5 sentence reply
+     * comfortably fits in ~200 tokens; a thematic 3-6 paragraph synthesis
+     * needs ~500-700. We don't cap normal replies (let the platform default
+     * decide); we do raise the floor for summary mode so multi-paragraph
+     * answers don't get truncated.
+     */
+    private const SUMMARY_MAX_TOKENS = 700;
 
     private readonly LoggerInterface $logger;
 
@@ -90,7 +100,8 @@ class RunChatTurn
         // the exception bubble up as a 500.
         try {
             $filters = $this->filterExtractor->extract($cleaned);
-            $retrieval = $this->retriever->retrieve($cleaned, self::RETRIEVAL_K, $filters);
+            $k = $filters->isSummary ? self::RETRIEVAL_K_SUMMARY : self::RETRIEVAL_K;
+            $retrieval = $this->retriever->retrieve($cleaned, $k, $filters);
         } catch (\Throwable $e) {
             $this->logger->error('chat.retrieval.failed', [
                 'error' => $e::class,
@@ -112,7 +123,7 @@ class RunChatTurn
             'distance_max' => $hits !== [] ? $hits[count($hits) - 1]->distance : null,
         ]);
 
-        $messages = [['role' => 'system', 'content' => $this->promptBuilder->systemPrompt()]];
+        $messages = [['role' => 'system', 'content' => $this->promptBuilder->systemPrompt($filters->isSummary)]];
         foreach ($this->turns->lastTurns($conversation, self::HISTORY_TURN_LIMIT) as $past) {
             if ($past->id()->equals($userTurn->id())) {
                 continue;
@@ -133,8 +144,9 @@ class RunChatTurn
         $firstTokenSeen = false;
         $truncated = false;
 
+        $streamOptions = $filters->isSummary ? ['max_tokens' => self::SUMMARY_MAX_TOKENS] : [];
         try {
-            foreach ($this->streamer->stream($messages) as $delta) {
+            foreach ($this->streamer->stream($messages, $streamOptions) as $delta) {
                 $accumulator .= $delta;
                 $firstTokenSeen = true;
                 yield SseEvent::token($delta);

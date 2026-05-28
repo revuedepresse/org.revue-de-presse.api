@@ -131,7 +131,41 @@ final class QueryFilterExtractor
         return new QueryFilters(
             dateRange: $this->extractDateRange($folded),
             screenNames: $this->extractOutlets($folded),
+            isSummary: $this->detectSummaryIntent($folded),
         );
+    }
+
+    /**
+     * Detect a "give me an overview" intent vs a specific question. Folded
+     * means lowercase + ASCII-transliterated, so we match against
+     * "resume"/"resumee" (decoding of "résumé") etc.
+     *
+     * Substring matches are deliberately broad: a query like "Que s'est-il
+     * passé hier" or "Quoi de neuf cette semaine" should fire. False
+     * positives that look like a specific question keep the system prompt's
+     * cite-everything rule, which is fine — Mistral handles both styles.
+     */
+    private function detectSummaryIntent(string $folded): bool
+    {
+        $triggers = [
+            'resume',          // matches "résume", "résumé", "résumer"
+            'synthese',        // "synthèse"
+            'syntheti',        // "synthétise(r)"
+            'apercu',          // "aperçu"
+            'panorama',
+            'que s\'est-il passe',  // "que s'est-il passé"
+            'que s est il passe',
+            'que se passe-t-il',
+            'que se passe t il',
+            'quoi de neuf',
+        ];
+        foreach ($triggers as $needle) {
+            if (str_contains($folded, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function fold(string $value): string

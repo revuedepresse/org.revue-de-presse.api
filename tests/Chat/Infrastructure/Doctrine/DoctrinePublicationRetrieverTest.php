@@ -284,6 +284,37 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         self::assertSame(2, count($conn->allSql));
     }
 
+    public function testSummaryModeUsesPopularityRerankAndOutletQuota(): void
+    {
+        // When isSummary=true, the retrieval SQL must:
+        //   1. Diversify outlets via a window function so one outlet can't
+        //      dominate (ROW_NUMBER PARTITION BY screen_name <= 3).
+        //   2. Blend popularity (reposts + likes) into ranking so the day's
+        //      "big stories" rise above merely-most-similar ones.
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 20, new QueryFilters(isSummary: true));
+
+        // SQL pins for summary mode — these are intentionally specific so a
+        // future rewrite has to think about what changes.
+        self::assertStringContainsString('ROW_NUMBER() OVER', $conn->lastSql);
+        self::assertStringContainsString("PARTITION BY metadata->>'screen_name'", $conn->lastSql);
+        self::assertStringContainsString('reposts', $conn->lastSql);
+        self::assertStringContainsString('likes', $conn->lastSql);
+    }
+
+    public function testNonSummaryModeKeepsTheClassicSingleSelect(): void
+    {
+        // Regression: the summary-mode CTE must NOT activate for normal queries.
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters(isSummary: false));
+
+        self::assertStringNotContainsString('ROW_NUMBER() OVER', $conn->lastSql);
+    }
+
     public function testNoFallbackWhenOnlyFilterIsScreenName(): void
     {
         // Without a date filter to drop, fallback would mean dropping the

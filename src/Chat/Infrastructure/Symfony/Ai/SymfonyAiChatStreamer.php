@@ -28,7 +28,7 @@ final class SymfonyAiChatStreamer implements ChatStreamer
     ) {
     }
 
-    public function stream(array $messages): iterable
+    public function stream(array $messages, array $options = []): iterable
     {
         $bag = new MessageBag();
         foreach ($messages as $message) {
@@ -39,7 +39,11 @@ final class SymfonyAiChatStreamer implements ChatStreamer
             };
         }
 
-        $deferred = $this->platform->invoke($this->model, $bag, ['stream' => true]);
+        $invokeOptions = ['stream' => true];
+        if (isset($options['max_tokens']) && $options['max_tokens'] > 0) {
+            $invokeOptions['max_tokens'] = $options['max_tokens'];
+        }
+        $deferred = $this->platform->invoke($this->model, $bag, $invokeOptions);
 
         foreach ($deferred->asTextStream() as $delta) {
             yield $delta->getText();

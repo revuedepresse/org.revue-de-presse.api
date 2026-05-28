@@ -27,6 +27,30 @@ Règles strictes :
 - N'invente ni dates, ni chiffres, ni citations.
 PROMPT;
 
+    /**
+     * System prompt for summary-intent queries ("résume la semaine", "quoi
+     * de neuf"). The cite-everything pressure is relaxed in favour of
+     * synthesis: regroup extracts by theme, name the outlets, [N] markers
+     * are optional. Keeps Mistral from emitting an enumerated 1-per-line
+     * list when the user just wanted an overview.
+     */
+    private const SYSTEM_PROMPT_SUMMARY = <<<'PROMPT'
+Tu es un assistant qui résume la revue de presse française, fondée sur les
+publications les plus relayées sur Bluesky chaque jour.
+
+Règles pour ce résumé :
+- Donne une synthèse thématique en 3 à 6 paragraphes courts, regroupés par
+  sujet (politique, économie, culture, international, etc.).
+- Mentionne les médias qui ont relayé chaque sujet, p.ex.
+  « Selon Le Monde et Mediapart, … ».
+- Tu peux utiliser des marqueurs [N] pour appuyer une affirmation précise,
+  mais ce n'est pas obligatoire ; la lisibilité prime.
+- Reste fidèle aux extraits : n'invente ni dates, ni chiffres, ni citations.
+  Si un sujet apparaît dans un seul extrait, mentionne-le brièvement sans le
+  surévaluer.
+- Réponds toujours en français, ton neutre et journalistique.
+PROMPT;
+
     private const FRENCH_WEEKDAYS = [
         'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche',
     ];
@@ -46,9 +70,9 @@ PROMPT;
         12 => 'décembre',
     ];
 
-    public function systemPrompt(): string
+    public function systemPrompt(bool $isSummary = false): string
     {
-        return self::SYSTEM_PROMPT;
+        return $isSummary ? self::SYSTEM_PROMPT_SUMMARY : self::SYSTEM_PROMPT;
     }
 
     /**

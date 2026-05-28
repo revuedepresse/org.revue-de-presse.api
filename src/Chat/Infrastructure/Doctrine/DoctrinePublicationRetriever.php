@@ -52,6 +52,19 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
      */
     private const RECENCY_BIAS_LAMBDA_PER_30_DAYS = 0.10;
 
+    /**
+     * Summary-mode constraints:
+     *   - max rows per outlet (avoids one outlet dominating a day's recap)
+     *   - popularity weight: blend cosine distance with a popularity term
+     *     `(1 - tanh((reposts + likes/2) / 50))` so a moderately-far hit
+     *     with 100 reposts beats a nearby hit with 0 reposts. Tanh keeps
+     *     the bonus bounded — runaway popularity (1000+ reposts) can't
+     *     wipe out the semantic signal entirely.
+     */
+    private const SUMMARY_OUTLET_QUOTA = 3;
+    private const SUMMARY_POPULARITY_LAMBDA = 0.20;
+    private const SUMMARY_POPULARITY_SCALE = 50.0;
+
     public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): Retrieval
     {
         $vector = $this->vectorizer->vectorize($cleanedQuery);
@@ -129,6 +142,16 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
 
         $whereClause = $where === [] ? '' : 'WHERE ' . implode(' AND ', $where);
 
+        // Summary mode rewrites the whole query: instead of `SELECT ... ORDER
+        // BY cosine LIMIT k`, we run a CTE that ranks candidates per outlet
+        // (ROW_NUMBER), keeps the top N per outlet, then orders the
+        // survivors by a popularity-blended score. This is how the user
+        // gets a thematic recap with varied outlets and the day's big
+        // stories, not 20 humanite.fr posts sorted by cosine.
+        if ($filters->isSummary) {
+            return $this->runSummaryQuery($queryVec, $k, $params, $types, $whereClause);
+        }
+
         // Recency-biased ORDER BY only when the user didn't pin a date window.
         // GREATEST(0, ...) clamps future-dated rows (just in case) to no bonus.
         //
@@ -177,6 +200,86 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
                 avatarUrl: isset($r['avatar_url']) && $r['avatar_url'] !== '' ? (string) $r['avatar_url'] : null,
             ),
             $rows,
+        );
+    }
+
+    /**
+     * Summary-mode SQL. Over-fetches via a CTE (4×k semantic neighbours),
+     * keeps at most SUMMARY_OUTLET_QUOTA per outlet, then orders survivors
+     * by `cosine - λ * popularity(reposts, likes)`.
+     *
+     * @param array<string, mixed>             $params
+     * @param array<string, ParameterType|ArrayParameterType|int> $types
+     *
+     * @return list<RetrievedHit>
+     */
+    private function runSummaryQuery(
+        string $queryVec,
+        int $k,
+        array $params,
+        array $types,
+        string $whereClause,
+    ): array {
+        $quota = self::SUMMARY_OUTLET_QUOTA;
+        $lambda = self::SUMMARY_POPULARITY_LAMBDA;
+        $scale = self::SUMMARY_POPULARITY_SCALE;
+        // 4× over-fetch ensures the per-outlet quota still leaves enough
+        // candidates after the filter (a 20-cap user request needs ~80
+        // candidates to draw from across ~7 outlets).
+        $overFetch = $k * 4;
+        $params['summary_pool'] = $overFetch;
+        $types['summary_pool'] = ParameterType::INTEGER;
+
+        $sql = <<<SQL
+            WITH candidates AS (
+                SELECT
+                    metadata->>'publication_id' AS publication_id,
+                    metadata->>'screen_name'    AS screen_name,
+                    metadata->>'snapshot_date'  AS snapshot_date,
+                    metadata->>'url'            AS url,
+                    metadata->>'avatar_url'     AS avatar_url,
+                    COALESCE(metadata->>'_text', metadata->>'content', '') AS text,
+                    COALESCE((metadata->>'reposts')::int, 0) AS reposts,
+                    COALESCE((metadata->>'likes')::int, 0)   AS likes,
+                    COALESCE((metadata->>'replies')::int, 0) AS replies,
+                    (embedding <=> CAST(:query_vec AS vector)) AS distance,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY metadata->>'screen_name'
+                        ORDER BY embedding <=> CAST(:query_vec AS vector)
+                    ) AS outlet_rank
+                FROM {$this->table()}
+                {$whereClause}
+                ORDER BY embedding <=> CAST(:query_vec AS vector)
+                LIMIT :summary_pool
+            )
+            SELECT *
+            FROM candidates
+            WHERE outlet_rank <= {$quota}
+            ORDER BY distance - {$lambda} * tanh(((reposts + likes / 2.0) / {$scale}))
+            LIMIT :limit
+            SQL;
+
+        $rows = $this->connection->executeQuery($sql, $params, $types)->fetchAllAssociative();
+
+        return array_map([$this, 'rowToHit'], $rows);
+    }
+
+    /**
+     * @param array<string, mixed> $r
+     */
+    private function rowToHit(array $r): RetrievedHit
+    {
+        return new RetrievedHit(
+            publicationId: (string) ($r['publication_id'] ?? ''),
+            screenName: (string) ($r['screen_name'] ?? ''),
+            snapshotDate: (string) ($r['snapshot_date'] ?? ''),
+            url: (string) ($r['url'] ?? ''),
+            text: (string) ($r['text'] ?? ''),
+            reposts: (int) ($r['reposts'] ?? 0),
+            likes: (int) ($r['likes'] ?? 0),
+            distance: max(0.0, (float) ($r['distance'] ?? 1.0)),
+            replies: (int) ($r['replies'] ?? 0),
+            avatarUrl: isset($r['avatar_url']) && $r['avatar_url'] !== '' ? (string) $r['avatar_url'] : null,
         );
     }
 
