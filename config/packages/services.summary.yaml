@@ -20,3 +20,7 @@ services:
     App\Summary\Application\DailySummaryGenerator: ~
 
     App\Summary\Infrastructure\Console\GenerateDailySummariesCommand: ~
+
+    # API Platform read side
+    App\Summary\Infrastructure\ApiPlatform\State\SummaryProvider:
+        tags: ['api_platform.state_provider']
