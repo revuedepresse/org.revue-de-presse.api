@@ -31,8 +31,6 @@
         "doctrine/inflector": "^2.0",
         "doctrine/orm": "^3",
         "guzzlehttp/guzzle": "^7.4",
-        "lcobucci/clock": "^3.6",
-        "lcobucci/jwt": "^5.4",
         "nelmio/cors-bundle": "^2.5",
         "predis/predis": "^1.1",
         "symfony/cache": "^7.4",

@@ -161,9 +161,6 @@
     "kreait/firebase-tokens": {
         "version": "1.10.0"
     },
-    "lcobucci/clock": {
-        "version": "2.3.x-dev"
-    },
     "monolog/monolog": {
         "version": "2.x-dev"
     },
