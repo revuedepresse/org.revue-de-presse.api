@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Infrastructure\RateLimit;
+namespace App\Tests\Security\Infrastructure\Http;
 
-use App\Infrastructure\RateLimit\RateLimitSubscriber;
+use App\Security\Infrastructure\Http\RateLimitSubscriber;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;

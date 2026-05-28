@@ -46,7 +46,7 @@ services:
         tags:
             - { name: kernel.event_subscriber }
 
-    App\Infrastructure\RateLimit\RateLimitSubscriber:
+    App\Security\Infrastructure\Http\RateLimitSubscriber:
         arguments:
             $tokenMintLimiterFactory:  '@limiter.token_mint'
             $highlightsLimiterFactory: '@limiter.highlights'

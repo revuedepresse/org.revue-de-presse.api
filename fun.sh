@@ -9,8 +9,10 @@ function build() {
     local PROJECT
     local PROJECT_OWNER_UID
     local PROJECT_OWNER_GID
+    local HOST_OS
 
     load_configuration_parameters
+    HOST_OS="$(uname)"
 
     if [ -n "${DEBUG}" ];
     then
@@ -23,6 +25,7 @@ function build() {
             --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
             --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
             --build-arg "PROJECT=${PROJECT}" \
+            --build-arg "HOST_OS=${HOST_OS}" \
             app \
             cache \
             service
@@ -36,6 +39,7 @@ function build() {
             --build-arg "OWNER_UID=${PROJECT_OWNER_UID}" \
             --build-arg "OWNER_GID=${PROJECT_OWNER_GID}" \
             --build-arg "PROJECT=${PROJECT}" \
+            --build-arg "HOST_OS=${HOST_OS}" \
             app \
             cache \
             service
@@ -353,72 +357,6 @@ function run_bench_without_redis() {
     run_bench_highlights 1
 }
 
-function run_php_worker_build() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            build php-worker'
-}
-
-function run_php_worker_start() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            up --detach php-worker'
-}
-
-function run_php_worker_stop() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            stop php-worker'
-}
-
-function run_php_worker_logs() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            logs --follow --tail=200 php-worker'
-}
-
-function run_reverse_proxy_build() {
-    # Traefik has no local build context — `build` would be a no-op.
-    # `pull` actually fetches the published image so a subsequent
-    # `run_reverse_proxy_start` doesn't have to.
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            pull reverse-proxy'
-}
-
-function run_reverse_proxy_start() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            up --detach reverse-proxy'
-}
-
-function run_reverse_proxy_stop() {
-    /bin/bash -c 'set -a; source ./.env.local; set +a; \
-        docker compose \
-            -f ./provisioning/containers/docker-compose.yaml \
-            -f ./provisioning/containers/docker-compose.override.yaml \
-            --profile frankenphp \
-            stop reverse-proxy'
-}
-
 function run_update_version() {
     local repo_file
     local source_tag
@@ -506,42 +444,6 @@ function run_update_version() {
     fi
 }
 
-function run_reverse_proxy_password() {
-    local user="${1:-admin}"
-    local password
-    local hash
-    local htpasswd_file='./var/etc/letsencrypt/htpasswd'
-
-    # 24-char URL-safe random password — plenty for a local dashboard.
-    password=$(openssl rand -base64 32 | tr -d '\n=+/' | head -c 24)
-
-    if command -v htpasswd >/dev/null 2>&1; then
-        hash=$(htpasswd -nbB "${user}" "${password}" | tr -d '\n')
-    else
-        # Fall back to the httpd image — a few-MB pull, runs offline after.
-        hash=$(docker run --rm httpd:2.4-alpine \
-            htpasswd -nbB "${user}" "${password}" | tr -d '\n')
-    fi
-
-    if [ -z "${hash}" ]; then
-        printf '✗ Failed to generate htpasswd hash%s' $'\n' 1>&2
-        return 1
-    fi
-
-    # Single-user dashboard — overwrite the file so re-running the target
-    # rotates credentials cleanly. Edit the file by hand if you want
-    # multiple users (one user:hash line each).
-    mkdir -p "$(dirname "${htpasswd_file}")"
-    printf '%s\n' "${hash}" > "${htpasswd_file}"
-
-    printf '%s%s' '✓ Wrote new Traefik dashboard credentials to '"${htpasswd_file}" $'\n'
-    printf '  %-9s %s%s' 'user:'     "${user}"     $'\n'
-    printf '  %-9s %s%s' 'password:' "${password}" $'\n'
-    printf '%s%s' '  (save the password somewhere — only the bcrypt hash is stored on disk)' $'\n'
-    printf '%s%s' '' $'\n'
-    printf '%s%s' '→ Traefik picks up the new file automatically (file provider watch=true).' $'\n'
-}
-
 function run_php_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
 
@@ -610,11 +512,9 @@ SCRIPT
 function stop() {
     load_configuration_parameters
 
-    # Stop only the FPM-stack services. `cache` is a baseline service
-    # shared with the opt-in php-worker / reverse-proxy stack — wiping
-    # the project with `down` would kill Redis for them too, leaving the
-    # benchmark harness in a degraded "cache=error" state. Naming the
-    # FPM services explicitly here keeps the two stacks independent.
+    # Stop the FPM-stack services explicitly rather than `down`-ing the
+    # project, so the shared `cache` (Redis) used by the benchmark
+    # harness stays up between runs.
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \

@@ -183,7 +183,11 @@ function install_service_requirements() {
     install_php_extensions
     clear_package_management_system_cache
 
-    if [ -e /start.sh ];
+    # Docker Desktop on macOS bind-mounts /start.sh through gRPC-FUSE /
+    # virtiofs; chown/chmod against it either no-op or surface confusing
+    # errors. Skip when the host is Darwin and trust the COPY --chown=…
+    # already performed in the Dockerfile.
+    if [ -e /start.sh ] && [ "${HOST_OS:-}" != "Darwin" ];
     then
 
           chown \
