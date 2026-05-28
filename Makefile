@@ -1,10 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: help build clean clear-app-cache clear-cache install install-hooks migrate phpstan restart start stop test update-version \
-        bench-with-redis bench-without-redis bench-deps reverse-proxy-password \
-        php-worker-build php-worker-start php-worker-stop php-worker-logs \
-        reverse-proxy-build reverse-proxy-start reverse-proxy-stop \
-        start-benchmark-stack stop-benchmark-stack restart-benchmark-stack \
+        bench-with-redis bench-without-redis bench-deps \
         chat-jwt-secret chat-embed-snapshots chat-store-setup chat-store-reset \
         chat-cache-clear chat-cron-install chat-cron-uninstall
 
@@ -77,30 +74,6 @@ bench-with-redis: ## Run the highlights perf harness with Redis cache active (no
 bench-without-redis: ## Run the highlights perf harness with Redis bypassed (x-benchmark header)
 	@/bin/bash -c 'source fun.sh && run_bench_without_redis'
 
-php-worker-build: ## Build the php-worker image (FrankenPHP under the hood; compose profile `frankenphp`)
-	@/bin/bash -c 'source fun.sh && run_php_worker_build'
-
-php-worker-start: php-worker-build ## Start the php-worker container, detached (rebuilds the image first)
-	@/bin/bash -c 'source fun.sh && run_php_worker_start'
-
-php-worker-stop: ## Stop the php-worker container (kept around for log inspection)
-	@/bin/bash -c 'source fun.sh && run_php_worker_stop'
-
-php-worker-logs: ## Tail php-worker logs
-	@/bin/bash -c 'source fun.sh && run_php_worker_logs'
-
-reverse-proxy-build: ## Pull the reverse-proxy image (Traefik; compose profile `frankenphp`)
-	@/bin/bash -c 'source fun.sh && run_reverse_proxy_build'
-
-reverse-proxy-start: reverse-proxy-build ## Start the reverse-proxy container, detached (pulls fresh image first; depends_on php-worker)
-	@/bin/bash -c 'source fun.sh && run_reverse_proxy_start'
-
-reverse-proxy-stop: ## Stop the reverse-proxy container (kept around for log inspection)
-	@/bin/bash -c 'source fun.sh && run_reverse_proxy_stop'
-
-reverse-proxy-password: ## Generate a random TRAEFIK_DASHBOARD_USERS line; copy it into .env.local manually
-	@/bin/bash -c 'source fun.sh && run_reverse_proxy_password "${TRAEFIK_USER:-admin}"'
-
 chat-jwt-secret: ## Generate a fresh 256-bit API_JWT_SECRET; print to stdout (does NOT touch any .env)
 	@/bin/bash -c 'source fun.sh && run_chat_jwt_secret'
 
@@ -121,15 +94,6 @@ chat-cron-install: ## Install + enable systemd timer that runs chat:embed-snapsh
 
 chat-cron-uninstall: ## Disable the timer and remove the systemd units (sudo required)
 	@/bin/bash -c 'source fun.sh && run_chat_cron_uninstall'
-
-start-benchmark-stack: php-worker-start reverse-proxy-start ## Build (if needed) and start the full benchmark stack (php-worker + reverse-proxy)
-	@printf '✅ Benchmark stack up — php-worker + reverse-proxy detached.%s' $$'\n'
-
-stop-benchmark-stack: reverse-proxy-stop php-worker-stop ## Stop the full benchmark stack (reverse-proxy first, then php-worker)
-	@printf '✅ Benchmark stack stopped — containers retained for log inspection.%s' $$'\n'
-
-restart-benchmark-stack: stop-benchmark-stack start-benchmark-stack ## Stop the benchmark stack and start it back up (rebuilds if needed)
-	@printf '✅ Benchmark stack restarted.%s' $$'\n'
 
 update-version: ## Sync repo version with latest git tag, OR `make update-version TAG=vX.Y.Z` to set + create a new tag
 	@/bin/bash -c 'source fun.sh && run_update_version'
