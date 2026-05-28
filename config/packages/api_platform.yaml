@@ -7,6 +7,7 @@ api_platform:
             - '%kernel.project_dir%/src/Security/Infrastructure/ApiPlatform/Resource'
             - '%kernel.project_dir%/src/NewsReview/Infrastructure/ApiPlatform/Resource'
             - '%kernel.project_dir%/src/Chat/Infrastructure/ApiPlatform/Resource'
+            - '%kernel.project_dir%/src/Summary/Infrastructure/ApiPlatform/Resource'
     formats:
         jsonld: ['application/ld+json']
         json:   ['application/json']
