@@ -20,6 +20,16 @@ services:
 
     App\Security\Infrastructure\ApiPlatform\State\TokenProcessor: ~
 
+    App\Security\Domain\DeviceTokenMinter:
+        arguments:
+            $store:          '@App\Security\Domain\AccessTokenStore'
+            $deviceMemberId: '%env(string:DEVICE_MEMBER_ID)%'
+            $ttlSeconds:     900
+
+    App\Security\Infrastructure\ApiPlatform\State\DeviceTokenProcessor:
+        arguments:
+            $minter: '@App\Security\Domain\DeviceTokenMinter'
+
     # NewsReview wiring (Highlight resource)
     App\NewsReview\Domain\Snapshot\SnapshotReader:
         class: App\NewsReview\Infrastructure\Repository\FilesystemSnapshotReader
@@ -48,9 +58,10 @@ services:
 
     App\Security\Infrastructure\Http\RateLimitSubscriber:
         arguments:
-            $tokenMintLimiterFactory:  '@limiter.token_mint'
-            $highlightsLimiterFactory: '@limiter.highlights'
-            $docsLimiterFactory:       '@limiter.docs'
+            $tokenMintLimiterFactory:        '@limiter.token_mint'
+            $deviceTokenMintLimiterFactory:  '@limiter.device_token_mint'
+            $highlightsLimiterFactory:       '@limiter.highlights'
+            $docsLimiterFactory:             '@limiter.docs'
             $logger: '@logger'
             $enabled: '%env(bool:RATE_LIMIT_ENABLED)%'
         tags:
