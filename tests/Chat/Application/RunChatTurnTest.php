@@ -149,8 +149,8 @@ final class RunChatTurnTest extends TestCase
         ));
         self::assertNotSame([], $userMessages, 'streamer must have received a user message');
         $lastUser = end($userMessages);
-        self::assertStringContainsString('Note : la période demandée', $lastUser['content']);
-        self::assertStringContainsString('Mentionne brièvement cette limite', $lastUser['content']);
+        self::assertStringContainsString('Instruction prioritaire', $lastUser['content']);
+        self::assertStringContainsString('Tu DOIS commencer ta réponse', $lastUser['content']);
     }
 
     public function testPerUserRateLimitYieldsErrorAndPersistsNothing(): void

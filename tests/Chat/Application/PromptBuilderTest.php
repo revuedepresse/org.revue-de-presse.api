@@ -74,15 +74,15 @@ final class PromptBuilderTest extends TestCase
         // the explanation in context. We assert both the explanation and
         // the instruction to mention it in the reply.
         self::assertStringContainsString(
-            "Note : la période demandée ne contient aucune publication",
+            "Instruction prioritaire : la période demandée ne contient aucune publication",
             $msg,
         );
         self::assertStringContainsString(
-            "Mentionne brièvement cette limite dans ta réponse.",
+            "Tu DOIS commencer ta réponse par une phrase indiquant cette limitation",
             $msg,
         );
         // Note appears before "Extraits", which appears before "Question".
-        $notePos = strpos($msg, 'Note :');
+        $notePos = strpos($msg, 'Instruction prioritaire');
         $extractsPos = strpos($msg, 'Extraits');
         $questionPos = strpos($msg, 'Question :');
         self::assertNotFalse($notePos);
@@ -102,7 +102,7 @@ final class PromptBuilderTest extends TestCase
             RetrievalNotice::DATE_FILTER_RELAXED,
         );
 
-        self::assertStringContainsString('Note :', $msg);
+        self::assertStringContainsString('Instruction prioritaire', $msg);
         self::assertStringContainsString('Question :', $msg);
         self::assertStringNotContainsString('Extraits', $msg);
     }

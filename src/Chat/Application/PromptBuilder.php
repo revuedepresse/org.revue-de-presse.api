@@ -88,9 +88,11 @@ PROMPT;
 
         return match ($notice) {
             RetrievalNotice::DATE_FILTER_RELAXED =>
-                "Note : la période demandée ne contient aucune publication correspondante. "
-                . "Les extraits ci-dessous proviennent du même média mais d'autres dates. "
-                . "Mentionne brièvement cette limite dans ta réponse.",
+                "Instruction prioritaire : la période demandée ne contient aucune publication "
+                . "du média. Les extraits ci-dessous proviennent du même média mais hors de cette "
+                . "période. Tu DOIS commencer ta réponse par une phrase indiquant cette limitation, "
+                . "p.ex. « Ce média n'a rien publié sur la période demandée ; voici ses publications "
+                . "plus anciennes : ». Ensuite seulement, résume les extraits.",
         };
     }
 
