@@ -89,6 +89,10 @@ final class SymfonyAiPublicationRetriever implements PublicationRetriever
                 reposts: isset($rawMeta['reposts']) && \is_int($rawMeta['reposts']) ? $rawMeta['reposts'] : 0,
                 likes: isset($rawMeta['likes']) && \is_int($rawMeta['likes']) ? $rawMeta['likes'] : 0,
                 distance: $distance,
+                replies: isset($rawMeta['replies']) && \is_int($rawMeta['replies']) ? $rawMeta['replies'] : 0,
+                avatarUrl: isset($rawMeta['avatar_url']) && \is_string($rawMeta['avatar_url']) && $rawMeta['avatar_url'] !== ''
+                    ? $rawMeta['avatar_url']
+                    : null,
             );
 
             if (\count($hits) >= $k) {

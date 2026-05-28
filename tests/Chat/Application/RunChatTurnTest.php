@@ -67,6 +67,55 @@ final class RunChatTurnTest extends TestCase
         self::assertFalse($turns->appended[1]->truncated());
     }
 
+    public function testCitationsExposeAllFieldsRequiredByPostCardAndAreTextCleaned(): void
+    {
+        // The Nuxt "sources citées" panel renders each citation through
+        // BlueskyPostCard (same component as the homepage). The card needs
+        // authorName / authorHandle / authorAvatarUrl / metrics — surface
+        // them in the SSE `done` payload. Defensively re-clean text so a
+        // legacy row with embedded \n or NBSP can't leak into the UI.
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $hit = new RetrievedHit(
+            publicationId: 'at://pub-1',
+            screenName: 'lemonde.fr',
+            snapshotDate: '2025-03-04',
+            url: 'https://bsky.app/profile/lemonde.fr/post/abc',
+            // Deliberately dirty input: CR, LF, NBSP, BOM, runs of spaces.
+            // After cleaning these must NOT appear in citations[0]['text'].
+            text: "Donald Trump\u{00A0}gèle\nl'aide  militaire\u{FEFF}",
+            reposts: 73,
+            likes: 169,
+            replies: 12,
+            avatarUrl: 'https://cdn.bsky.app/img/avatar/lemonde.jpg',
+            distance: 0.12,
+        );
+        $retriever = new ArrayRetriever([$hit]);
+        $streamer = new ScriptedStreamer(['Voir [1].'], provider: 'mistral');
+
+        $use_case = $this->makeUseCase($conversations, $turns, $retriever, $streamer);
+        $events = iterator_to_array($use_case('did:plc:user', 'Que dit Le Monde ?'));
+
+        $done = end($events);
+        self::assertSame('done', $done->type);
+        $citation = $done->data['citations'][0];
+
+        self::assertSame('at://pub-1', $citation['publicationId']);
+        self::assertSame('lemonde.fr', $citation['screenName']);
+        self::assertSame('2025-03-04', $citation['snapshotDate']);
+        self::assertSame('https://bsky.app/profile/lemonde.fr/post/abc', $citation['url']);
+        self::assertSame('https://cdn.bsky.app/img/avatar/lemonde.jpg', $citation['avatarUrl']);
+        self::assertSame(73, $citation['reposts']);
+        self::assertSame(169, $citation['likes']);
+        self::assertSame(12, $citation['replies']);
+
+        // Text is fully cleaned: no \n, no NBSP, no BOM, single spaces.
+        self::assertSame("Donald Trump gèle l'aide militaire", $citation['text']);
+        self::assertStringNotContainsString("\n", $citation['text']);
+        self::assertStringNotContainsString("\u{00A0}", $citation['text']);
+        self::assertStringNotContainsString("\u{FEFF}", $citation['text']);
+    }
+
     public function testPerUserRateLimitYieldsErrorAndPersistsNothing(): void
     {
         $conversations = new InMemoryConversationRepository();

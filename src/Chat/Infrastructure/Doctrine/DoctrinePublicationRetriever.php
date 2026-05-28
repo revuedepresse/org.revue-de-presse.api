@@ -79,9 +79,11 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
                 metadata->>'screen_name'    AS screen_name,
                 metadata->>'snapshot_date'  AS snapshot_date,
                 metadata->>'url'            AS url,
+                metadata->>'avatar_url'     AS avatar_url,
                 COALESCE(metadata->>'_text', metadata->>'content', '') AS text,
-                (metadata->>'reposts')::int AS reposts,
-                (metadata->>'likes')::int   AS likes,
+                COALESCE((metadata->>'reposts')::int, 0) AS reposts,
+                COALESCE((metadata->>'likes')::int, 0)   AS likes,
+                COALESCE((metadata->>'replies')::int, 0) AS replies,
                 (embedding <=> CAST(:query_vec AS vector)) AS distance
             FROM {$this->table()}
             {$whereClause}
@@ -101,6 +103,8 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
                 reposts: (int) ($r['reposts'] ?? 0),
                 likes: (int) ($r['likes'] ?? 0),
                 distance: max(0.0, (float) ($r['distance'] ?? 1.0)),
+                replies: (int) ($r['replies'] ?? 0),
+                avatarUrl: isset($r['avatar_url']) && $r['avatar_url'] !== '' ? (string) $r['avatar_url'] : null,
             ),
             $rows,
         );

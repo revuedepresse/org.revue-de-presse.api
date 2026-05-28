@@ -26,8 +26,11 @@ final class TextCleaner
         // 3. Strip C0/C1 control characters except TAB; collapses newlines.
         $stripped = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/u', ' ', $normalised) ?? $normalised;
 
-        // 4. Collapse runs of whitespace (incl. NBSP \xA0) to single spaces.
-        $collapsed = preg_replace('/[\s\x{00A0}]+/u', ' ', $stripped) ?? $stripped;
+        // 4. Collapse runs of whitespace (incl. NBSP \xA0, zero-width
+        // family \x{200B}-\x{200D}, BOM \x{FEFF}) to single spaces. PHP's
+        // \s misses the zero-width / BOM characters but they read as
+        // invisible junk in the UI just the same.
+        $collapsed = preg_replace('/[\s\x{00A0}\x{200B}-\x{200D}\x{FEFF}]+/u', ' ', $stripped) ?? $stripped;
 
         // 5. Trim.
         return trim($collapsed);

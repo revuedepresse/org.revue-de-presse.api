@@ -19,6 +19,8 @@ final readonly class RetrievedHit
         public int $reposts,
         public int $likes,
         public float $distance,
+        public int $replies = 0,
+        public ?string $avatarUrl = null,
     ) {
     }
 }

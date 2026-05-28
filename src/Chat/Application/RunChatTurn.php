@@ -211,7 +211,13 @@ class RunChatTurn
                     'screenName' => $hit->screenName,
                     'snapshotDate' => $hit->snapshotDate,
                     'url' => $hit->url,
-                    'text' => $hit->text,
+                    // Defensive re-clean: catches \n / NBSP / BOM in legacy
+                    // rows that pre-date the embedder's TextCleaner pass.
+                    'text' => $this->textCleaner->clean($hit->text),
+                    'avatarUrl' => $hit->avatarUrl,
+                    'reposts' => $hit->reposts,
+                    'likes' => $hit->likes,
+                    'replies' => $hit->replies,
                 ];
             }
         }
