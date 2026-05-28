@@ -6,6 +6,8 @@ namespace App\Chat\Infrastructure\Doctrine;
 use App\Chat\Application\Port\PublicationRetriever;
 use App\Chat\Domain\Query\DateRange;
 use App\Chat\Domain\Query\QueryFilters;
+use App\Chat\Domain\Retrieval\Retrieval;
+use App\Chat\Domain\Retrieval\RetrievalNotice;
 use App\Chat\Domain\Retrieval\RetrievedHit;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
@@ -50,7 +52,7 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
      */
     private const RECENCY_BIAS_LAMBDA_PER_30_DAYS = 0.10;
 
-    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): Retrieval
     {
         $vector = $this->vectorizer->vectorize($cleanedQuery);
         $queryVec = '[' . implode(',', $vector->getData()) . ']';
@@ -66,7 +68,9 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
         // of whether real extracts exist).
         //
         // We deliberately do NOT drop the screen_name filter on fallback —
-        // switching to a different outlet would surprise the user.
+        // switching to a different outlet would surprise the user. The
+        // returned Retrieval carries DATE_FILTER_RELAXED so the prompt
+        // builder can have Mistral acknowledge the gap.
         if ($hits === []
             && $filters->screenNames !== []
             && !$filters->dateRange->isEmpty()
@@ -76,9 +80,12 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
                 $k,
                 new QueryFilters(dateRange: new DateRange(), screenNames: $filters->screenNames),
             );
+            if ($hits !== []) {
+                return new Retrieval(hits: $hits, notice: RetrievalNotice::DATE_FILTER_RELAXED);
+            }
         }
 
-        return $hits;
+        return new Retrieval(hits: $hits);
     }
 
     /**

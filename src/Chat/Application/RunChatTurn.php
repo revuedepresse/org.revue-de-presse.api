@@ -90,7 +90,7 @@ class RunChatTurn
         // the exception bubble up as a 500.
         try {
             $filters = $this->filterExtractor->extract($cleaned);
-            $hits = $this->retriever->retrieve($cleaned, self::RETRIEVAL_K, $filters);
+            $retrieval = $this->retriever->retrieve($cleaned, self::RETRIEVAL_K, $filters);
         } catch (\Throwable $e) {
             $this->logger->error('chat.retrieval.failed', [
                 'error' => $e::class,
@@ -100,8 +100,9 @@ class RunChatTurn
 
             return;
         }
+        $notice = $retrieval->notice;
         $hits = array_values(array_filter(
-            $hits,
+            $retrieval->hits,
             static fn ($h): bool => $h->distance <= self::COSINE_DISTANCE_CUTOFF,
         ));
 
@@ -126,7 +127,7 @@ class RunChatTurn
             }
             $messages[] = ['role' => $past->role(), 'content' => $past->content()];
         }
-        $messages[] = ['role' => 'user', 'content' => $this->promptBuilder->buildUserMessage($cleaned, $hits)];
+        $messages[] = ['role' => 'user', 'content' => $this->promptBuilder->buildUserMessage($cleaned, $hits, $notice)];
 
         $accumulator = '';
         $firstTokenSeen = false;

@@ -32,7 +32,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         );
         $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
-        $hits = $retriever->retrieve('q', 8, new QueryFilters());
+        $hits = $retriever->retrieve('q', 8, new QueryFilters())->hits;
 
         self::assertCount(1, $hits);
         self::assertSame('at://pub-1', $hits[0]->publicationId);
@@ -55,7 +55,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         $retriever = new SymfonyAiPublicationRetriever(new ArrayStore($docs), new StaticVectorizer());
 
         $filters = new QueryFilters(screenNames: ['lemonde.fr']);
-        $hits = $retriever->retrieve('q', 8, $filters);
+        $hits = $retriever->retrieve('q', 8, $filters)->hits;
 
         self::assertSame(['p1', 'p3'], array_map(fn ($h) => $h->publicationId, $hits));
     }
@@ -73,7 +73,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
             from: new \DateTimeImmutable('2025-03-01'),
             to: new \DateTimeImmutable('2025-03-31'),
         ));
-        $hits = $retriever->retrieve('q', 8, $filters);
+        $hits = $retriever->retrieve('q', 8, $filters)->hits;
 
         self::assertSame(['p-inside'], array_map(fn ($h) => $h->publicationId, $hits));
     }
@@ -132,7 +132,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         );
         $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
-        $hits = $retriever->retrieve('q', 1, new QueryFilters());
+        $hits = $retriever->retrieve('q', 1, new QueryFilters())->hits;
 
         self::assertSame('at://did:plc:abc/app.bsky.feed.post/3lj', $hits[0]->publicationId);
     }
@@ -151,7 +151,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         );
         $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
-        $hits = $retriever->retrieve('q', 1, new QueryFilters());
+        $hits = $retriever->retrieve('q', 1, new QueryFilters())->hits;
 
         self::assertSame('at://legacy-row-id', $hits[0]->publicationId);
     }
@@ -161,7 +161,7 @@ final class SymfonyAiPublicationRetrieverTest extends TestCase
         $doc = $this->vectorDocument(id: 'p1', score: null, metadata: ['screen_name' => 'lemonde.fr', 'snapshot_date' => '2025-03-04']);
         $retriever = new SymfonyAiPublicationRetriever(new ArrayStore([$doc]), new StaticVectorizer());
 
-        $hits = $retriever->retrieve('q', 1, new QueryFilters());
+        $hits = $retriever->retrieve('q', 1, new QueryFilters())->hits;
 
         self::assertSame(1.0, $hits[0]->distance);
     }

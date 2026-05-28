@@ -5,6 +5,7 @@ namespace App\Chat\Infrastructure\Symfony\Ai;
 
 use App\Chat\Application\Port\PublicationRetriever;
 use App\Chat\Domain\Query\QueryFilters;
+use App\Chat\Domain\Retrieval\Retrieval;
 use App\Chat\Domain\Retrieval\RetrievedHit;
 use Symfony\AI\Store\Document\VectorizerInterface;
 use Symfony\AI\Store\Query\VectorQuery;
@@ -36,7 +37,7 @@ final class SymfonyAiPublicationRetriever implements PublicationRetriever
     ) {
     }
 
-    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): Retrieval
     {
         $fetchLimit = $filters->isEmpty() ? $k : $k * 4;
         // VectorizerInterface::vectorize() returns a Vector for a string
@@ -100,6 +101,8 @@ final class SymfonyAiPublicationRetriever implements PublicationRetriever
             }
         }
 
-        return $hits;
+        // This adapter doesn't do any fallback — symfony/ai-store has no
+        // retry hook and the filter post-pass is best-effort. Just wrap.
+        return new Retrieval(hits: $hits);
     }
 }

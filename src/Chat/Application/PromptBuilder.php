@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Chat\Application;
 
+use App\Chat\Domain\Retrieval\RetrievalNotice;
 use App\Chat\Domain\Retrieval\RetrievedHit;
 
 /**
@@ -53,14 +54,44 @@ PROMPT;
     /**
      * @param list<RetrievedHit> $hits
      */
-    public function buildUserMessage(string $cleanedUserMessage, array $hits): string
-    {
+    public function buildUserMessage(
+        string $cleanedUserMessage,
+        array $hits,
+        ?RetrievalNotice $notice = null,
+    ): string {
         $contextBlock = $this->formatHits($hits);
+        $noticeLine = $this->renderNotice($notice);
+
         if ($contextBlock === '') {
-            return "Question : {$cleanedUserMessage}";
+            // Even without extracts, hand the notice to the model so it can
+            // explain itself (e.g. "no recent content from that outlet").
+            $head = $noticeLine !== '' ? "{$noticeLine}\n\n" : '';
+
+            return "{$head}Question : {$cleanedUserMessage}";
         }
 
-        return "Extraits (par ordre de pertinence) :\n{$contextBlock}\n\nQuestion : {$cleanedUserMessage}";
+        $head = $noticeLine !== '' ? "{$noticeLine}\n\n" : '';
+
+        return "{$head}Extraits (par ordre de pertinence) :\n{$contextBlock}\n\nQuestion : {$cleanedUserMessage}";
+    }
+
+    /**
+     * Per-notice French sentence. Empty string when no notice. The sentence
+     * is phrased so the assistant naturally repeats / paraphrases it in
+     * its answer to the user.
+     */
+    private function renderNotice(?RetrievalNotice $notice): string
+    {
+        if ($notice === null) {
+            return '';
+        }
+
+        return match ($notice) {
+            RetrievalNotice::DATE_FILTER_RELAXED =>
+                "Note : la période demandée ne contient aucune publication correspondante. "
+                . "Les extraits ci-dessous proviennent du même média mais d'autres dates. "
+                . "Mentionne brièvement cette limite dans ta réponse.",
+        };
     }
 
     /**

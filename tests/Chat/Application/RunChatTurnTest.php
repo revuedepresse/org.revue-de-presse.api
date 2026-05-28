@@ -15,6 +15,8 @@ use App\Chat\Domain\Query\QueryFilterExtractor;
 use App\Chat\Domain\Query\QueryFilters;
 use App\Chat\Domain\Repository\ConversationRepository;
 use App\Chat\Domain\Repository\ConversationTurnRepository;
+use App\Chat\Domain\Retrieval\Retrieval;
+use App\Chat\Domain\Retrieval\RetrievalNotice;
 use App\Chat\Domain\Retrieval\RetrievedHit;
 use App\Chat\Domain\Text\TextCleaner;
 use PHPUnit\Framework\TestCase;
@@ -114,6 +116,41 @@ final class RunChatTurnTest extends TestCase
         self::assertStringNotContainsString("\n", $citation['text']);
         self::assertStringNotContainsString("\u{00A0}", $citation['text']);
         self::assertStringNotContainsString("\u{FEFF}", $citation['text']);
+    }
+
+    public function testRetrievalNoticeIsPropagatedIntoTheUserMessageGivenToTheStreamer(): void
+    {
+        // When the retriever returns DATE_FILTER_RELAXED, the streamer must
+        // receive a user message containing the French "Note : ..." preface,
+        // so Mistral can acknowledge the shortcoming in its reply.
+        $conversations = new InMemoryConversationRepository();
+        $turns = new InMemoryConversationTurnRepository();
+        $hit = new RetrievedHit(
+            publicationId: 'at://telerama-old',
+            screenName: 'telerama.bsky.social',
+            snapshotDate: '2026-01-15',
+            url: 'https://bsky.app/profile/telerama.bsky.social/post/x',
+            text: 'Vieux extrait',
+            reposts: 1,
+            likes: 1,
+            replies: 0,
+            avatarUrl: null,
+            distance: 0.4,
+        );
+        $retriever = new ArrayRetriever([$hit], RetrievalNotice::DATE_FILTER_RELAXED);
+        $capture = new MessageCapturingStreamer(['ok']);
+
+        $use_case = $this->makeUseCase($conversations, $turns, $retriever, $capture);
+        iterator_to_array($use_case('did:plc:user', 'Que dit Telerama cette semaine ?'));
+
+        $userMessages = array_values(array_filter(
+            $capture->lastMessages,
+            static fn (array $m): bool => $m['role'] === 'user',
+        ));
+        self::assertNotSame([], $userMessages, 'streamer must have received a user message');
+        $lastUser = end($userMessages);
+        self::assertStringContainsString('Note : la période demandée', $lastUser['content']);
+        self::assertStringContainsString('Mentionne brièvement cette limite', $lastUser['content']);
     }
 
     public function testPerUserRateLimitYieldsErrorAndPersistsNothing(): void
@@ -390,11 +427,14 @@ final class InMemoryConversationTurnRepository implements ConversationTurnReposi
 final class ArrayRetriever implements PublicationRetriever
 {
     /** @param list<RetrievedHit> $hits */
-    public function __construct(private readonly array $hits) {}
+    public function __construct(
+        private readonly array $hits,
+        private readonly ?RetrievalNotice $notice = null,
+    ) {}
 
-    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): Retrieval
     {
-        return array_slice($this->hits, 0, $k);
+        return new Retrieval(hits: array_slice($this->hits, 0, $k), notice: $this->notice);
     }
 }
 
@@ -403,7 +443,7 @@ final class ThrowingRetriever implements PublicationRetriever
 {
     public function __construct(private readonly \Throwable $error) {}
 
-    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
+    public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): Retrieval
     {
         throw $this->error;
     }

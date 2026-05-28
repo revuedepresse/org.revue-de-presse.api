@@ -5,6 +5,7 @@ namespace App\Tests\Chat\Infrastructure\Doctrine;
 
 use App\Chat\Domain\Query\DateRange;
 use App\Chat\Domain\Query\QueryFilters;
+use App\Chat\Domain\Retrieval\RetrievalNotice;
 use App\Chat\Infrastructure\Doctrine\DoctrinePublicationRetriever;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
@@ -23,7 +24,7 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         ]);
 
         $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.1, 0.2, 0.3]));
-        $hits = $retriever->retrieve('macron', 8, new QueryFilters());
+        $hits = $retriever->retrieve('macron', 8, new QueryFilters())->hits;
 
         // No WHERE on metadata; just ORDER BY embedding <=>, LIMIT k.
         // ("screen_name" / "snapshot_date" appear in SELECT — we check WHERE-specific phrases.)
@@ -51,7 +52,7 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         ]);
         $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
 
-        $hits = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['lemonde.fr', 'mediapart.fr']));
+        $hits = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['lemonde.fr', 'mediapart.fr']))->hits;
 
         // WHERE pushes the screen_name filter into SQL so pgvector ranks
         // ONLY rows that match the outlet, instead of post-filtering K candidates.
@@ -185,7 +186,7 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         ]);
         $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
 
-        $hits = $retriever->retrieve('q', 8, new QueryFilters(
+        $result = $retriever->retrieve('q', 8, new QueryFilters(
             dateRange: new DateRange(
                 from: new \DateTimeImmutable('2026-05-22'),
                 to: new \DateTimeImmutable('2026-05-28'),
@@ -193,8 +194,11 @@ final class DoctrinePublicationRetrieverTest extends TestCase
             screenNames: ['lemonde.fr'],
         ));
 
-        self::assertCount(1, $hits, 'fallback should surface the screen-name-only hit');
-        self::assertSame('at://lemonde-fallback', $hits[0]->publicationId);
+        self::assertCount(1, $result->hits, 'fallback should surface the screen-name-only hit');
+        self::assertSame('at://lemonde-fallback', $result->hits[0]->publicationId);
+        // The retriever signals it had to drop the date filter so PromptBuilder
+        // can have the assistant acknowledge the gap.
+        self::assertSame(RetrievalNotice::DATE_FILTER_RELAXED, $result->notice);
         self::assertSame(2, count($conn->allSql), 'retriever must have issued exactly two SQL queries');
         // Second query must still have the screen_name filter but no date predicates
         // (snapshot_date appears in SELECT regardless; we check the WHERE shape).
@@ -224,13 +228,14 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         ]);
         $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
 
-        $hits = $retriever->retrieve('q', 8, new QueryFilters(
+        $result = $retriever->retrieve('q', 8, new QueryFilters(
             dateRange: new DateRange(from: new \DateTimeImmutable('2026-05-22')),
             screenNames: ['lemonde.fr'],
         ));
 
-        self::assertCount(1, $hits);
+        self::assertCount(1, $result->hits);
         self::assertSame(1, count($conn->allSql), 'no fallback needed when first query has hits');
+        self::assertNull($result->notice, 'no notice when first query already returns hits');
     }
 
     public function testNoFallbackWhenOnlyFilterIsScreenName(): void
@@ -241,10 +246,11 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         $conn = new RecordingConnection([[]]);
         $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
 
-        $hits = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['telerama.bsky.social']));
+        $result = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['telerama.bsky.social']));
 
-        self::assertSame([], $hits);
+        self::assertSame([], $result->hits);
         self::assertSame(1, count($conn->allSql));
+        self::assertNull($result->notice);
     }
 
     public function testEmptyScreenNamesArrayDoesNotEmitWhereClause(): void
