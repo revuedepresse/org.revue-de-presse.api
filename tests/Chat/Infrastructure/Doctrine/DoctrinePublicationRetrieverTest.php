@@ -161,6 +161,92 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         self::assertStringNotContainsString('CURRENT_DATE', $conn->lastSql);
     }
 
+    public function testFallsBackToScreenNameOnlyWhenDateRangeYieldsZeroHits(): void
+    {
+        // First query (with date filter) returns 0 rows;
+        // the retriever must transparently re-query without the date
+        // filter so the user still gets results from the named outlet.
+        $conn = new RecordingConnection([
+            [], // first call (with date): zero rows
+            [   // second call (without date): one row
+                [
+                    'publication_id' => 'at://lemonde-fallback',
+                    'screen_name' => 'lemonde.fr',
+                    'snapshot_date' => '2025-08-01',
+                    'url' => 'u',
+                    'avatar_url' => null,
+                    'text' => 'older lemonde post',
+                    'reposts' => 0,
+                    'likes' => 0,
+                    'replies' => 0,
+                    'distance' => 0.4,
+                ],
+            ],
+        ]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $hits = $retriever->retrieve('q', 8, new QueryFilters(
+            dateRange: new DateRange(
+                from: new \DateTimeImmutable('2026-05-22'),
+                to: new \DateTimeImmutable('2026-05-28'),
+            ),
+            screenNames: ['lemonde.fr'],
+        ));
+
+        self::assertCount(1, $hits, 'fallback should surface the screen-name-only hit');
+        self::assertSame('at://lemonde-fallback', $hits[0]->publicationId);
+        self::assertSame(2, count($conn->allSql), 'retriever must have issued exactly two SQL queries');
+        // Second query must still have the screen_name filter but no date predicates
+        // (snapshot_date appears in SELECT regardless; we check the WHERE shape).
+        self::assertStringContainsString("metadata->>'screen_name' IN", $conn->allSql[1]);
+        self::assertStringNotContainsString("metadata->>'snapshot_date' >=", $conn->allSql[1]);
+        self::assertStringNotContainsString("metadata->>'snapshot_date' <=", $conn->allSql[1]);
+        self::assertStringNotContainsString("metadata->>'snapshot_date' BETWEEN", $conn->allSql[1]);
+    }
+
+    public function testNoFallbackWhenFirstQueryAlreadyReturnsHits(): void
+    {
+        $conn = new RecordingConnection([
+            [
+                [
+                    'publication_id' => 'p1',
+                    'screen_name' => 'lemonde.fr',
+                    'snapshot_date' => '2026-05-25',
+                    'url' => '',
+                    'avatar_url' => null,
+                    'text' => '',
+                    'reposts' => 0,
+                    'likes' => 0,
+                    'replies' => 0,
+                    'distance' => 0.3,
+                ],
+            ],
+        ]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $hits = $retriever->retrieve('q', 8, new QueryFilters(
+            dateRange: new DateRange(from: new \DateTimeImmutable('2026-05-22')),
+            screenNames: ['lemonde.fr'],
+        ));
+
+        self::assertCount(1, $hits);
+        self::assertSame(1, count($conn->allSql), 'no fallback needed when first query has hits');
+    }
+
+    public function testNoFallbackWhenOnlyFilterIsScreenName(): void
+    {
+        // Without a date filter to drop, fallback would mean dropping the
+        // screen_name — which would be a confusing UX (different outlet
+        // entirely). Just return empty in that case.
+        $conn = new RecordingConnection([[]]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $hits = $retriever->retrieve('q', 8, new QueryFilters(screenNames: ['telerama.bsky.social']));
+
+        self::assertSame([], $hits);
+        self::assertSame(1, count($conn->allSql));
+    }
+
     public function testEmptyScreenNamesArrayDoesNotEmitWhereClause(): void
     {
         // Regression: an empty list mustn't degenerate into `IN ()` (SQL error).
@@ -179,19 +265,50 @@ final class RecordingConnection extends Connection
     public string $lastSql = '';
     /** @var array<string, mixed> */
     public array $lastParams = [];
+    /** @var list<string> every SQL string passed to executeQuery, in order */
+    public array $allSql = [];
 
-    /** @param list<array<string, mixed>> $rows */
-    public function __construct(private readonly array $rows)
+    /** @var list<list<array<string, mixed>>> */
+    private array $resultSets;
+    private int $callIndex = 0;
+
+    /**
+     * Accepts EITHER:
+     *  - list<row> — every call returns these same rows (back-compat with old tests)
+     *  - list<list<row>> — call N returns resultSets[N]; off-end calls return []
+     */
+    public function __construct(array $rows)
     {
         // bypass parent constructor — we override the methods we use
+        $this->resultSets = $this->detectMultipleResultSets($rows) ? $rows : [$rows];
     }
 
     public function executeQuery(string $sql, array $params = [], $types = [], ?\Doctrine\DBAL\Cache\QueryCacheProfile $qcp = null): Result
     {
         $this->lastSql = $sql;
         $this->lastParams = $params;
+        $this->allSql[] = $sql;
 
-        return new InMemoryResult($this->rows);
+        $rows = $this->resultSets[$this->callIndex] ?? [];
+        $this->callIndex++;
+
+        return new InMemoryResult($rows);
+    }
+
+    /** Multi-result-set when caller passes a list of lists of associative arrays. */
+    private function detectMultipleResultSets(array $rows): bool
+    {
+        if ($rows === []) {
+            return false;
+        }
+        $first = $rows[0] ?? null;
+        // single row case: associative array with string keys
+        if (\is_array($first) && $first !== [] && \is_string(array_key_first($first))) {
+            return false;
+        }
+        // either empty list (which we treat as "one empty result set") OR
+        // a list of rows. If $first is itself a list-of-arrays, it's multi.
+        return \is_array($first);
     }
 }
 

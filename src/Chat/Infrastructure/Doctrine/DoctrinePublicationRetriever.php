@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Chat\Infrastructure\Doctrine;
 
 use App\Chat\Application\Port\PublicationRetriever;
+use App\Chat\Domain\Query\DateRange;
 use App\Chat\Domain\Query\QueryFilters;
 use App\Chat\Domain\Retrieval\RetrievedHit;
 use Doctrine\DBAL\ArrayParameterType;
@@ -52,9 +53,39 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
     public function retrieve(string $cleanedQuery, int $k, QueryFilters $filters): array
     {
         $vector = $this->vectorizer->vectorize($cleanedQuery);
-
         $queryVec = '[' . implode(',', $vector->getData()) . ']';
 
+        $hits = $this->runQuery($queryVec, $k, $filters);
+
+        // Fallback: when a date filter combined with an outlet filter yields
+        // zero hits, the corpus simply lacks recent content from that outlet.
+        // Drop the date filter and retry so the user still gets real content
+        // from the named outlet, instead of an empty card panel + a
+        // confabulated assistant response (Mistral writes [N] markers from
+        // the system prompt's strong cite-everything instruction regardless
+        // of whether real extracts exist).
+        //
+        // We deliberately do NOT drop the screen_name filter on fallback —
+        // switching to a different outlet would surprise the user.
+        if ($hits === []
+            && $filters->screenNames !== []
+            && !$filters->dateRange->isEmpty()
+        ) {
+            $hits = $this->runQuery(
+                $queryVec,
+                $k,
+                new QueryFilters(dateRange: new DateRange(), screenNames: $filters->screenNames),
+            );
+        }
+
+        return $hits;
+    }
+
+    /**
+     * @return list<RetrievedHit>
+     */
+    private function runQuery(string $queryVec, int $k, QueryFilters $filters): array
+    {
         $where = [];
         $params = ['query_vec' => $queryVec, 'limit' => $k];
         $types = ['query_vec' => ParameterType::STRING, 'limit' => ParameterType::INTEGER];
