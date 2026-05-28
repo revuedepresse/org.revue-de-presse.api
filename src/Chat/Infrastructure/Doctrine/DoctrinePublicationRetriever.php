@@ -90,10 +90,16 @@ final class DoctrinePublicationRetriever implements PublicationRetriever
 
         // Recency-biased ORDER BY only when the user didn't pin a date window.
         // GREATEST(0, ...) clamps future-dated rows (just in case) to no bonus.
+        //
+        // The cosine-distance subexpression MUST be parenthesised before the
+        // `+` addition. Postgres parses `<=>` with low precedence, so without
+        // parens `embedding <=> CAST(...) + 0.10 * decay` groups as
+        // `embedding <=> (CAST(...) + 0.10 * decay)` → vector + numeric type
+        // error at query time.
         $lambda = self::RECENCY_BIAS_LAMBDA_PER_30_DAYS;
         $orderBy = $hasExplicitDateFilter
             ? 'embedding <=> CAST(:query_vec AS vector)'
-            : "embedding <=> CAST(:query_vec AS vector) "
+            : "(embedding <=> CAST(:query_vec AS vector)) "
                 . "+ {$lambda} * GREATEST(0, (CURRENT_DATE - (metadata->>'snapshot_date')::date) / 30.0)";
 
         $sql = <<<SQL

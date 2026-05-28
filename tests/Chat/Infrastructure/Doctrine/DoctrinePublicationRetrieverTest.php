@@ -30,7 +30,12 @@ final class DoctrinePublicationRetrieverTest extends TestCase
         self::assertStringNotContainsString("metadata->>'screen_name' IN", $conn->lastSql);
         self::assertStringNotContainsString("metadata->>'snapshot_date' >=", $conn->lastSql);
         self::assertStringNotContainsString("metadata->>'snapshot_date' BETWEEN", $conn->lastSql);
-        self::assertStringContainsString('ORDER BY embedding <=>', $conn->lastSql);
+        // Cosine sort term must appear in ORDER BY in either bare or
+        // parenthesised form (parenthesised when the recency bias is added).
+        self::assertMatchesRegularExpression(
+            '/ORDER\s+BY\s+\(?embedding\s*<=>/s',
+            $conn->lastSql,
+        );
         self::assertSame(8, $conn->lastParams['limit'] ?? null);
 
         self::assertCount(2, $hits);
@@ -113,6 +118,28 @@ final class DoctrinePublicationRetrieverTest extends TestCase
             '/ORDER\s+BY[^L]*CURRENT_DATE/s',
             $conn->lastSql,
             'expected CURRENT_DATE to appear inside the ORDER BY expression',
+        );
+    }
+
+    public function testUnfilteredCosineExpressionIsParenthesisedBeforeAdditionOperator(): void
+    {
+        // Regression: Postgres parses `<=>` with low precedence, so
+        //     embedding <=> CAST(:v AS vector) + 0.10 * decay
+        // groups as `embedding <=> (CAST + 0.10*decay)` → vector + numeric
+        // type error. The decay must be added to the PARENTHESISED cosine
+        // distance, not appended after the cast.
+        $conn = new RecordingConnection([]);
+        $retriever = new DoctrinePublicationRetriever($conn, new FixedVectorizer([0.0]));
+
+        $retriever->retrieve('q', 8, new QueryFilters());
+
+        // Pin the parenthesisation inside the ORDER BY clause specifically
+        // (the SELECT clause also parenthesises the cosine expression to
+        // alias it as `distance`; that's not what we need to check here).
+        self::assertMatchesRegularExpression(
+            '/ORDER\s+BY\s+\(embedding\s*<=>\s*CAST\(:query_vec\s+AS\s+vector\)\)\s*\+/s',
+            $conn->lastSql,
+            'cosine distance subexpression must be parenthesised in ORDER BY before the recency-decay addition',
         );
     }
 
