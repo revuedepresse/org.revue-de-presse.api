@@ -10,7 +10,7 @@ parameters:
 			message: '#^Unreachable statement \- code above always terminates\.$#'
 			identifier: deadCode.unreachable
 			count: 1
-			path: tests/Infrastructure/RateLimit/RateLimitTokenTest.php
+			path: tests/Security/Infrastructure/Http/RateLimitTokenTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'

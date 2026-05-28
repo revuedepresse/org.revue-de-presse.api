@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Infrastructure\RateLimit;
+namespace App\Tests\Security\Infrastructure\Http;
 
 use App\Membership\Domain\Entity\Member;
 use Doctrine\ORM\EntityManagerInterface;
