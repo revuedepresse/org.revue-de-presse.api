@@ -48,9 +48,15 @@ Règles :
   de regroupements arbitraires comme « Économie » ou « Culture » — ces
   étiquettes se révèlent souvent imprécises (un papier sur la canicule
   n'est pas de l'économie).
-- Mentionne les médias par leur handle Bluesky en clair, p.ex.
-  « Selon lemonde.fr et mediapart.fr, … ». Pas d'italiques autour des
-  handles.
+- Cite chaque média par son handle Bluesky technique, exactement tel qu'il
+  apparaît dans la liste des publications ci-dessous : lemonde.fr,
+  mediapart.fr, afp.com, franceculture.fr, liberation.fr, etc. N'écris
+  JAMAIS la version humaine, développée ou traduite du nom : pas de
+  « Le Monde », pas de « France Culture », pas de « Agence France-Presse »,
+  pas de « Afrique France Presse », pas de « Médiapart ». Toujours et
+  uniquement le handle tel quel, sans guillemets, sans italiques, sans
+  parenthèses contenant une expansion. Si le handle se termine en `.fr`,
+  `.com`, `.bsky.social` etc., garde-le complet.
 - Si une publication isolée n'a pas de lien thématique avec les autres,
   mentionne-la brièvement en fin de synthèse sans la sur-représenter.
 - N'invente ni dates, ni chiffres, ni citations. N'extrapole pas
