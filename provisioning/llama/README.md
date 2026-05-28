@@ -1,9 +1,7 @@
 # llama.cpp host-native backend
 
 Two `llama-server` processes (chat + embeddings) running natively on the
-Mac M2 deploy host. Replaces the Ollama Docker container. Design notes
-in `[redacted]` (local
-to dev clone — gitignored under `[redacted]`).
+Mac M2 deploy host. Replaces the Ollama Docker container.
 
 ## Topology
 
