@@ -48,7 +48,7 @@
         "symfony/lock": "^7.4",
         "symfony/mailer": "^7.4",
         "symfony/messenger": "^7.4",
-        "symfony/mime": "^7.4",
+        "symfony/mime": "^8.1",
         "symfony/monolog-bundle": "^3.8",
         "symfony/property-access": "^7.4",
         "symfony/property-info": "^7.4",
