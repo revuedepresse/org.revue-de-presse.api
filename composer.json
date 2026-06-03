@@ -39,7 +39,7 @@
         "symfony/event-dispatcher": "^7.4",
         "symfony/expression-language": "^8.0",
         "symfony/filesystem": "^7.4",
-        "symfony/finder": "^7.4",
+        "symfony/finder": "^8.1",
         "symfony/flex": "^2.1",
         "symfony/framework-bundle": "^7.4",
         "symfony/http-client": "^7.4",
