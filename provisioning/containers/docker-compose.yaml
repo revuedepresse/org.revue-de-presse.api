@@ -16,6 +16,10 @@ services:
         image: redis:7-bookworm
         command: redis-server --appendonly yes
         restart: always
+        # Cap container memory, so a runaway process cannot exhaust the
+        # host and take the other services down with it. Sized from
+        # observed steady-state usage with generous headroom.
+        mem_limit: 256m
         volumes:
             - '../volumes/cache:/data'
 
@@ -32,6 +36,11 @@ services:
         env_file:
             - '../../.env.local'
         restart: always
+        # Cap container memory, so a runaway process cannot exhaust the
+        # host and take the other services down with it. Sized from
+        # observed steady-state usage with headroom; revisit alongside
+        # the php-fpm pool sizing rather than raising it on its own.
+        mem_limit: 2g
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
