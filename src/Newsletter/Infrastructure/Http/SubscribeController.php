@@ -6,6 +6,7 @@ namespace App\Newsletter\Infrastructure\Http;
 use App\Newsletter\Domain\Service\SubscriberEnroller;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\InvalidEmailAddress;
+use App\Newsletter\Infrastructure\Config\NewsletterConfig;
 use App\Newsletter\Infrastructure\Mail\ConfirmationMailer;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +31,7 @@ final class SubscribeController extends AbstractController
 
     public function __construct(
         private readonly string $signupUrl,
+        private readonly NewsletterConfig $config,
     ) {}
 
     #[Route('/subscribe', name: 'newsletter_subscribe_form', methods: ['GET'])]
@@ -78,7 +80,9 @@ final class SubscribeController extends AbstractController
 
     private function renderResponse(string $template, int $status = 200): Response
     {
-        $response = $this->render($template);
+        $response = $this->render($template, [
+            'confirm_ttl_days' => intdiv($this->config->confirmTtlHours + 23, 24),
+        ]);
         $response->setStatusCode($status);
         $response->headers->set('Referrer-Policy', 'no-referrer');
         $response->headers->set('X-Robots-Tag', 'noindex, nofollow');

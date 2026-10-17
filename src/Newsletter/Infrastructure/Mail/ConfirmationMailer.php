@@ -21,10 +21,13 @@ final class ConfirmationMailer
         $msg = (new TemplatedEmail())
             ->from(new Address($this->config->fromEmail, $this->config->fromName))
             ->to(new Address($email->unmask()))
-            ->subject('Confirmez votre abonnement à la Revue de presse')
+            ->subject('Confirmez votre adresse e-mail — Revue de presse')
             ->htmlTemplate('newsletter/confirm-email.html.twig')
             ->textTemplate('newsletter/confirm-email.text.twig')
-            ->context(['confirm_url' => $this->config->confirmUrl($confirmToken)]);
+            ->context([
+                'confirm_url' => $this->config->confirmUrl($confirmToken),
+                'confirm_ttl_days' => intdiv($this->config->confirmTtlHours + 23, 24),
+            ]);
         $this->mailer->send($msg);
     }
 }
