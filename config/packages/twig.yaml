@@ -1,5 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        newsletter_signup_url: '%env(NEWSLETTER_SIGNUP_URL)%'
 
 when@test:
     twig:

@@ -12,6 +12,21 @@ Daily-report mailer. See the design at
 - `bin/console newsletter:rotate-encryption-key` — re-encrypt rows with NEXT key.
 - `bin/console newsletter:check-design-tokens` — audit design tokens against the source-of-truth JSON (read-only; reports drift).
 
+## Public sign-up
+
+`POST /newsletter/subscribe` (form fields `email`, `website`) is what the
+sign-up page at `NEWSLETTER_SIGNUP_URL` (default
+`https://revue-de-presse.org/lettre-quotidienne`) posts to — a plain HTML form,
+so no CORS and per-IP rate limiting sees the real visitor. `GET` redirects to
+that page. Rows created this way have `enrolled_by = public-form`.
+
+- Double opt-in is unchanged: the row stays `pending` until the confirm link
+  in the email is clicked.
+- The response never says whether an address was already subscribed.
+- `website` is a honeypot: filled in → nothing happens, same page rendered.
+- Limits: 5 POSTs / 10 min per IP (`newsletter_subscribe_post`) and 3
+  confirmation mails / day per address (`newsletter_subscribe_email`).
+
 ## Local dev — end to end (enrol a recipient → send a real top-10 mail)
 
 ### 0. Prerequisites you bring yourself

@@ -1,0 +1,7 @@
+{% apply inline_css(source('newsletter/_styles/design-tokens.html.twig')) %}
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
+<table role="presentation" class="wrap" width="100%">
+  <tr><td class="brand-header">{% include 'newsletter/_partials/brand-header.html.twig' %}</td></tr>
+  <tr><td style="padding:16px">Merci&nbsp;! Un e-mail de confirmation vient de vous être envoyé. Vérifiez votre boîte de réception (et vos indésirables) puis cliquez sur le lien qu'il contient pour recevoir chaque matin le top 10 de la veille.<br><br><a href="{{ newsletter_signup_url }}">Revenir à la Revue de presse</a></td></tr>
+</table></body></html>
+{% endapply %}

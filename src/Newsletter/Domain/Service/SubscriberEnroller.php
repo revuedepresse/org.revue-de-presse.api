@@ -20,9 +20,10 @@ final class SubscriberEnroller
         private readonly string $actingUser,
     ) {}
 
-    public function enrol(EmailAddress $email): EnrolmentOutcome
+    public function enrol(EmailAddress $email, ?string $enrolledBy = null): EnrolmentOutcome
     {
         $now = $this->clock->now();
+        $enrolledBy ??= $this->actingUser;
         $existing = $this->repository->findByEmailHash($email->hash());
 
         if ($existing === null) {
@@ -34,7 +35,7 @@ final class SubscriberEnroller
                 confirmToken: $confirm,
                 confirmExpiresAt: $now->modify(sprintf('+%d hours', $this->confirmTtlHours)),
                 unsubToken: $unsub,
-                enrolledBy: $this->actingUser,
+                enrolledBy: $enrolledBy,
                 now: $now,
             );
             $this->repository->save($sub);
@@ -44,7 +45,7 @@ final class SubscriberEnroller
         return match ($existing->status()) {
             SubscriberStatus::Active => EnrolmentOutcome::alreadyActive(),
             SubscriberStatus::Pending => $this->resendPending($existing),
-            SubscriberStatus::Unsubscribed => $this->reenrol($existing, $now),
+            SubscriberStatus::Unsubscribed => $this->reenrol($existing, $now, $enrolledBy),
         };
     }
 
@@ -55,7 +56,7 @@ final class SubscriberEnroller
         return EnrolmentOutcome::resent($token);
     }
 
-    private function reenrol(Subscriber $sub, \DateTimeImmutable $now): EnrolmentOutcome
+    private function reenrol(Subscriber $sub, \DateTimeImmutable $now, string $enrolledBy): EnrolmentOutcome
     {
         $confirm = $this->tokens->generate();
         $unsub = $this->tokens->generate();
@@ -63,7 +64,7 @@ final class SubscriberEnroller
             confirmToken: $confirm,
             confirmExpiresAt: $now->modify(sprintf('+%d hours', $this->confirmTtlHours)),
             unsubToken: $unsub,
-            enrolledBy: $this->actingUser,
+            enrolledBy: $enrolledBy,
             now: $now,
         );
         $this->repository->save($sub);

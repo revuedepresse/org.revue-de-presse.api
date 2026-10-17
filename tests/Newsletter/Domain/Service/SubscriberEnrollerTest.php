@@ -85,4 +85,24 @@ final class SubscriberEnrollerTest extends TestCase
         $sub2 = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
         self::assertSame(SubscriberStatus::Pending, $sub2->status());
     }
+
+    public function test_enrolled_by_defaults_to_acting_user(): void
+    {
+        $repo = new InMemorySubscriberRepository();
+        $enroller = $this->makeEnroller($repo, new \DateTimeImmutable('2026-05-23T05:30:00Z'));
+        $enroller->enrol(EmailAddress::fromString('alice@example.com'));
+
+        $sub = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
+        self::assertSame('rdp-api', $sub->enrolledBy());
+    }
+
+    public function test_enrolled_by_can_be_overridden_per_call(): void
+    {
+        $repo = new InMemorySubscriberRepository();
+        $enroller = $this->makeEnroller($repo, new \DateTimeImmutable('2026-05-23T05:30:00Z'));
+        $enroller->enrol(EmailAddress::fromString('alice@example.com'), 'public-form');
+
+        $sub = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
+        self::assertSame('public-form', $sub->enrolledBy());
+    }
 }

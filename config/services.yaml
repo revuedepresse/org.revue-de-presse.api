@@ -90,6 +90,13 @@ services:
     App\Newsletter\Infrastructure\Http\UnsubscribeController:
         tags: ['controller.service_arguments']
 
+    App\Newsletter\Infrastructure\Http\SubscribeController:
+        arguments:
+            $signupUrl: '%env(NEWSLETTER_SIGNUP_URL)%'
+        tags: ['controller.service_arguments']
+
+    App\Newsletter\Infrastructure\Mail\ConfirmationMailer: ~
+
     App\Newsletter\Infrastructure\Console\SyncDesignTokensCommand: ~
 
     Twig\Extra\CssInliner\CssInlinerExtension:
@@ -117,6 +124,7 @@ services:
         arguments:
             $newsletterPublicLimiter: '@limiter.newsletter_public'
             $newsletterUnsubscribePostLimiter: '@limiter.newsletter_unsubscribe_post'
+            $newsletterSubscribePostLimiter: '@limiter.newsletter_subscribe_post'
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.request', priority: 256 }
 
