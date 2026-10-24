@@ -99,6 +99,23 @@ class HighlightsResourceTest extends WebTestCase
         );
     }
 
+    public function test_known_list_returns_200_and_unknown_list_returns_400(): void
+    {
+        $bearer = $this->mintToken();
+        $get = function (string $list) use ($bearer): int {
+            $this->client->request(
+                'GET',
+                '/api/highlights?startDate=2026-05-01&endDate=2026-05-01&includeRetweets=0&list=' . rawurlencode($list),
+                server: ['HTTP_AUTHORIZATION' => 'Bearer ' . $bearer, 'HTTP_ACCEPT' => 'application/ld+json'],
+            );
+
+            return $this->client->getResponse()->getStatusCode();
+        };
+
+        self::assertSame(200, $get('coop-medias'));
+        self::assertSame(400, $get('../../../etc/passwd'));
+    }
+
     public function test_bogus_bearer_returns_401(): void
     {
         $this->client->request(

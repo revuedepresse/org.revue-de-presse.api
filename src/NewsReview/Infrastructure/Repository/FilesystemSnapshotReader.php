@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\NewsReview\Infrastructure\Repository;
 
+use App\NewsReview\Domain\Snapshot\PublisherList;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 use Psr\Log\LoggerInterface;
 
@@ -14,11 +15,11 @@ final class FilesystemSnapshotReader implements SnapshotReader
     ) {
     }
 
-    public function read(string $date): array
+    public function read(string $date, PublisherList $list = PublisherList::FrenchMedia): array
     {
-        $path = $this->projectDir . '/src/Bluesky/Resources/' . $date . '.json';
+        $path = $this->projectDir . '/src/Bluesky/Resources/' . $list->snapshotFileName($date);
         if (!file_exists($path)) {
-            $this->logger->info('snapshot missing', ['date' => $date]);
+            $this->logger->info('snapshot missing', ['date' => $date, 'list' => $list->value]);
 
             return [];
         }

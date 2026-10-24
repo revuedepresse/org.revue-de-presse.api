@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\NewsReview\Infrastructure\Repository\CacheKey;
 
+use App\NewsReview\Domain\Snapshot\PublisherList;
+
 final class HighlightCacheKey
 {
     public static function from(array $queryParams): string
@@ -18,6 +20,13 @@ final class HighlightCacheKey
             'term='   . (string) ($queryParams['term'] ?? ''),
             'aggs='   . self::sortedCsv($queryParams['selectedAggregates'] ?? []),
         ];
+
+        // Appended only for the lists added after French media, so the keys
+        // already cached for French media stay valid.
+        $list = $queryParams['list'] ?? PublisherList::FrenchMedia;
+        if ($list instanceof PublisherList && $list !== PublisherList::FrenchMedia) {
+            $parts[] = 'list=' . $list->value;
+        }
 
         return sha1(implode(';', $parts));
     }
