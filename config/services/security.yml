@@ -49,6 +49,7 @@ services:
             $requestStack: '@request_stack'
             $logger:       '@logger'
             $apiEnv:       '%kernel.environment%'
+            $defaultRanking: '%env(HIGHLIGHTS_DEFAULT_RANKING)%'
         tags:
             - { name: 'api_platform.state_provider' }
 

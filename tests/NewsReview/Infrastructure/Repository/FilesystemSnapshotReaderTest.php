@@ -86,13 +86,11 @@ class FilesystemSnapshotReaderTest extends TestCase
         self::assertSame([], $reader->read('2026-05-02', PublisherList::CoopMedias));
     }
 
-    public function test_reads_end_of_day_rankings_from_their_own_sub_directory(): void
+    public function test_reads_end_of_day_rankings_from_files_named_after_list_and_ranking(): void
     {
-        mkdir($this->projectDir . '/src/Bluesky/Resources/end-of-day');
-        mkdir($this->projectDir . '/src/Bluesky/Resources/coop-medias/end-of-day', 0777, true);
         file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.json', json_encode([['screen_name' => 'first']], JSON_THROW_ON_ERROR));
-        file_put_contents($this->projectDir . '/src/Bluesky/Resources/end-of-day/2026-05-02.json', json_encode([['screen_name' => 'fr-eod']], JSON_THROW_ON_ERROR));
-        file_put_contents($this->projectDir . '/src/Bluesky/Resources/coop-medias/end-of-day/2026-05-02.json', json_encode([['screen_name' => 'coop-eod']], JSON_THROW_ON_ERROR));
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.fr.end-of-day.json', json_encode([['screen_name' => 'fr-eod']], JSON_THROW_ON_ERROR));
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.coop-medias.end-of-day.json', json_encode([['screen_name' => 'coop-eod']], JSON_THROW_ON_ERROR));
 
         $reader = new FilesystemSnapshotReader(projectDir: $this->projectDir, logger: new NullLogger());
 

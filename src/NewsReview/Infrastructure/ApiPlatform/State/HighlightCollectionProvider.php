@@ -9,8 +9,10 @@ use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightFilters;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
 use App\NewsReview\Domain\Snapshot\PublisherList;
+use App\NewsReview\Domain\Snapshot\Ranking;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 use App\NewsReview\Domain\Snapshot\UnknownPublisherList;
+use App\NewsReview\Domain\Snapshot\UnknownRanking;
 use App\NewsReview\Infrastructure\Repository\CacheKey\HighlightCacheKey;
 use App\Infrastructure\Cache\RedisCache;
 use Psr\Log\LoggerInterface;
@@ -30,6 +32,7 @@ final class HighlightCollectionProvider implements ProviderInterface
         private readonly RequestStack $requestStack,
         private readonly LoggerInterface $logger,
         private readonly string $apiEnv,
+        private readonly string $defaultRanking = 'first-sighting',
     ) {
     }
 
@@ -77,7 +80,7 @@ final class HighlightCollectionProvider implements ProviderInterface
         $date = $params['startDate'] instanceof \DateTimeInterface
             ? $params['startDate']->format('Y-m-d')
             : 'unknown';
-        $snapshot = $this->reader->read($date, $params['list']);
+        $snapshot = $this->reader->read($date, $params['list'], $params['ranking']);
         $statuses = $snapshot['statuses'] ?? $snapshot;
         if (!is_array($statuses)) {
             return [];
@@ -132,6 +135,12 @@ final class HighlightCollectionProvider implements ProviderInterface
         try {
             $parsed['list'] = PublisherList::fromQuery($query['list'] ?? null);
         } catch (UnknownPublisherList $exception) {
+            throw new BadRequestHttpException($exception->getMessage(), $exception);
+        }
+
+        try {
+            $parsed['ranking'] = Ranking::fromQuery($query['ranking'] ?? null, Ranking::from($this->defaultRanking));
+        } catch (UnknownRanking $exception) {
             throw new BadRequestHttpException($exception->getMessage(), $exception);
         }
 

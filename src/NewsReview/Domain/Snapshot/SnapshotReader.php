@@ -8,5 +8,9 @@ interface SnapshotReader
     /**
      * @return array<int|string, mixed>
      */
-    public function read(string $date, PublisherList $list = PublisherList::FrenchMedia): array;
+    public function read(
+        string $date,
+        PublisherList $list = PublisherList::FrenchMedia,
+        Ranking $ranking = Ranking::FirstSighting,
+    ): array;
 }

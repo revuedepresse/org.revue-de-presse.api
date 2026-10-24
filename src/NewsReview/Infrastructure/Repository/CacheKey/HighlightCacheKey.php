@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\NewsReview\Infrastructure\Repository\CacheKey;
 
 use App\NewsReview\Domain\Snapshot\PublisherList;
+use App\NewsReview\Domain\Snapshot\Ranking;
 
 final class HighlightCacheKey
 {
@@ -26,6 +27,12 @@ final class HighlightCacheKey
         $list = $queryParams['list'] ?? PublisherList::FrenchMedia;
         if ($list instanceof PublisherList && $list !== PublisherList::FrenchMedia) {
             $parts[] = 'list=' . $list->value;
+        }
+
+        // Same for rankings: first-sighting keeps the keys cached before rankings existed.
+        $ranking = $queryParams['ranking'] ?? Ranking::FirstSighting;
+        if ($ranking instanceof Ranking && $ranking !== Ranking::FirstSighting) {
+            $parts[] = 'ranking=' . $ranking->value;
         }
 
         return sha1(implode(';', $parts));

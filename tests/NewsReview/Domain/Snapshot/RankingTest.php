@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\NewsReview\Domain\Snapshot;
 
+use App\NewsReview\Domain\Snapshot\PublisherList;
 use App\NewsReview\Domain\Snapshot\Ranking;
 use App\NewsReview\Domain\Snapshot\UnknownRanking;
 use PHPUnit\Framework\TestCase;
@@ -28,9 +29,12 @@ final class RankingTest extends TestCase
         Ranking::fromQuery('../../etc', Ranking::FirstSighting);
     }
 
-    public function test_only_end_of_day_lives_in_its_own_sub_directory(): void
+    public function test_every_list_and_ranking_has_its_own_file_in_one_directory(): void
     {
-        self::assertNull(Ranking::FirstSighting->snapshotDirectory());
-        self::assertSame('end-of-day', Ranking::EndOfDay->snapshotDirectory());
+        self::assertSame('2026-05-02.json', PublisherList::FrenchMedia->snapshotFileName('2026-05-02'));
+        self::assertSame('2026-05-02.json', PublisherList::FrenchMedia->snapshotFileName('2026-05-02', Ranking::FirstSighting));
+        self::assertSame('2026-05-02.fr.end-of-day.json', PublisherList::FrenchMedia->snapshotFileName('2026-05-02', Ranking::EndOfDay));
+        self::assertSame('2026-05-02.coop-medias.first-sighting.json', PublisherList::CoopMedias->snapshotFileName('2026-05-02', Ranking::FirstSighting));
+        self::assertSame('2026-05-02.coop-medias.end-of-day.json', PublisherList::CoopMedias->snapshotFileName('2026-05-02', Ranking::EndOfDay));
     }
 }
