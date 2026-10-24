@@ -8160,16 +8160,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.26.0",
+            "version": "v3.30.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "1fcae487b180d78e6351f4e0afa91f9eab96a2bc"
+                "reference": "8c737079b726af72ff8ef3c595be9f6a810ea1ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/1fcae487b180d78e6351f4e0afa91f9eab96a2bc",
-                "reference": "1fcae487b180d78e6351f4e0afa91f9eab96a2bc",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/8c737079b726af72ff8ef3c595be9f6a810ea1ef",
+                "reference": "8c737079b726af72ff8ef3c595be9f6a810ea1ef",
                 "shasum": ""
             },
             "require": {
@@ -8224,7 +8224,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.26.0"
+                "source": "https://github.com/twigphp/Twig/tree/v3.30.0"
             },
             "funding": [
                 {
@@ -8236,7 +8236,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-20T07:31:59+00:00"
+            "time": "2026-09-25T13:20:01+00:00"
         },
         {
             "name": "willdurand/negotiation",
