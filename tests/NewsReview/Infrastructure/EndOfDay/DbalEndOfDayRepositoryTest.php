@@ -70,10 +70,10 @@ final class DbalEndOfDayRepositoryTest extends TestCase
 
         self::assertSame(
             [
-                ['201', '2026-10-23 20:00:00', '7', '14', 'at://lemonde/2'],
-                ['201', '2026-10-23 22:00:00', '7', '14', 'at://lemonde/2'],
+                [201, '2026-10-23 20:00:00', 7, 14, 'at://lemonde/2'],
+                [201, '2026-10-23 22:00:00', 7, 14, 'at://lemonde/2'],
             ],
-            array_map('array_values', $this->db->fetchAllAssociative("SELECT status_id, checked_at, total_retweets, total_favorites, publication_id FROM status_popularity WHERE measured_by = 'rebuild' ORDER BY checked_at")),
+            array_map(static fn(array $row): array => array_values(array_map(static fn($v) => is_numeric($v) ? (int) $v : $v, $row)), $this->db->fetchAllAssociative("SELECT status_id, checked_at, total_retweets, total_favorites, publication_id FROM status_popularity WHERE measured_by = 'rebuild' ORDER BY checked_at")),
         );
         self::assertSame(3, (int) $this->db->fetchOne("SELECT count(*) FROM status_popularity WHERE measured_by = 'fetch'"));
         self::assertMatchesRegularExpression('/^[0-9a-f-]{36}$/', (string) $this->db->fetchOne("SELECT id FROM status_popularity WHERE measured_by = 'rebuild' LIMIT 1"));
