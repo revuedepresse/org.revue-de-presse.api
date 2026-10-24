@@ -62,7 +62,7 @@
         "symfony/twig-bundle": "^7.4",
         "symfony/uid": "^7.4",
         "symfony/validator": "^7.4",
-        "symfony/var-dumper": "^7.4",
+        "symfony/var-dumper": "^8.1",
         "symfony/var-exporter": "^7.4",
         "symfony/yaml": "^7.4",
         "twig/cssinliner-extra": "^3"
