@@ -116,6 +116,24 @@ class HighlightsResourceTest extends WebTestCase
         self::assertSame(400, $get('../../../etc/passwd'));
     }
 
+    public function test_known_ranking_returns_200_and_unknown_ranking_returns_400(): void
+    {
+        $bearer = $this->mintToken();
+        $get = function (string $ranking) use ($bearer): int {
+            $this->client->request(
+                'GET',
+                '/api/highlights?startDate=2026-05-01&endDate=2026-05-01&includeRetweets=0&ranking=' . rawurlencode($ranking),
+                server: ['HTTP_AUTHORIZATION' => 'Bearer ' . $bearer, 'HTTP_ACCEPT' => 'application/ld+json'],
+            );
+
+            return $this->client->getResponse()->getStatusCode();
+        };
+
+        self::assertSame(200, $get('end-of-day'));
+        self::assertSame(200, $get('first-sighting'));
+        self::assertSame(400, $get('best'));
+    }
+
     public function test_bogus_bearer_returns_401(): void
     {
         $this->client->request(

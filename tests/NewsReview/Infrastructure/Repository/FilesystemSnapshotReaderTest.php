@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\NewsReview\Infrastructure\Repository;
 
 use App\NewsReview\Domain\Snapshot\PublisherList;
+use App\NewsReview\Domain\Snapshot\Ranking;
 use App\NewsReview\Infrastructure\Repository\FilesystemSnapshotReader;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -83,6 +84,22 @@ class FilesystemSnapshotReaderTest extends TestCase
         );
 
         self::assertSame([], $reader->read('2026-05-02', PublisherList::CoopMedias));
+    }
+
+    public function test_reads_end_of_day_rankings_from_their_own_sub_directory(): void
+    {
+        mkdir($this->projectDir . '/src/Bluesky/Resources/end-of-day');
+        mkdir($this->projectDir . '/src/Bluesky/Resources/coop-medias/end-of-day', 0777, true);
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.json', json_encode([['screen_name' => 'first']], JSON_THROW_ON_ERROR));
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/end-of-day/2026-05-02.json', json_encode([['screen_name' => 'fr-eod']], JSON_THROW_ON_ERROR));
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/coop-medias/end-of-day/2026-05-02.json', json_encode([['screen_name' => 'coop-eod']], JSON_THROW_ON_ERROR));
+
+        $reader = new FilesystemSnapshotReader(projectDir: $this->projectDir, logger: new NullLogger());
+
+        self::assertSame([['screen_name' => 'first']], $reader->read('2026-05-02', PublisherList::FrenchMedia, Ranking::FirstSighting));
+        self::assertSame([['screen_name' => 'fr-eod']], $reader->read('2026-05-02', PublisherList::FrenchMedia, Ranking::EndOfDay));
+        self::assertSame([['screen_name' => 'coop-eod']], $reader->read('2026-05-02', PublisherList::CoopMedias, Ranking::EndOfDay));
+        self::assertSame([], $reader->read('2026-05-03', PublisherList::FrenchMedia, Ranking::EndOfDay));
     }
 
     private function removeDirectory(string $path): void
