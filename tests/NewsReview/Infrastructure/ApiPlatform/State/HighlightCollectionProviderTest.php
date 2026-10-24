@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class HighlightCollectionProviderTest extends TestCase
 {
@@ -69,6 +70,127 @@ class HighlightCollectionProviderTest extends TestCase
         $items = iterator_to_array($provider->provide(new GetCollection(uriTemplate: '/highlights')));
 
         self::assertSame([], $items);
+    }
+
+    public function test_list_parameter_selects_that_list_snapshot(): void
+    {
+        $row = static fn(string $screenName): array => [
+            'screen_name'         => $screenName,
+            'reposts'             => 1,
+            'likes'               => 2,
+            'text'                => 'hi',
+            'publication_id'      => 'at://did/x/' . $screenName,
+            'publicationDateTime' => '2026-05-01T10:00:00+02:00',
+        ];
+        $reader = new InMemorySnapshotReader(
+            ['2026-05-01' => [$row('lemonde.fr')]],
+            ['coop-medias' => ['2026-05-01' => [$row('reporterre.net')]]],
+        );
+
+        $screenNames = function (string $query) use ($reader): array {
+            $stack = new RequestStack();
+            $stack->push(Request::create('/api/highlights?startDate=2026-05-01&endDate=2026-05-01&includeRetweets=0' . $query));
+            $provider = new HighlightCollectionProvider(
+                $reader,
+                new HighlightFilters(),
+                new HighlightNormalizer(),
+                null,
+                $stack,
+                new NullLogger(),
+                apiEnv: 'test',
+            );
+
+            return array_map(
+                static fn(HighlightDto $dto): string => $dto->screenName,
+                iterator_to_array($provider->provide(new GetCollection(uriTemplate: '/highlights'))),
+            );
+        };
+
+        self::assertSame(['lemonde.fr'], $screenNames(''));
+        self::assertSame(['lemonde.fr'], $screenNames('&list=fr'));
+        self::assertSame(['reporterre.net'], $screenNames('&list=coop-medias'));
+    }
+
+    public function test_ranking_parameter_and_configured_default_select_the_snapshot(): void
+    {
+        $row = static fn(string $screenName): array => [
+            'screen_name'         => $screenName,
+            'reposts'             => 1,
+            'likes'               => 2,
+            'text'                => 'hi',
+            'publication_id'      => 'at://did/x/' . $screenName,
+            'publicationDateTime' => '2026-05-01T10:00:00+02:00',
+        ];
+        $reader = new InMemorySnapshotReader(
+            ['2026-05-01' => [$row('first-sighting.fr')]],
+            [],
+            ['fr' => ['2026-05-01' => [$row('end-of-day.fr')]]],
+        );
+
+        $screenNames = function (string $query, string $defaultRanking) use ($reader): array {
+            $stack = new RequestStack();
+            $stack->push(Request::create('/api/highlights?startDate=2026-05-01&endDate=2026-05-01&includeRetweets=0' . $query));
+            $provider = new HighlightCollectionProvider(
+                $reader,
+                new HighlightFilters(),
+                new HighlightNormalizer(),
+                null,
+                $stack,
+                new NullLogger(),
+                apiEnv: 'test',
+                defaultRanking: $defaultRanking,
+            );
+
+            return array_map(
+                static fn(HighlightDto $dto): string => $dto->screenName,
+                iterator_to_array($provider->provide(new GetCollection(uriTemplate: '/highlights'))),
+            );
+        };
+
+        self::assertSame(['first-sighting.fr'], $screenNames('', 'first-sighting'));
+        self::assertSame(['end-of-day.fr'], $screenNames('', 'end-of-day'));
+        self::assertSame(['end-of-day.fr'], $screenNames('&ranking=end-of-day', 'first-sighting'));
+        self::assertSame(['first-sighting.fr'], $screenNames('&ranking=first-sighting', 'end-of-day'));
+    }
+
+    public function test_unknown_ranking_is_a_bad_request(): void
+    {
+        $stack = new RequestStack();
+        $stack->push(Request::create('/api/highlights?startDate=2026-05-01&endDate=2026-05-01&ranking=best'));
+
+        $provider = new HighlightCollectionProvider(
+            new InMemorySnapshotReader(),
+            new HighlightFilters(),
+            new HighlightNormalizer(),
+            null,
+            $stack,
+            new NullLogger(),
+            apiEnv: 'test',
+        );
+
+        $this->expectException(BadRequestHttpException::class);
+
+        $provider->provide(new GetCollection(uriTemplate: '/highlights'));
+    }
+
+    public function test_unknown_list_is_a_bad_request(): void
+    {
+        $stack = new RequestStack();
+        $stack->push(Request::create('/api/highlights?startDate=2026-05-01&endDate=2026-05-01&list=../../etc'));
+
+        $provider = new HighlightCollectionProvider(
+            new InMemorySnapshotReader(),
+            new HighlightFilters(),
+            new HighlightNormalizer(),
+            null,
+            $stack,
+            new NullLogger(),
+            apiEnv: 'test',
+        );
+
+        $this->expectException(BadRequestHttpException::class);
+
+        $provider->provide(new GetCollection(uriTemplate: '/highlights'));
     }
 
     public function test_x_benchmark_bypasses_redis_in_non_prod(): void

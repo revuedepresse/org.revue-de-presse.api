@@ -49,8 +49,26 @@ services:
             $requestStack: '@request_stack'
             $logger:       '@logger'
             $apiEnv:       '%kernel.environment%'
+            $defaultRanking: '%env(HIGHLIGHTS_DEFAULT_RANKING)%'
         tags:
             - { name: 'api_platform.state_provider' }
+
+    # End-of-day rebuild: like and repost times from Bluesky, measurements stored
+    # next to the fetched ones in status_popularity.
+    App\NewsReview\Domain\EndOfDay\Interactions:
+        class: App\NewsReview\Infrastructure\EndOfDay\BlueskyInteractions
+        arguments:
+            $httpClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+
+    App\NewsReview\Domain\EndOfDay\EndOfDayRebuilder:
+        arguments:
+            $interactions: '@App\NewsReview\Domain\EndOfDay\Interactions'
+
+    App\NewsReview\Infrastructure\EndOfDay\DbalEndOfDayRepository:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+
+    App\NewsReview\Infrastructure\Console\RebuildEndOfDayCommand: ~
 
     App\NewsReview\Infrastructure\ApiPlatform\Listener\HighlightsCacheHeaderListener:
         tags:

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\NewsReview\Infrastructure\Repository\CacheKey;
 
+use App\NewsReview\Domain\Snapshot\PublisherList;
+use App\NewsReview\Domain\Snapshot\Ranking;
 use App\NewsReview\Infrastructure\Repository\CacheKey\HighlightCacheKey;
 use PHPUnit\Framework\TestCase;
 
@@ -48,5 +50,39 @@ class HighlightCacheKeyTest extends TestCase
         ];
 
         self::assertSame(HighlightCacheKey::from($a), HighlightCacheKey::from($b));
+    }
+
+    public function test_each_list_has_its_own_key_and_french_media_keeps_its_existing_one(): void
+    {
+        $base = [
+            'startDate' => new \DateTime('2026-05-01'),
+            'endDate'   => new \DateTime('2026-05-01'),
+        ];
+
+        self::assertSame(
+            HighlightCacheKey::from($base),
+            HighlightCacheKey::from($base + ['list' => PublisherList::FrenchMedia]),
+        );
+        self::assertNotSame(
+            HighlightCacheKey::from($base),
+            HighlightCacheKey::from($base + ['list' => PublisherList::CoopMedias]),
+        );
+    }
+
+    public function test_end_of_day_has_its_own_key_and_first_sighting_keeps_the_existing_one(): void
+    {
+        $base = [
+            'startDate' => new \DateTime('2026-05-01'),
+            'endDate'   => new \DateTime('2026-05-01'),
+        ];
+
+        self::assertSame(
+            HighlightCacheKey::from($base),
+            HighlightCacheKey::from($base + ['ranking' => Ranking::FirstSighting]),
+        );
+        self::assertNotSame(
+            HighlightCacheKey::from($base),
+            HighlightCacheKey::from($base + ['ranking' => Ranking::EndOfDay]),
+        );
     }
 }
