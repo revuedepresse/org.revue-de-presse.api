@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Newsletter\Infrastructure\Highlights;
 
 use App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher;
+use App\NewsReview\Domain\Snapshot\PublisherList;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +13,7 @@ final class SnapshotHighlightsFetcherTest extends TestCase
     public function test_truncates_to_10_and_maps_fields(): void
     {
         $reader = new class implements SnapshotReader {
-            public function read(string $date): array {
+            public function read(string $date, PublisherList $list = PublisherList::FrenchMedia): array {
                 $rows = [];
                 for ($i = 1; $i <= 12; $i++) {
                     $rows[] = ['screen_name' => "pub{$i}", 'text' => "text {$i}", 'reposts' => $i, 'likes' => $i * 2, 'url' => "https://x/{$i}"];
@@ -34,7 +35,7 @@ final class SnapshotHighlightsFetcherTest extends TestCase
         // TextCleanerTest; here we just confirm the wiring is live by
         // asserting that escape junk is gone.
         $reader = new class implements SnapshotReader {
-            public function read(string $date): array {
+            public function read(string $date, PublisherList $list = PublisherList::FrenchMedia): array {
                 return [[
                     'screen_name' => 'humanite.fr',
                     'text' => '1er\xa0\mai et \n new lines',

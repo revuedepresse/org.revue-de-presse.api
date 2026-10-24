@@ -8,11 +8,14 @@ use ApiPlatform\State\ProviderInterface;
 use App\NewsReview\Domain\Model\HighlightDto;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightFilters;
 use App\NewsReview\Domain\Snapshot\Filter\HighlightNormalizer;
+use App\NewsReview\Domain\Snapshot\PublisherList;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
+use App\NewsReview\Domain\Snapshot\UnknownPublisherList;
 use App\NewsReview\Infrastructure\Repository\CacheKey\HighlightCacheKey;
 use App\Infrastructure\Cache\RedisCache;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @implements ProviderInterface<HighlightDto>
@@ -74,7 +77,7 @@ final class HighlightCollectionProvider implements ProviderInterface
         $date = $params['startDate'] instanceof \DateTimeInterface
             ? $params['startDate']->format('Y-m-d')
             : 'unknown';
-        $snapshot = $this->reader->read($date);
+        $snapshot = $this->reader->read($date, $params['list']);
         $statuses = $snapshot['statuses'] ?? $snapshot;
         if (!is_array($statuses)) {
             return [];
@@ -124,6 +127,12 @@ final class HighlightCollectionProvider implements ProviderInterface
                     $parsed[$field] = null;
                 }
             }
+        }
+
+        try {
+            $parsed['list'] = PublisherList::fromQuery($query['list'] ?? null);
+        } catch (UnknownPublisherList $exception) {
+            throw new BadRequestHttpException($exception->getMessage(), $exception);
         }
 
         return $parsed;
