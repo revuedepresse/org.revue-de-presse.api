@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Symfony\Component\Uid\Ulid;
@@ -113,6 +114,18 @@ final class SubscribeControllerTest extends WebTestCase
         self::assertSame(Edition::CoopMedias, $this->find('alice@example.com', Edition::CoopMedias)?->edition());
     }
 
+    public function test_a_plus_address_is_accepted(): void
+    {
+        $client = $this->client();
+        $this->subscribe($client, 'alice+news@example.com', edition: 'both');
+
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Email::class, $email);
+        self::assertSame('alice+news@example.com', $email->getTo()[0]->getAddress());
+    }
+
     public function test_both_letters_take_one_confirmation_mail(): void
     {
         $client = $this->client();
@@ -143,6 +156,9 @@ final class SubscribeControllerTest extends WebTestCase
         $this->subscribe($client, 'alice@example.com', edition: '../etc');
 
         self::assertResponseStatusCodeSame(422);
+        // The address is fine: the page must not say otherwise.
+        self::assertSelectorTextContains('body', "Cette lettre n'est pas disponible");
+        self::assertSelectorTextNotContains('body', 'ne semble pas valide');
         self::assertEmailCount(0);
         self::assertNull($this->find('alice@example.com'));
     }

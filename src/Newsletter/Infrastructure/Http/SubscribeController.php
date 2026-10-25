@@ -56,10 +56,15 @@ final class SubscribeController extends AbstractController
         }
 
         try {
-            $email = EmailAddress::fromString((string) $request->request->get('email', ''));
-            // fr, coop-medias or both; without one, the French media letter.
+            // fr, coop-medias, fr-coop-medias or both; without one, the French media letter.
             $editions = Edition::listFromForm($request->request->all()['edition'] ?? null);
-        } catch (InvalidEmailAddress|InvalidEdition) {
+        } catch (InvalidEdition) {
+            return $this->renderResponse('newsletter/subscribe-unavailable.html.twig', 422);
+        }
+
+        try {
+            $email = EmailAddress::fromString((string) $request->request->get('email', ''));
+        } catch (InvalidEmailAddress) {
             return $this->renderResponse('newsletter/subscribe-invalid.html.twig', 422);
         }
 
