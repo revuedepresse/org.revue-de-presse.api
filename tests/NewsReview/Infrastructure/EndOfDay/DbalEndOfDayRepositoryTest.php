@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 final class DbalEndOfDayRepositoryTest extends TestCase
 {
     private const FR = 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3lbcwg7qq3z2h';
+    private const COOP = 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3mymhj5akx32w';
 
     private Connection $db;
 
@@ -48,6 +49,21 @@ final class DbalEndOfDayRepositoryTest extends TestCase
         self::assertSame(
             [['at://lemonde/2', 'lemonde.fr', 201], ['at://lemonde/3', 'lemonde.fr', 303]],
             array_map(static fn(Candidate $c): array => [$c->uri, $c->handle, $c->statusId], $candidates),
+        );
+    }
+
+    public function test_the_combined_list_takes_the_posts_of_both_lists_members_once(): void
+    {
+        // lemonde.fr is in both lists; coop.fr only in Coop Médias.
+        $this->db->executeStatement("INSERT INTO weaving_user VALUES (3, 'coop.fr', 'did:plc:coop')");
+        $this->db->executeStatement("INSERT INTO publishers_list VALUES (3, '" . self::COOP . "', 'did:plc:lemonde', NULL), (4, '" . self::COOP . "', 'did:plc:coop', NULL)");
+        $this->db->executeStatement("INSERT INTO publication VALUES (5, 'at://coop/1', 'coop.fr', '2026-10-23 10:00:00')");
+
+        $candidates = (new DbalEndOfDayRepository($this->db))->candidates(ParisDay::of('2026-10-23'), PublisherList::fromQuery('fr-coop-medias'));
+
+        self::assertSame(
+            ['at://coop/1', 'at://lemonde/2', 'at://lemonde/3'],
+            array_map(static fn(Candidate $c): string => $c->uri, $candidates),
         );
     }
 

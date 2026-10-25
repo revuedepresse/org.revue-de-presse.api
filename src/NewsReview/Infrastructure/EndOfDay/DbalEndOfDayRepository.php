@@ -17,10 +17,14 @@ use Symfony\Component\Uid\Uuid;
  */
 final class DbalEndOfDayRepository
 {
+    private const FRENCH_MEDIA = 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3lbcwg7qq3z2h';
+    private const COOP_MEDIAS = 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3mymhj5akx32w';
+
     // Bluesky lists whose members are ranked, by publisher list.
     private const LIST_URIS = [
-        'fr' => 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3lbcwg7qq3z2h',
-        'coop-medias' => 'at://did:plc:hsvsr3edhbdymtjrg5cifbce/app.bsky.graph.list/3mymhj5akx32w',
+        'fr' => [self::FRENCH_MEDIA],
+        'coop-medias' => [self::COOP_MEDIAS],
+        'fr-coop-medias' => [self::FRENCH_MEDIA, self::COOP_MEDIAS],
     ];
     private const UTC = 'Y-m-d H:i:s';
 
@@ -43,16 +47,18 @@ SELECT DISTINCT p.document_id AS uri,
   FROM publication p
   JOIN weaving_user u ON u.usr_twitter_username = p.screen_name
   JOIN publishers_list l ON l.screen_name = u.usr_twitter_id
- WHERE l.name = :list
+ WHERE l.name IN (:lists)
    AND l.deleted_at IS NULL
    AND p.published_at >= :starts_at
    AND p.published_at < :ends_at
    AND p.document_id LIKE 'at://%'
  ORDER BY p.document_id
 SQL, [
-            'list' => self::LIST_URIS[$list->value],
+            'lists' => self::LIST_URIS[$list->value],
             'starts_at' => $day->startsAt()->format(self::UTC),
             'ends_at' => $day->endsAt()->format(self::UTC),
+        ], [
+            'lists' => ArrayParameterType::STRING,
         ]);
 
         return array_map(

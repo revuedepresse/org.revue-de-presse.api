@@ -100,6 +100,18 @@ class FilesystemSnapshotReaderTest extends TestCase
         self::assertSame([], $reader->read('2026-05-03', PublisherList::FrenchMedia, Ranking::EndOfDay));
     }
 
+    public function test_reads_the_combined_list_from_its_own_files_for_both_rankings(): void
+    {
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.fr-coop-medias.first-sighting.json', json_encode([['screen_name' => 'both-first']], JSON_THROW_ON_ERROR));
+        file_put_contents($this->projectDir . '/src/Bluesky/Resources/2026-05-02.fr-coop-medias.end-of-day.json', json_encode([['screen_name' => 'both-eod']], JSON_THROW_ON_ERROR));
+
+        $reader = new FilesystemSnapshotReader(projectDir: $this->projectDir, logger: new NullLogger());
+        $list = PublisherList::fromQuery('fr-coop-medias');
+
+        self::assertSame([['screen_name' => 'both-first']], $reader->read('2026-05-02', $list, Ranking::FirstSighting));
+        self::assertSame([['screen_name' => 'both-eod']], $reader->read('2026-05-02', $list, Ranking::EndOfDay));
+    }
+
     private function removeDirectory(string $path): void
     {
         if (!is_dir($path)) {

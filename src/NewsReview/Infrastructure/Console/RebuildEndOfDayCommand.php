@@ -36,7 +36,7 @@ final class RebuildEndOfDayCommand extends Command
     {
         $this
             ->addArgument('date', InputArgument::REQUIRED, 'Calendar day in Europe/Paris (YYYY-MM-DD)')
-            ->addOption('list', null, InputOption::VALUE_REQUIRED, 'Publisher list: fr or coop-medias', 'fr')
+            ->addOption('list', null, InputOption::VALUE_REQUIRED, 'Publisher list: fr, coop-medias or fr-coop-medias', 'fr')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Print the rebuilt top 10 at each cut-off; store nothing');
     }
 

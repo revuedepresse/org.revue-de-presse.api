@@ -11,6 +11,7 @@
 |---|---|
 | `fr` (default) | French media |
 | `coop-medias` | the `coop-medias.org` list |
+| `fr-coop-medias` | members of either list, each post counted once |
 
 ## Rankings
 
@@ -29,6 +30,7 @@ Every list and ranking has its own file per day, all in `src/Bluesky/Resources/`
 |---|---|---|
 | `fr` | `<date>.json` | `<date>.fr.end-of-day.json` |
 | `coop-medias` | `<date>.coop-medias.first-sighting.json` | `<date>.coop-medias.end-of-day.json` |
+| `fr-coop-medias` | `<date>.fr-coop-medias.first-sighting.json` | `<date>.fr-coop-medias.end-of-day.json` |
 
 French media first-sighting snapshots predate the other lists and rankings and
 keep their `<date>.json` name; every other file is `<date>.<list>.<ranking>.json`
