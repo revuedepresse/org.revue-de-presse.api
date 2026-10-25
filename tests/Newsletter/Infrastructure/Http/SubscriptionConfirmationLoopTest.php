@@ -74,6 +74,33 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertStringContainsString('coop-medias: 1 sent, 0 failed, 1 considered', $display);
     }
 
+    public function test_both_letters_are_asked_for_and_confirmed_at_once(): void
+    {
+        $client = $this->client();
+
+        $client->request('POST', '/newsletter/subscribe', ['email' => 'alice@example.com', 'website' => '', 'edition' => 'both']);
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Email::class, $email);
+        self::assertStringContainsString("la lettre d'information des médias français", (string) $email->getTextBody());
+        self::assertStringContainsString("la lettre d'information de Coop Médias", (string) $email->getTextBody());
+
+        self::assertSame(1, preg_match('#https?://\S+/newsletter/confirm/[A-Za-z0-9_-]{43}\?and=[A-Za-z0-9_-]{43}#', (string) $email->getTextBody(), $m));
+        $client->request('GET', (string) parse_url($m[0], PHP_URL_PATH) . '?' . parse_url($m[0], PHP_URL_QUERY));
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('body', 'adresse e-mail est confirmée');
+
+        self::assertSame(SubscriberStatus::Active, $this->find('alice@example.com')->status());
+        self::assertSame(SubscriberStatus::Active, $this->find('alice@example.com', Edition::CoopMedias)->status());
+        self::assertFalse($this->find('alice@example.com')->unsubToken()->equals($this->find('alice@example.com', Edition::CoopMedias)->unsubToken()));
+
+        // Two letters a day, each with its own unsubscribe link.
+        $display = $this->sendDaily($client);
+        self::assertStringContainsString('fr: 1 sent', $display);
+        self::assertStringContainsString('coop-medias: 1 sent', $display);
+    }
+
     public function test_tampered_confirmation_link_does_not_activate(): void
     {
         $client = $this->client();

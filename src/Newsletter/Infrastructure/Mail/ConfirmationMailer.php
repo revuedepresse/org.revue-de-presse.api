@@ -19,6 +19,19 @@ final class ConfirmationMailer
 
     public function send(EmailAddress $email, string $confirmToken, Edition $edition = Edition::FrenchMedia): void
     {
+        $this->sendForEditions($email, [[$edition, $confirmToken]]);
+    }
+
+    /**
+     * One mail, one button, for every edition asked for at once.
+     *
+     * @param non-empty-list<array{Edition, string}> $tokensByEdition
+     */
+    public function sendForEditions(EmailAddress $email, array $tokensByEdition): void
+    {
+        $names = array_map(static fn(array $pair): string => $pair[0]->newsletterName(), $tokensByEdition);
+        $tokens = array_map(static fn(array $pair): string => $pair[1], $tokensByEdition);
+
         $msg = (new TemplatedEmail())
             ->from(new Address($this->config->fromEmail, $this->config->fromName))
             ->to(new Address($email->unmask()))
@@ -26,9 +39,9 @@ final class ConfirmationMailer
             ->htmlTemplate('newsletter/confirm-email.html.twig')
             ->textTemplate('newsletter/confirm-email.text.twig')
             ->context([
-                'confirm_url' => $this->config->confirmUrl($confirmToken),
+                'confirm_url' => $this->config->confirmUrl(...$tokens),
                 'confirm_ttl_days' => intdiv($this->config->confirmTtlHours + 23, 24),
-                'newsletter_name' => $edition->newsletterName(),
+                'newsletter_name' => implode(' et ', $names),
             ]);
         $this->mailer->send($msg);
     }

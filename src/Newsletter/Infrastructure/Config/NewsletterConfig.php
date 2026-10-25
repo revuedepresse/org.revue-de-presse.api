@@ -29,9 +29,11 @@ final class NewsletterConfig
         }
     }
 
-    public function confirmUrl(string $token): string
+    public function confirmUrl(string $token, string ...$others): string
     {
-        return rtrim($this->baseUrl, '/') . '/newsletter/confirm/' . $token;
+        $url = rtrim($this->baseUrl, '/') . '/newsletter/confirm/' . $token;
+
+        return $others === [] ? $url : $url . '?' . http_build_query(['and' => implode(',', $others)]);
     }
 
     public function unsubscribeUrl(string $token): string

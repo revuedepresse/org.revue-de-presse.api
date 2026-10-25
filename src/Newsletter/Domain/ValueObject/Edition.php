@@ -28,6 +28,22 @@ enum Edition: string
         return self::tryFrom($value) ?? throw new InvalidEdition($value);
     }
 
+    /**
+     * What a sign-up form asks for: one edition, "both", or a list of them.
+     *
+     * @return list<self> in declaration order, each once
+     */
+    public static function listFromForm(mixed $value): array
+    {
+        if ($value === 'both') {
+            return self::cases();
+        }
+
+        $asked = array_map(self::fromForm(...), is_array($value) ? array_values($value) : [$value]);
+
+        return array_values(array_filter(self::cases(), static fn(self $edition): bool => in_array($edition, $asked, true)));
+    }
+
     /** "Vous êtes abonné·e à …" */
     public function newsletterName(): string
     {
