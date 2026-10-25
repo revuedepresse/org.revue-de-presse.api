@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Symfony\Component\Uid\Ulid;
@@ -120,7 +121,9 @@ final class SubscribeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertEmailCount(1);
-        self::assertSame('alice+news@example.com', self::getMailerMessage()->getTo()[0]->getAddress());
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(Email::class, $email);
+        self::assertSame('alice+news@example.com', $email->getTo()[0]->getAddress());
     }
 
     public function test_both_letters_take_one_confirmation_mail(): void
