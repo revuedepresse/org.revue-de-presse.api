@@ -302,8 +302,13 @@ function install_app_requirements() {
         return 1
     fi
 
+    # php-fpm runs as the service's uid, not as the code's owner.
+    local service_uid
+    service_uid="${SERVICE_UID:-10001}"
+
     \cat '/templates/www.conf.dist' | \
     \sed -E 's/__SERVICE__/'"${PROJECT}"'/g' | \
+    \sed -E 's/__SERVICE_UID__/'"${service_uid}"'/g' | \
     \sed -E 's/__UID__/'"${PROJECT_OWNER_UID}"'/g' | \
     \sed -E 's/__GID__/'"${PROJECT_OWNER_GID}"'/g' \
     > "${project_dir}/provisioning/containers/service/templates/www.conf" && \

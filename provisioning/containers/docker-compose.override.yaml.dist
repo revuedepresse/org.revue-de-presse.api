@@ -5,10 +5,13 @@ services:
       - '../../:/var/www/org.example.api/'
       - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
 
+  # Compose merges volumes by target: keep the code read-only here too.
   service:
     volumes:
-      - '../../:/var/www/org.example.api/'
-      - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/'
+      - '../../:/var/www/org.example.api/:ro'
+      - '../../../shared/emoji-data/:/var/www/org.example.api/public/emoji-data/:ro'
+      - '../../var/cache/:/var/www/org.example.api/var/cache/'
+      - '../../var/log/:/var/www/org.example.api/var/log/'
       - 'service-run:/var/www/org.example.api/var/run'
 
 ###> symfony/mailer ###

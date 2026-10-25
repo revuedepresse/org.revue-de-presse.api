@@ -501,6 +501,9 @@ function start() {
     remove_running_container_and_image_in_debug_mode 'app'
     load_configuration_parameters
 
+    # Docker cannot create a mount point inside the read-only code.
+    mkdir -p ./public/emoji-data
+
     local command
     command=$(cat <<-SCRIPT
 docker compose \

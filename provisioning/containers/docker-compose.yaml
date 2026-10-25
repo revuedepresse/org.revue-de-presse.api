@@ -41,14 +41,21 @@ services:
         # observed steady-state usage with headroom; revisit alongside
         # the php-fpm pool sizing rather than raising it on its own.
         mem_limit: 2g
+        # gid 101: the group the reverse proxy reaches the php-fpm socket with.
+        user: '10001:101'
+        # Read-only, except the state written at runtime.
         volumes:
-            - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
-            - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
-            - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
-            - '../../../shared/:/var/www/shared/'
+            - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini:ro'
+            - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf:ro'
+            - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro'
+            - '../../../shared/:/var/www/shared/:ro'
+            - '../../../shared/latest_cache/:/var/www/shared/latest_cache/'
+            - '../../../shared/log/:/var/www/shared/log/'
+            - '../../../shared/run/:/var/www/shared/run/'
             - type: bind
               source: './service/templates/www.conf'
               target: '/usr/local/etc/php-fpm.d/www.conf'
+              read_only: true
               bind:
                   create_host_path: false
 

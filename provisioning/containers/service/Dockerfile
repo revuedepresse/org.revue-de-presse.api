@@ -36,7 +36,10 @@ COPY        --from=composer:2.9 /usr/bin/composer /usr/bin/composer
 
 RUN         /bin/bash -c 'source /scripts/install-service-requirements.sh'
 
-USER        ${SERVICE_OWNER_UID}:${SERVICE_OWNER_GID}
+ARG         SERVICE_UID=10001
+ARG         SERVICE_GID=101
+
+USER        ${SERVICE_UID}:${SERVICE_GID}
 
 VOLUME      ["/scripts", "/var/www/shared", "/var/www/${PROJECT_DIR}"]
 
