@@ -39,8 +39,11 @@ that page. Rows created this way have `enrolled_by = public-form`.
   in the email is clicked.
 - The response never says whether an address was already subscribed.
 - `website` is a honeypot: filled in → nothing happens, same page rendered.
-- `edition` is `fr` (the default when absent) or `coop-medias`; anything else
-  answers 422.
+- `edition` is `fr` (the default when absent), `coop-medias` or `both`;
+  anything else answers 422. `both` enrols the address in each edition and
+  sends a single confirmation mail whose one link
+  (`/newsletter/confirm/<token>?and=<token>`) confirms both. Each edition is
+  then sent, and unsubscribed from, on its own.
 - Limits: 5 POSTs / 10 min per IP (`newsletter_subscribe_post`) and 3
   confirmation mails / day per address (`newsletter_subscribe_email`).
 

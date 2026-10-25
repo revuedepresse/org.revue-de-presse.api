@@ -15,6 +15,8 @@ enum PublisherList: string
 {
     case FrenchMedia = 'fr';
     case CoopMedias = 'coop-medias';
+    // Members of either list, each post counted once.
+    case FrenchAndCoopMedias = 'fr-coop-medias';
 
     public static function fromQuery(mixed $value): self
     {
