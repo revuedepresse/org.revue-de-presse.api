@@ -34,9 +34,14 @@ French media first-sighting snapshots predate the other lists and rankings and
 keep their `<date>.json` name; every other file is `<date>.<list>.<ranking>.json`
 (see `PublisherList::snapshotFileName()`).
 
-Without `?ranking=`, `HIGHLIGHTS_DEFAULT_RANKING` decides (`first-sighting` in
-`.env`). Setting it to `end-of-day` switches every client (site, app,
-newsletter readers of the API) at once, and setting it back reverts.
+Without `?ranking=`, `HIGHLIGHTS_DEFAULT_RANKING` decides (`end-of-day` in
+`.env`). It switches every client (site, app, newsletter readers of the API)
+at once, and setting it to `first-sighting` reverts.
+
+A defaulted `end-of-day` falls back to `first-sighting` on days that have no
+end-of-day snapshot: French media end-of-day snapshots start on 2025-03-04, and
+the days before only have first-sighting ones. A ranking asked for by name is
+never swapped for another one, and the two never share a cache key.
 
 Unknown lists or rankings answer 400.
 

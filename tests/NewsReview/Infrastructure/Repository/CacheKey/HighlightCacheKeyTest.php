@@ -85,4 +85,18 @@ class HighlightCacheKeyTest extends TestCase
             HighlightCacheKey::from($base + ['ranking' => Ranking::EndOfDay]),
         );
     }
+
+    public function test_a_defaulted_ranking_that_may_fall_back_does_not_share_the_key_of_one_asked_for_by_name(): void
+    {
+        $base = [
+            'startDate' => new \DateTime('2018-01-01'),
+            'endDate'   => new \DateTime('2018-01-01'),
+            'ranking'   => Ranking::EndOfDay,
+        ];
+
+        self::assertNotSame(
+            HighlightCacheKey::from($base),
+            HighlightCacheKey::from($base + ['rankingFallback' => Ranking::FirstSighting]),
+        );
+    }
 }

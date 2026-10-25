@@ -35,6 +35,13 @@ final class HighlightCacheKey
             $parts[] = 'ranking=' . $ranking->value;
         }
 
+        // A defaulted ranking may hold another ranking's posts on days it has
+        // none, which a ranking asked for by name must never be served.
+        $fallback = $queryParams['rankingFallback'] ?? null;
+        if ($fallback instanceof Ranking) {
+            $parts[] = 'fallback=' . $fallback->value;
+        }
+
         return sha1(implode(';', $parts));
     }
 
