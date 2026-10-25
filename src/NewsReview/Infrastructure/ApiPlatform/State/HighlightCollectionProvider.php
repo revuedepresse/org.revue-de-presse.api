@@ -81,6 +81,9 @@ final class HighlightCollectionProvider implements ProviderInterface
             ? $params['startDate']->format('Y-m-d')
             : 'unknown';
         $snapshot = $this->reader->read($date, $params['list'], $params['ranking']);
+        if ($snapshot === [] && $params['rankingFallback'] instanceof Ranking) {
+            $snapshot = $this->reader->read($date, $params['list'], $params['rankingFallback']);
+        }
         $statuses = $snapshot['statuses'] ?? $snapshot;
         if (!is_array($statuses)) {
             return [];
@@ -143,6 +146,14 @@ final class HighlightCollectionProvider implements ProviderInterface
         } catch (UnknownRanking $exception) {
             throw new BadRequestHttpException($exception->getMessage(), $exception);
         }
+
+        // A ranking nobody asked for by name may fall back to first-sighting,
+        // the only ranking every day has: French media end-of-day snapshots
+        // start on 2025-03-04, and older days would otherwise come back empty.
+        $rankingAskedFor = isset($query['ranking']) && $query['ranking'] !== '';
+        $parsed['rankingFallback'] = !$rankingAskedFor && $parsed['ranking'] !== Ranking::FirstSighting
+            ? Ranking::FirstSighting
+            : null;
 
         return $parsed;
     }

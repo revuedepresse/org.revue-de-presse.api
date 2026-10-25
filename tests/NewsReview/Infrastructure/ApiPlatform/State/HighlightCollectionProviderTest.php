@@ -153,6 +153,45 @@ class HighlightCollectionProviderTest extends TestCase
         self::assertSame(['first-sighting.fr'], $screenNames('&ranking=first-sighting', 'end-of-day'));
     }
 
+    public function test_default_end_of_day_falls_back_to_first_sighting_where_a_day_has_none(): void
+    {
+        $row = static fn(string $screenName): array => [
+            'screen_name'         => $screenName,
+            'reposts'             => 1,
+            'likes'               => 2,
+            'text'                => 'hi',
+            'publication_id'      => 'at://did/x/' . $screenName,
+            'publicationDateTime' => '2018-01-01T10:00:00+01:00',
+        ];
+        // French media end-of-day snapshots only start on 2025-03-04: older
+        // days have a first-sighting snapshot and nothing else.
+        $reader = new InMemorySnapshotReader(['2018-01-01' => [$row('first-sighting.fr')]]);
+
+        $screenNames = function (string $query) use ($reader): array {
+            $stack = new RequestStack();
+            $stack->push(Request::create('/api/highlights?startDate=2018-01-01&endDate=2018-01-01&includeRetweets=0' . $query));
+            $provider = new HighlightCollectionProvider(
+                $reader,
+                new HighlightFilters(),
+                new HighlightNormalizer(),
+                null,
+                $stack,
+                new NullLogger(),
+                apiEnv: 'test',
+                defaultRanking: 'end-of-day',
+            );
+
+            return array_map(
+                static fn(HighlightDto $dto): string => $dto->screenName,
+                iterator_to_array($provider->provide(new GetCollection(uriTemplate: '/highlights'))),
+            );
+        };
+
+        self::assertSame(['first-sighting.fr'], $screenNames(''));
+        // Asked for by name, a ranking is never swapped for another one.
+        self::assertSame([], $screenNames('&ranking=end-of-day'));
+    }
+
     public function test_unknown_ranking_is_a_bad_request(): void
     {
         $stack = new RequestStack();
