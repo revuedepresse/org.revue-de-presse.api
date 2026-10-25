@@ -28,7 +28,7 @@ final class EnrollSubscriberCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('email', InputArgument::REQUIRED);
-        $this->addOption('edition', null, InputOption::VALUE_REQUIRED, 'fr|coop-medias', Edition::FrenchMedia->value);
+        $this->addOption('edition', null, InputOption::VALUE_REQUIRED, 'fr|coop-medias|fr-coop-medias', Edition::FrenchMedia->value);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

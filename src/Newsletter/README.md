@@ -21,6 +21,7 @@ Two daily letters, each the top 10 of one publisher list, ranked by end of day
 |---|---|---|
 | `fr` | la lettre d'information des médias français | `https://revue-de-presse.org/lettre-quotidienne` |
 | `coop-medias` | la lettre d'information de Coop Médias | `https://revue-de-presse.org/lettre-quotidienne-coop-medias` |
+| `fr-coop-medias` | la lettre d'information des médias français et de Coop Médias: one letter, both lists' top 10 together | `https://revue-de-presse.org/lettre-quotidienne` |
 
 An address subscribes to each edition separately: one row per address and
 edition (unique on `email_hash, edition`), each with its own confirmation and
@@ -39,7 +40,8 @@ that page. Rows created this way have `enrolled_by = public-form`.
   in the email is clicked.
 - The response never says whether an address was already subscribed.
 - `website` is a honeypot: filled in → nothing happens, same page rendered.
-- `edition` is `fr` (the default when absent), `coop-medias` or `both`;
+- `edition` is `fr` (the default when absent), `coop-medias`, `fr-coop-medias`
+  (one letter, both lists together) or `both` (two letters, `fr` and `coop-medias`);
   anything else answers 422. `both` enrols the address in each edition and
   sends a single confirmation mail whose one link
   (`/newsletter/confirm/<token>?and=<token>`) confirms both. Each edition is
