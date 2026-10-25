@@ -1,0 +1,56 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Newsletter\Domain\ValueObject;
+
+/**
+ * Which daily newsletter a subscription is to. Each edition is the top 10 of
+ * one publisher list, so the values are the lists' (see PublisherList).
+ *
+ * An address subscribes to each edition separately: one row, one confirmation
+ * and one unsubscribe link per edition.
+ */
+enum Edition: string
+{
+    case FrenchMedia = 'fr';
+    case CoopMedias = 'coop-medias';
+
+    public static function fromForm(mixed $value): self
+    {
+        if ($value === null || $value === '') {
+            return self::FrenchMedia;
+        }
+
+        if (!is_string($value)) {
+            throw new InvalidEdition('(non-string)');
+        }
+
+        return self::tryFrom($value) ?? throw new InvalidEdition($value);
+    }
+
+    /** "Vous êtes abonné·e à …" */
+    public function newsletterName(): string
+    {
+        return match ($this) {
+            self::FrenchMedia => "la lettre d'information des médias français",
+            self::CoopMedias => "la lettre d'information de Coop Médias",
+        };
+    }
+
+    /** "Top 10 des publications … les plus relayées sur Bluesky" */
+    public function publishers(): string
+    {
+        return match ($this) {
+            self::FrenchMedia => 'des médias français',
+            self::CoopMedias => 'des médias de Coop Médias',
+        };
+    }
+
+    public function subject(string $dateFr): string
+    {
+        return match ($this) {
+            self::FrenchMedia => sprintf('Revue de presse — %s', $dateFr),
+            self::CoopMedias => sprintf('Revue de presse Coop Médias — %s', $dateFr),
+        };
+    }
+}

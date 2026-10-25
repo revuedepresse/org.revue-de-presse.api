@@ -33,3 +33,15 @@ framework:
             limit: 10
             interval: '1 minute'
             cache_pool: cache.rate_limiter
+        newsletter_subscribe_post:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '10 minutes'
+            cache_pool: cache.rate_limiter
+        newsletter_subscribe_email:
+            # Confirmation mails per address (keyed by email hash), whatever
+            # the client IP.
+            policy: 'fixed_window'
+            limit: 3
+            interval: '1 day'
+            cache_pool: cache.rate_limiter

@@ -5,6 +5,7 @@ namespace App\Newsletter\Domain\Service;
 
 use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
 use Psr\Clock\ClockInterface;
@@ -20,10 +21,11 @@ final class SubscriberEnroller
         private readonly string $actingUser,
     ) {}
 
-    public function enrol(EmailAddress $email): EnrolmentOutcome
+    public function enrol(EmailAddress $email, ?string $enrolledBy = null, Edition $edition = Edition::FrenchMedia): EnrolmentOutcome
     {
         $now = $this->clock->now();
-        $existing = $this->repository->findByEmailHash($email->hash());
+        $enrolledBy ??= $this->actingUser;
+        $existing = $this->repository->findByEmailHash($email->hash(), $edition);
 
         if ($existing === null) {
             $confirm = $this->tokens->generate();
@@ -34,8 +36,9 @@ final class SubscriberEnroller
                 confirmToken: $confirm,
                 confirmExpiresAt: $now->modify(sprintf('+%d hours', $this->confirmTtlHours)),
                 unsubToken: $unsub,
-                enrolledBy: $this->actingUser,
+                enrolledBy: $enrolledBy,
                 now: $now,
+                edition: $edition,
             );
             $this->repository->save($sub);
             return EnrolmentOutcome::created($confirm);
@@ -44,7 +47,7 @@ final class SubscriberEnroller
         return match ($existing->status()) {
             SubscriberStatus::Active => EnrolmentOutcome::alreadyActive(),
             SubscriberStatus::Pending => $this->resendPending($existing),
-            SubscriberStatus::Unsubscribed => $this->reenrol($existing, $now),
+            SubscriberStatus::Unsubscribed => $this->reenrol($existing, $now, $enrolledBy),
         };
     }
 
@@ -55,7 +58,7 @@ final class SubscriberEnroller
         return EnrolmentOutcome::resent($token);
     }
 
-    private function reenrol(Subscriber $sub, \DateTimeImmutable $now): EnrolmentOutcome
+    private function reenrol(Subscriber $sub, \DateTimeImmutable $now, string $enrolledBy): EnrolmentOutcome
     {
         $confirm = $this->tokens->generate();
         $unsub = $this->tokens->generate();
@@ -63,7 +66,7 @@ final class SubscriberEnroller
             confirmToken: $confirm,
             confirmExpiresAt: $now->modify(sprintf('+%d hours', $this->confirmTtlHours)),
             unsubToken: $unsub,
-            enrolledBy: $this->actingUser,
+            enrolledBy: $enrolledBy,
             now: $now,
         );
         $this->repository->save($sub);

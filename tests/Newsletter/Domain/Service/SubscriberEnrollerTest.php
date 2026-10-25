@@ -6,6 +6,7 @@ namespace App\Tests\Newsletter\Domain\Service;
 use App\Newsletter\Domain\Service\EnrolmentOutcome;
 use App\Newsletter\Domain\Service\EnrolmentOutcomeKind;
 use App\Newsletter\Domain\Service\SubscriberEnroller;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\OpaqueToken;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
@@ -84,5 +85,45 @@ final class SubscriberEnrollerTest extends TestCase
         self::assertSame(EnrolmentOutcomeKind::Reenrolled, $third->result);
         $sub2 = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
         self::assertSame(SubscriberStatus::Pending, $sub2->status());
+    }
+
+    public function test_enrolled_by_defaults_to_acting_user(): void
+    {
+        $repo = new InMemorySubscriberRepository();
+        $enroller = $this->makeEnroller($repo, new \DateTimeImmutable('2026-05-23T05:30:00Z'));
+        $enroller->enrol(EmailAddress::fromString('alice@example.com'));
+
+        $sub = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
+        self::assertSame('rdp-api', $sub->enrolledBy());
+    }
+
+    public function test_enrolled_by_can_be_overridden_per_call(): void
+    {
+        $repo = new InMemorySubscriberRepository();
+        $enroller = $this->makeEnroller($repo, new \DateTimeImmutable('2026-05-23T05:30:00Z'));
+        $enroller->enrol(EmailAddress::fromString('alice@example.com'), 'public-form');
+
+        $sub = $repo->findByEmailHash(EmailAddress::fromString('alice@example.com')->hash());
+        self::assertSame('public-form', $sub->enrolledBy());
+    }
+
+    public function test_an_address_subscribes_to_each_edition_on_its_own(): void
+    {
+        $repo = new InMemorySubscriberRepository();
+        $enroller = $this->makeEnroller($repo, new \DateTimeImmutable('2026-05-23T05:30:00Z'));
+        $alice = EmailAddress::fromString('alice@example.com');
+
+        $french = $enroller->enrol($alice);
+        $coop = $enroller->enrol($alice, edition: Edition::CoopMedias);
+
+        self::assertSame(EnrolmentOutcomeKind::Created, $french->result);
+        self::assertSame(EnrolmentOutcomeKind::Created, $coop->result);
+        self::assertFalse($french->confirmToken->equals($coop->confirmToken));
+
+        $frenchRow = $repo->findByEmailHash($alice->hash(), Edition::FrenchMedia);
+        $coopRow = $repo->findByEmailHash($alice->hash(), Edition::CoopMedias);
+        self::assertSame(Edition::FrenchMedia, $frenchRow?->edition());
+        self::assertSame(Edition::CoopMedias, $coopRow?->edition());
+        self::assertFalse($frenchRow->unsubToken()->equals($coopRow->unsubToken()));
     }
 }

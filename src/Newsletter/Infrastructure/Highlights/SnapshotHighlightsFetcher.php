@@ -5,7 +5,10 @@ namespace App\Newsletter\Infrastructure\Highlights;
 
 use App\Newsletter\Domain\Service\DailyHighlightsSource;
 use App\Newsletter\Domain\Service\HighlightView;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Infrastructure\Text\TextCleaner;
+use App\NewsReview\Domain\Snapshot\PublisherList;
+use App\NewsReview\Domain\Snapshot\Ranking;
 use App\NewsReview\Domain\Snapshot\SnapshotReader;
 
 final class SnapshotHighlightsFetcher implements DailyHighlightsSource
@@ -13,9 +16,16 @@ final class SnapshotHighlightsFetcher implements DailyHighlightsSource
     public function __construct(private readonly SnapshotReader $snapshots)
     {}
 
-    public function fetchTop10(\DateTimeImmutable $date): array
+    public function fetchTop10(\DateTimeImmutable $date, Edition $edition = Edition::FrenchMedia): array
     {
-        $raw = $this->snapshots->read($date->format('Y-m-d'));
+        // Ranked by end of day, like the site; first-sighting where a day has
+        // no end-of-day snapshot (French media ones start on 2025-03-04).
+        $day = $date->format('Y-m-d');
+        $list = PublisherList::from($edition->value);
+        $raw = $this->snapshots->read($day, $list, Ranking::EndOfDay);
+        if ($raw === []) {
+            $raw = $this->snapshots->read($day, $list, Ranking::FirstSighting);
+        }
         $views = [];
         foreach (array_slice($raw, 0, 10) as $i => $row) {
             $views[] = new HighlightView(

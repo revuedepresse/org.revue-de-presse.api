@@ -6,11 +6,43 @@ Daily-report mailer. See the design at
 
 ## Commands
 
-- `bin/console newsletter:enroll <email>` — enrol a recipient (sends confirm email).
+- `bin/console newsletter:enroll <email> [--edition=fr|coop-medias]` — enrol a recipient (sends confirm email).
 - `bin/console newsletter:list [--status=active|pending|unsubscribed]` — list.
-- `bin/console newsletter:send-daily [--date=YYYY-MM-DD] [--dry-run]` — cron entry.
+- `bin/console newsletter:send-daily [--date=YYYY-MM-DD] [--edition=fr|coop-medias] [--dry-run]` — cron entry; every edition unless `--edition` is given.
 - `bin/console newsletter:rotate-encryption-key` — re-encrypt rows with NEXT key.
 - `bin/console newsletter:check-design-tokens` — audit design tokens against the source-of-truth JSON (read-only; reports drift).
+
+## Editions
+
+Two daily letters, each the top 10 of one publisher list, ranked by end of day
+(first sighting on days with no end-of-day snapshot):
+
+| `edition` | Letter | Sign-up page |
+|---|---|---|
+| `fr` | la lettre d'information des médias français | `https://revue-de-presse.org/lettre-quotidienne` |
+| `coop-medias` | la lettre d'information de Coop Médias | `https://revue-de-presse.org/lettre-quotidienne-coop-medias` |
+
+An address subscribes to each edition separately: one row per address and
+edition (unique on `email_hash, edition`), each with its own confirmation and
+unsubscribe links, so leaving one letter keeps the other. Rows that predate
+editions are `fr`.
+
+## Public sign-up
+
+`POST /newsletter/subscribe` (form fields `email`, `website`, `edition`) is what the
+sign-up page at `NEWSLETTER_SIGNUP_URL` (default
+`https://revue-de-presse.org/lettre-quotidienne`) posts to — a plain HTML form,
+so no CORS and per-IP rate limiting sees the real visitor. `GET` redirects to
+that page. Rows created this way have `enrolled_by = public-form`.
+
+- Double opt-in is unchanged: the row stays `pending` until the confirm link
+  in the email is clicked.
+- The response never says whether an address was already subscribed.
+- `website` is a honeypot: filled in → nothing happens, same page rendered.
+- `edition` is `fr` (the default when absent) or `coop-medias`; anything else
+  answers 422.
+- Limits: 5 POSTs / 10 min per IP (`newsletter_subscribe_post`) and 3
+  confirmation mails / day per address (`newsletter_subscribe_email`).
 
 ## Local dev — end to end (enrol a recipient → send a real top-10 mail)
 
@@ -133,6 +165,9 @@ prod.
 |---|---|
 | 0 | Success or dry-run. |
 | 1 | Lock held (already sent today). |
-| 2 | Upstream highlights fetch failed. |
+| 2 | Upstream highlights fetch failed, or no highlights for the day. |
 | 3 | Mailer failure for ≥1 recipient. |
 | 4 | Config invalid. |
+
+Each edition is sent on its own and reported on its own line; the exit code is
+the worst of them.

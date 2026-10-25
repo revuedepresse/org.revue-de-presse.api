@@ -5,6 +5,7 @@ namespace App\Tests\Newsletter\Domain\Repository;
 
 use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\OpaqueToken;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
 
@@ -18,10 +19,10 @@ final class InMemorySubscriberRepository implements SubscriberRepository
         $this->byId[(string) $subscriber->id()] = $subscriber;
     }
 
-    public function findByEmailHash(string $emailHash): ?Subscriber
+    public function findByEmailHash(string $emailHash, Edition $edition = Edition::FrenchMedia): ?Subscriber
     {
         foreach ($this->byId as $s) {
-            if (hash_equals($s->emailHash(), $emailHash)) {
+            if (hash_equals($s->emailHash(), $emailHash) && $s->edition() === $edition) {
                 return $s;
             }
         }
@@ -49,9 +50,13 @@ final class InMemorySubscriberRepository implements SubscriberRepository
         return null;
     }
 
-    public function iterateActive(int $batchSize = 200): iterable
+    public function iterateActive(int $batchSize = 200, ?Edition $edition = null): iterable
     {
-        yield from $this->iterateByStatus(SubscriberStatus::Active->value, $batchSize);
+        foreach ($this->iterateByStatus(SubscriberStatus::Active->value, $batchSize) as $s) {
+            if ($edition === null || $s->edition() === $edition) {
+                yield $s;
+            }
+        }
     }
 
     public function iterateByStatus(string $status, int $batchSize = 200): iterable
