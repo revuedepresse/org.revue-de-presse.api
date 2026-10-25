@@ -70,6 +70,7 @@ final class SnapshotHighlightsFetcherTest extends TestCase
 
         self::assertSame('fr.end-of-day', $screenName('2026-05-23', Edition::FrenchMedia));
         self::assertSame('coop-medias.end-of-day', $screenName('2026-05-23', Edition::CoopMedias));
+        self::assertSame('fr-coop-medias.end-of-day', $screenName('2026-05-23', Edition::FrenchAndCoopMedias));
         self::assertSame('fr.first-sighting', $screenName('2018-01-01', Edition::FrenchMedia));
     }
 }

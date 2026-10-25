@@ -14,6 +14,8 @@ enum Edition: string
 {
     case FrenchMedia = 'fr';
     case CoopMedias = 'coop-medias';
+    // One letter, the top 10 of both lists together.
+    case FrenchAndCoopMedias = 'fr-coop-medias';
 
     public static function fromForm(mixed $value): self
     {
@@ -35,8 +37,9 @@ enum Edition: string
      */
     public static function listFromForm(mixed $value): array
     {
+        // Two letters, one per list.
         if ($value === 'both') {
-            return self::cases();
+            return [self::FrenchMedia, self::CoopMedias];
         }
 
         $asked = array_map(self::fromForm(...), is_array($value) ? array_values($value) : [$value]);
@@ -50,6 +53,7 @@ enum Edition: string
         return match ($this) {
             self::FrenchMedia => "la lettre d'information des médias français",
             self::CoopMedias => "la lettre d'information de Coop Médias",
+            self::FrenchAndCoopMedias => "la lettre d'information des médias français et de Coop Médias",
         };
     }
 
@@ -59,6 +63,7 @@ enum Edition: string
         return match ($this) {
             self::FrenchMedia => 'des médias français',
             self::CoopMedias => 'des médias de Coop Médias',
+            self::FrenchAndCoopMedias => 'des médias français et de Coop Médias',
         };
     }
 
@@ -67,6 +72,7 @@ enum Edition: string
         return match ($this) {
             self::FrenchMedia => sprintf('Revue de presse — %s', $dateFr),
             self::CoopMedias => sprintf('Revue de presse Coop Médias — %s', $dateFr),
+            self::FrenchAndCoopMedias => sprintf('Revue de presse, médias français et Coop Médias — %s', $dateFr),
         };
     }
 }

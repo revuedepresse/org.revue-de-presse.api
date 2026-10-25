@@ -13,7 +13,9 @@ final class EditionTest extends TestCase
     {
         self::assertSame([Edition::FrenchMedia], Edition::listFromForm(null));
         self::assertSame([Edition::CoopMedias], Edition::listFromForm('coop-medias'));
+        // "both" is two letters, one per list; the combined letter is asked for by name.
         self::assertSame([Edition::FrenchMedia, Edition::CoopMedias], Edition::listFromForm('both'));
+        self::assertSame([Edition::FrenchAndCoopMedias], Edition::listFromForm('fr-coop-medias'));
         self::assertSame([Edition::FrenchMedia, Edition::CoopMedias], Edition::listFromForm(['coop-medias', 'fr', 'fr']));
     }
 

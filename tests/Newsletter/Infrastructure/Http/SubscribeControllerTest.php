@@ -124,6 +124,19 @@ final class SubscribeControllerTest extends WebTestCase
         self::assertSame(Edition::CoopMedias, $this->find('alice@example.com', Edition::CoopMedias)?->edition());
     }
 
+    public function test_the_combined_letter_is_one_subscription(): void
+    {
+        $client = $this->client();
+        $this->subscribe($client, 'alice@example.com', edition: 'fr-coop-medias');
+
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(1);
+        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information des médias français et de Coop Médias");
+        self::assertSame(Edition::FrenchAndCoopMedias, $this->find('alice@example.com', Edition::FrenchAndCoopMedias)?->edition());
+        self::assertNull($this->find('alice@example.com'));
+        self::assertNull($this->find('alice@example.com', Edition::CoopMedias));
+    }
+
     public function test_unknown_edition_is_rejected(): void
     {
         $client = $this->client();

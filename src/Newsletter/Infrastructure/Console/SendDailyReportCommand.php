@@ -39,7 +39,7 @@ final class SendDailyReportCommand extends Command
     {
         $this->addOption('date', null, InputOption::VALUE_REQUIRED, 'YYYY-MM-DD (default: yesterday in configured TZ)');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE);
-        $this->addOption('edition', null, InputOption::VALUE_REQUIRED, 'fr|coop-medias (default: every edition)');
+        $this->addOption('edition', null, InputOption::VALUE_REQUIRED, 'fr|coop-medias|fr-coop-medias (default: every edition)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

@@ -72,6 +72,7 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         $display = $this->sendDaily($client);
         self::assertStringContainsString('fr: 0 sent, 0 failed, 0 considered', $display);
         self::assertStringContainsString('coop-medias: 1 sent, 0 failed, 1 considered', $display);
+        self::assertStringContainsString('fr-coop-medias: 0 sent, 0 failed, 0 considered', $display);
     }
 
     public function test_both_letters_are_asked_for_and_confirmed_at_once(): void
