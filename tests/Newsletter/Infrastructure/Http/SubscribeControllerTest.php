@@ -5,6 +5,7 @@ namespace App\Tests\Newsletter\Infrastructure\Http;
 
 use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\OpaqueToken;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
@@ -100,6 +101,28 @@ final class SubscribeControllerTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function test_the_edition_field_picks_the_newsletter(): void
+    {
+        $client = $this->client();
+        $this->subscribe($client, 'alice@example.com', edition: 'coop-medias');
+
+        self::assertResponseIsSuccessful();
+        self::assertEmailCount(1);
+        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information de Coop Médias");
+        self::assertNull($this->find('alice@example.com'));
+        self::assertSame(Edition::CoopMedias, $this->find('alice@example.com', Edition::CoopMedias)?->edition());
+    }
+
+    public function test_unknown_edition_is_rejected(): void
+    {
+        $client = $this->client();
+        $this->subscribe($client, 'alice@example.com', edition: '../etc');
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertEmailCount(0);
+        self::assertNull($this->find('alice@example.com'));
+    }
+
     public function test_get_redirects_to_the_signup_page(): void
     {
         $client = $this->client();
@@ -122,14 +145,18 @@ final class SubscribeControllerTest extends WebTestCase
         return $client;
     }
 
-    private function subscribe(KernelBrowser $client, string $email, string $website = ''): void
+    private function subscribe(KernelBrowser $client, string $email, string $website = '', ?string $edition = null): void
     {
-        $client->request('POST', '/newsletter/subscribe', ['email' => $email, 'website' => $website]);
+        $fields = ['email' => $email, 'website' => $website];
+        if ($edition !== null) {
+            $fields['edition'] = $edition;
+        }
+        $client->request('POST', '/newsletter/subscribe', $fields);
     }
 
-    private function find(string $email): ?Subscriber
+    private function find(string $email, Edition $edition = Edition::FrenchMedia): ?Subscriber
     {
         $repo = self::getContainer()->get(SubscriberRepository::class);
-        return $repo->findByEmailHash(EmailAddress::fromString($email)->hash());
+        return $repo->findByEmailHash(EmailAddress::fromString($email)->hash(), $edition);
     }
 }

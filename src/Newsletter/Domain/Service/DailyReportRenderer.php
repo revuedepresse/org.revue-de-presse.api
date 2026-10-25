@@ -25,13 +25,16 @@ final class DailyReportRenderer
         $email = (new TemplatedEmail())
             ->from(new Address($this->config->fromEmail, $this->config->fromName))
             ->to(new Address($recipient->email()->unmask()))
-            ->subject(sprintf('Revue de presse — %s', $dateFr))
+            ->subject($recipient->edition()->subject($dateFr))
             ->htmlTemplate('newsletter/daily-report.html.twig')
             ->textTemplate('newsletter/daily-report.text.twig')
             ->context([
                 'date_fr'        => $dateFr,
                 'highlights'     => $highlights,
                 'unsubscribe_url' => $unsubUrl,
+                'subject'        => $recipient->edition()->subject($dateFr),
+                'publishers'     => $recipient->edition()->publishers(),
+                'newsletter_name' => $recipient->edition()->newsletterName(),
             ]);
 
         $email->getHeaders()->addTextHeader('List-Unsubscribe', sprintf('<%s>', $unsubUrl));

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Newsletter\Domain\Entity;
 
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\InvalidStatusTransition;
 use App\Newsletter\Domain\ValueObject\OpaqueToken;
@@ -13,14 +14,18 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\Entity]
 #[ORM\Table(name: 'newsletter_subscribers')]
 #[ORM\Index(columns: ['status'], name: 'idx_newsletter_subscribers_status')]
+#[ORM\UniqueConstraint(name: 'uq_newsletter_subscribers_email_hash_edition', columns: ['email_hash', 'edition'])]
 class Subscriber
 {
     #[ORM\Id]
     #[ORM\Column(type: 'ulid', unique: true)]
     private Ulid $id;
 
-    #[ORM\Column(name: 'email_hash', type: 'string', length: 64, unique: true)]
+    #[ORM\Column(name: 'email_hash', type: 'string', length: 64)]
     private string $emailHash;
+
+    #[ORM\Column(type: 'string', length: 16, enumType: Edition::class, options: ['default' => 'fr'])]
+    private Edition $edition;
 
     #[ORM\Column(name: 'email_encrypted', type: 'newsletter_encrypted_string')]
     private string $email;
@@ -66,9 +71,11 @@ class Subscriber
         OpaqueToken $unsubToken,
         string $enrolledBy,
         \DateTimeImmutable $now,
+        Edition $edition,
     ) {
         $this->id = $id;
         $this->emailHash = $email->hash();
+        $this->edition = $edition;
         $this->email = $email->unmask();
         $this->status = SubscriberStatus::Pending;
         $this->confirmToken = $confirmToken->value();
@@ -88,8 +95,9 @@ class Subscriber
         OpaqueToken $unsubToken,
         string $enrolledBy,
         \DateTimeImmutable $now,
+        Edition $edition = Edition::FrenchMedia,
     ): self {
-        return new self($id, $email, $confirmToken, $confirmExpiresAt, $unsubToken, $enrolledBy, $now);
+        return new self($id, $email, $confirmToken, $confirmExpiresAt, $unsubToken, $enrolledBy, $now, $edition);
     }
 
     public function reenrol(
@@ -156,6 +164,7 @@ class Subscriber
 
     public function id(): Ulid                                 { return $this->id; }
     public function emailHash(): string                        { return $this->emailHash; }
+    public function edition(): Edition                         { return $this->edition; }
     public function email(): EmailAddress                      { return EmailAddress::fromString($this->email); }
     public function status(): SubscriberStatus                 { return $this->status; }
     public function confirmToken(): ?OpaqueToken               { return $this->confirmToken === null ? null : OpaqueToken::fromString($this->confirmToken); }

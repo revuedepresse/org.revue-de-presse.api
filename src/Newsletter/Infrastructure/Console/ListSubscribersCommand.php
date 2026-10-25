@@ -30,11 +30,12 @@ final class ListSubscribersCommand extends Command
             $rows[] = [
                 (string) $sub->id(),
                 $sub->email()->unmask(),
+                $sub->edition()->value,
                 $sub->status()->value,
                 $sub->lastSentAt()?->format(\DateTimeInterface::ATOM) ?? '-',
             ];
         }
-        $io->table(['id', 'email', 'status', 'last_sent_at'], $rows);
+        $io->table(['id', 'email', 'edition', 'status', 'last_sent_at'], $rows);
         return Command::SUCCESS;
     }
 }

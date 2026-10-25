@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Newsletter\Infrastructure\Http;
 
 use App\Newsletter\Domain\Service\SubscriberEnroller;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
+use App\Newsletter\Domain\ValueObject\InvalidEdition;
 use App\Newsletter\Domain\ValueObject\InvalidEmailAddress;
 use App\Newsletter\Infrastructure\Config\NewsletterConfig;
 use App\Newsletter\Infrastructure\Mail\ConfirmationMailer;
@@ -55,7 +57,9 @@ final class SubscribeController extends AbstractController
 
         try {
             $email = EmailAddress::fromString((string) $request->request->get('email', ''));
-        } catch (InvalidEmailAddress) {
+            // Each sign-up page posts the edition it offers; without one, the French media letter.
+            $edition = Edition::fromForm($request->request->get('edition'));
+        } catch (InvalidEmailAddress|InvalidEdition) {
             return $this->renderResponse('newsletter/subscribe-invalid.html.twig', 422);
         }
 
@@ -65,10 +69,10 @@ final class SubscribeController extends AbstractController
             return $this->renderResponse('newsletter/subscribe-pending.html.twig');
         }
 
-        $outcome = $enroller->enrol($email, self::ENROLLED_BY);
+        $outcome = $enroller->enrol($email, self::ENROLLED_BY, $edition);
         if ($outcome->confirmToken !== null) {
             try {
-                $confirmationMailer->send($email, $outcome->confirmToken->value());
+                $confirmationMailer->send($email, $outcome->confirmToken->value(), $edition);
             } catch (TransportExceptionInterface $e) {
                 $newsletterLogger->error('newsletter confirmation send failed', ['email' => (string) $email, 'error' => $e->getMessage()]);
                 return $this->renderResponse('newsletter/subscribe-failed.html.twig', 503);

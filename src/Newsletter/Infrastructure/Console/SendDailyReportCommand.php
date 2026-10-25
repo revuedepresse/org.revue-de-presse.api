@@ -6,6 +6,8 @@ namespace App\Newsletter\Infrastructure\Console;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
 use App\Newsletter\Domain\Service\DailyHighlightsSource;
 use App\Newsletter\Domain\Service\DailyReportRenderer;
+use App\Newsletter\Domain\ValueObject\Edition;
+use App\Newsletter\Domain\ValueObject\InvalidEdition;
 use App\Newsletter\Infrastructure\Config\NewsletterConfig;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
@@ -37,6 +39,7 @@ final class SendDailyReportCommand extends Command
     {
         $this->addOption('date', null, InputOption::VALUE_REQUIRED, 'YYYY-MM-DD (default: yesterday in configured TZ)');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE);
+        $this->addOption('edition', null, InputOption::VALUE_REQUIRED, 'fr|coop-medias (default: every edition)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -48,32 +51,54 @@ final class SendDailyReportCommand extends Command
             : $this->clock->now()->setTimezone($tz)->modify('-1 day');
         $dateKey = $date->format('Y-m-d');
 
-        $lock = $this->newsletterLockFactory->createLock('newsletter.daily.' . $dateKey, 3600);
+        try {
+            $editions = $input->getOption('edition') !== null
+                ? [Edition::fromForm($input->getOption('edition'))]
+                : Edition::cases();
+        } catch (InvalidEdition $e) {
+            $io->error($e->getMessage());
+            return Command::INVALID;
+        }
+
+        // Each edition is sent on its own: one with no highlights or failed
+        // sends does not hold back the others. The worst outcome is the exit code.
+        $exit = Command::SUCCESS;
+        foreach ($editions as $edition) {
+            $exit = max($exit, $this->sendEdition($edition, $date, $dateKey, (bool) $input->getOption('dry-run'), $io));
+        }
+
+        return $exit;
+    }
+
+    private function sendEdition(Edition $edition, \DateTimeImmutable $date, string $dateKey, bool $dryRun, SymfonyStyle $io): int
+    {
+        $label = sprintf('%s %s', $dateKey, $edition->value);
+        $lock = $this->newsletterLockFactory->createLock(sprintf('newsletter.daily.%s.%s', $edition->value, $dateKey), 3600);
         if (!$lock->acquire()) {
-            $io->warning(sprintf('Lock held for %s — already sent today or another run in progress', $dateKey));
+            $io->warning(sprintf('Lock held for %s — already sent today or another run in progress', $label));
             return 1;
         }
 
         try {
             try {
-                $views = $this->highlights->fetchTop10($date);
+                $views = $this->highlights->fetchTop10($date, $edition);
             } catch (\Throwable $e) {
-                $this->logger->error('newsletter highlights fetch failed', ['date' => $dateKey, 'error' => $e->getMessage()]);
-                $io->error('Highlights fetch failed: ' . $e->getMessage());
+                $this->logger->error('newsletter highlights fetch failed', ['date' => $dateKey, 'edition' => $edition->value, 'error' => $e->getMessage()]);
+                $io->error(sprintf('%s: highlights fetch failed: %s', $label, $e->getMessage()));
                 return 2;
             }
             if (count($views) === 0) {
-                $io->warning('No highlights for ' . $dateKey);
+                $io->warning('No highlights for ' . $label);
                 return 2;
             }
 
             $sent = 0; $failed = 0; $considered = 0;
-            foreach ($this->repo->iterateActive(200) as $sub) {
+            foreach ($this->repo->iterateActive(200, $edition) as $sub) {
                 $considered++;
                 $email = $this->renderer->render($sub, $views, $date);
 
-                if ($input->getOption('dry-run')) {
-                    $io->writeln(sprintf('dry-run: would send to %s', $sub->email()));
+                if ($dryRun) {
+                    $io->writeln(sprintf('dry-run: would send %s to %s', $edition->value, $sub->email()));
                     continue;
                 }
 
@@ -84,11 +109,11 @@ final class SendDailyReportCommand extends Command
                     $sent++;
                 } catch (Throwable $e) {
                     $failed++;
-                    $this->logger->error('newsletter send failed', ['subscriber_id' => (string) $sub->id(), 'error' => $e->getMessage()]);
+                    $this->logger->error('newsletter send failed', ['subscriber_id' => (string) $sub->id(), 'edition' => $edition->value, 'error' => $e->getMessage()]);
                 }
             }
 
-            $io->success(sprintf('%s: %d sent, %d failed, %d considered', $dateKey, $sent, $failed, $considered));
+            $io->success(sprintf('%s: %d sent, %d failed, %d considered', $label, $sent, $failed, $considered));
             return $failed > 0 ? 3 : 0;
         } finally {
             $lock->release();

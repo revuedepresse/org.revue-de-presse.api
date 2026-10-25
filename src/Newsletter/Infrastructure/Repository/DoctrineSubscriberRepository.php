@@ -5,6 +5,7 @@ namespace App\Newsletter\Infrastructure\Repository;
 
 use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\OpaqueToken;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,10 +21,10 @@ final class DoctrineSubscriberRepository implements SubscriberRepository
         $this->em->flush();
     }
 
-    public function findByEmailHash(string $emailHash): ?Subscriber
+    public function findByEmailHash(string $emailHash, Edition $edition = Edition::FrenchMedia): ?Subscriber
     {
         return $this->em->getRepository(Subscriber::class)
-            ->findOneBy(['emailHash' => $emailHash]);
+            ->findOneBy(['emailHash' => $emailHash, 'edition' => $edition]);
     }
 
     public function findByConfirmToken(OpaqueToken $token): ?Subscriber
@@ -38,9 +39,9 @@ final class DoctrineSubscriberRepository implements SubscriberRepository
             ->findOneBy(['unsubToken' => $token->value()]);
     }
 
-    public function iterateActive(int $batchSize = 200): iterable
+    public function iterateActive(int $batchSize = 200, ?Edition $edition = null): iterable
     {
-        return $this->iterateByStatus(SubscriberStatus::Active->value, $batchSize);
+        return $this->iterateByStatus(SubscriberStatus::Active->value, $batchSize, $edition);
     }
 
     public function truncate(): int
@@ -53,7 +54,7 @@ final class DoctrineSubscriberRepository implements SubscriberRepository
         return $count;
     }
 
-    public function iterateByStatus(string $status, int $batchSize = 200): iterable
+    public function iterateByStatus(string $status, int $batchSize = 200, ?Edition $edition = null): iterable
     {
         $qb = $this->em->createQueryBuilder()
             ->select('s')
@@ -61,6 +62,9 @@ final class DoctrineSubscriberRepository implements SubscriberRepository
             ->where('s.status = :status')
             ->orderBy('s.id', 'ASC')
             ->setParameter('status', $status);
+        if ($edition !== null) {
+            $qb->andWhere('s.edition = :edition')->setParameter('edition', $edition->value);
+        }
 
         $offset = 0;
         do {

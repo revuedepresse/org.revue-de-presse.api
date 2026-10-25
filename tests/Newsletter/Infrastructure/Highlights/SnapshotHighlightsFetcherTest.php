@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Newsletter\Infrastructure\Highlights;
 
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Infrastructure\Highlights\SnapshotHighlightsFetcher;
 use App\NewsReview\Domain\Snapshot\PublisherList;
 use App\NewsReview\Domain\Snapshot\Ranking;
@@ -50,5 +51,25 @@ final class SnapshotHighlightsFetcherTest extends TestCase
         self::assertSame("1er mai et \n new lines", $views[0]->text);
         self::assertStringNotContainsString('\\xa0', $views[0]->text);
         self::assertStringNotContainsString('\\n', $views[0]->text);
+    }
+
+    public function test_each_edition_reads_its_list_end_of_day_snapshot_and_falls_back_to_first_sighting(): void
+    {
+        $reader = new class implements SnapshotReader {
+            public function read(string $date, PublisherList $list = PublisherList::FrenchMedia, Ranking $ranking = Ranking::FirstSighting): array {
+                // French media end-of-day snapshots start on 2025-03-04.
+                if ($list === PublisherList::FrenchMedia && $ranking === Ranking::EndOfDay && $date < '2025-03-04') {
+                    return [];
+                }
+
+                return [['screen_name' => $list->value . '.' . $ranking->value, 'text' => 't', 'reposts' => 1, 'likes' => 1, 'url' => 'https://x/1']];
+            }
+        };
+        $fetcher = new SnapshotHighlightsFetcher($reader);
+        $screenName = static fn(string $date, Edition $edition): string => $fetcher->fetchTop10(new \DateTimeImmutable($date), $edition)[0]->screen_name;
+
+        self::assertSame('fr.end-of-day', $screenName('2026-05-23', Edition::FrenchMedia));
+        self::assertSame('coop-medias.end-of-day', $screenName('2026-05-23', Edition::CoopMedias));
+        self::assertSame('fr.first-sighting', $screenName('2018-01-01', Edition::FrenchMedia));
     }
 }

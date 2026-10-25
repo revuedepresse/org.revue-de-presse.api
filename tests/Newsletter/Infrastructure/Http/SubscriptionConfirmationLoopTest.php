@@ -7,6 +7,7 @@ use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
 use App\Newsletter\Domain\Service\DailyHighlightsSource;
 use App\Newsletter\Domain\Service\HighlightView;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
 use App\Newsletter\Infrastructure\Doctrine\BootEncryptedStringType;
@@ -55,6 +56,24 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertStringContainsString('1 sent, 0 failed, 1 considered', $this->sendDaily($client));
     }
 
+    public function test_each_edition_is_confirmed_and_sent_on_its_own(): void
+    {
+        $client = $this->client();
+
+        // Alice signs up to both newsletters, and only confirms Coop Médias.
+        $this->signUpAndReadConfirmationLink($client, 'alice@example.com');
+        $coopConfirmUrl = $this->signUpAndReadConfirmationLink($client, 'alice@example.com', Edition::CoopMedias);
+
+        $client->request('GET', parse_url($coopConfirmUrl, PHP_URL_PATH));
+        self::assertResponseIsSuccessful();
+        self::assertSame(SubscriberStatus::Pending, $this->find('alice@example.com')->status());
+        self::assertSame(SubscriberStatus::Active, $this->find('alice@example.com', Edition::CoopMedias)->status());
+
+        $display = $this->sendDaily($client);
+        self::assertStringContainsString('fr: 0 sent, 0 failed, 0 considered', $display);
+        self::assertStringContainsString('coop-medias: 1 sent, 0 failed, 1 considered', $display);
+    }
+
     public function test_tampered_confirmation_link_does_not_activate(): void
     {
         $client = $this->client();
@@ -69,9 +88,9 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertSame(SubscriberStatus::Pending, $this->find('alice@example.com')->status());
     }
 
-    private function signUpAndReadConfirmationLink(KernelBrowser $client, string $address): string
+    private function signUpAndReadConfirmationLink(KernelBrowser $client, string $address, Edition $edition = Edition::FrenchMedia): string
     {
-        $client->request('POST', '/newsletter/subscribe', ['email' => $address, 'website' => '']);
+        $client->request('POST', '/newsletter/subscribe', ['email' => $address, 'website' => '', 'edition' => $edition->value]);
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('body', 'Confirmez votre adresse e-mail');
         self::assertEmailCount(1);
@@ -109,7 +128,7 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         $tool->createSchema([$em->getClassMetadata(Subscriber::class)]);
 
         self::getContainer()->set(DailyHighlightsSource::class, new class implements DailyHighlightsSource {
-            public function fetchTop10(\DateTimeImmutable $date): array
+            public function fetchTop10(\DateTimeImmutable $date, Edition $edition = Edition::FrenchMedia): array
             {
                 return [new HighlightView('01', 'lemonde.fr', null, 'Une brève', '22 mai 2026', 1, 2, 'https://bsky.app/profile/lemonde.fr/post/1')];
             }
@@ -118,10 +137,10 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         return $client;
     }
 
-    private function find(string $address): Subscriber
+    private function find(string $address, Edition $edition = Edition::FrenchMedia): Subscriber
     {
         $sub = self::getContainer()->get(SubscriberRepository::class)
-            ->findByEmailHash(EmailAddress::fromString($address)->hash());
+            ->findByEmailHash(EmailAddress::fromString($address)->hash(), $edition);
         self::assertNotNull($sub);
 
         return $sub;

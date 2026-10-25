@@ -5,6 +5,7 @@ namespace App\Newsletter\Domain\Service;
 
 use App\Newsletter\Domain\Entity\Subscriber;
 use App\Newsletter\Domain\Repository\SubscriberRepository;
+use App\Newsletter\Domain\ValueObject\Edition;
 use App\Newsletter\Domain\ValueObject\EmailAddress;
 use App\Newsletter\Domain\ValueObject\SubscriberStatus;
 use Psr\Clock\ClockInterface;
@@ -20,11 +21,11 @@ final class SubscriberEnroller
         private readonly string $actingUser,
     ) {}
 
-    public function enrol(EmailAddress $email, ?string $enrolledBy = null): EnrolmentOutcome
+    public function enrol(EmailAddress $email, ?string $enrolledBy = null, Edition $edition = Edition::FrenchMedia): EnrolmentOutcome
     {
         $now = $this->clock->now();
         $enrolledBy ??= $this->actingUser;
-        $existing = $this->repository->findByEmailHash($email->hash());
+        $existing = $this->repository->findByEmailHash($email->hash(), $edition);
 
         if ($existing === null) {
             $confirm = $this->tokens->generate();
@@ -37,6 +38,7 @@ final class SubscriberEnroller
                 unsubToken: $unsub,
                 enrolledBy: $enrolledBy,
                 now: $now,
+                edition: $edition,
             );
             $this->repository->save($sub);
             return EnrolmentOutcome::created($confirm);
