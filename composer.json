@@ -36,7 +36,7 @@
         "symfony/cache": "^7.4",
         "symfony/console": "^7.4",
         "symfony/dotenv": "^7.4",
-        "symfony/event-dispatcher": "^7.4",
+        "symfony/event-dispatcher": "^8.1",
         "symfony/expression-language": "^8.0",
         "symfony/filesystem": "^7.4",
         "symfony/finder": "^8.1",
