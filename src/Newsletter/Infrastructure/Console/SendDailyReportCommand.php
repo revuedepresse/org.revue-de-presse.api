@@ -92,9 +92,21 @@ final class SendDailyReportCommand extends Command
                 return 2;
             }
 
-            $sent = 0; $failed = 0; $considered = 0;
+            $sent = 0; $failed = 0; $considered = 0; $skipped = 0;
             foreach ($this->repo->iterateActive(200, $edition) as $sub) {
                 $considered++;
+
+                // The lock above only serializes concurrent runs; this is what
+                // keeps a re-run (manual catch-up, double cron) from mailing
+                // the same issue to the same subscriber twice.
+                if ($sub->hasReceivedIssue($date)) {
+                    $skipped++;
+                    if ($dryRun) {
+                        $io->writeln(sprintf('dry-run: %s already sent to %s', $label, $sub->email()));
+                    }
+                    continue;
+                }
+
                 $email = $this->renderer->render($sub, $views, $date);
 
                 if ($dryRun) {
@@ -104,7 +116,7 @@ final class SendDailyReportCommand extends Command
 
                 try {
                     $this->mailer->send($email);
-                    $sub->markSent($this->clock->now());
+                    $sub->markSent($this->clock->now(), $date);
                     $this->repo->save($sub);
                     $sent++;
                 } catch (Throwable $e) {
@@ -113,7 +125,7 @@ final class SendDailyReportCommand extends Command
                 }
             }
 
-            $io->success(sprintf('%s: %d sent, %d failed, %d considered', $label, $sent, $failed, $considered));
+            $io->success(sprintf('%s: %d sent, %d failed, %d skipped (already sent), %d considered', $label, $sent, $failed, $skipped, $considered));
             return $failed > 0 ? 3 : 0;
         } finally {
             $lock->release();

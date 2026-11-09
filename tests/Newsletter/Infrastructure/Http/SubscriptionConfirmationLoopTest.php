@@ -38,7 +38,7 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertSame(SubscriberStatus::Pending, $this->find('bob@example.com')->status());
 
         // 2. Before anyone confirms, the daily send reaches nobody.
-        self::assertStringContainsString('0 sent, 0 failed, 0 considered', $this->sendDaily($client));
+        self::assertStringContainsString('0 sent, 0 failed, 0 skipped (already sent), 0 considered', $this->sendDaily($client));
 
         // 3. Alice clicks the link in her email; Bob never does.
         $client->request('GET', parse_url($aliceConfirmUrl, PHP_URL_PATH));
@@ -53,7 +53,10 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertSame(SubscriberStatus::Active, $this->find('alice@example.com')->status());
 
         // 4. The daily send now reaches Alice only.
-        self::assertStringContainsString('1 sent, 0 failed, 1 considered', $this->sendDaily($client));
+        self::assertStringContainsString('1 sent, 0 failed, 0 skipped (already sent), 1 considered', $this->sendDaily($client));
+
+        // 5. Running the same day's send again mails nobody a second copy.
+        self::assertStringContainsString('0 sent, 0 failed, 1 skipped (already sent), 1 considered', $this->sendDaily($client));
     }
 
     public function test_each_edition_is_confirmed_and_sent_on_its_own(): void
@@ -70,9 +73,9 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         self::assertSame(SubscriberStatus::Active, $this->find('alice@example.com', Edition::CoopMedias)->status());
 
         $display = $this->sendDaily($client);
-        self::assertStringContainsString('fr: 0 sent, 0 failed, 0 considered', $display);
-        self::assertStringContainsString('coop-medias: 1 sent, 0 failed, 1 considered', $display);
-        self::assertStringContainsString('fr-coop-medias: 0 sent, 0 failed, 0 considered', $display);
+        self::assertStringContainsString('fr: 0 sent, 0 failed, 0 skipped (already sent), 0 considered', $display);
+        self::assertStringContainsString('coop-medias: 1 sent, 0 failed, 0 skipped (already sent), 1 considered', $display);
+        self::assertStringContainsString('fr-coop-medias: 0 sent, 0 failed, 0 skipped (already sent), 0 considered', $display);
     }
 
     public function test_both_letters_are_asked_for_and_confirmed_at_once(): void

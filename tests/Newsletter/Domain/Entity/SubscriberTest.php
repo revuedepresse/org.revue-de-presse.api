@@ -131,4 +131,30 @@ final class SubscriberTest extends TestCase
         $s->markSent(new \DateTimeImmutable('2026-05-24T05:30:00Z'));
         self::assertSame('2026-05-24T05:30:00+00:00', $s->lastSentAt()?->format(\DateTimeInterface::ATOM));
     }
+
+    public function test_mark_sent_records_the_issue_received(): void
+    {
+        $s = $this->enrolNow();
+        $s->confirm($s->confirmToken(), new \DateTimeImmutable('2026-05-23T06:00:00Z'));
+
+        $issue = new \DateTimeImmutable('2026-05-23');
+        self::assertFalse($s->hasReceivedIssue($issue));
+
+        $s->markSent(new \DateTimeImmutable('2026-05-24T05:30:00Z'), $issue);
+        self::assertTrue($s->hasReceivedIssue($issue));
+        self::assertFalse($s->hasReceivedIssue(new \DateTimeImmutable('2026-05-24')));
+        self::assertSame('2026-05-23', $s->lastSentIssue()?->format('Y-m-d'));
+    }
+
+    public function test_mark_sent_without_an_issue_keeps_the_recorded_issue(): void
+    {
+        $s = $this->enrolNow();
+        $s->confirm($s->confirmToken(), new \DateTimeImmutable('2026-05-23T06:00:00Z'));
+
+        $issue = new \DateTimeImmutable('2026-05-23');
+        $s->markSent(new \DateTimeImmutable('2026-05-24T05:30:00Z'), $issue);
+        // The way RotateEncryptionKeyCommand touches a row.
+        $s->markSent($s->lastSentAt());
+        self::assertTrue($s->hasReceivedIssue($issue));
+    }
 }
