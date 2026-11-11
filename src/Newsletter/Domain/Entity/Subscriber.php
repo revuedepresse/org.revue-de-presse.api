@@ -57,6 +57,9 @@ class Subscriber
     #[ORM\Column(name: 'last_sent_at', type: 'datetimetz_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastSentAt = null;
 
+    #[ORM\Column(name: 'last_sent_issue', type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $lastSentIssue = null;
+
     #[ORM\Column(name: 'created_at', type: 'datetimetz_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -156,10 +159,20 @@ class Subscriber
         $this->updatedAt = $now;
     }
 
-    public function markSent(\DateTimeImmutable $when): void
+    // A null $issue (a key rotation touching the row) keeps the recorded issue.
+    public function markSent(\DateTimeImmutable $when, ?\DateTimeImmutable $issue = null): void
     {
         $this->lastSentAt = $when;
+        if ($issue !== null) {
+            $this->lastSentIssue = $issue;
+        }
         $this->updatedAt = $when;
+    }
+
+    public function hasReceivedIssue(\DateTimeImmutable $issue): bool
+    {
+        return $this->lastSentIssue !== null
+            && $this->lastSentIssue->format('Y-m-d') === $issue->format('Y-m-d');
     }
 
     public function id(): Ulid                                 { return $this->id; }
@@ -174,4 +187,5 @@ class Subscriber
     public function confirmedAt(): ?\DateTimeImmutable         { return $this->confirmedAt; }
     public function unsubscribedAt(): ?\DateTimeImmutable      { return $this->unsubscribedAt; }
     public function lastSentAt(): ?\DateTimeImmutable          { return $this->lastSentAt; }
+    public function lastSentIssue(): ?\DateTimeImmutable       { return $this->lastSentIssue; }
 }
