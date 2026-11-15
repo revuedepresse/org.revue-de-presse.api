@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    paths:
+        # Images an email attaches to itself, through `email.image()`.
+        # Not under public/: these are carried by the message, not served.
+        '%kernel.project_dir%/assets/email': email_assets
     globals:
         newsletter_signup_url: '%env(NEWSLETTER_SIGNUP_URL)%'
 
