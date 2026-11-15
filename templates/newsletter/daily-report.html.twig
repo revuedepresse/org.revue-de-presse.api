@@ -11,6 +11,9 @@
   <table role="presentation" class="wrap" width="100%" cellpadding="0" cellspacing="0">
     <tr><td class="brand-header">{% include 'newsletter/_partials/brand-header.html.twig' %}</td></tr>
     <tr><td class="title-row">Top 10 des publications {{ publishers }} les plus relayées sur Bluesky le {{ date_fr }}</td></tr>
+    {# Attached once for the whole letter; every card points at the same part. #}
+    {% set icon_reposts = email is defined ? email.image('@email_assets/metric-reposts.png') : null %}
+    {% set icon_likes = email is defined ? email.image('@email_assets/metric-likes.png') : null %}
     {% for highlight in highlights %}
       <tr><td>{% include 'newsletter/_partials/highlight-card.html.twig' %}</td></tr>
     {% endfor %}
