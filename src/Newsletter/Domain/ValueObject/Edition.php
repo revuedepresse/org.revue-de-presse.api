@@ -52,8 +52,8 @@ enum Edition: string
     {
         return match ($this) {
             self::FrenchMedia => "la lettre d'information des médias français",
-            self::CoopMedias => "la lettre d'information de Coop Médias",
-            self::FrenchAndCoopMedias => "la lettre d'information des médias français et de Coop Médias",
+            self::CoopMedias => "la lettre d'information de Coop-médias",
+            self::FrenchAndCoopMedias => "la lettre d'information des médias français et de Coop-médias",
         };
     }
 
@@ -62,8 +62,8 @@ enum Edition: string
     {
         return match ($this) {
             self::FrenchMedia => 'des médias français',
-            self::CoopMedias => 'des médias de Coop Médias',
-            self::FrenchAndCoopMedias => 'des médias français et de Coop Médias',
+            self::CoopMedias => 'des médias de Coop-médias',
+            self::FrenchAndCoopMedias => 'des médias français et de Coop-médias',
         };
     }
 
@@ -71,8 +71,8 @@ enum Edition: string
     {
         return match ($this) {
             self::FrenchMedia => sprintf('Revue de presse — %s', $dateFr),
-            self::CoopMedias => sprintf('Revue de presse Coop Médias — %s', $dateFr),
-            self::FrenchAndCoopMedias => sprintf('Revue de presse, médias français et Coop Médias — %s', $dateFr),
+            self::CoopMedias => sprintf('Revue de presse Coop-médias — %s', $dateFr),
+            self::FrenchAndCoopMedias => sprintf('Revue de presse, médias français et Coop-médias — %s', $dateFr),
         };
     }
 }

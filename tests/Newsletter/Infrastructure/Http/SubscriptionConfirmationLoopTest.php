@@ -63,7 +63,7 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
     {
         $client = $this->client();
 
-        // Alice signs up to both newsletters, and only confirms Coop Médias.
+        // Alice signs up to both newsletters, and only confirms Coop-médias.
         $this->signUpAndReadConfirmationLink($client, 'alice@example.com');
         $coopConfirmUrl = $this->signUpAndReadConfirmationLink($client, 'alice@example.com', Edition::CoopMedias);
 
@@ -88,7 +88,7 @@ final class SubscriptionConfirmationLoopTest extends WebTestCase
         $email = self::getMailerMessage();
         self::assertInstanceOf(Email::class, $email);
         self::assertStringContainsString("la lettre d'information des médias français", (string) $email->getTextBody());
-        self::assertStringContainsString("la lettre d'information de Coop Médias", (string) $email->getTextBody());
+        self::assertStringContainsString("la lettre d'information de Coop-médias", (string) $email->getTextBody());
 
         self::assertSame(1, preg_match('#https?://\S+/newsletter/confirm/[A-Za-z0-9_-]{43}\?and=[A-Za-z0-9_-]{43}#', (string) $email->getTextBody(), $m));
         $client->request('GET', (string) parse_url($m[0], PHP_URL_PATH) . '?' . parse_url($m[0], PHP_URL_QUERY));

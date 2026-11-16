@@ -20,8 +20,8 @@ Two daily letters, each the top 10 of one publisher list, ranked by end of day
 | `edition` | Letter | Sign-up page |
 |---|---|---|
 | `fr` | la lettre d'information des médias français | `https://revue-de-presse.org/lettre-quotidienne` |
-| `coop-medias` | la lettre d'information de Coop Médias | `https://revue-de-presse.org/lettre-quotidienne-coop-medias` |
-| `fr-coop-medias` | la lettre d'information des médias français et de Coop Médias: one letter, both lists' top 10 together | `https://revue-de-presse.org/lettre-quotidienne` |
+| `coop-medias` | la lettre d'information de Coop-médias | `https://revue-de-presse.org/lettre-quotidienne-coop-medias` |
+| `fr-coop-medias` | la lettre d'information des médias français et de Coop-médias: one letter, both lists' top 10 together | `https://revue-de-presse.org/lettre-quotidienne` |
 
 An address subscribes to each edition separately: one row per address and
 edition (unique on `email_hash, edition`), each with its own confirmation and
