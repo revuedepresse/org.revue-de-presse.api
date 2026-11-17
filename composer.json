@@ -38,7 +38,7 @@
         "symfony/dotenv": "^7.4",
         "symfony/event-dispatcher": "^8.1",
         "symfony/expression-language": "^8.0",
-        "symfony/filesystem": "^7.4",
+        "symfony/filesystem": "^8.1",
         "symfony/finder": "^8.1",
         "symfony/flex": "^2.1",
         "symfony/framework-bundle": "^7.4",
