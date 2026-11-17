@@ -109,7 +109,7 @@ final class SubscribeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertEmailCount(1);
-        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information de Coop Médias");
+        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information de Coop-médias");
         self::assertNull($this->find('alice@example.com'));
         self::assertSame(Edition::CoopMedias, $this->find('alice@example.com', Edition::CoopMedias)?->edition());
     }
@@ -144,7 +144,7 @@ final class SubscribeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertEmailCount(1);
-        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information des médias français et de Coop Médias");
+        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information des médias français et de Coop-médias");
         self::assertSame(Edition::FrenchAndCoopMedias, $this->find('alice@example.com', Edition::FrenchAndCoopMedias)?->edition());
         self::assertNull($this->find('alice@example.com'));
         self::assertNull($this->find('alice@example.com', Edition::CoopMedias));

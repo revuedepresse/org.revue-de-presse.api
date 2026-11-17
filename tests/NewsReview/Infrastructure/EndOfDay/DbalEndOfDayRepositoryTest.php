@@ -54,7 +54,7 @@ final class DbalEndOfDayRepositoryTest extends TestCase
 
     public function test_the_combined_list_takes_the_posts_of_both_lists_members_once(): void
     {
-        // lemonde.fr is in both lists; coop.fr only in Coop Médias.
+        // lemonde.fr is in both lists; coop.fr only in Coop-médias.
         $this->db->executeStatement("INSERT INTO weaving_user VALUES (3, 'coop.fr', 'did:plc:coop')");
         $this->db->executeStatement("INSERT INTO publishers_list VALUES (3, '" . self::COOP . "', 'did:plc:lemonde', NULL), (4, '" . self::COOP . "', 'did:plc:coop', NULL)");
         $this->db->executeStatement("INSERT INTO publication VALUES (5, 'at://coop/1', 'coop.fr', '2026-10-23 10:00:00')");
