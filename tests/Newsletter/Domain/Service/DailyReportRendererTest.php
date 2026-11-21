@@ -71,7 +71,7 @@ final class DailyReportRendererTest extends KernelTestCase
         $coop = $render(Edition::CoopMedias);
         self::assertSame('Revue de presse Coop-médias — 23 mai 2026', $coop->getSubject());
         self::assertStringContainsString('des médias de Coop-médias', (string) $coop->getTextBody());
-        self::assertStringContainsString("la lettre d'information de Coop-médias", (string) $coop->getTextBody());
+        self::assertStringContainsString("notre lettre d'information dédiée à Coop-médias (coop-medias.org)", (string) $coop->getTextBody());
         self::assertStringContainsString('des médias de Coop-médias', (string) $coop->getHtmlBody());
 
         $combined = $render(Edition::FrenchAndCoopMedias);

@@ -52,7 +52,7 @@ enum Edition: string
     {
         return match ($this) {
             self::FrenchMedia => "la lettre d'information des médias français",
-            self::CoopMedias => "la lettre d'information de Coop-médias",
+            self::CoopMedias => "notre lettre d'information dédiée à Coop-médias (coop-medias.org)",
             self::FrenchAndCoopMedias => "la lettre d'information des médias français et de Coop-médias",
         };
     }
