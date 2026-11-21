@@ -109,7 +109,7 @@ final class SubscribeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertEmailCount(1);
-        self::assertEmailTextBodyContains(self::getMailerMessage(), "la lettre d'information de Coop-médias");
+        self::assertEmailTextBodyContains(self::getMailerMessage(), "Vous avez demandé à recevoir chaque matin notre lettre d'information dédiée à Coop-médias (coop-medias.org).");
         self::assertNull($this->find('alice@example.com'));
         self::assertSame(Edition::CoopMedias, $this->find('alice@example.com', Edition::CoopMedias)?->edition());
     }
